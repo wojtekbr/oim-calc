@@ -1,0 +1,218 @@
+{
+  "_meta": { "name": "Imperium Osmańskie" },
+
+  "ott_sipahi_m": {
+    "id": "ott_sipahi_m",
+    "name": "Sipahowie lenni M",
+    "cost": 9,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "ott_sipahi_l": {
+    "id": "ott_sipahi_l",
+    "name": "Sipahowie lenni L",
+    "cost": 12,
+    "improvement_cost": 3,
+    "rank": "gold",
+    "is_cavalry": true
+  },
+  "ott_sipahi_lances_m": {
+    "id": "ott_sipahi_lances_m",
+    "name": "Sipahowie lenni z kopiami M",
+    "cost": 10,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "has_lances": true
+  },
+  "ott_sandzakbej": {
+    "id": "ott_sandzakbej",
+    "name": "Sandzakbej",
+    "cost": 0,
+    "improvement_cost": 0,
+    "rank": "group"
+  },
+  "ott_aga": {
+    "id": "ott_aga",
+    "name": "Aga",
+    "cost": 0,
+    "improvement_cost": 0,
+    "rank": "group"
+  },
+  "ott_kethuda": {
+    "id": "ott_kethuda",
+    "name": "Kethuda",
+    "cost": 2,
+    "improvement_cost": 0,
+    "rank": "group"
+  },
+  "ott_mehter": {
+    "id": "ott_meher",
+    "name": "Mehter",
+    "cost": 2,
+    "improvement_cost": 0,
+    "rank": "group"
+  },
+  "ott_beszli_s": {
+    "id": "ott_beszli_s",
+    "name": "Beszli S",
+    "cost": 6,
+    "improvement_cost": 1,
+    "rank": "bronze",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "are_scouts": true
+  },
+  "ott_beszli_m": {
+    "id": "ott_beszli_m",
+    "name": "Beszli M",
+    "cost": 8,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "are_scouts": true
+  },
+  "ott_gonullu_s": {
+    "id": "ott_gonullu_s",
+    "name": "Gonullu S",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "bronze",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "are_scouts": true,
+    "are_looters_insubordinate": true
+  },
+  "ott_gonullu_m": {
+    "id": "ott_gonullu_m",
+    "name": "Gonullu M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "are_scouts": true,
+    "are_looters_insubordinate": true
+  },
+  "ott_deli_s_double": {
+    "id": "ott_deli_s_double",
+    "name": "2x Deli S",
+    "cost": 8,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "has_lances": true
+  },
+  "ott_segbani_m": {
+    "id": "ott_segbani_m",
+    "name": "Segbani M",
+    "cost": 4,
+    "improvement_cost": 2,
+    "rank": "bronze",
+    "are_looters_insubordinate": true,
+    "are_proxy_dragoons": true
+  },
+  "ott_azab_m": {
+    "id": "ott_azab_m",
+    "name": "Azabowie M",
+    "cost": 5,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "are_looters_insubordinate": true
+  },
+  "ott_azab_l": {
+    "id": "ott_azab_l",
+    "name": "Azabowie L",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "are_looters_insubordinate": true
+  },
+  "ott_deli_s": {
+    "id": "ott_deli_s",
+    "name": "Deli S",
+    "cost": 8,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "has_lances": true
+  },
+  "ott_deli_m": {
+    "id": "ott_deli_m",
+    "name": "Deli M",
+    "cost": 12,
+    "improvement_cost": 3,
+    "rank": "gold",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "has_lances": true
+  },
+  "ott_janissaries_s": {
+    "id": "ott_janissaries_s",
+    "name": "Janczarzy S",
+    "cost": 4,
+    "improvement_cost": 1,
+    "rank": "silver"
+  },
+  "ott_janissaries_m": {
+    "id": "ott_janissaries_m",
+    "name": "Janczarzy M",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver"
+  },
+  "ott_light_art_s": {
+    "id": "ott_light_art_s",
+    "name": "Lekkie Działa Tureckie S",
+    "cost": 3,
+    "improvement_cost": 3,
+    "rank": "bronze",
+    "is_artillery": true
+  },
+  "ott_light_art_m": {
+    "id": "ott_light_art_m",
+    "name": "Lekkie Działa Tureckie M",
+    "cost": 6,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_artillery": true
+  },
+  "ott_medium_art_s": {
+    "id": "ott_medium_art_s",
+    "name": "Lekkie Działa Tureckie S",
+    "cost": 3,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_artillery": true
+  },
+  "ott_medium_art_m": {
+    "id": "ott_medium_art_m",
+    "name": "Lekkie Działa Tureckie M",
+    "cost": 6,
+    "improvement_cost": 3,
+    "rank": "gold",
+    "is_artillery": true
+  },
+  "ott_sipahi_guards_m": {
+    "id": "ott_sipahi_guards_m",
+    "name": "Sipahowie gwardii M",
+    "cost": 12,
+    "improvement_cost": 3,
+    "rank": "gold",
+    "is_cavalry": true,
+    "has_lances": true
+  },
+  "ott_silahdars_m": {
+    "id": "ott_silahdars_m",
+    "name": "Silahdarowie M",
+    "cost": 14,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_cavalry": true,
+    "has_lances": true
+  }
+}

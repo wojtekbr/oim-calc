@@ -1,0 +1,52 @@
+{
+  "name": "Sandzak sipahow z ejaletów europejskich",
+  "id": "ott_sipahi_europ",
+  "structure": {
+    "base": {
+      "general": {
+        "id":"ott_sandzakbej",
+        "name": "Sandzakbej",
+        "cost": 0
+      },
+      "unit1": [
+        {
+          "id": "ott_sipahi_m",
+          "name": "Sipahowie lenni M",
+          "cost": 9
+        }
+      ],
+      "unit2": [
+        {
+          "id": "ott_sipahi_m",
+          "name": "Sipahowie lenni M",
+          "cost": 9
+        },
+        {
+          "id": "ott_sipahi_l",
+          "name": "Sipahowie lenni L",
+          "cost": 12
+        },
+        {
+          "id": "ott_sipahi_lances_m",
+          "name": "Sipahowie lenni z kopiami M",
+          "cost": 10
+        }
+      ]
+    },
+    "additional": {
+      "unit2":
+      [
+        {
+          "id": "ott_sipahi_m",
+          "name": "Sipahowie lenni M",
+          "cost": 9
+        },
+        {
+          "id": "ott_sipahi_l",
+          "name": "Sipahowie lenni L",
+          "cost": 12
+        }
+      ]
+    }
+  }
+}

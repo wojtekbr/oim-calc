@@ -1,0 +1,23 @@
+{
+  "ott_european": {
+    "name": "Armia Ejaletu Europejskiego",
+    "improvement_points": 10,
+    "base_cost": 11,
+    "additional_units": ["ott_light_art_s","ott_light_art_m", "ott_medium_art_s", "ott_medium_art_m", "ott_sipahi_guards_m", "ott_silahdars_m"],
+    "base": [
+      { "options": ["ott_province_eur"] },
+      { "options": ["ott_sipahi_europ"] },
+      { "options": ["ott_sipahi_europ", "ott_sipahi_albanian"] }
+    ],
+    "additional": [
+      {
+        "options": [
+          "none",
+          "ott_janissary",
+          "ott_sipahi_europ"
+        ]
+      },
+      { "options": ["none", "ott_sipahi_europ"] }
+    ]
+  }
+}

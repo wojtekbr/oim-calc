@@ -1,0 +1,8 @@
+{
+  "_meta": { "name": "Korona" },
+
+  "cro_crown_cavalry": { "id": "cro_crown_cavalry", "name": "Cavalry Crown", "cost": 14 },
+  "cro_light_cavalry": { "id": "cro_light_cavalry", "name": "Light Cavalry", "cost": 10 },
+  "cro_dragoons": { "id": "cro_dragoons", "name": "Dragoons", "cost": 11 },
+  "cro_volunteers": { "id": "cro_volunteers", "name": "Volunteers", "cost": 8 }
+}

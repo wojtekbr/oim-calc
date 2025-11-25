@@ -1,0 +1,161 @@
+{
+  "ott_sipahi_europ": {
+    "name": "Sandżak sipahów lennych z ejaletów europejskich",
+    "base_cost": 4,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": null
+      },
+      {
+        "id": "javelin",
+        "cost": -1,
+        "max_amount": null
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": ["ott_sandzakbej"],
+        "unit1": ["ott_sipahi_m"],
+        "unit2": ["ott_sipahi_m", "ott_sipahi_l"]
+      },
+      "additional": {
+        "unit3": ["ott_sipahi_m", "ott_sipahi_l"]
+      }
+    }
+  },
+  "ott_sipahi_alban": {
+    "name": "Sandżak sipahów Bośniackich/Albańskich",
+      "base_cost": 3,
+      "recon": 0,
+      "awareness": 4,
+      "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": null
+      },
+      {
+        "id": "javelin",
+        "cost": -1,
+        "max_amount": null
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": ["ott_sandzakbej"],
+        "unit1": ["ott_sipahi_lances_m"],
+        "unit2": ["ott_sipahi_lances_m"]
+      },
+      "additional": {
+        "unit3": ["ott_sipahi_lances_m"]
+      }
+    }
+  },
+  "ott_province_eur": {
+    "name": "Prowincjonalne wojska nadworne z ejaletów europejskich",
+    "base_cost": 7,
+    "recon": 1,
+    "awareness": 4,
+    "activations": 3,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "cost": "double",
+        "limitations": ["ott_beszli_s","ott_beszli_m","ott_gonullu_s","ott_gonullu_m"]
+      },
+      {
+        "id": "javelin",
+        "cost": -1
+      },
+      {
+        "id": "independent",
+        "cost": "triple",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_ammo",
+        "cost": 1
+      },
+      {
+        "id": "kalkans",
+        "cost": 1,
+        "limitations": ["ott_beszli_s","ott_beszli_m"]
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": ["ott_aga"],
+        "unit1": ["ott_beszli_s","ott_beszli_m"],
+        "unit2": ["ott_beszli_s","ott_beszli_m","ott_gonullu_s","ott_gonullu_m"],
+        "unit3": ["ott_beszli_s","ott_beszli_m","ott_gonullu_s","ott_gonullu_m","ott_segbani_m"],
+        "optional": ["ott_deli_s"]
+      },
+      "additional": {
+        "unit4": ["ott_segbani_m", "ott_azab_m", "ott_azab_l"],
+        "optional": ["ott_deli_m"]
+      }
+    }
+  },
+  "ott_janissary": {
+    "name": "Pułk Janczarów",
+    "base_cost": 5,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 3,
+    "regiment_improvements": [
+      {
+        "id": "serdengetci_contract",
+        "cost": 3,
+        "army_point_cost": 0
+      },
+      {
+        "id": "elite_janissaries",
+        "cost": 3,
+        "army_point_cost": 3
+      }
+    ],
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "cost": "double"
+      },
+      {
+        "id": "additional_ammo",
+        "cost": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": ["ott_aga"],
+        "unit1": ["ott_janissaries_m"],
+        "unit2": ["ott_janissaries_s","ott_janissaries_m"],
+        "unit3": ["ott_janissaries_s","ott_janissaries_m"],
+        "unit4": ["none","ott_mehter"],
+        "optional": ["ott_light_art_s"]
+      },
+      "additional": {
+        "general": ["ott_kethuda"],
+        "unit5": ["ott_janissaries_s","ott_janissaries_m"],
+        "unit_custom_cost": [
+          {
+            "depends_on": "unit5",
+            "id": "ott_janissaries_s",
+            "cost": 5
+          },
+          {
+            "depends_on": "unit5",
+            "id": "ott_janissaries_m",
+            "cost": 7
+          }
+        ],
+        "optional": ["ott_light_art_m"]
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "ottomans": {
+    "name": "Imperium Osmańskie",
+    "dir": "ottomans"
+  },
+  "hre": {
+    "name": "Cesarstwo Rzymskie",
+    "dir": "hre"
+  },
+  "poland": {
+    "name": "Rzeczpospolita Obojga Narodów - Korona",
+    "dir": "commonwealth-crown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "cro_koronna": {
+    "name": "Dywizja Koronna",
+    "structure": {
+      "base": {
+        "general": [],
+        "unit1": ["cro_crown_cavalry","cro_light_cavalry"],
+        "unit2": ["cro_crown_cavalry","cro_light_cavalry","cro_dragoons"]
+      },
+      "additional": {
+        "unit2": ["cro_volunteers","cro_dragoons"]
+      }
+    }
+  }
+}
