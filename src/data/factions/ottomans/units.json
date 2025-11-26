@@ -31,21 +31,24 @@
     "name": "Sandzakbej",
     "cost": 0,
     "improvement_cost": 0,
-    "rank": "group"
+    "rank": "group",
+    "orders": 2
   },
   "ott_aga": {
     "id": "ott_aga",
     "name": "Aga",
     "cost": 0,
     "improvement_cost": 0,
-    "rank": "group"
+    "rank": "group",
+    "orders": 2
   },
   "ott_kethuda": {
     "id": "ott_kethuda",
     "name": "Kethuda",
     "cost": 2,
     "improvement_cost": 0,
-    "rank": "group"
+    "rank": "group",
+    "orders": 1
   },
   "ott_mehter": {
     "id": "ott_meher",
@@ -183,7 +186,7 @@
   },
   "ott_medium_art_s": {
     "id": "ott_medium_art_s",
-    "name": "Lekkie Działa Tureckie S",
+    "name": "Średnie Działa Tureckie S",
     "cost": 3,
     "improvement_cost": 2,
     "rank": "silver",
@@ -191,7 +194,7 @@
   },
   "ott_medium_art_m": {
     "id": "ott_medium_art_m",
-    "name": "Lekkie Działa Tureckie M",
+    "name": "Średnie Działa Tureckie M",
     "cost": 6,
     "improvement_cost": 3,
     "rank": "gold",

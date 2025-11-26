@@ -1,8 +1,144 @@
 {
   "_meta": { "name": "Korona" },
 
-  "cro_crown_cavalry": { "id": "cro_crown_cavalry", "name": "Cavalry Crown", "cost": 14 },
-  "cro_light_cavalry": { "id": "cro_light_cavalry", "name": "Light Cavalry", "cost": 10 },
-  "cro_dragoons": { "id": "cro_dragoons", "name": "Dragoons", "cost": 11 },
-  "cro_volunteers": { "id": "cro_volunteers", "name": "Volunteers", "cost": 8 }
+  "cro_colonel": {
+    "id": "cro_colonel",
+    "name": "Pułkownik",
+    "cost": 0,
+    "improvement_cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "cro_rotmistrz": {
+    "id": "cro_rotmistrz",
+    "name": "Rotmistrz",
+    "cost": 2,
+    "improvement_cost": 0,
+    "rank": "group",
+    "orders": 1
+  },
+  "cro_cossack_style_m": {
+    "id": "cro_cossack_style_m",
+    "name": "Jazda kozacka M",
+    "cost": 9,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "cro_pancerni_s": {
+    "id": "cro_pancerni_s",
+    "name": "Pancerni S",
+    "cost": 8,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "cro_pancerni_m": {
+    "id": "cro_pancerni_m",
+    "name": "Pancerni M",
+    "cost": 11,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_cavalry": true
+  },
+  "cro_cosasck_style_rohatyna_s": {
+    "id": "cro_cosasck_style_rohatyna_s",
+    "name": "Jazda kozacka z rohatynami S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "cro_cosasck_style_rohatyna_m": {
+    "id": "cro_cosasck_style_rohatyna_m",
+    "name": "Jazda kozacka z rohatynami M",
+    "cost": 10,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "cro_hussars_s": {
+    "id": "cro_hussars_s",
+    "name": "Husaria S",
+    "cost": 12,
+    "pu_cost": 1,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_cavalry": true,
+    "has_lances": true
+  },
+  "cro_hussars_m": {
+    "id": "cro_hussars_m",
+    "name": "Husaria M",
+    "cost": 17,
+    "pu_cost": 1,
+    "improvement_cost": 5,
+    "rank": "gold",
+    "is_cavalry": true,
+    "has_lances": true
+  },
+  "cro_cossack_style_s": {
+    "id": "cro_cossack_style_s",
+    "name": "Jazda kozacka S",
+    "cost": 5,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "cro_pancerni_rohatyna_s": {
+    "id": "cro_pancerni_rohatyna_s",
+    "name": "Pancerni z rohatynami S",
+    "cost": 9,
+    "improvement_cost": 4,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "cro_pancerni_rohatyna_m": {
+    "id": "cro_pancerni_rohatyna_m",
+    "name": "Pancerni z rohatynami M",
+    "cost": 12,
+    "improvement_cost": 5,
+    "rank": "gold",
+    "is_cavalry": true
+  },
+  "cro_cossack_style_vet_m": {
+    "id": "cro_cossack_style_vet_m",
+    "name": "Jazda kozacka (weterani) M",
+    "cost": 10,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "cro_pancerni_vet_s": {
+    "id": "cro_pancerni_vet_s",
+    "name": "Pancerni (weterani) S",
+    "cost": 9,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "cro_pancerni_vet_m": {
+    "id": "cro_pancerni_vet_m",
+    "name": "Pancerni (weterani) M",
+    "cost": 12,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_cavalry": true
+  },
+  "cro_cosasck_style_rohatyna_vet_s": {
+    "id": "cro_cosasck_style_rohatyna_vet_s",
+    "name": "Jazda kozacka z rohatynami (weterani) S",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "cro_cosasck_style_rohatyna_vet_m": {
+    "id": "cro_cosasck_style_rohatyna_vet_m",
+    "name": "Jazda kozacka z rohatynami (weterani) M",
+    "cost": 11,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true
+  }
 }

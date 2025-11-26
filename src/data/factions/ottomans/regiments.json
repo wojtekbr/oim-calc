@@ -21,7 +21,7 @@
       "base": {
         "general": ["ott_sandzakbej"],
         "unit1": ["ott_sipahi_m"],
-        "unit2": ["ott_sipahi_m", "ott_sipahi_l"]
+        "unit2": ["ott_sipahi_lances_m", "ott_sipahi_l"]
       },
       "additional": {
         "unit3": ["ott_sipahi_m", "ott_sipahi_l"]
@@ -42,7 +42,7 @@
       },
       {
         "id": "javelin",
-        "cost": -1,
+        "cost":-1,
         "max_amount": null
       }
     ],

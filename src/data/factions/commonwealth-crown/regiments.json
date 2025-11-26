@@ -1,0 +1,86 @@
+{
+  "cro_crown_cavalry": {
+    "name": "Pułk jazdy koronnej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "cost": 1,
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol",
+        "cost": -1,
+        "max_amount": null
+      },
+      {
+        "id": "independent",
+        "cost": "triple",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": ["cro_colonel"],
+        "unit1": ["cro_cossack_style_m"],
+        "unit2": ["cro_cossack_style_m", "cro_pancerni_s", "cro_pancerni_m", "cro_cosasck_style_rohatyna_s", "cro_cosasck_style_rohatyna_m"],
+        "optional": ["cro_hussars_s"]
+      },
+      "additional": {
+        "general": "cro_rotmistrz",
+        "unit3": ["cro_cossack_style_s", "cro_cossack_style_m", "cro_pancerni_rohatyna_s", "cro_pancerni_rohatyna_m"]
+      }
+    }
+  },
+  "cro_elite_crown_cavalry": {
+    "name": "Doborowy pułk jazdy koronnej",
+    "base_cost": 4,
+    "recon": 0,
+    "awareness": 5,
+    "activations": 3,
+    "commander_orders_bonus": 1,
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "cost": 1,
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol",
+        "cost": -1,
+        "max_amount": null
+      },
+      {
+        "id": "independent",
+        "cost": "triple",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": ["cro_colonel"],
+        "unit1": ["cro_cossack_style_vet_m"],
+        "unit2": ["cro_cossack_style_vet_m", "cro_pancerni_vet_s", "cro_pancerni_vet_m", "cro_cosasck_style_rohatyna_vet_s", "cro_cosasck_style_rohatyna_vet_m"],
+        "optional": ["cro_hussars_s"]
+      },
+      "additional": {
+        "general": "cro_rotmistrz",
+        "unit3": ["cro_cossack_style_s", "cro_cossack_style_m", "cro_pancerni_rohatyna_s", "cro_pancerni_rohatyna_m"],
+        "optional": ["cro_hussars_m"]
+      }
+    }
+  }
+}

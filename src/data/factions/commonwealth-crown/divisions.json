@@ -1,11 +1,40 @@
 {
   "cro_koronna": {
     "name": "Dywizja Koronna",
+    "improvement_points": 12,
+    "base_cost": 9,
+    "additional_units": [
+      "common_supply_wagon"
+    ],
+    "base": [
+      { "options": ["cro_crown_cavalry","cro_light_cavalry"] },
+      { "options": ["cro_crown_cavalry","cro_elite_crown_cavalry","cro_dragoons"] },
+      { "options": ["cro_crown_cavalry", "cro_volunteers"] }
+    ],
+    "additional": [
+      {
+        "options": [
+          "none",
+          "cro_crown_cavalry",
+          "cro_wolunteers",
+          "cro_reiters",
+          "cro_levy_of_nobility"
+        ]
+      },
+      {
+        "options": [
+          "none",
+          "cro_crown_cavalry",
+          "cro_dragoons",
+          "cro_mercenary_infantry"
+        ]
+      }
+    ],
     "structure": {
       "base": {
         "general": [],
         "unit1": ["cro_crown_cavalry","cro_light_cavalry"],
-        "unit2": ["cro_crown_cavalry","cro_light_cavalry","cro_dragoons"]
+        "unit2": ["cro_crown_cavalry","cro_elite_cavalry","cro_dragoons"]
       },
       "additional": {
         "unit2": ["cro_volunteers","cro_dragoons"]

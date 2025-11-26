@@ -3,7 +3,21 @@
     "name": "Armia Ejaletu Europejskiego",
     "improvement_points": 10,
     "base_cost": 11,
-    "additional_units": ["ott_light_art_s","ott_light_art_m", "ott_medium_art_s", "ott_medium_art_m", "ott_sipahi_guards_m", "ott_silahdars_m"],
+    "additional_units": [
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["ott_light_art_s", "ott_light_art_m"]
+      },
+      {
+        "type": "group",
+        "name": "Średnia Artyleria",
+        "options": ["ott_medium_art_s", "ott_medium_art_m"]
+      },
+      "ott_sipahi_guards_m",
+      "ott_silahdars_m",
+      "common_supply_wagon"
+    ],
     "base": [
       { "options": ["ott_province_eur"] },
       { "options": ["ott_sipahi_europ"] },
