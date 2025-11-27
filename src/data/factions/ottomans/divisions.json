@@ -14,9 +14,28 @@
         "name": "Średnia Artyleria",
         "options": ["ott_medium_art_s", "ott_medium_art_m"]
       },
-      "ott_sipahi_guards_m",
-      "ott_silahdars_m",
-      "common_supply_wagon"
+      {
+        "name": "ott_silahdars_m",
+        "assignment_rules": {
+          "assignment_required": true,
+          "allowed_regiment_ids": ["ott_sipahi_europ", "ott_sipahi_alban"],
+          "exclusion_tag": "ott_sipahi_guards_m"
+        }
+      },
+      {
+        "name": "ott_sipahi_guards_m",
+        "assignment_rules": {
+          "assignment_required": true,
+          "allowed_regiment_ids": ["ott_sipahi_europ", "ott_sipahi_alban"],
+          "exclusion_tag": "ott_silahdars_m"
+        }
+      },
+      {
+        "name":"common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      }
     ],
     "base": [
       { "options": ["ott_province_eur"] },

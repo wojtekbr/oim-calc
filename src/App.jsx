@@ -152,7 +152,7 @@ export default function App() {
         return supplyBonus;
     };
 
-    // ZLICZANIE IMP (PUNKTY ULEPSZEŃ - WYDATKI)
+    // ZLICZANIE IMP
     const calculateImprovementPointsCost = (divisionConfig) => {
         if (!selectedFaction || !divisionConfig) return 0;
         const unitsMap = selectedFaction.units || {};
@@ -176,15 +176,11 @@ export default function App() {
             const regimentImprovementsDefinition = regimentDefinition.regiment_improvements || [];
             const improvementsMap = regimentConfig.improvements || {};
 
-            // 1. Ulepszenia Pułkowe (IMP)
             (regimentConfig.regimentImprovements || []).forEach(impId => {
                 const impDef = regimentImprovementsDefinition.find(i => i.id === impId);
-                if (impDef && typeof impDef.cost === 'number') {
-                    totalImpCost += impDef.cost;
-                }
+                if (impDef && typeof impDef.cost === 'number') totalImpCost += impDef.cost;
             });
 
-            // 2. Jednostki i ich ulepszenia (IMP)
             const selectedUnitsByPosition = [
                 ...Object.entries(regimentConfig.base || {}).map(([key, unitId]) => ({ key: `base/${key}`, unitId })),
                 ...Object.entries(regimentConfig.additional || {}).map(([key, unitId]) => ({ key: `additional/${key}`, unitId })),
@@ -195,11 +191,7 @@ export default function App() {
                 if (!unitId || unitId === 'none') return;
                 const unitDef = unitsMap[unitId];
                 if (!unitDef || unitDef.rank === 'group') return;
-
-                // -- NOWOŚĆ: KOSZT JEDNOSTKI W PUNKTACH ULEPSZEŃ (PU_COST) --
-                if (typeof unitDef.pu_cost === 'number') {
-                    totalImpCost += unitDef.pu_cost;
-                }
+                if (typeof unitDef.pu_cost === 'number') totalImpCost += unitDef.pu_cost;
 
                 (improvementsMap[positionKey] || []).forEach(impId => {
                     const impDef = unitImprovementsDefinition.find(i => i.id === impId);
@@ -207,7 +199,6 @@ export default function App() {
                 });
             });
 
-            // 3. Jednostki Wsparcia i ich ulepszenia (IMP)
             if (divisionConfig.supportUnits && Array.isArray(divisionConfig.supportUnits)) {
                 const regimentPositionKey = `${regiment.group}/${regiment.index}`;
                 divisionConfig.supportUnits
@@ -216,11 +207,7 @@ export default function App() {
                         const supportUnitKey = `support/${su.id}-${regimentPositionKey}`;
                         const supportUnitDef = unitsMap[su.id];
                         if (!supportUnitDef || supportUnitDef.rank === 'group') return;
-
-                        // -- NOWOŚĆ: KOSZT JEDNOSTKI W PUNKTACH ULEPSZEŃ (PU_COST) - Jeśli przypisana --
-                        if (typeof supportUnitDef.pu_cost === 'number') {
-                            totalImpCost += supportUnitDef.pu_cost;
-                        }
+                        if (typeof supportUnitDef.pu_cost === 'number') totalImpCost += supportUnitDef.pu_cost;
 
                         (improvementsMap[supportUnitKey] || []).forEach(impId => {
                             const impDef = unitImprovementsDefinition.find(i => i.id === impId);
@@ -230,7 +217,6 @@ export default function App() {
             }
         });
 
-        // -- NOWOŚĆ: Jednostki Wsparcia NIEPRZYPISANE (One też kosztują PU, jeśli są kupione) --
         if (divisionConfig.supportUnits && Array.isArray(divisionConfig.supportUnits)) {
             divisionConfig.supportUnits
                 .filter(su => !su.assignedTo)
@@ -245,9 +231,19 @@ export default function App() {
         return totalImpCost;
     };
 
-    // Zlicza KOSZT PUNKTOWY (ARMY POINTS) Pułku
+    // --- GŁÓWNY KALKULATOR STATYSTYK PUŁKU ---
     const calculateRegimentStats = (regimentConfig, regimentId, configuredDivision) => {
-        const stats = { cost: 0, recon: 0, motivation: 0, activations: 0, orders: 0, unitNames: [] };
+        // Added awareness & isVanguard
+        const stats = {
+            cost: 0,
+            recon: 0,
+            motivation: 0,
+            activations: 0,
+            orders: 0,
+            awareness: 0, // RYZYKO
+            isVanguard: regimentConfig?.isVanguard || false, // STRAŻ PRZEDNIA
+            unitNames: []
+        };
         if (!selectedFaction || !regimentId) return stats;
 
         const unitsMap = selectedFaction.units || {};
@@ -257,6 +253,7 @@ export default function App() {
         stats.cost = regimentDefinition.base_cost || 0;
         stats.recon = regimentDefinition.recon || 0;
         stats.activations = regimentDefinition.activations || 0;
+        stats.awareness = regimentDefinition.awareness || 0; // Zczytujemy ryzyko z definicji
 
         const unitImprovementsDefinition = regimentDefinition.unit_improvements || [];
         const regimentImprovementsDefinition = regimentDefinition.regiment_improvements || [];
@@ -281,7 +278,9 @@ export default function App() {
         const addUnitStats = (unitId, positionKey) => {
             const unitDef = unitsMap[unitId];
             if (!unitDef) return;
+
             stats.unitNames.push(unitDef.name);
+
             if (unitDef.is_cavalry) stats.recon += 1;
             if (unitDef.is_light_cavalry) stats.recon += 1;
             if (unitDef.has_lances) stats.recon -= 1;
@@ -294,8 +293,10 @@ export default function App() {
             if (unitDef.are_wagons) stats.recon -= 2;
             if (unitDef.is_harassing) stats.recon += 1;
             if (unitDef.is_disperse) stats.recon += 1;
+
             if (unitDef.rank === 'bronze' || unitDef.rank === 'silver') stats.motivation += 1;
             else if (unitDef.rank === 'gold') stats.motivation += 2;
+
             if (unitDef.orders) {
                 let ordersValue = unitDef.orders;
                 if (positionKey === 'base/general') {
@@ -338,6 +339,7 @@ export default function App() {
                     });
             }
         }
+
         return stats;
     };
 
@@ -345,10 +347,12 @@ export default function App() {
         if (!divisionConfig) return null;
         let maxCost = -1;
         let mainKey = null;
+
         const allRegiments = [
             ...divisionConfig.base.map(r => ({ ...r, key: `base/${r.index}` })),
             ...divisionConfig.additional.map(r => ({ ...r, key: `additional/${r.index}` }))
         ].filter(r => r.id !== 'none');
+
         allRegiments.forEach(reg => {
             const stats = calculateRegimentStats(reg.config, reg.id, divisionConfig);
             if (stats.cost > maxCost) {
@@ -356,6 +360,7 @@ export default function App() {
                 mainKey = reg.key;
             }
         });
+
         return mainKey;
     };
 
@@ -375,6 +380,7 @@ export default function App() {
             .forEach(su => {
                 cost += (unitsMap[su.id]?.cost || 0);
             });
+
         return cost;
     }
 
@@ -406,7 +412,7 @@ export default function App() {
             {screen === "list" && (
                 <FactionList
                     factions={factions}
-                    onOpenDivision={openRegimentSelector}
+                    onOpenDivision={(factionKey, divisionKey) => openRegimentSelector(factionKey, divisionKey)}
                 />
             )}
 

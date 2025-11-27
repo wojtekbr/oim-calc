@@ -5,6 +5,7 @@
     "recon": 0,
     "awareness": 4,
     "activations": 2,
+    "type": "cavalry",
     "unit_improvements": [
       {
         "id": "veterans",
@@ -30,10 +31,11 @@
   },
   "ott_sipahi_alban": {
     "name": "Sandżak sipahów Bośniackich/Albańskich",
-      "base_cost": 3,
-      "recon": 0,
-      "awareness": 4,
-      "activations": 2,
+    "base_cost": 3,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "type": "cavalry",
     "unit_improvements": [
       {
         "id": "veterans",

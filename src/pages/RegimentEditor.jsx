@@ -14,7 +14,6 @@ export default function RegimentEditor({
                                            improvementPointsLimit,
                                            unitsMap,
                                        }) {
-    // ... (struktury, konfiguracja, sloty - BEZ ZMIAN)
     const structure = regiment.structure || {};
     const base = structure.base || {};
     const additional = structure.additional || {};
@@ -32,14 +31,20 @@ export default function RegimentEditor({
     const [improvements, setImprovements] = useState(currentConfig.improvements || {});
     const [regimentImprovements, setRegimentImprovements] = useState(currentConfig.regimentImprovements || []);
 
+    // USUNIĘTO isVanguard ze stanu (teraz jest tylko read-only w podsumowaniu)
+
     const saveAndGoBack = () => {
         setConfiguredDivision(prev => {
             const newDivision = { ...prev };
             const newGroup = [...newDivision[regimentGroup]];
 
+            // Pobieramy stary config, żeby zachować isVanguard (którego tu nie edytujemy)
+            const oldConfig = newGroup[regimentIndex].config;
+
             newGroup[regimentIndex] = {
                 ...newGroup[regimentIndex],
                 config: {
+                    ...oldConfig, // Zachowaj stare pola (w tym isVanguard)
                     base: selectedBase,
                     additional: selectedAdditional,
                     additionalCustom: selectedAdditionalCustom,
@@ -51,6 +56,11 @@ export default function RegimentEditor({
             newDivision[regimentGroup] = newGroup;
             return newDivision;
         });
+
+        onBack();
+    };
+
+    const cancelAndGoBack = () => {
         onBack();
     };
 
@@ -65,6 +75,7 @@ export default function RegimentEditor({
             });
             setSelectedBase(baseDefaults);
         }
+
         if (Object.keys(currentConfig.additional || {}).length === 0) {
             const addDefaults = {};
             Object.keys(additional).filter(k => k !== 'unit_custom_cost').forEach((k) => {
@@ -76,7 +87,6 @@ export default function RegimentEditor({
 
     const getUnitName = (unitId) => unitsMap[unitId]?.name || unitId;
     const getUnitCost = (unitId) => unitsMap[unitId]?.cost || 0;
-    // --- NOWOŚĆ: Helper do PU ---
     const getUnitPUCost = (unitId) => unitsMap[unitId]?.pu_cost || 0;
 
     const getUnitCustomCost = (unitId) => {
@@ -94,16 +104,18 @@ export default function RegimentEditor({
         return getUnitCost(unitId);
     }
 
-    // ... (Logika walidacji opcji, ulepszeń, koszt lokalny IMP - BEZ ZMIAN)
     const isOptionalBaseSelected = useMemo(() => {
         return Object.entries(selectedBase).some(([key, unitId]) => key.toLowerCase().startsWith("optional") && !!unitId);
     }, [selectedBase]);
+
     const isOptionalAdditionalSelected = useMemo(() => {
         return Object.entries(selectedAdditional).some(([key, unitId]) => key.toLowerCase().startsWith("optional") && !!unitId);
     }, [selectedAdditional]);
+
     const otherAdditionalCount = useMemo(() => {
         return Object.entries(selectedAdditional).filter(([k, v]) => !k.toLowerCase().startsWith("optional") && !!v).length;
     }, [selectedAdditional]);
+
     const isAnyOptionalSelected = isOptionalBaseSelected || isOptionalAdditionalSelected;
 
     const unitLevelImprovements = regiment.unit_improvements || [];
@@ -111,8 +123,16 @@ export default function RegimentEditor({
 
     const localImprovementCost = useMemo(() => {
         const tempRegimentConfig = {
-            id: regiment.id, group: regimentGroup, index: regimentIndex,
-            config: { base: selectedBase, additional: selectedAdditional, additionalCustom: selectedAdditionalCustom, improvements: improvements, regimentImprovements: regimentImprovements }
+            id: regiment.id,
+            group: regimentGroup,
+            index: regimentIndex,
+            config: {
+                base: selectedBase,
+                additional: selectedAdditional,
+                additionalCustom: selectedAdditionalCustom,
+                improvements: improvements,
+                regimentImprovements: regimentImprovements
+            }
         };
         const hybridConfig = { ...tempRegimentConfig, supportUnits: configuredDivision.supportUnits };
         return calculateImprovementPointsCost(hybridConfig);
@@ -121,32 +141,56 @@ export default function RegimentEditor({
     const newRemainingPointsAfterLocalChanges = useMemo(() => {
         if (remainingImprovementPoints === undefined) return 0;
         const totalDivisionLimit = divisionDefinition.improvement_points || 0;
+
         const tempDivisionConfig = JSON.parse(JSON.stringify(configuredDivision));
+
+        // Zachowujemy isVanguard przy symulacji, choć nie ma wpływu na koszt IMP
+        const oldVanguard = configuredDivision[regimentGroup][regimentIndex].config.isVanguard;
+
         tempDivisionConfig[regimentGroup][regimentIndex].config = {
-            base: selectedBase, additional: selectedAdditional, additionalCustom: selectedAdditionalCustom, improvements: improvements, regimentImprovements: regimentImprovements,
+            base: selectedBase,
+            additional: selectedAdditional,
+            additionalCustom: selectedAdditionalCustom,
+            improvements: improvements,
+            regimentImprovements: regimentImprovements,
+            isVanguard: oldVanguard
         };
+
         const dynamicSupplyBonus = calculateTotalSupplyBonus ? calculateTotalSupplyBonus(tempDivisionConfig) : 0;
         const dynamicLimit = totalDivisionLimit + dynamicSupplyBonus;
+
         const totalUsedWithLocalChanges = calculateImprovementPointsCost(tempDivisionConfig);
         return dynamicLimit - totalUsedWithLocalChanges;
     }, [divisionDefinition, configuredDivision, regimentGroup, regimentIndex, selectedBase, selectedAdditional, selectedAdditionalCustom, improvements, regimentImprovements, calculateTotalSupplyBonus, calculateImprovementPointsCost, remainingImprovementPoints]);
 
 
-    // ... (Handlery ulepszeń - BEZ ZMIAN)
+    // --- HANDLERY ---
     const handleImprovementToggle = (positionKey, unitId, impId) => {
         const unitDef = unitsMap[unitId];
         if (unitDef?.rank === 'group') return;
+
         setImprovements(prev => {
             const currentUnitImps = prev[positionKey] || [];
             const impDef = unitLevelImprovements.find(i => i.id === impId);
             if (!impDef) return prev;
-            if (currentUnitImps.includes(impId)) return { ...prev, [positionKey]: currentUnitImps.filter(id => id !== impId) };
-            else {
+
+            if (currentUnitImps.includes(impId)) {
+                return { ...prev, [positionKey]: currentUnitImps.filter(id => id !== impId) };
+            } else {
                 if (impDef.max_amount === 1) {
-                    const isAlreadyUsed = Object.entries(improvements).some(([posKey, impList]) => posKey !== positionKey && impList.includes(impId));
-                    if (isAlreadyUsed) { alert(`Limit 1 na pułk.`); return prev; }
+                    const isAlreadyUsed = Object.entries(improvements).some(([posKey, impList]) =>
+                        posKey !== positionKey && impList.includes(impId)
+                    );
+                    if (isAlreadyUsed) {
+                        alert(`Ulepszenie "${impId}" może być użyte tylko raz w Pułku.`);
+                        return prev;
+                    }
                 }
-                if (impDef.limitations && !impDef.limitations.includes(unitId)) { alert(`Ograniczenie jednostki.`); return prev; }
+                if (impDef.limitations && !impDef.limitations.includes(unitId)) {
+                    alert(`Jednostka "${getUnitName(unitId)}" nie może otrzymać ulepszenia "${impId}".`);
+                    return prev;
+                }
+
                 const improvementBaseCost = unitDef.improvement_cost || 0;
                 let potentialIMPCost = 0;
                 if (impDef.cost === -1) potentialIMPCost = Math.max(1, improvementBaseCost - 1);
@@ -155,17 +199,24 @@ export default function RegimentEditor({
                 else if (impDef.cost === 'triple') potentialIMPCost = improvementBaseCost * 3;
                 else if (impDef.cost === 1) potentialIMPCost = improvementBaseCost;
 
-                if (newRemainingPointsAfterLocalChanges - potentialIMPCost < 0) { alert(`Brak punktów ulepszeń.`); return prev; }
+                if (newRemainingPointsAfterLocalChanges - potentialIMPCost < 0) {
+                    alert(`Brak punktów ulepszeń.`);
+                    return prev;
+                }
+
                 return { ...prev, [positionKey]: [...currentUnitImps, impId] };
             }
         });
     };
+
     const handleRegimentImprovementToggle = (impId) => {
         setRegimentImprovements(prev => {
             const impDef = regimentLevelImprovements.find(i => i.id === impId);
             if (!impDef) return prev;
+
             const impOccurrences = regimentLevelImprovements.filter(imp => imp.id === impId).length;
             const currentCount = prev.filter(id => id === impId).length;
+
             if (prev.includes(impId)) {
                 const index = prev.lastIndexOf(impId);
                 return [...prev.slice(0, index), ...prev.slice(index + 1)];
@@ -178,24 +229,19 @@ export default function RegimentEditor({
         });
     };
 
-    // === HANDLERY WYBORU JEDNOSTEK (Z NOWĄ WALIDACJĄ PU_COST) ===
-
     const handleBaseClick = (groupKey, unitId) => {
         const isOptional = groupKey.toLowerCase().startsWith("optional");
         const positionKey = `base/${groupKey}`;
-
         setSelectedBase((prev) => {
             const current = prev[groupKey];
             const next = current === unitId ? null : unitId;
 
-            // Walidacja PU
             const currentPU = current ? getUnitPUCost(current) : 0;
             const nextPU = next ? getUnitPUCost(next) : 0;
-            // Zmiana netto w punktach (dodatnia wartość to KOSZT, więc odejmujemy od pozostałych)
             const puDifference = nextPU - currentPU;
 
             if (newRemainingPointsAfterLocalChanges - puDifference < 0) {
-                alert(`Brak Punktów Ulepszeń na tę jednostkę. Koszt: ${nextPU}, Pozostało: ${newRemainingPointsAfterLocalChanges + currentPU}`);
+                alert(`Brak Punktów Ulepszeń na tę jednostkę.`);
                 return prev;
             }
 
@@ -213,24 +259,22 @@ export default function RegimentEditor({
     const handleAdditionalSelect = (groupKey, unitId) => {
         const isOptional = groupKey.toLowerCase().startsWith("optional");
         const positionKey = `additional/${groupKey}`;
-
         setSelectedAdditional((prev) => {
             const current = prev[groupKey];
             const next = current === unitId ? null : unitId;
 
-            // Walidacja PU
             const currentPU = current ? getUnitPUCost(current) : 0;
             const nextPU = next ? getUnitPUCost(next) : 0;
             const puDifference = nextPU - currentPU;
 
             if (newRemainingPointsAfterLocalChanges - puDifference < 0) {
-                alert(`Brak Punktów Ulepszeń na tę jednostkę. Koszt: ${nextPU}`);
+                alert(`Brak Punktów Ulepszeń na tę jednostkę.`);
                 return prev;
             }
 
             if (isOptional) {
                 if (next && next !== 'none' && isOptionalBaseSelected) return prev;
-                if (next && next !== 'none' && otherAdditionalCount === 0) { alert("Wymagana inna jednostka."); return prev; }
+                if (next && next !== 'none' && otherAdditionalCount === 0) { alert("Wymagana inna jednostka w Poziomie I."); return prev; }
             }
             if (current !== next) {
                 setImprovements(p => { const n={...p}; delete n[positionKey]; return n; });
@@ -245,7 +289,10 @@ export default function RegimentEditor({
         const current = selectedAdditionalCustom;
         const next = current === unitId ? null : unitId;
 
-        // Walidacja PU
+        if (next && (!selectedAdditional[customCostSlotName] || selectedAdditional[customCostSlotName] === 'none')) {
+            return;
+        }
+
         const currentPU = current ? getUnitPUCost(current) : 0;
         const nextPU = next ? getUnitPUCost(next) : 0;
         const puDifference = nextPU - currentPU;
@@ -255,12 +302,12 @@ export default function RegimentEditor({
             return;
         }
 
-        if (next && !selectedAdditional[customCostSlotName]) { alert(`Wymagany wybór w slocie "${customCostSlotName}".`); return; }
         if (current !== next) setImprovements(p => { const n={...p}; delete n[positionKey]; return n; });
         setSelectedAdditionalCustom(next);
     };
 
-    // ... (totalCost i stats calculation - BEZ ZMIAN)
+
+    // --- KALKULACJE (Cost, Stats) ---
     const totalCost = useMemo(() => {
         let cost = regiment.base_cost || 0;
         regimentImprovements.forEach(impId => {
@@ -294,7 +341,7 @@ export default function RegimentEditor({
         return cost;
     }, [selectedBase, selectedAdditional, selectedAdditionalCustom, improvements, regimentImprovements, configuredDivision, regiment, regimentGroup, regimentIndex]);
 
-    const { totalRecon, totalMotivation, totalActivations, totalOrders } = useMemo(() => {
+    const { totalRecon, totalMotivation, totalActivations, totalOrders, totalAwareness } = useMemo(() => {
         let recon = 0; let motivation = 0; let orders = 0;
         const regimentPositionKey = `${regimentGroup}/${regimentIndex}`;
         const unitPositions = [
@@ -309,6 +356,7 @@ export default function RegimentEditor({
         [...unitPositions, ...supportIds].filter(item => item.id && item.id !== 'none').forEach(({ id: uid, key: positionKey }) => {
             const def = unitsMap[uid];
             if (!def) return;
+
             if (def.is_cavalry) recon++;
             if (def.is_light_cavalry) recon++;
             if (def.has_lances) recon--;
@@ -321,8 +369,10 @@ export default function RegimentEditor({
             if (def.are_wagons) recon -= 2;
             if (def.is_harassing) recon++;
             if (def.is_disperse) recon++;
+
             if (def.rank === 'bronze' || def.rank === 'silver') motivation += 1;
             else if (def.rank === 'gold') motivation += 2;
+
             if (def.orders) {
                 let val = def.orders;
                 if (positionKey === 'base/general') val += (regiment.commander_orders_bonus || 0);
@@ -330,15 +380,25 @@ export default function RegimentEditor({
             }
         });
         recon += regiment.recon || 0;
-        const isMainForce = regiment.isMainForce;
-        if (isMainForce) motivation += 1;
-        const activations = (regiment.activations || 0) + (isMainForce ? 1 : 0);
-        return { totalRecon: recon, totalMotivation: motivation, totalActivations: activations, totalOrders: orders };
-    }, [selectedBase, selectedAdditional, selectedAdditionalCustom, configuredDivision, regiment, unitsMap, regimentGroup, regimentIndex]);
+        const awareness = regiment.awareness || 0;
+        const isMainForce = currentConfig.isVanguard; // BŁĄD? Nie, tu chodziło o MainForce. Ale czekaj, Vanguard to Straż Przednia.
+        // MainForce jest w regiment.isMainForce (przekazane z props).
+        const isVanguard = currentConfig.isVanguard; // To jest Straż Przednia (checkbox).
+        const isMainForceProp = regiment.isMainForce; // To są Siły Główne (automatyczne).
+
+        if (isMainForceProp) motivation += 1;
+        const activations = (regiment.activations || 0) + (isMainForceProp ? 1 : 0);
+
+        return { totalRecon: recon, totalMotivation: motivation, totalActivations: activations, totalOrders: orders, totalAwareness: awareness, isVanguard };
+    }, [selectedBase, selectedAdditional, selectedAdditionalCustom, configuredDivision, regiment, unitsMap, regimentGroup, regimentIndex, currentConfig.isVanguard]);
+
 
     // --- RENDER FUNCTIONS ---
+
     const Tile = ({ children, active, onClick, style }) => (
-        <div onClick={onClick} style={{ padding: "10px 12px", borderRadius: 8, border: active ? "2px solid #0077ff" : "1px solid #ddd", background: active ? "#e9f3ff" : "#fff", cursor: "pointer", minWidth: 160, textAlign: "center", boxShadow: active ? "0 1px 4px rgba(0,0,0,0.06)" : "none", ...style }}>{children}</div>
+        <div onClick={onClick} style={{ padding: "10px 12px", borderRadius: 8, border: active ? "2px solid #0077ff" : "1px solid #ddd", background: active ? "#e9f3ff" : "#fff", cursor: "pointer", minWidth: 160, textAlign: "center", boxShadow: active ? "0 1px 4px rgba(0,0,0,0.06)" : "none", ...style }}>
+            {children}
+        </div>
     );
 
     const RegimentImprovementsBlock = () => {
@@ -380,7 +440,7 @@ export default function RegimentEditor({
                     let disabled = false;
                     if (imp.limitations && !imp.limitations.includes(unitId)) disabled = true;
                     if (imp.max_amount === 1 && !isImpActive) {
-                        const isUsed = Object.entries(improvements).some(([k, arr]) => k !== positionKey && !k.startsWith('support/') && arr.includes(imp.id));
+                        const isUsed = Object.entries(improvements).some(([k, arr]) => k !== positionKey && arr.includes(imp.id));
                         if (isUsed) disabled = true;
                     }
                     const improvementBaseCost = unitDef.improvement_cost || 0;
@@ -406,10 +466,42 @@ export default function RegimentEditor({
 
     const renderRow = (groupKey, unitIds, type) => {
         if (!Array.isArray(unitIds) || unitIds.length === 0) return null;
+
+        // Nagłówki
+        let headerLabel = null;
+        if (groupKey === 'optional') headerLabel = "Jednostka dodatkowa";
+        else if (!groupKey.startsWith('unit') && groupKey !== 'general') headerLabel = groupKey;
+
+        // Walidacja opcjonalnych
+        const isOptionalGroup = groupKey.toLowerCase().startsWith("optional");
+        let isDisabled = false;
+        let reason = "";
+
+        if (isOptionalGroup) {
+            if (type === 'base' && isOptionalAdditionalSelected) {
+                isDisabled = true;
+                reason = "(Wybrano opcję w Poziomie I)";
+            } else if (type === 'additional' && isOptionalBaseSelected) {
+                isDisabled = true;
+                reason = "(Wybrano opcję w Podstawie)";
+            }
+            else if (type === 'additional' && otherAdditionalCount === 0) {
+                const isSelected = selectedAdditional[groupKey] && selectedAdditional[groupKey] !== 'none';
+                if (!isSelected) {
+                    isDisabled = true;
+                    reason = "(Wymaga innej jednostki w Poziomie I)";
+                }
+            }
+        }
+
         return (
             <div key={groupKey} style={{ marginBottom: 14 }}>
-                <div style={{ marginBottom: 8, fontWeight: 700 }}>{groupKey}</div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {headerLabel && <div style={{ marginBottom: 8, fontWeight: 700, display: 'flex', alignItems: 'center' }}>
+                    {headerLabel}
+                    {isDisabled && <span style={{ marginLeft: 10, fontSize: 12, color: '#d32f2f', fontWeight: 'normal' }}>{reason}</span>}
+                </div>}
+
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", opacity: isDisabled ? 0.5 : 1, pointerEvents: isDisabled ? 'none' : 'auto' }}>
                     {unitIds.map((uid) => {
                         if (uid === 'none') {
                             const active = type === "base" ? (selectedBase[groupKey] === 'none' || selectedBase[groupKey] === null) : selectedAdditional[groupKey] === 'none';
@@ -417,6 +509,7 @@ export default function RegimentEditor({
                                 <div key="none" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 5px 10px 0' }}>
                                     <Tile active={active} onClick={() => type === "base" ? handleBaseClick(groupKey, 'none') : handleAdditionalSelect(groupKey, 'none')}>
                                         <div style={{ fontWeight: 700, color: '#888' }}>Brak</div>
+                                        <div style={{ fontSize: 11, color: '#aaa' }}>(0 PS)</div>
                                     </Tile>
                                 </div>
                             );
@@ -437,7 +530,7 @@ export default function RegimentEditor({
                             <div key={uid} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 5px 10px 0' }}>
                                 <Tile active={active} onClick={() => type === "base" ? handleBaseClick(groupKey, uid) : handleAdditionalSelect(groupKey, uid)}>
                                     <div style={{ fontWeight: 700 }}>{getUnitName(uid)}</div>
-                                    <div style={{ fontSize: 11, color: '#666' }}>({getFinalUnitCost(uid, false)} pkt)</div>
+                                    <div style={{ fontSize: 11, color: '#666' }}>({getFinalUnitCost(uid, false)} Punktów Siły)</div>
                                     {ordersDisplay !== null && <div style={{ fontSize: 11, color: '#673ab7', fontWeight: 700 }}>Rozkazy: {ordersDisplay}</div>}
                                     {unitDef.pu_cost && <div style={{ fontSize: 11, color: '#d32f2f' }}>Koszt PU: {unitDef.pu_cost}</div>}
                                 </Tile>
@@ -455,26 +548,32 @@ export default function RegimentEditor({
         const dependentUnitSelected = selectedAdditional[customCostSlotName];
         const isEnabled = !!dependentUnitSelected && dependentUnitSelected !== 'none';
         const positionKey = `additional/${customCostSlotName}_custom`;
+
         return (
             <div key={customCostSlotName} style={{ marginBottom: 14 }}>
-                <div style={{ marginBottom: 8, fontWeight: 700 }}>Jednostka z niestandardowym kosztem</div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", opacity: isEnabled ? 1 : 0.4, pointerEvents: isEnabled ? 'auto' : 'none' }}>
+                <div style={{ marginBottom: 8, fontWeight: 700, display: 'flex', alignItems: 'center' }}>
+                    Poziom II
+                    {!isEnabled && <span style={{ marginLeft: 10, fontSize: 12, color: '#d32f2f', fontWeight: 'normal' }}>(Wymaga wyboru jednostki w Poziomie I)</span>}
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", opacity: isEnabled ? 1 : 0.5, pointerEvents: isEnabled ? 'auto' : 'none' }}>
                     {customCostDefinition.map((def) => {
                         const uid = def.id;
                         const active = selectedAdditionalCustom === uid;
                         const finalCost = getFinalUnitCost(uid, true);
+                        const unitDef = unitsMap[uid];
+
                         return (
                             <div key={uid} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 5px 10px 0' }}>
                                 <Tile active={active} onClick={() => handleCustomSelect(uid)} style={{ marginBottom: 5 }}>
                                     <div style={{ fontWeight: 700 }}>{getUnitName(uid)}</div>
-                                    <div style={{ fontSize: 11, color: '#0077ff', fontWeight: 700 }}>({finalCost} pkt)</div>
+                                    <div style={{ fontSize: 11, color: '#0077ff', fontWeight: 700 }}>{finalCost} Punktów Siły</div>
+                                    {unitDef?.pu_cost && <div style={{ fontSize: 11, color: '#d32f2f' }}>Koszt PU: {unitDef.pu_cost}</div>}
                                 </Tile>
                                 {active && renderUnitButtonsHelper(positionKey, uid)}
                             </div>
                         );
                     })}
                 </div>
-                {!isEnabled && <div style={{ color: 'red', marginTop: 5, fontSize: 12 }}>Wymaga wyboru w slocie "{customCostSlotName}".</div>}
             </div>
         );
     }
@@ -491,6 +590,7 @@ export default function RegimentEditor({
                     {assignedSupportUnits.map((su, index) => {
                         const unitDef = unitsMap[su.id];
                         const supportUnitKey = `support/${su.id}-${su.assignedTo.positionKey}`;
+
                         return (
                             <div key={index} style={{ padding: 10, border: '1px dashed #0077ff', borderRadius: 6, background: '#f5f8ff' }}>
                                 <div style={{ fontWeight: 700, marginBottom: 5 }}>Wsparcie: {unitDef.name}</div>
@@ -506,14 +606,23 @@ export default function RegimentEditor({
     const totalDivisionLimit = divisionDefinition.improvement_points || 0;
     const displayTotalLimit = (divisionDefinition.improvement_points || 0) + calculateTotalSupplyBonus(configuredDivision);
     const impColor = newRemainingPointsAfterLocalChanges < 0 ? 'red' : newRemainingPointsAfterLocalChanges === displayTotalLimit ? '#666' : '#1b7e32';
+    const isVanguard = currentConfig.isVanguard;
 
     return (
         <div style={{ display: "flex", gap: 25 }}>
             <div style={{ flex: 1 }}>
-                <button onClick={saveAndGoBack} style={{ marginBottom: 14 }}>← Zapisz i Powrót</button>
+                <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+                    <button onClick={saveAndGoBack} style={{ padding: "10px 20px", cursor: "pointer", backgroundColor: "#1976d2", color: "white", border: "none", borderRadius: 4, fontWeight: "bold" }}>
+                        Zapisz i wróć
+                    </button>
+                    <button onClick={cancelAndGoBack} style={{ padding: "10px 15px", cursor: "pointer", backgroundColor: "#e0e0e0", color: "#333", border: "1px solid #ccc", borderRadius: 4 }}>
+                        Anuluj
+                    </button>
+                </div>
+
                 <h2 style={{ marginTop: 0 }}>{regiment.name}</h2>
                 <p>
-                    Koszt bazowy Pułku: <strong>{regiment.base_cost || 0} pkt</strong><br/>
+                    Koszt bazowy Pułku: <strong>{regiment.base_cost || 0} Punktów Siły</strong><br/>
                     Punkty ulepszeń Dywizji: <strong style={{ color: impColor }}>{newRemainingPointsAfterLocalChanges} / {displayTotalLimit}</strong>
                 </p>
                 <section style={{ marginTop: 12 }}>
@@ -522,7 +631,7 @@ export default function RegimentEditor({
                     {Object.keys(base).map((k) => renderRow(k, base[k], "base"))}
                 </section>
                 <section style={{ marginTop: 18 }}>
-                    <h3 style={{ marginBottom: 10 }}>Dodatkowe jednostki</h3>
+                    <h3 style={{ marginBottom: 10 }}>Poziom I</h3>
                     {Object.keys(additional).filter(k => k !== 'unit_custom_cost').map((k) => renderRow(k, additional[k], "additional"))}
                     {renderCustomCostSlot()}
                 </section>
@@ -530,10 +639,17 @@ export default function RegimentEditor({
             </div>
             <div style={{ width: 360, padding: 15, border: "1px solid #ddd", borderRadius: 10, height: "fit-content", position: "sticky", top: 20, background: "#fafafa" }}>
                 <h3 style={{ marginTop: 0 }}>Podsumowanie Pułku</h3>
-                <div style={{ marginBottom: 10 }}><strong>Zwiad:</strong> {totalRecon} | <strong>Motywacja:</strong> {totalMotivation} | <strong>Aktywacje:</strong> {totalActivations} | <strong>Rozkazy:</strong> {totalOrders}</div>
+                <div style={{ marginBottom: 10 }}>
+                    <div>Zwiad: <strong>{totalRecon}</strong></div>
+                    <div>Motywacja: <strong>{totalMotivation}</strong></div>
+                    <div>Aktywacje: <strong>{totalActivations}</strong></div>
+                    <div>Rozkazy: <strong>{totalOrders}</strong></div>
+                    <div>Ryzyko: <strong>{totalAwareness}</strong></div>
+                </div>
                 <div style={{ marginBottom: 15 }}>
                     <strong>Wybrane jednostki:</strong>
                     <ul>
+                        {isVanguard && <li style={{ color: '#d35400', fontWeight: 'bold' }}>[STRAŻ PRZEDNIA]</li>}
                         {regimentImprovements.length > 0 && <li style={{ color: '#0077ff' }}>Ulepszenia Pułku: {regimentImprovements.join(', ')}</li>}
                         {[
                             ...Object.entries(selectedBase).map(([k, id]) => ({ key: `base/${k}`, id, isCustom: false })),
@@ -541,13 +657,13 @@ export default function RegimentEditor({
                             ...(selectedAdditionalCustom ? [{ key: customCostSlotName + "_custom", id: selectedAdditionalCustom, isCustom: true }] : [])
                         ].filter(u => u.id && u.id !== 'none').map(u => (
                             <li key={u.key}>
-                                <strong>{getUnitName(u.id)}</strong> ({getFinalUnitCost(u.id, u.isCustom)} pkt)
+                                <strong>{getUnitName(u.id)}</strong> ({getFinalUnitCost(u.id, u.isCustom)} PS)
                                 {(improvements[u.key] || []).length > 0 && <span style={{ fontSize: 11, color: '#1b7e32' }}> (+ {improvements[u.key].join(', ')})</span>}
                             </li>
                         ))}
                         {configuredDivision.supportUnits.filter(su => su.assignedTo?.positionKey === `${regimentGroup}/${regimentIndex}`).map((su, i) => (
                             <li key={`su-${i}`} style={{ color: '#0077ff' }}>
-                                <strong>[WSPARCIE] {unitsMap[su.id]?.name}</strong> ({unitsMap[su.id]?.cost || 0} pkt)
+                                <strong>[WSPARCIE] {unitsMap[su.id]?.name}</strong> ({unitsMap[su.id]?.cost || 0} PS)
                                 {(improvements[`support/${su.id}-${su.assignedTo.positionKey}`] || []).length > 0 &&
                                 <span style={{ fontSize: 11, color: '#1b7e32' }}> (+ {improvements[`support/${su.id}-${su.assignedTo.positionKey}`].join(', ')})</span>}
                             </li>
@@ -555,7 +671,7 @@ export default function RegimentEditor({
                     </ul>
                 </div>
                 <hr />
-                <div style={{ fontSize: 18, fontWeight: 700 }}>Całkowity Koszt: {totalCost} pkt</div>
+                <div style={{ fontSize: 18, fontWeight: 700 }}>Całkowity Koszt: {totalCost} Punktów Siły</div>
             </div>
         </div>
     );
