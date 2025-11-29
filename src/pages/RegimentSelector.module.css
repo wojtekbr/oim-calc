@@ -1,0 +1,339 @@
+.container {
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.inputsRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.inputField {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+/* Dashboard Summary Card */
+.summaryCard {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-left: 5px solid #0077ff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.summaryTitle { font-size: 20px; font-weight: 800; color: #222; }
+.summarySubtitle { font-size: 14px; color: #666; margin-top: 4px; }
+.summaryPoints { font-size: 16px; font-weight: 600; }
+.pointsOk { color: #1b7e32; }
+.pointsError { color: #d32f2f; }
+
+/* Sections */
+.section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 24px;
+}
+.sectionTitle {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 16px;
+  text-transform: uppercase;
+  color: #555;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+/* Support Units Grid */
+.supportGrid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.supportTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  background: white;
+  min-width: 140px;
+  min-height: 80px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  text-align: center;
+}
+.supportTile:hover { transform: translateY(-2px); border-color: #aaa; }
+.supportTile.active {
+  border-color: #0077ff;
+  background-color: #f0f7ff;
+}
+.supportTile.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
+.checkIcon {
+  position: absolute; top: 6px; right: 6px;
+  color: #0077ff; font-weight: bold;
+}
+
+/* Support Config List */
+.configRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+}
+.configRow.error {
+  border-color: #d32f2f;
+  background-color: #fff5f5;
+}
+.selectInput {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+.removeBtn {
+  padding: 6px 12px;
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.removeBtn:hover { background: #ffcdd2; }
+
+/* Regiment Rows */
+.regimentRow {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: #fff;
+  transition: all 0.2s;
+}
+.regimentRow.mainForce {
+  border: 2px solid #ff9800;
+  background: #fff8e1;
+}
+.regimentRow.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.regHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.regTitle { font-weight: 700; font-size: 15px; display: flex; alignItems: center; gap: 10px; }
+.mainForceBadge { background: #ff9800; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+.vanguardLabel {
+  display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: normal;
+  cursor: pointer; padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd;
+}
+.vanguardLabel.active { background: #e3f2fd; border-color: #90caf9; }
+
+.regStats {
+  font-size: 12px; color: #555; text-align: right;
+}
+.regCost {
+  font-size: 18px; font-weight: 700; color: #1b7e32;
+}
+
+.regControls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.regNameInput {
+  padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex: 1;
+}
+.regSelect {
+  padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-width: 250px;
+}
+.editBtn {
+  padding: 8px 16px; background: #0077ff; color: white; border: none; border-radius: 4px; cursor: pointer;
+}
+.editBtn:hover { background: #005ecb; }
+
+.regSupportInfo {
+  margin-top: 8px; font-size: 12px; color: #0077ff; font-style: italic;
+}
+
+/* PDF Button */
+.pdfBtn {
+  text-decoration: none;
+  padding: 10px 20px;
+  color: #fff;
+  background-color: #d32f2f;
+  border-radius: 5px;
+  font-weight: bold;
+  display: inline-block;
+}
+.pdfBtn:hover { background-color: #b71c1c; }
+.backBtn {
+  border: none; background: none; color: #0077ff; font-weight: 600; cursor: pointer; font-size: 14px;
+}
+
+.optionsGrid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.optionCard {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 180px;
+  flex: 1; /* Rozciągnij, żeby wypełnić wiersz */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.optionCard:hover {
+  border-color: #999;
+  background-color: #fafafa;
+}
+
+.optionCard.active {
+  border-color: #0077ff;
+  background-color: #e9f3ff;
+  box-shadow: 0 0 0 1px #0077ff inset;
+}
+
+.optionName {
+  font-weight: 600;
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.optionCost {
+  font-size: 11px;
+  color: #666;
+}
+
+/* Dostosowanie nagłówka, żeby zrobić miejsce na kafelki */
+.regHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Zmieniamy na flex-start, bo kafelki mogą być wysokie */
+  margin-bottom: 12px;
+}
+
+/* Ukrywamy stary select, ale zostawiamy input nazwy */
+.regControls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+
+.optionsGrid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.optionCard {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 180px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative; /* Dla ikonki check */
+}
+
+.optionCard:hover {
+  border-color: #999;
+  background-color: #fafafa;
+}
+
+.optionCard.active {
+  border-color: #0077ff;
+  background-color: #e9f3ff;
+  box-shadow: 0 0 0 1px #0077ff inset;
+}
+
+/* NOWA KLASA: Wyszarzenie dla zablokowanych opcji */
+.optionCard.disabledTile {
+  opacity: 0.5;
+  filter: grayscale(1);
+  pointer-events: none; /* Blokuje klikanie */
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  border-color: #eee;
+}
+
+.optionName {
+  font-weight: 600;
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.optionCost {
+  font-size: 11px;
+  color: #666;
+}
+
+.regHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.regControls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}

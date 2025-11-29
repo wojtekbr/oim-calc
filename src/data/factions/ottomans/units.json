@@ -142,7 +142,8 @@
     "rank": "silver",
     "is_cavalry": true,
     "is_light_cavalry": true,
-    "has_lances": true
+    "has_lances": true,
+    "improvement_limitations": ["javelin","kalkans", "veterans", "additional_ammo"]
   },
   "ott_deli_m": {
     "id": "ott_deli_m",
@@ -152,7 +153,8 @@
     "rank": "gold",
     "is_cavalry": true,
     "is_light_cavalry": true,
-    "has_lances": true
+    "has_lances": true,
+    "improvement_limitations": ["javelin","kalkans", "veterans", "additional_ammo"]
   },
   "ott_janissaries_s": {
     "id": "ott_janissaries_s",

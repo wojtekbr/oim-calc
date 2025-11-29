@@ -1,0 +1,294 @@
+/* Layout Główny */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
+  color: #333;
+}
+
+.topBar {
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  z-index: 10;
+}
+
+.topBarTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 12px;
+}
+
+.btnPrimary, .btnSecondary {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btnPrimary {
+  background-color: #0077ff;
+  color: white;
+}
+.btnPrimary:hover { background-color: #005ecb; }
+
+.btnSecondary {
+  background-color: #e0e0e0;
+  color: #333;
+}
+.btnSecondary:hover { background-color: #d0d0d0; }
+
+/* Grid Content */
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  padding: 24px;
+  overflow-y: auto; /* To pozwala na scrollowanie treści */
+  flex: 1;
+  align-items: start; /* Ważne dla sticky: elementy wyrównane do góry */
+}
+
+@media (max-width: 1024px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Kolumny */
+.mainColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  /* STICKY LOGIC */
+  position: sticky;
+  top: 0; /* Przykleja się do góry scrollowalnego kontenera */
+  height: fit-content;
+}
+
+/* Sekcje */
+.sectionCard {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+}
+
+.supportCard {
+  border-color: #0077ff;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.supportHeader {
+  border-bottom-color: #cce3f6;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #444;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.supportTitle {
+  color: #0056b3;
+}
+
+.customSlotSeparator {
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.disabledContent {
+  opacity: 0.5;
+  filter: grayscale(1);
+  transition: all 0.3s ease;
+}
+.disabledContent:hover {
+  opacity: 0.8;
+  filter: grayscale(0.5);
+}
+
+.groupContainer {
+  margin-bottom: 24px;
+}
+
+.groupLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.unitsRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Karta Jednostki */
+.unitCard {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 220px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.unitCard.selectable {
+  cursor: pointer;
+}
+.unitCard.selectable:hover {
+  border-color: #aaa;
+}
+
+.unitCard.active {
+  border-color: #0077ff;
+  background-color: #f0f7ff;
+  box-shadow: 0 0 0 1px #0077ff inset;
+}
+
+.unitName {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #222;
+}
+
+.unitCost {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.improvementsContainer {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px dashed #ccc;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.impBadge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.impBadge:hover:not(:disabled) {
+  background: #e9e9e9;
+}
+
+.impBadge.active {
+  background: #e6ffe6;
+  border-color: #1b7e32;
+  color: #006400;
+}
+
+.impBadge:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Sidebar Stats & Summary */
+.pointsBox {
+  background-color: #eef6fc;
+  border: 1px solid #cce3f6;
+  border-radius: 6px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.pointsBig {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0056b3;
+  display: block;
+}
+
+.pointsLabel {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #668;
+}
+
+/* Nowy separator między sekcją kosztów a statystyk */
+.statsSeparator {
+  margin: 16px 0;
+  border-top: 1px solid #eee;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+.statRow:last-child {
+  border-bottom: none;
+}
+
+.statLabel { color: #555; }
+.statValue { font-weight: 700; color: #222; }
+
+.impPoints {
+  font-weight: bold;
+}
+.impPoints.ok { color: #1b7e32; }
+.impPoints.error { color: #d32f2f; }

@@ -20,16 +20,47 @@
     ],
     "structure": {
       "base": {
-        "general": ["ott_sandzakbej"],
-        "unit1": ["ott_sipahi_m"],
-        "unit2": ["ott_sipahi_lances_m", "ott_sipahi_l"]
+        "general": [
+          {
+            "unit1": {
+              "id": "ott_sandzakbej"
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_m"
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_lances_m"
+            },
+            "unit2": {
+              "id": "ott_sipahi_l"
+            }
+          }
+        ]
       },
       "additional": {
-        "unit3": ["ott_sipahi_m", "ott_sipahi_l"]
+        "additional1": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_m"
+            },
+            "unit2": {
+              "id": "ott_sipahi_l"
+            }
+          }
+        ]
       }
     }
   },
-  "ott_sipahi_alban": {
+
+  "ott_sipahi_albanian": {
     "name": "Sandżak sipahów Bośniackich/Albańskich",
     "base_cost": 3,
     "recon": 0,
@@ -44,21 +75,46 @@
       },
       {
         "id": "javelin",
-        "cost":-1,
+        "cost": -1,
         "max_amount": null
       }
     ],
     "structure": {
       "base": {
-        "general": ["ott_sandzakbej"],
-        "unit1": ["ott_sipahi_lances_m"],
-        "unit2": ["ott_sipahi_lances_m"]
+        "general": [
+          {
+            "unit1": {
+              "id": "ott_sandzakbej"
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_lances_m"
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_lances_m"
+            }
+          }
+        ]
       },
       "additional": {
-        "unit3": ["ott_sipahi_lances_m"]
+        "additional1": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_lances_m"
+            }
+          }
+        ]
       }
     }
   },
+
   "ott_province_eur": {
     "name": "Prowincjonalne wojska nadworne z ejaletów europejskich",
     "base_cost": 7,
@@ -92,18 +148,91 @@
     ],
     "structure": {
       "base": {
-        "general": ["ott_aga"],
-        "unit1": ["ott_beszli_s","ott_beszli_m"],
-        "unit2": ["ott_beszli_s","ott_beszli_m","ott_gonullu_s","ott_gonullu_m"],
-        "unit3": ["ott_beszli_s","ott_beszli_m","ott_gonullu_s","ott_gonullu_m","ott_segbani_m"],
-        "optional": ["ott_deli_s"]
+        "general": [
+          {
+            "unit1": {
+              "id": "ott_aga"
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "id": "ott_beszli_s"
+            },
+            "unit2": {
+              "id": "ott_beszli_m"
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "id": "ott_beszli_s"
+            },
+            "unit2": {
+              "id": "ott_beszli_m"
+            },
+            "unit3": {
+              "id": "ott_gonullu_s"
+            },
+            "unit4": {
+              "id": "ott_gonullu_m"
+            }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": {
+              "id": "ott_beszli_s"
+            },
+            "unit2": {
+              "id": "ott_beszli_m"
+            },
+            "unit3": {
+              "id": "ott_gonullu_s"
+            },
+            "unit4": {
+              "id": "ott_gonullu_m"
+            },
+            "unit5": {
+              "id": "ott_segbani_m"
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "id": "ott_deli_s"
+            }
+          }
+        ]
       },
       "additional": {
-        "unit4": ["ott_segbani_m", "ott_azab_m", "ott_azab_l"],
-        "optional": ["ott_deli_m"]
+        "additional1": [
+          {
+            "unit1": {
+              "id": "ott_segbani_m"
+            },
+            "unit2": {
+              "id": "ott_azab_m"
+            },
+            "unit3": {
+              "id": "ott_azab_l"
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "id": "ott_deli_m"
+            }
+          }
+        ]
       }
     }
   },
+
   "ott_janissary": {
     "name": "Pułk Janczarów",
     "base_cost": 5,
@@ -134,29 +263,94 @@
     ],
     "structure": {
       "base": {
-        "general": ["ott_aga"],
-        "unit1": ["ott_janissaries_m"],
-        "unit2": ["ott_janissaries_s","ott_janissaries_m"],
-        "unit3": ["ott_janissaries_s","ott_janissaries_m"],
-        "unit4": ["none","ott_mehter"],
-        "optional": ["ott_light_art_s"]
-      },
-      "additional": {
-        "general": ["ott_kethuda"],
-        "unit5": ["ott_janissaries_s","ott_janissaries_m"],
-        "unit_custom_cost": [
+        "general": [
           {
-            "depends_on": "unit5",
-            "id": "ott_janissaries_s",
-            "cost": 5
-          },
-          {
-            "depends_on": "unit5",
-            "id": "ott_janissaries_m",
-            "cost": 7
+            "unit1": {
+              "id": "ott_aga"
+            }
           }
         ],
-        "optional": ["ott_light_art_m"]
+        "base1": [
+          {
+            "unit1": {
+              "id": "ott_janissaries_m"
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "id": "ott_janissaries_s"
+            },
+            "unit2": {
+              "id": "ott_janissaries_m"
+            }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": {
+              "id": "ott_janissaries_s"
+            },
+            "unit2": {
+              "id": "ott_janissaries_m"
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "id": "ott_mehter"
+            },
+            "unit2": {
+              "id": "ott_aga"
+            }
+          },
+          {
+            "unit1": {
+              "id": "ott_light_art_s"
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "id": "ott_kethuda"
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "id": "ott_janissaries_s"
+            },
+            "unit2": {
+              "id": "ott_janissaries_m"
+            }
+          },
+          {
+            "unit1": {
+              "id": "ott_janissaries_s"
+            },
+            "unit2": {
+              "id": "ott_janissaries_m"
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "id": "ott_mehter"
+            }
+          },
+          {
+            "unit1": {
+              "id": "ott_light_art_m"
+            }
+          }
+        ]
       }
     }
   }
