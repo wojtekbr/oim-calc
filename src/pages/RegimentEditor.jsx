@@ -2,6 +2,10 @@ import React from "react";
 import { useRegimentLogic } from "./useRegimentLogic";
 import styles from "./RegimentEditor.module.css";
 import { GROUP_TYPES } from "../constants";
+import { 
+    canUnitTakeImprovement, 
+    calculateSingleImprovementIMPCost 
+} from "../utils/armyMath";
 
 // --- Sub-components (View Only) ---
 
@@ -15,18 +19,23 @@ const UnitCard = ({
   getFinalUnitCost,
   unitLevelImprovements,
   positionKey,
-  remainingPoints
+  remainingPoints,
+  regiment,
+  commonImprovements
 }) => {
   const unitDef = unitMap[unitId];
   if (!unitDef) return null;
 
   const baseCost = getFinalUnitCost(unitId, false);
   
+  const unitPuCost = unitDef.improvement_points_cost || unitDef.pu_cost || 0;
+  
+  const costLabel = unitPuCost > 0 
+      ? `${baseCost} PS + ${unitPuCost} PU` 
+      : `${baseCost} PS`;
+
   const validImprovements = unitLevelImprovements.filter(imp => {
-      if (imp.limitations && !imp.limitations.includes(unitId)) return false;
-      const unitLimitations = unitDef?.improvement_limitations || unitDef?.improvements_limitations || null;
-      if (unitLimitations && Array.isArray(unitLimitations) && unitLimitations.includes(imp.id)) return false;
-      return true;
+      return canUnitTakeImprovement(unitDef, imp.id, regiment);
   });
 
   return (
@@ -37,20 +46,13 @@ const UnitCard = ({
       <div className={styles.unitName}>
         {isActive && "✔ "}{unitDef.name || unitId}
       </div>
-      <div className={styles.unitCost}>{baseCost} PS</div>
+      <div className={styles.unitCost}>{costLabel}</div>
 
       {validImprovements.length > 0 && isActive && (
         <div className={styles.improvementsContainer} onClick={(e) => e.stopPropagation()}>
           {validImprovements.map(imp => {
              const isSelected = improvements?.includes(imp.id);
-             
-             const improvementBaseCost = unitDef.improvement_cost || 0;
-             let cost = 0;
-             if (imp.cost === -1) cost = Math.max(1, improvementBaseCost - 1);
-             else if (typeof imp.cost === "number") cost = imp.cost;
-             else if (imp.cost === "double") cost = improvementBaseCost * 2;
-             else if (imp.cost === 1) cost = improvementBaseCost;
-
+             const cost = calculateSingleImprovementIMPCost(unitDef, imp.id, regiment, commonImprovements);
              const canAfford = isSelected || (remainingPoints - cost >= 0);
 
              return (
@@ -81,7 +83,9 @@ const GroupSection = ({
   state,
   unitsMap,
   unitLevelImprovements,
-  isLocked
+  isLocked,
+  regiment,
+  commonImprovements 
 }) => {
   const { handleSelectInPod, handleImprovementToggle } = handlers;
   const { getFinalUnitCost } = logicHelpers;
@@ -100,7 +104,7 @@ const GroupSection = ({
   return (
     <div className={styles.groupContainer}>
       {isOptionalGroup && (
-          <div className={styles.groupLabel} style={{marginBottom: 8}}>
+          <div className={`${styles.groupLabel} ${styles.groupLabelOptional}`}>
              {isLocked ? "Jednostka dodatkowa (Wymagany zakup jednostki podstawowej)" : "Jednostka dodatkowa (Opcjonalne)"}
           </div>
       )}
@@ -126,8 +130,12 @@ const GroupSection = ({
                 : `${type}/${groupKey}/${index}`;
 
             return (
-                <div key={index} style={{marginBottom: 12}}>
-                    {options.length > 1 && <div style={{fontSize: 11, marginBottom: 4, color: '#888'}}>Wybierz 1 z {options.length}:</div>}
+                <div key={index} className={styles.podContainer}>
+                    {options.length > 1 && (
+                        <div className={styles.podSelectionHint}>
+                            Wybierz 1 z {options.length}:
+                        </div>
+                    )}
                     <div className={styles.unitsRow}>
                         {options.map(unitId => {
                             const isActive = selectedId === unitId;
@@ -144,6 +152,8 @@ const GroupSection = ({
                                     unitLevelImprovements={unitLevelImprovements}
                                     positionKey={positionKey}
                                     remainingPoints={state.newRemainingPointsAfterLocalChanges}
+                                    regiment={regiment}
+                                    commonImprovements={commonImprovements}
                                 />
                             );
                         })}
@@ -162,7 +172,7 @@ const GroupSection = ({
 export default function RegimentEditor(props) {
   const { state, definitions, handlers, helpers } = useRegimentLogic(props);
   const { unitsMap, regiment } = props;
-  const { base, additional } = definitions;
+  const { base, additional, commonImprovements } = definitions;
   
   return (
     <div className={styles.container}>
@@ -197,6 +207,8 @@ export default function RegimentEditor(props) {
                         state={state}
                         unitsMap={unitsMap}
                         unitLevelImprovements={definitions.unitLevelImprovements}
+                        regiment={regiment}
+                        commonImprovements={commonImprovements}
                     />
                 ))}
             </div>
@@ -225,6 +237,8 @@ export default function RegimentEditor(props) {
                                         unitLevelImprovements={definitions.unitLevelImprovements}
                                         positionKey={supportPositionKey}
                                         remainingPoints={state.newRemainingPointsAfterLocalChanges}
+                                        regiment={regiment} 
+                                        commonImprovements={commonImprovements}
                                     />
                                 );
                             })}
@@ -256,6 +270,8 @@ export default function RegimentEditor(props) {
                                 unitsMap={unitsMap}
                                 unitLevelImprovements={definitions.unitLevelImprovements}
                                 isLocked={isOptionalLocked}
+                                regiment={regiment}
+                                commonImprovements={commonImprovements}
                             />
                         );
                     })}
@@ -283,6 +299,8 @@ export default function RegimentEditor(props) {
                                             unitLevelImprovements={definitions.unitLevelImprovements}
                                             positionKey={`additional/${definitions.customCostSlotName}_custom`}
                                             remainingPoints={state.newRemainingPointsAfterLocalChanges}
+                                            regiment={regiment}
+                                            commonImprovements={commonImprovements}
                                         />
                                     );
                                 })}
@@ -295,7 +313,6 @@ export default function RegimentEditor(props) {
 
         {/* RIGHT COLUMN - SIDEBAR */}
         <div className={styles.sidebar}>
-            {/* SCALONA KARTA PODSUMOWANIA */}
             <div className={styles.sectionCard}>
                 
                 {/* 1. Koszty i Punkty */}
@@ -304,18 +321,23 @@ export default function RegimentEditor(props) {
                     <span className={styles.pointsBig}>{state.totalCost} PS</span>
                 </div>
                 
+                <div className={styles.statRow} style={{borderBottom: 'none', marginBottom: 10}}>
+                    <span className={styles.statLabel}>Typ Pułku:</span>
+                    <span className={styles.statValue} style={{textTransform: 'uppercase', color: '#0077ff'}}>
+                        {state.stats.regimentType}
+                    </span>
+                </div>
+
                 <div className={styles.statRow}>
-                    {/* ZMIANA: Nowa nazwa etykiety */}
                     <span className={styles.statLabel}>Pozostałe Punkty Ulepszeń Dywizji:</span>
                     <span className={`${styles.impPoints} ${state.newRemainingPointsAfterLocalChanges < 0 ? styles.error : styles.ok}`}>
                         {state.newRemainingPointsAfterLocalChanges}
                     </span>
                 </div>
 
-                {/* Separator */}
                 <div className={styles.statsSeparator}></div>
 
-                {/* 2. Statystyki Bojowe (bez nagłówka) */}
+                {/* 2. Statystyki Bojowe */}
                 <div className={styles.statRow}>
                     <span className={styles.statLabel}>Zwiad:</span>
                     <span className={styles.statValue}>{state.stats.totalRecon}</span>
@@ -338,21 +360,36 @@ export default function RegimentEditor(props) {
                 </div>
             </div>
 
-            {/* OSOBNA KARTA: Ulepszenia Pułku (Pozostawiona osobno dla czytelności) */}
+            {/* OSOBNA KARTA: Ulepszenia Pułku */}
             {definitions.regimentLevelImprovements.length > 0 && (
                 <div className={styles.sectionCard}>
                     <h4 className={styles.groupLabel}>Ulepszenia Pułku</h4>
-                    <div style={{display: 'flex', flexDirection: 'column', gap: 8}}>
+                    <div className={styles.regimentImprovementsList}>
                         {definitions.regimentLevelImprovements.map(imp => {
                             const isActive = state.regimentImprovements.includes(imp.id);
+                            
+                            const commonDef = definitions.commonImprovements?.[imp.id];
+                            const displayName = imp.name || commonDef?.name || imp.id;
+
+                            const armyCost = imp.army_point_cost ?? commonDef?.army_point_cost;
+                            const puCost = imp.cost ?? commonDef?.cost;
+                            
+                            const costParts = [];
+                            if (typeof armyCost === 'number') costParts.push(`${armyCost} PS`);
+                            if (typeof puCost === 'number') costParts.push(`${puCost} PU`);
+                            
+                            const costString = costParts.length > 0 
+                                ? `(${costParts.join(" + ")})` 
+                                : "";
+
                             return (
-                                <label key={imp.id} className={styles.toggleLabel} style={{fontSize: 13}}>
+                                <label key={imp.id} className={`${styles.toggleLabel} ${styles.regimentImprovementLabel}`}>
                                     <input 
                                         type="checkbox"
                                         checked={isActive}
                                         onChange={() => handlers.handleRegimentImprovementToggle(imp.id)}
                                     />
-                                    {imp.id} ({imp.army_point_cost ? `${imp.army_point_cost} PS` : `${imp.cost} PU`})
+                                    {displayName} {costString}
                                 </label>
                             );
                         })}

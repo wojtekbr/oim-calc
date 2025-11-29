@@ -1,3 +1,5 @@
+/* ... (Wszystkie poprzednie style zachowujemy, wklej to na końcu pliku lub podmień całość) ... */
+
 /* Layout Główny */
 .container {
   display: flex;
@@ -59,9 +61,9 @@
   grid-template-columns: 1fr 320px;
   gap: 24px;
   padding: 24px;
-  overflow-y: auto; /* To pozwala na scrollowanie treści */
+  overflow-y: auto;
   flex: 1;
-  align-items: start; /* Ważne dla sticky: elementy wyrównane do góry */
+  align-items: start;
 }
 
 @media (max-width: 1024px) {
@@ -81,9 +83,8 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  /* STICKY LOGIC */
   position: sticky;
-  top: 0; /* Przykleja się do góry scrollowalnego kontenera */
+  top: 0;
   height: fit-content;
 }
 
@@ -162,6 +163,32 @@
   margin-bottom: 8px;
   text-transform: uppercase;
 }
+
+/* NOWE KLASY CZYSZCZĄCE INLINE STYLE */
+.groupLabelOptional {
+  margin-bottom: 8px;
+}
+
+.podContainer {
+  margin-bottom: 12px;
+}
+
+.podSelectionHint {
+  font-size: 11px;
+  margin-bottom: 4px;
+  color: #888;
+}
+
+.regimentImprovementsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.regimentImprovementLabel {
+  font-size: 13px;
+}
+/* KONIEC NOWYCH KLAS */
 
 .unitsRow {
   display: flex;
@@ -266,7 +293,6 @@
   color: #668;
 }
 
-/* Nowy separator między sekcją kosztów a statystyk */
 .statsSeparator {
   margin: 16px 0;
   border-top: 1px solid #eee;

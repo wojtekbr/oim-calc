@@ -1,0 +1,38 @@
+{
+  "veterans": {
+    "name": "Weterani",
+    "cost": "double",
+    "type": "unit"
+  },
+  "javelin": {
+    "name": "Dziryt",
+    "cost": -1,
+    "type": "unit"
+  },
+  "pistol": {
+    "name": "Pistolety",
+    "cost": -1,
+    "type": "unit"
+  },
+  "additional_ammo": {
+    "name": "Dodatkowa amunicja",
+    "cost": 1,
+    "type": "unit"
+  },
+  "kalkans": {
+    "name": "Kałkany",
+    "cost": 1,
+    "type": "unit"
+  },
+  "serdengetci_contract": {
+    "name": "Kontrakt Serdengetci",
+    "cost": 3,
+    "type": "regiment"
+  },
+  "elite_janissaries": {
+    "name": "Elitarni Janczarzy",
+    "cost": 3,
+    "army_point_cost": 3,
+    "type": "regiment"
+  }
+}

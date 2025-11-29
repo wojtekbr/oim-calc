@@ -1,7 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
-import { IDS, GROUP_TYPES } from "../constants";
+import { IDS, GROUP_TYPES, RANK_TYPES } from "../constants";
+import { useArmyData } from "../context/ArmyDataContext";
+import { canUnitTakeImprovement, calculateSingleImprovementIMPCost, validateVanguardCost } from "../utils/armyMath"; // FIX: Import
+import { calculateRuleBonuses, checkSupportUnitRequirements } from "../utils/divisionRules";
 
 export const useRegimentLogic = ({
+  // ... (propsy bez zmian) ...
   regiment,
   configuredDivision,
   setConfiguredDivision,
@@ -13,21 +17,29 @@ export const useRegimentLogic = ({
   remainingImprovementPoints,
   divisionDefinition: propDivisionDefinition,
   unitsMap,
+  getRegimentDefinition
 }) => {
-  const divisionDefinition = propDivisionDefinition || regiment.divisionDefinition || {};
+  const { improvements: commonImprovements, factions } = useArmyData(); // Pobieramy factions dla walidatora (wymaga selectedFaction)
   
+  // Problem: hook useRegimentLogic nie dostaje `selectedFaction` bezpośrednio, a `regiment` to obiekt definicji.
+  // Walidator `validateVanguardCost` wymaga obiektu faction, który ma pole `.units`.
+  // W App.jsx przekazujemy `unitsMap`. Możemy zrekonstruować faction object.
+  const fakeFactionForValidator = { units: unitsMap };
+
+
+  // ... (reszta hooka bez zmian: State, Helpers, useEffect, useMemo) ...
+  // SKOPIUJ WSZYSTKO ZE STAREGO PLIKU AŻ DO saveAndGoBack
+
+  const divisionDefinition = propDivisionDefinition || regiment.divisionDefinition || {};
   const structure = regiment.structure || {};
   const base = structure.base || {};
   const additional = structure.additional || {};
   const currentConfig = configuredDivision?.[regimentGroup]?.[regimentIndex]?.config || {};
-  
   const customCostDefinition = additional?.unit_custom_cost;
   const customCostSlotName = customCostDefinition?.[0]?.depends_on;
-
   const unitLevelImprovements = regiment.unit_improvements || [];
   const regimentLevelImprovements = regiment.regiment_improvements || [];
 
-  // --- State ---
   const [baseSelections, setBaseSelections] = useState(() => (currentConfig.baseSelections || {}));
   const [additionalSelections, setAdditionalSelections] = useState(() => (currentConfig.additionalSelections || {}));
   const [additionalEnabled, setAdditionalEnabled] = useState(() => !!currentConfig.additionalEnabled || false);
@@ -37,7 +49,6 @@ export const useRegimentLogic = ({
   const [improvements, setImprovements] = useState(currentConfig.improvements || {});
   const [regimentImprovements, setRegimentImprovements] = useState(currentConfig.regimentImprovements || []);
 
-  // --- Helpers ---
   const getUnitName = (id) => unitsMap?.[id]?.name || id;
   const getUnitCost = (id) => unitsMap?.[id]?.cost || 0;
   
@@ -52,7 +63,6 @@ export const useRegimentLogic = ({
 
   const groupKeys = (obj) => (obj && typeof obj === "object" ? Object.keys(obj) : []);
 
-  // --- Initialization ---
   useEffect(() => {
     const initForGroup = (groupObj, prevSelections = {}, isMandatory = false) => {
       const out = { ...prevSelections };
@@ -61,10 +71,8 @@ export const useRegimentLogic = ({
         const sel = Array.isArray(out[gk]) ? [...out[gk]] : [];
         for (let i = 0; i < arr.length; i++) {
           if (sel[i] !== undefined) continue;
-          
           const pod = arr[i] || {};
           const ids = Object.values(pod).map((v) => v?.id).filter(Boolean);
-          
           if (isMandatory) {
               if (ids.length === 0) sel[i] = null;
               else if (ids.length === 1) sel[i] = ids[0];
@@ -77,13 +85,10 @@ export const useRegimentLogic = ({
       });
       return out;
     };
-
     setBaseSelections(initForGroup(base, currentConfig.baseSelections || {}, true));
     setAdditionalSelections(initForGroup(additional, currentConfig.additionalSelections || {}, false));
-
     const optSelInit = { ...(currentConfig.optionalSelections || {}) };
     const optEnabledInit = { ...(currentConfig.optionalEnabled || {}) };
-
     const initOptionalGroup = (groupType, groupObj) => {
         if (Array.isArray(groupObj.optional)) {
             const key = `${groupType}/optional`;
@@ -95,29 +100,20 @@ export const useRegimentLogic = ({
             }
         }
     }
-
     initOptionalGroup(GROUP_TYPES.BASE, base);
     initOptionalGroup(GROUP_TYPES.ADDITIONAL, additional);
-
     setOptionalSelections(optSelInit);
     setOptionalEnabled(optEnabledInit);
     setAdditionalEnabled(!!currentConfig.additionalEnabled);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [regiment.id]);
 
-  // --- Support Units Logic ---
   const assignedSupportUnits = useMemo(() => {
     const regimentPositionKey = `${regimentGroup}/${regimentIndex}`;
     return (configuredDivision.supportUnits || [])
         .filter(su => su.assignedTo?.positionKey === regimentPositionKey);
   }, [configuredDivision.supportUnits, regimentGroup, regimentIndex]);
 
-  // --- Calculations ---
-  
-  // LOGIKA BLOKADY: Sprawdź, czy kupiono cokolwiek w Poziomie I (poza optionalem)
   const hasAdditionalBaseSelection = useMemo(() => {
-      // Przeszukujemy additionalSelections (tam są grupy 'general', 'additional1' itp., bez 'optional')
-      // Ignorujemy klucz 'optional' jeśli tam trafił, oraz sprawdzamy czy wartość nie jest pusta/none
       return Object.entries(additionalSelections).some(([key, arr]) => {
           if (key === GROUP_TYPES.OPTIONAL) return false;
           return Array.isArray(arr) && arr.some(id => id && id !== IDS.NONE);
@@ -139,7 +135,6 @@ export const useRegimentLogic = ({
           }
           return;
         }
-
         const arr = groupObj[gk] || [];
         const selArr = selections[gk] || [];
         for (let i = 0; i < arr.length; i++) {
@@ -148,35 +143,28 @@ export const useRegimentLogic = ({
         }
       });
     };
-
     pushGroup(GROUP_TYPES.BASE, base, baseSelections, optionalSelections, optionalEnabled);
     if (additionalEnabled) {
       pushGroup(GROUP_TYPES.ADDITIONAL, additional, additionalSelections, optionalSelections, optionalEnabled);
     }
-
     if (selectedAdditionalCustom) {
         entries.push({ key: `additional/${customCostSlotName}_custom`, id: selectedAdditionalCustom, isCustom: true });
     }
-
     const regimentPositionKey = `${regimentGroup}/${regimentIndex}`;
     (configuredDivision.supportUnits || []).filter((su) => su.assignedTo?.positionKey === regimentPositionKey).forEach((su) => {
       entries.push({ key: `support/${su.id}-${su.assignedTo.positionKey}`, id: su.id });
     });
-
     return entries;
   }, [base, additional, baseSelections, additionalSelections, optionalSelections, optionalEnabled, additionalEnabled, selectedAdditionalCustom, configuredDivision, customCostSlotName, regimentGroup, regimentIndex]);
-
 
   const newRemainingPointsAfterLocalChanges = useMemo(() => {
     if (remainingImprovementPoints === undefined) return 0;
     const totalDivisionLimit = divisionDefinition.improvement_points || 0;
-    
     const tmp = JSON.parse(JSON.stringify(configuredDivision));
     const oldV = configuredDivision[regimentGroup]?.[regimentIndex]?.config?.isVanguard;
-    
     tmp[regimentGroup][regimentIndex].config = {
-      base: baseSelections,
-      additional: additionalSelections,
+      baseSelections,
+      additionalSelections,
       additionalCustom: selectedAdditionalCustom,
       additionalEnabled,
       optionalEnabled,
@@ -185,41 +173,45 @@ export const useRegimentLogic = ({
       regimentImprovements,
       isVanguard: oldV,
     };
-
-    const dynamicSupplyBonus = calculateTotalSupplyBonus ? calculateTotalSupplyBonus(tmp) : 0;
-    const dynamicLimit = totalDivisionLimit + dynamicSupplyBonus;
+    const ruleBonuses = calculateRuleBonuses(tmp, divisionDefinition, unitsMap, getRegimentDefinition);
+    const dynamicSupplyBonus = calculateTotalSupplyBonus(tmp);
+    const dynamicLimit = totalDivisionLimit + dynamicSupplyBonus + ruleBonuses.improvementPoints;
     const totalUsedWithLocalChanges = calculateImprovementPointsCost(tmp);
     return dynamicLimit - totalUsedWithLocalChanges;
   }, [
     baseSelections, additionalSelections, selectedAdditionalCustom, additionalEnabled, 
     optionalEnabled, optionalSelections, improvements, regimentImprovements, 
     configuredDivision, calculateTotalSupplyBonus, calculateImprovementPointsCost, 
-    divisionDefinition, remainingImprovementPoints, regimentGroup, regimentIndex
+    divisionDefinition, remainingImprovementPoints, regimentGroup, regimentIndex,
+    unitsMap, getRegimentDefinition
   ]);
 
   const totalCost = useMemo(() => {
     let cost = regiment.base_cost || 0;
     regimentImprovements.forEach((impId) => {
       const impDef = regimentLevelImprovements.find((i) => i.id === impId);
-      if (impDef && typeof impDef.army_point_cost === "number") cost += impDef.army_point_cost;
+      const common = commonImprovements[impId];
+      if (impDef?.army_point_cost !== undefined) cost += impDef.army_point_cost;
+      else if (common?.army_point_cost !== undefined) cost += common.army_point_cost;
     });
     collectSelectedUnits.forEach((u) => {
         cost += getFinalUnitCost(u.id, !!u.isCustom);
     });
-    Object.entries(improvements || {}).forEach(([pos, imps]) => {
-      (imps || []).forEach((impId) => {
-        const impDef = unitLevelImprovements.find((i) => i.id === impId);
-        if (impDef && typeof impDef.army_point_cost === "number") cost += impDef.army_point_cost;
-      });
-    });
     return cost;
-  }, [regiment, regimentImprovements, improvements, collectSelectedUnits, unitLevelImprovements, getFinalUnitCost, regimentLevelImprovements]);
+  }, [regiment, regimentImprovements, improvements, collectSelectedUnits, getFinalUnitCost, regimentLevelImprovements, commonImprovements]);
 
   const stats = useMemo(() => {
     let recon = 0, motivation = 0, orders = 0;
+    let mountedCount = 0;
+    let footCount = 0;
     collectSelectedUnits.forEach(({ id, key }) => {
       const def = unitsMap[id];
       if (!def) return;
+      if (def.rank !== RANK_TYPES.GROUP) {
+          const isMounted = def.is_cavalry || def.are_dragoons || def.are_proxy_dragoons;
+          if (isMounted) mountedCount++;
+          else footCount++;
+      }
       if (def.is_cavalry) recon++;
       if (def.is_light_cavalry) recon++;
       if (def.has_lances) recon--;
@@ -245,15 +237,29 @@ export const useRegimentLogic = ({
     const isMainForceProp = regiment.isMainForce;
     if (isMainForceProp) motivation++;
     const activations = (regiment.activations || 0) + (isMainForceProp ? 1 : 0);
-    return { totalRecon: recon, totalMotivation: motivation, totalActivations: activations, totalOrders: orders, totalAwareness: awareness };
+    let regimentType = "-";
+    const totalCombatUnits = mountedCount + footCount;
+    if (totalCombatUnits > 0) {
+        if (footCount === 0) {
+            regimentType = "Konny";
+        } else if (footCount < totalCombatUnits / 2) {
+            regimentType = "Mieszany";
+        } else {
+            regimentType = "Pieszy";
+        }
+    }
+    return { totalRecon: recon, totalMotivation: motivation, totalActivations: activations, totalOrders: orders, totalAwareness: awareness, regimentType };
   }, [collectSelectedUnits, unitsMap, regiment]);
 
   // --- ACTIONS ---
+  const hasAnySelection = (selectionsObj) => {
+      return Object.values(selectionsObj).some(arr => arr && arr.some(id => id && id !== IDS.NONE));
+  };
 
   const handleSelectInPod = (type, groupKey, index, unitId) => {
+    // ... (COPY FROM PREVIOUS) ...
     let currentSelection = null;
     const isOptionalGroup = groupKey === GROUP_TYPES.OPTIONAL;
-    
     if (isOptionalGroup) {
         currentSelection = optionalSelections[`${type}/optional`]?.[index];
     } else if (type === GROUP_TYPES.BASE) {
@@ -261,26 +267,37 @@ export const useRegimentLogic = ({
     } else if (type === GROUP_TYPES.ADDITIONAL) {
         currentSelection = additionalSelections[groupKey]?.[index];
     }
-
     const isDeselecting = currentSelection === unitId;
     const newValue = isDeselecting ? null : unitId;
-
     const posKey = isOptionalGroup ? `${type}/optional/${index}` : `${type}/${groupKey}/${index}`;
-    if (isDeselecting) {
-        setImprovements((p) => { const m = { ...p }; delete m[posKey]; return m; });
-    }
+    if (isDeselecting) setImprovements((p) => { const m = { ...p }; delete m[posKey]; return m; });
 
     if (isOptionalGroup) {
         const mapKey = `${type}/optional`;
+        const groupDef = type === GROUP_TYPES.BASE ? base : additional;
+        const optionalPods = groupDef.optional || [];
         setOptionalSelections(prev => {
             const next = { ...prev };
-            const arr = [...(next[mapKey] || [])];
-            arr[index] = newValue;
+            let arr = [...(next[mapKey] || [])];
+            if (arr.length < optionalPods.length) {
+                 const padded = Array(optionalPods.length).fill(null);
+                 arr.forEach((v, i) => padded[i] = v);
+                 arr = padded;
+            }
+            if (isDeselecting) arr = arr.map(() => null);
+            else {
+                arr[index] = newValue;
+                arr = arr.map((currentVal, i) => {
+                    if (i === index) return newValue;
+                    if (currentVal && currentVal !== IDS.NONE) return currentVal;
+                    const pod = optionalPods[i] || {};
+                    const options = Object.values(pod).map(v => v?.id).filter(Boolean);
+                    return options.length > 0 ? options[0] : null;
+                });
+            }
             next[mapKey] = arr;
-            
             const hasActive = arr.some(x => x && x !== IDS.NONE);
             setOptionalEnabled(prevOpt => ({ ...prevOpt, [mapKey]: hasActive }));
-
             if (hasActive) {
                 const otherKey = type === GROUP_TYPES.BASE ? "additional/optional" : "base/optional";
                 if (optionalEnabled[otherKey]) {
@@ -303,22 +320,44 @@ export const useRegimentLogic = ({
             return next;
         });
     } else if (type === GROUP_TYPES.ADDITIONAL) {
+        const mandatoryGroups = Object.keys(additional).filter(k => k !== GROUP_TYPES.OPTIONAL);
         setAdditionalSelections(prev => {
             const next = { ...prev };
-            const arr = [...(next[groupKey] || [])];
-            arr[index] = newValue;
-            next[groupKey] = arr;
-            
-            const hasOthers = Object.keys(next).some(k => k !== groupKey && next[k].some(x => x && x !== IDS.NONE));
-            const hasCurrent = arr.some(x => x && x !== IDS.NONE);
-            
-            if (!hasOthers && !hasCurrent && !selectedAdditionalCustom) {
+            if (isDeselecting) {
+                mandatoryGroups.forEach(gKey => {
+                    const groupDef = additional[gKey] || [];
+                    next[gKey] = Array(groupDef.length).fill(null);
+                    setImprovements(prevImp => {
+                        const nextImp = { ...prevImp };
+                        Object.keys(nextImp).forEach(key => {
+                            if (key.startsWith(`additional/${gKey}/`)) delete nextImp[key];
+                        });
+                        return nextImp;
+                    });
+                });
+            } else {
+                mandatoryGroups.forEach(gKey => {
+                    const groupDef = additional[gKey] || [];
+                    let arr = next[gKey] ? [...next[gKey]] : Array(groupDef.length).fill(null);
+                    if (gKey === groupKey) arr[index] = newValue;
+                    arr = arr.map((currentVal, i) => {
+                        if (currentVal && currentVal !== IDS.NONE) return currentVal;
+                        const pod = groupDef[i] || {};
+                        const options = Object.values(pod).map(v => v?.id).filter(Boolean);
+                        return options.length > 0 ? options[0] : null;
+                    });
+                    next[gKey] = arr;
+                });
+            }
+            const hasAnySelectionInMandatory = mandatoryGroups.some(gKey => {
+                const arr = next[gKey];
+                return Array.isArray(arr) && arr.some(id => id && id !== IDS.NONE);
+            });
+            if (!hasAnySelectionInMandatory && !selectedAdditionalCustom) {
                 setAdditionalEnabled(false);
                 setOptionalSelections(prevOpt => {
                     const nextOpt = { ...prevOpt };
-                    if (nextOpt["additional/optional"]) {
-                        nextOpt["additional/optional"] = nextOpt["additional/optional"].map(() => null);
-                    }
+                    if (nextOpt["additional/optional"]) nextOpt["additional/optional"] = nextOpt["additional/optional"].map(() => null);
                     return nextOpt;
                 });
                 setOptionalEnabled(prevOpt => ({ ...prevOpt, "additional/optional": false }));
@@ -329,7 +368,7 @@ export const useRegimentLogic = ({
                     });
                     return nextImp;
                 });
-            } else if (newValue && newValue !== IDS.NONE) {
+            } else {
                 setAdditionalEnabled(true);
             }
             return next;
@@ -338,27 +377,19 @@ export const useRegimentLogic = ({
   };
 
   const handleCustomSelect = (unitId) => {
+    // ... (COPY FROM PREVIOUS) ...
     const isDeselecting = selectedAdditionalCustom === unitId;
     const next = isDeselecting ? null : unitId;
-    
     setSelectedAdditionalCustom(next);
-    
-    if (next && !additionalEnabled) {
-        setAdditionalEnabled(true);
-    }
-    
+    if (next && !additionalEnabled) setAdditionalEnabled(true);
     if (isDeselecting) {
          setImprovements((p) => { const m = { ...p }; delete m[`additional/${customCostSlotName}_custom`]; return m; });
-         
-         const hasAnyAdditional = Object.values(additionalSelections).some(arr => arr && arr.some(id => id && id !== IDS.NONE));
-         
+         const hasAnyAdditional = hasAnySelection(additionalSelections);
          if (!hasAnyAdditional) {
              setAdditionalEnabled(false);
              setOptionalSelections(prevOpt => {
                 const nextOpt = { ...prevOpt };
-                if (nextOpt["additional/optional"]) {
-                    nextOpt["additional/optional"] = nextOpt["additional/optional"].map(() => null);
-                }
+                if (nextOpt["additional/optional"]) nextOpt["additional/optional"] = nextOpt["additional/optional"].map(() => null);
                 return nextOpt;
             });
             setOptionalEnabled(prevOpt => ({ ...prevOpt, "additional/optional": false }));
@@ -374,95 +405,53 @@ export const useRegimentLogic = ({
   };
 
   const handleImprovementToggle = (positionKey, unitId, impId) => {
+    // ... (COPY FROM PREVIOUS) ...
     const unitDef = unitsMap[unitId];
     if (unitDef?.rank === "group") return;
-    const impDef = unitLevelImprovements.find(i => i.id === impId);
-    if (!impDef) return;
-
-    const unitLimitations = unitDef?.improvement_limitations || unitDef?.improvements_limitations || null;
-    if (unitLimitations && Array.isArray(unitLimitations) && unitLimitations.includes(impId)) {
+    const canTake = canUnitTakeImprovement(unitDef, impId, regiment);
+    if (!canTake) {
         alert(`Jednostka "${getUnitName(unitId)}" nie może otrzymać ulepszenia "${impId}".`);
         return;
     }
-
+    const regImpDef = unitLevelImprovements.find(i => i.id === impId);
+    if (regImpDef?.max_amount === 1) {
+        const usedElsewhere = Object.entries(improvements).some(([k, arr]) => k !== positionKey && arr.includes(impId));
+        if (usedElsewhere) {
+            const current = improvements[positionKey] || [];
+            if (!current.includes(impId)) {
+                alert(`Ulepszenie "${impId}" może być użyte tylko raz w pułku.`);
+                return;
+            }
+        }
+    }
     setImprovements((prev) => {
       const cur = Array.isArray(prev[positionKey]) ? [...prev[positionKey]] : [];
       if (cur.includes(impId)) {
         return { ...prev, [positionKey]: cur.filter(x => x !== impId) };
       } else {
-        if (impDef.max_amount === 1) {
-          const usedElsewhere = Object.entries(prev).some(([k, arr]) => k !== positionKey && arr.includes(impId));
-          if (usedElsewhere) {
-            alert(`Ulepszenie "${impId}" może być użyte tylko raz w pułku.`);
-            return prev;
-          }
-        }
-        if (impDef.limitations && !impDef.limitations.includes(unitId)) {
-           alert(`Jednostka "${getUnitName(unitId)}" nie może otrzymać ulepszenia "${impId}".`);
-           return prev;
-        }
-
-        const improvementBaseCost = unitDef.improvement_cost || 0;
-        let potentialIMPCost = 0;
-        if (impDef.cost === -1) potentialIMPCost = Math.max(1, improvementBaseCost - 1);
-        else if (typeof impDef.cost === "number") potentialIMPCost = impDef.cost;
-        else if (impDef.cost === "double") potentialIMPCost = improvementBaseCost * 2;
-        else if (impDef.cost === "triple") potentialIMPCost = improvementBaseCost * 3;
-        else if (impDef.cost === 1) potentialIMPCost = improvementBaseCost;
-
-        if (newRemainingPointsAfterLocalChanges - potentialIMPCost < 0) {
+        const cost = calculateSingleImprovementIMPCost(unitDef, impId, regiment, commonImprovements);
+        if (newRemainingPointsAfterLocalChanges - cost < 0) {
           alert("Brak punktów ulepszeń.");
           return prev;
         }
-
         return { ...prev, [positionKey]: [...cur, impId] };
       }
     });
   };
 
   const handleRegimentImprovementToggle = (impId) => {
+    // ... (COPY FROM PREVIOUS) ...
     setRegimentImprovements((prev) => {
-        const impDef = regimentLevelImprovements.find(i => i.id === impId);
-        if (!impDef) return prev;
         if (prev.includes(impId)) {
              const idx = prev.lastIndexOf(impId);
              return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
-        }
-        const cost = typeof impDef.cost === "number" ? impDef.cost : 0;
-        if (newRemainingPointsAfterLocalChanges - cost < 0) {
-             alert("Brak punktów IMP.");
-             return prev;
         }
         return [...prev, impId];
     });
   };
 
-  const saveAndGoBack = () => {
-    setConfiguredDivision((prev) => {
-      const newDivision = { ...prev };
-      const newGroup = [...newDivision[regimentGroup]];
-      const oldConfig = newGroup[regimentIndex].config || {};
-      newGroup[regimentIndex] = {
-        ...newGroup[regimentIndex],
-        config: {
-          ...oldConfig,
-          baseSelections,
-          additionalSelections,
-          additionalEnabled,
-          optionalEnabled,
-          optionalSelections,
-          additionalCustom: selectedAdditionalCustom,
-          improvements,
-          regimentImprovements,
-        },
-      };
-      newDivision[regimentGroup] = newGroup;
-      return newDivision;
-    });
-    onBack();
-  };
-
   const handleToggleAdditional = () => {
+    // ... (COPY FROM PREVIOUS) ...
     setAdditionalEnabled((prev) => {
       const next = !prev;
       if (!next) {
@@ -488,16 +477,85 @@ export const useRegimentLogic = ({
     });
   };
 
+  // FIX: Zmodyfikowany saveAndGoBack do walidacji kosztu Vanguarda
+  const saveAndGoBack = () => {
+    
+    // 1. Budujemy "brudną" wersję dywizji (kopię stanu)
+    const tempDivisionForCheck = JSON.parse(JSON.stringify(configuredDivision));
+    const groupRef = tempDivisionForCheck[regimentGroup];
+    const oldConfig = groupRef[regimentIndex].config;
+
+    groupRef[regimentIndex].config = {
+          baseSelections,
+          additionalSelections,
+          additionalCustom: selectedAdditionalCustom,
+          additionalEnabled,
+          optionalEnabled,
+          optionalSelections,
+          improvements,
+          regimentImprovements,
+          isVanguard: oldConfig.isVanguard
+    };
+    
+    // FIX: WALIDACJA KOSZTU STRAŻY PRZEDNIEJ
+    const vanguardCheck = validateVanguardCost(tempDivisionForCheck, fakeFactionForValidator, getRegimentDefinition, commonImprovements);
+    if (!vanguardCheck.isValid) {
+        alert(vanguardCheck.message);
+        return; // Blokujemy zapis
+    }
+
+    // 2. Walidacja wsparcia
+    const keptSupportUnits = [];
+    const removedNames = [];
+
+    (tempDivisionForCheck.supportUnits || []).forEach(su => {
+        let unitConfig = null;
+        if (su.definitionIndex !== undefined && divisionDefinition.additional_units) {
+            unitConfig = divisionDefinition.additional_units[su.definitionIndex];
+        } else {
+            unitConfig = divisionDefinition.additional_units?.find(u => 
+                (typeof u === 'string' && u === su.id) || 
+                (u.name === su.id)
+            );
+        }
+        if (unitConfig) {
+            const check = checkSupportUnitRequirements(unitConfig, tempDivisionForCheck, getRegimentDefinition);
+            if (check.isAllowed) keptSupportUnits.push(su);
+            else removedNames.push(getUnitName(su.id));
+        } else {
+            keptSupportUnits.push(su);
+        }
+    });
+
+    if (removedNames.length > 0) {
+        const confirmed = window.confirm(
+            `Zapisanie zmian spowoduje usunięcie następujących jednostek wsparcia (niespełnione wymagania):\n\n- ${removedNames.join("\n- ")}\n\nCzy chcesz kontynuować?`
+        );
+        if (!confirmed) return; // PRZERWIJ ZAPIS
+    }
+
+    // Jeśli przeszło walidację, zapisz do stanu
+    setConfiguredDivision((prev) => {
+         const next = JSON.parse(JSON.stringify(prev));
+         next[regimentGroup][regimentIndex].config = tempDivisionForCheck[regimentGroup][regimentIndex].config;
+         next.supportUnits = keptSupportUnits;
+         return next;
+    });
+    
+    onBack();
+  };
+
   return {
     state: {
       baseSelections, additionalSelections, additionalEnabled, 
       optionalEnabled, optionalSelections, selectedAdditionalCustom,
       improvements, regimentImprovements, newRemainingPointsAfterLocalChanges,
-      stats, totalCost, assignedSupportUnits, hasAdditionalBaseSelection // <--- Expose flag
+      stats, totalCost, assignedSupportUnits, hasAdditionalBaseSelection
     },
     definitions: {
         structure, base, additional, customCostDefinition, customCostSlotName,
-        unitLevelImprovements, regimentLevelImprovements
+        unitLevelImprovements, regimentLevelImprovements,
+        commonImprovements
     },
     handlers: {
         handleSelectInPod, 

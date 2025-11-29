@@ -42,6 +42,22 @@
     "rank": "group",
     "orders": 2
   },
+  "ott_bejlerbej": {
+    "id": "ott_bejlerbej",
+    "name": "Bejlerbej",
+    "cost": 0,
+    "rank": "group",
+    "orders": 3,
+    "activations": 3
+  },
+  "ott_czausz": {
+    "id": "ott_czausz",
+    "name": "Czausz",
+    "cost": 3,
+    "improvement_points_cost": 1,
+    "rank": "group",
+    "orders": 2
+  },
   "ott_kethuda": {
     "id": "ott_kethuda",
     "name": "Kethuda",
@@ -143,6 +159,7 @@
     "is_cavalry": true,
     "is_light_cavalry": true,
     "has_lances": true,
+    "improvement_points_cost": 1,
     "improvement_limitations": ["javelin","kalkans", "veterans", "additional_ammo"]
   },
   "ott_deli_m": {
@@ -154,6 +171,7 @@
     "is_cavalry": true,
     "is_light_cavalry": true,
     "has_lances": true,
+    "improvement_points_cost": 1,
     "improvement_limitations": ["javelin","kalkans", "veterans", "additional_ammo"]
   },
   "ott_janissaries_s": {
@@ -216,6 +234,7 @@
     "name": "Silahdarowie M",
     "cost": 14,
     "improvement_cost": 4,
+    "improvement_points_cost": 1,
     "rank": "gold",
     "is_cavalry": true,
     "has_lances": true

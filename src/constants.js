@@ -1,5 +1,6 @@
 // Typy grup w strukturze jsona
 export const GROUP_TYPES = {
+    VANGUARD: 'vanguard', // NOWE
     BASE: 'base',
     ADDITIONAL: 'additional',
     OPTIONAL: 'optional',
@@ -11,7 +12,7 @@ export const RANK_TYPES = {
     BRONZE: 'bronze',
     SILVER: 'silver',
     GOLD: 'gold',
-    GROUP: 'group' // np. dowódcy, tabory
+    GROUP: 'group'
 };
 
 // ID specjalne

@@ -3,7 +3,28 @@
     "name": "Armia Ejaletu Europejskiego",
     "improvement_points": 10,
     "base_cost": 11,
+    "general": ["ott_bejlerbej"],
+    "rules": [
+      {
+        "id": "additional_pu_points_for_units",
+        "unit_ids": [
+          "ott_segbani_m"
+        ],
+        "required_unit_amount": 2,
+        "bonus_pu": 6
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_id": "ott_province_eur",
+        "max_amount": 1
+      }
+    ],
     "additional_units": [
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["ott_light_art_s", "ott_light_art_m"]
+      },
       {
         "type": "group",
         "name": "Lekka Artyleria",
@@ -35,12 +56,35 @@
         "assignment_rules": {
           "can_be_assigned": false
         }
+      },
+      {
+        "name":"common_transport_camel",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name":"ott_czausz",
+        "assignment_rules": {
+          "can_be_assigned": false
+        },
+        "requirements": [
+          {
+            "type": "regiment_contains_unit",
+            "regiment_id": "ott_province_eur",
+            "unit_id": "ott_segbani_m",
+            "min_amount": 1
+          }
+        ]
       }
     ],
+    "vanguard": 
+      [
+      { "options": ["ott_sipahi_europ", "ott_province_eur"] }
+     ],
     "base": [
-      { "options": ["ott_province_eur"] },
-      { "options": ["ott_sipahi_europ"] },
-      { "options": ["ott_sipahi_europ", "ott_sipahi_albanian"] }
+      { "options": ["ott_sipahi_europ","ott_province_eur"] },
+      { "options": ["ott_sipahi_europ", "ott_sipahi_albanian", "ott_province_eur"] }
     ],
     "additional": [
       {

@@ -6,5 +6,23 @@
     "improvement_cost": 0,
     "rank": "group",
     "additional_supply": 4
+  },
+
+  "common_transport_camel": {
+    "id": "common_transport_camel",
+    "name": "Wielbłądy transportowe",
+    "cost": 2,
+    "improvement_cost": 0,
+    "rank": "group",
+    "additional_supply": 2
+  },
+
+  "common_dragoons_s": {
+    "id": "common_dragoons_s",
+    "name": "Dragoni Najemni S",
+    "cost": 4,
+    "improvement_cost": 2,
+    "rank": "bronze",
+    "is_dragoon": true
   }
 }

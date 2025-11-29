@@ -3,22 +3,19 @@ import FactionList from "./pages/FactionList";
 import RegimentSelector from "./pages/RegimentSelector";
 import RegimentEditor from "./pages/RegimentEditor";
 import { ArmyDataProvider, useArmyData } from "./context/ArmyDataContext";
-import { SCREENS, IDS } from "./constants";
+import { SCREENS, IDS, GROUP_TYPES } from "./constants";
 import { 
     calculateRegimentStats, 
     calculateImprovementPointsCost, 
     calculateTotalSupplyBonus, 
     calculateDivisionCost
 } from "./utils/armyMath";
-import ErrorBoundary from "./components/ErrorBoundary";
+import { calculateRuleBonuses, validateDivisionRules } from "./utils/divisionRules";
 
-// Helper do tworzenia domyślnej struktury (przeniesiony do utils/armyMath.js lub zostawiony tutaj jako helper UI)
-// Dla przejrzystości zostawiam tutaj, ale korzysta on teraz z clean constants
 const createDefaultRegiments = (divisionDefinition, getRegimentDefinition) => {
     const createRegimentWithDefaults = (group, index, regimentId) => {
-        const config = { base: {}, additional: {}, improvements: {}, isVanguard: false };
+        const config = { base: {}, additional: {}, improvements: {} };
         const def = getRegimentDefinition(regimentId);
-        
         if (def && def.structure && def.structure.base) {
             Object.entries(def.structure.base).forEach(([slotKey, options]) => {
                 const isOptional = slotKey.toLowerCase().startsWith('optional');
@@ -32,19 +29,29 @@ const createDefaultRegiments = (divisionDefinition, getRegimentDefinition) => {
         return { group, index, id: regimentId, customName: "", config: config };
     };
 
+    const vanguardRegiments = (divisionDefinition.vanguard || []).map((group, index) => 
+        createRegimentWithDefaults(GROUP_TYPES.VANGUARD, index, group.options[0])
+    );
+
     const baseRegiments = divisionDefinition.base.map((group, index) =>
-        createRegimentWithDefaults('base', index, group.options[0])
+        createRegimentWithDefaults(GROUP_TYPES.BASE, index, group.options[0])
     );
 
     const additionalRegiments = divisionDefinition.additional.map((group, index) => ({
-        group: "additional",
+        group: GROUP_TYPES.ADDITIONAL,
         index,
         id: IDS.NONE,
         customName: "",
         config: {},
     }));
 
+    const defaultGeneral = divisionDefinition.general && divisionDefinition.general.length > 0 
+        ? divisionDefinition.general[0] 
+        : null;
+
     return {
+        general: defaultGeneral,
+        vanguard: vanguardRegiments,
         base: baseRegiments,
         additional: additionalRegiments,
         supportUnits: [],
@@ -52,10 +59,8 @@ const createDefaultRegiments = (divisionDefinition, getRegimentDefinition) => {
     };
 };
 
-// --- GŁÓWNA ZAWARTOŚĆ APLIKACJI (Konsument Danych) ---
 function AppContent() {
-    // Pobieramy dane z Contextu zamiast ładować je tutaj
-    const { factions, loading, error } = useArmyData();
+    const { factions, loading, error, improvements } = useArmyData();
 
     const [screen, setScreen] = useState(SCREENS.LIST);
     const [selectedFactionKey, setSelectedFactionKey] = useState(null);
@@ -65,21 +70,16 @@ function AppContent() {
     const [editingRegimentIndex, setEditingRegimentIndex] = useState(null);
     const [editingRegimentGroup, setEditingRegimentGroup] = useState(null);
 
-    // --- Derived State Helpers ---
     const selectedFaction = selectedFactionKey ? factions?.[selectedFactionKey] : null;
     const selectedDivisionDefinition = selectedFaction && selectedDivisionKey ? selectedFaction.divisions[selectedDivisionKey] : null;
-    
-    // Wrapper na getRegimentDefinition dla aktualnie wybranej frakcji
     const getRegimentDefinition = (regimentKey) => selectedFaction?.regiments[regimentKey] || null;
 
-    // --- Init Configured Division ---
     useEffect(() => {
         if (screen === SCREENS.SELECTOR && selectedDivisionDefinition && !configuredDivision) {
             setConfiguredDivision(createDefaultRegiments(selectedDivisionDefinition, getRegimentDefinition));
         }
     }, [screen, selectedDivisionDefinition, configuredDivision]);
 
-    // --- Routing Handlers ---
     const openRegimentSelector = (factionKey, divisionKey) => {
         setSelectedFactionKey(factionKey);
         setSelectedDivisionKey(divisionKey);
@@ -106,14 +106,24 @@ function AppContent() {
         setConfiguredDivision(null);
     };
 
-    // --- Calculations ---
-    const supplyBonus = configuredDivision ? calculateTotalSupplyBonus(configuredDivision, selectedFaction, getRegimentDefinition) : 0;
-    const totalImprovementsUsed = configuredDivision ? calculateImprovementPointsCost(configuredDivision, selectedFaction, getRegimentDefinition) : 0;
-    const improvementPointsLimit = (selectedDivisionDefinition?.improvement_points || 0) + supplyBonus;
+    const ruleBonuses = configuredDivision && selectedDivisionDefinition 
+        ? calculateRuleBonuses(configuredDivision, selectedDivisionDefinition, selectedFaction.units, getRegimentDefinition)
+        : { improvementPoints: 0, supply: 0 };
+
+    const supplyFromUnits = configuredDivision ? calculateTotalSupplyBonus(configuredDivision, selectedFaction, getRegimentDefinition) : 0;
+    const supplyBonus = supplyFromUnits + ruleBonuses.supply;
+
+    const totalImprovementsUsed = configuredDivision ? calculateImprovementPointsCost(configuredDivision, selectedFaction, getRegimentDefinition, improvements) : 0;
+    const improvementPointsLimit = (selectedDivisionDefinition?.improvement_points || 0) + supplyBonus + ruleBonuses.improvementPoints;
+    
     const remainingImprovementPoints = improvementPointsLimit - totalImprovementsUsed;
     
+    const validationErrors = (configuredDivision && selectedDivisionDefinition)
+        ? validateDivisionRules(configuredDivision, selectedDivisionDefinition, selectedFaction.units, getRegimentDefinition)
+        : [];
+
     const totalDivisionCost = configuredDivision 
-        ? calculateDivisionCost(configuredDivision, selectedFaction, getRegimentDefinition, calculateRegimentStats) 
+        ? calculateDivisionCost(configuredDivision, selectedFaction, getRegimentDefinition, calculateRegimentStats, improvements) 
         : (selectedDivisionDefinition?.base_cost || 0);
 
     const getEditingRegiment = () => {
@@ -127,12 +137,10 @@ function AppContent() {
         };
     };
 
-    // --- Render Loading/Error ---
     if (loading) return <div style={{ padding: 20 }}>Ładowanie danych frakcji...</div>;
     if (error) return <div style={{ padding: 20 }}>Błąd krytyczny: {error}</div>;
     if (!factions) return <div style={{ padding: 20 }}>Brak danych.</div>;
 
-    // --- Render Screens ---
     return (
         <div style={{ padding: 0 }}>
             {screen === SCREENS.LIST && (
@@ -146,51 +154,50 @@ function AppContent() {
             )}
 
             {screen === SCREENS.SELECTOR && selectedFaction && selectedDivisionDefinition && configuredDivision && (
-                <ErrorBoundary>
-                    <RegimentSelector
-                        faction={selectedFaction}
-                        divisionDefinition={selectedDivisionDefinition}
-                        configuredDivision={configuredDivision}
-                        setConfiguredDivision={setConfiguredDivision}
-                        onOpenRegimentEditor={openRegimentEditor}
-                        onBack={backToList}
-                        getRegimentDefinition={getRegimentDefinition}
-                        
-                        divisionBaseCost={selectedDivisionDefinition.base_cost || 0}
-                        remainingImprovementPoints={remainingImprovementPoints}
-                        improvementPointsLimit={improvementPointsLimit}
-                        totalDivisionCost={totalDivisionCost}
-                        
-                        additionalUnitsDefinitions={selectedDivisionDefinition?.additional_units || []}
-                        unitsMap={selectedFaction.units}
-                    />
-                </ErrorBoundary>
+                <RegimentSelector
+                    faction={selectedFaction}
+                    divisionDefinition={selectedDivisionDefinition}
+                    configuredDivision={configuredDivision}
+                    setConfiguredDivision={setConfiguredDivision}
+                    onOpenRegimentEditor={openRegimentEditor}
+                    onBack={backToList}
+                    getRegimentDefinition={getRegimentDefinition}
+                    
+                    divisionBaseCost={selectedDivisionDefinition.base_cost || 0}
+                    remainingImprovementPoints={remainingImprovementPoints}
+                    improvementPointsLimit={improvementPointsLimit}
+                    totalDivisionCost={totalDivisionCost}
+                    
+                    additionalUnitsDefinitions={selectedDivisionDefinition?.additional_units || []}
+                    unitsMap={selectedFaction.units}
+                    
+                    validationErrors={validationErrors}
+                />
             )}
 
             {screen === SCREENS.EDITOR && selectedFaction && configuredDivision && editingRegimentIndex !== null && (
-                <ErrorBoundary>
-                    <RegimentEditor
-                        faction={selectedFaction}
-                        regiment={getEditingRegiment()}
-                        onBack={backToSelector}
-                        configuredDivision={configuredDivision}
-                        setConfiguredDivision={setConfiguredDivision}
-                        regimentGroup={editingRegimentGroup}
-                        regimentIndex={editingRegimentIndex}
-                        
-                        // Passing math helpers with bound context
-                        calculateImprovementPointsCost={(div) => calculateImprovementPointsCost(div, selectedFaction, getRegimentDefinition)}
-                        calculateTotalSupplyBonus={(div) => calculateTotalSupplyBonus(div, selectedFaction, getRegimentDefinition)}
-                        remainingImprovementPoints={remainingImprovementPoints}
-                        unitsMap={selectedFaction.units}
-                    />
-                </ErrorBoundary>
+                <RegimentEditor
+                    faction={selectedFaction}
+                    regiment={getEditingRegiment()}
+                    onBack={backToSelector}
+                    configuredDivision={configuredDivision}
+                    setConfiguredDivision={setConfiguredDivision}
+                    regimentGroup={editingRegimentGroup}
+                    regimentIndex={editingRegimentIndex}
+                    
+                    calculateImprovementPointsCost={(div) => calculateImprovementPointsCost(div, selectedFaction, getRegimentDefinition, improvements)}
+                    calculateTotalSupplyBonus={(div) => calculateTotalSupplyBonus(div, selectedFaction, getRegimentDefinition)}
+                    // ZMIANA: Przekazujemy getRegimentDefinition, aby hook mógł liczyć zasady
+                    getRegimentDefinition={getRegimentDefinition}
+                    
+                    remainingImprovementPoints={remainingImprovementPoints}
+                    unitsMap={selectedFaction.units}
+                />
             )}
         </div>
     );
 }
 
-// --- APP WRAPPER (To inject Context) ---
 export default function App() {
     return (
         <ArmyDataProvider>
