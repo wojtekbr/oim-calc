@@ -238,5 +238,55 @@
     "rank": "gold",
     "is_cavalry": true,
     "has_lances": true
+  },
+  "ott_janissaries_egypt_m": {
+    "id": "ott_janissaries_egypt_m",
+    "name": "Janczarzy Egipscy M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_infantry": true
+  },
+  "ott_janissaries_egypt_s": {
+    "id": "ott_janissaries_egypt_s",
+    "name": "Janczarzy Egipscy S",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "silver",
+    "is_infantry": true
+  },
+  "ott_janissaries_5": {
+    "id": "ott_janissaries_5",
+    "name": "Janczarzy S",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "silver",
+    "is_infantry": true
+  },
+  "ott_janissaries_7": {
+    "id": "ott_janissaries_7",
+    "name": "Janczarzy M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_infantry": true
+  },
+  "ott_mamluk_s": {
+    "id": "ott_mamluk_s",
+    "name": "Mamelucy S",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "has_lances": true
+  },
+  "ott_mamluk_m": {
+    "id": "ott_mamluk_m",
+    "name": "Mamelucy M",
+    "cost": 11,
+    "improvement_cost": 3,
+    "rank": "gold",
+    "is_cavalry": true,
+    "has_lances": true
   }
 }

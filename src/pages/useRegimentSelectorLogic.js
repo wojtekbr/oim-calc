@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { calculateRegimentStats, calculateMainForceKey, validateVanguardCost, validateAlliedCost } from "../utils/armyMath"; // FIX: Import
+import { calculateRegimentStats, calculateMainForceKey, validateVanguardCost, validateAlliedCost } from "../utils/armyMath";
 import { IDS, GROUP_TYPES } from "../constants";
 import { useArmyData } from "../context/ArmyDataContext";
 import { checkSupportUnitRequirements } from "../utils/divisionRules";
@@ -16,7 +16,6 @@ export const useRegimentSelectorLogic = ({
   const [playerName, setPlayerName] = useState("");
   const [divisionCustomName, setDivisionCustomName] = useState("");
 
-  // ... (regimentsList, purchasedSlotsMap, unitsRulesMap - BEZ ZMIAN, skopiuj z poprzedniego pliku) ...
   const regimentsList = useMemo(() => {
     if (!configuredDivision) return [];
     const { vanguard, base, additional } = configuredDivision;
@@ -51,7 +50,6 @@ export const useRegimentSelectorLogic = ({
     return map;
   }, [additionalUnitsDefinitions]);
 
-  // ... (handleBuySupportUnit, handleRemoveSupportUnit, handleAssignSupportUnit - BEZ ZMIAN) ...
   const handleBuySupportUnit = (unitId, definitionIndex, remainingPoints) => {
     setConfiguredDivision(prev => {
         const currentSupportUnits = [...prev.supportUnits];
@@ -122,17 +120,16 @@ export const useRegimentSelectorLogic = ({
     });
   };
 
-  // --- ZMODYFIKOWANY HANDLER ZMIANY PUŁKU ---
   const handleRegimentChange = (groupKey, index, newRegimentId) => {
-    // 1. Symulacja
     const tempDivision = JSON.parse(JSON.stringify(configuredDivision));
     const groupArr = tempDivision[groupKey];
     
+    // Inicjalizujemy czysty konfig
     const newConfig = { 
         baseSelections: {}, 
         additionalSelections: {}, 
         additionalCustom: null,
-        additionalEnabled: false,
+        additionalEnabled: false, // DOMYŚLNIE FALSE
         optionalEnabled: {},
         optionalSelections: {},
         improvements: {},
@@ -141,15 +138,33 @@ export const useRegimentSelectorLogic = ({
     };
 
     const def = getRegimentDefinition(newRegimentId);
-    if (def && def.structure && def.structure.base) {
-         Object.entries(def.structure.base).forEach(([slotKey, options]) => {
-             if (slotKey === 'optional') return;
-             const pods = options;
-             newConfig.baseSelections[slotKey] = pods.map(pod => {
-                 const opts = Object.values(pod).map(u => u?.id).filter(Boolean);
-                 return opts.length > 0 ? opts[0] : null;
+    
+    if (def && def.structure) {
+        // 1. Inicjalizacja BASE (Auto-select first key)
+        if (def.structure.base) {
+            Object.entries(def.structure.base).forEach(([slotKey, pods]) => {
+                if (slotKey === 'optional') return;
+                newConfig.baseSelections[slotKey] = pods.map(pod => {
+                    const keys = Object.keys(pod);
+                    return keys.length > 0 ? keys[0] : null; 
+                });
+            });
+        }
+
+        // 2. Inicjalizacja ADDITIONAL (Auto-select first key)
+        if (def.structure.additional) {
+             Object.entries(def.structure.additional).forEach(([slotKey, pods]) => {
+                if (slotKey === 'optional') return;
+                
+                newConfig.additionalSelections[slotKey] = pods.map(pod => {
+                    const keys = Object.keys(pod);
+                    return keys.length > 0 ? keys[0] : null; 
+                });
              });
-         });
+             
+             // USUNIĘTO: newConfig.additionalEnabled = true;
+             // Teraz pozostaje false, czekając na kliknięcie checkboxa przez usera.
+        }
     }
 
     groupArr[index] = {
@@ -165,7 +180,7 @@ export const useRegimentSelectorLogic = ({
         }
     }
 
-    // 2. Walidacja Supportu
+    // Walidacja Supportu
     const unitsToRemoveIndices = [];
     const unitsToRemoveNames = [];
 
@@ -196,21 +211,18 @@ export const useRegimentSelectorLogic = ({
         if (!confirmed) return;
     }
 
-    // 3. Walidacja Vanguard Cost
     const vanguardCheck = validateVanguardCost(tempDivision, unitsMap, faction, getRegimentDefinition, improvements);
     if (!vanguardCheck.isValid) {
         alert(vanguardCheck.message);
         return;
     }
 
-    // FIX: 4. Walidacja Allied Cost
     const alliedCheck = validateAlliedCost(tempDivision, unitsMap, faction, getRegimentDefinition, improvements);
     if (!alliedCheck.isValid) {
         alert(alliedCheck.message);
         return;
     }
 
-    // 5. Update
     setConfiguredDivision((prev) => {
       const group = prev[groupKey];
       const newGroup = [...group];
@@ -220,52 +232,19 @@ export const useRegimentSelectorLogic = ({
           newSupportUnits = newSupportUnits.filter((_, idx) => !unitsToRemoveIndices.includes(idx));
       }
 
-      const config = { 
-          baseSelections: {}, 
-          additionalSelections: {}, 
-          additionalCustom: null,
-          additionalEnabled: false,
-          optionalEnabled: {},
-          optionalSelections: {},
-          improvements: {},
-          regimentImprovements: [],
-          isVanguard: false 
-      };
-      
-      const def = getRegimentDefinition(newRegimentId);
-      if (def && def.structure && def.structure.base) {
-         Object.entries(def.structure.base).forEach(([slotKey, options]) => {
-             if (slotKey === 'optional') return;
-             const pods = options;
-             config.baseSelections[slotKey] = pods.map(pod => {
-                 const opts = Object.values(pod).map(u => u?.id).filter(Boolean);
-                 return opts.length > 0 ? opts[0] : null;
-             });
-         });
-      }
-
       newGroup[index] = {
         ...newGroup[index],
         id: newRegimentId,
         customName: "",
-        config: config,
+        config: newConfig,
       };
 
       const positionKey = `${groupKey}/${index}`;
-      
-      if (newRegimentId === IDS.NONE) {
-        newSupportUnits.forEach((su, i) => {
-          if (su.assignedTo?.positionKey === positionKey) {
-            newSupportUnits[i] = { ...su, assignedTo: null };
-          }
-        });
-      } else {
-           newSupportUnits.forEach((su, i) => {
-            if (su.assignedTo?.positionKey === positionKey) {
-              newSupportUnits[i] = { ...su, assignedTo: null };
-            }
-          });
-      }
+      newSupportUnits.forEach((su, i) => {
+        if (su.assignedTo?.positionKey === positionKey) {
+          newSupportUnits[i] = { ...su, assignedTo: null };
+        }
+      });
 
       if (groupKey === GROUP_TYPES.ADDITIONAL) {
         for (let i = index + 1; i < newGroup.length; i++) {

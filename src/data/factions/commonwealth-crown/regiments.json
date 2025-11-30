@@ -18,8 +18,7 @@
       },
       {
         "id": "additional_pistol",
-        "cost": -1,
-        "max_amount": null
+        "cost": -1
       },
       {
         "id": "independent",
@@ -29,14 +28,71 @@
     ],
     "structure": {
       "base": {
-        "general": ["cro_colonel"],
-        "unit1": ["cro_cossack_style_m"],
-        "unit2": ["cro_cossack_style_m", "cro_pancerni_s", "cro_pancerni_m", "cro_cosasck_style_rohatyna_s", "cro_cosasck_style_rohatyna_m"],
-        "optional": ["cro_hussars_s"]
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_m"]
+            },
+            "unit2": {
+              "units": ["cro_pancerni_s"]
+            },
+            "unit3": {
+              "units": ["cro_pancerni_m"]
+            },
+            "unit4": {
+              "units": ["cro_cosasck_style_rohatyna_s"]
+            },
+            "unit5": {
+              "units": ["cro_cosasck_style_rohatyna_m"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["cro_hussars_s"]
+            }
+          }
+        ]
       },
       "additional": {
-        "general": "cro_rotmistrz",
-        "unit3": ["cro_cossack_style_s", "cro_cossack_style_m", "cro_pancerni_rohatyna_s", "cro_pancerni_rohatyna_m"]
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_rotmistrz"]
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_s"]
+            },
+            "unit2": {
+              "units": ["cro_cossack_style_m"]
+            },
+            "unit3": {
+              "units": ["cro_pancerni_rohatyna_s"]
+            },
+            "unit4": {
+              "units": ["cro_pancerni_rohatyna_m"]
+            }
+          }
+        ]
       }
     }
   },
@@ -60,8 +116,7 @@
       },
       {
         "id": "additional_pistol",
-        "cost": -1,
-        "max_amount": null
+        "cost": -1
       },
       {
         "id": "independent",
@@ -71,15 +126,590 @@
     ],
     "structure": {
       "base": {
-        "general": ["cro_colonel"],
-        "unit1": ["cro_cossack_style_vet_m"],
-        "unit2": ["cro_cossack_style_vet_m", "cro_pancerni_vet_s", "cro_pancerni_vet_m", "cro_cosasck_style_rohatyna_vet_s", "cro_cosasck_style_rohatyna_vet_m"],
-        "optional": ["cro_hussars_s"]
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_vet_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_vet_m"]
+            },
+            "unit2": {
+              "units": ["cro_pancerni_vet_s"]
+            },
+            "unit3": {
+              "units": ["cro_pancerni_vet_m"]
+            },
+            "unit4": {
+              "units": ["cro_cosasck_style_rohatyna_vet_s"]
+            },
+            "unit5": {
+              "units": ["cro_cosasck_style_rohatyna_vet_m"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["cro_hussars_s"]
+            }
+          }
+        ]
       },
       "additional": {
-        "general": "cro_rotmistrz",
-        "unit3": ["cro_cossack_style_s", "cro_cossack_style_m", "cro_pancerni_rohatyna_s", "cro_pancerni_rohatyna_m"],
-        "optional": ["cro_hussars_m"]
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_rotmistrz"]
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_s"]
+            },
+            "unit2": {
+              "units": ["cro_cossack_style_m"]
+            },
+            "unit3": {
+              "units": ["cro_pancerni_rohatyna_s"]
+            },
+            "unit4": {
+              "units": ["cro_pancerni_rohatyna_m"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["cro_hussars_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "cro_light_cavalry": {
+    "name": "Pułk Jazdy Lekkiej Koronnej",
+    "base_cost": 0,
+    "recon": 2,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "cost": 1,
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol",
+        "cost": -1
+      },
+      {
+        "id": "independent",
+        "cost": "triple",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_wallachian_s"]
+            },
+            "unit2": {
+              "units": ["cro_wallachian_m"]
+            },
+            "unit3": {
+              "units": ["cro_tatar_style_s"]
+            },
+            "unit4": {
+              "units": ["cro_tatar_style_m"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["cro_pancerni_light_reg_s"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_rotmistrz"]
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_s"]
+            },
+            "unit2": {
+              "units": ["cro_cossack_style_m"]
+            }
+          }
+        ],
+        "additional2": [
+          {
+            "unit1": {
+              "units": ["cro_wallachian_s"]
+            },
+            "unit2": {
+              "units": ["cro_wallachian_m"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["cro_pancerni_light_reg_s"]
+            },
+            "unit2": {
+              "units": ["cro_pancerni_light_reg_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "cro_levy_of_nobility": {
+    "name": "Pospolite Ruszenie Koronne",
+    "base_cost": 2,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "special_rules": [
+      "posluch",
+      "pospolitacy",
+      "lanowa_makes_mixed",
+      "artillery_req_lanowa_m",
+      "hus_no_lanowa",
+      "hus_m_req_pospolite_l_x2"
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_pistol",
+        "cost": -1,
+        "improvement_limitations": ["cro_piechota_lanowa_s", "cro_piechota_lanowa_m", "cro_light_artillery"]
+      },
+      {
+        "id": "additional_ammo",
+        "cost": 1,
+        "max_amount": 1,
+        "units_allowed": ["cro_piechota_lanowa_s", "cro_piechota_lanowa_m", "cro_light_artillery"]
+      },
+      {
+        "id": "kalkans",
+        "cost": 1,
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": 1
+      },
+      {
+        "id": "independent",
+        "cost": "triple",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_kasztelan"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_pospolite_s"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_pospolite_s"]
+            },
+            "unit2": {
+              "units": ["cro_pospolite_m"]
+            },
+            "unit3": {
+              "units": ["cro_piechota_lanowa_s"]
+            },
+            "unit4": {
+              "units": ["cro_piechota_lanowa_m"]
+            }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": {
+              "units": ["cro_pospolite_s"]
+            },
+            "unit2": {
+              "units": ["cro_pospolite_m"]
+            },
+            "unit3": {
+              "units": ["cro_piechota_lanowa_s"]
+            },
+            "unit4": {
+              "units": ["cro_piechota_lanowa_m"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["cro_light_artillery"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_pospolite_s"]
+            },
+            "unit2": {
+              "units": ["cro_pospolite_m"]
+            },
+            "unit3": {
+              "units": ["cro_pospolite_hus_s"]
+            },
+            "unit4": {
+              "units": ["cro_pospolite_hus_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "cro_polish_dragoons": {
+    "name": "Regiment Polskich Dragonów",
+    "base_cost": 0,
+    "recon": 1,
+    "awareness": 5,
+    "activations": 2,
+    "regiment_improvements": [
+      {
+        "id": "mercenary_dragoons",
+        "cost": 3,
+        "max_amount": 1
+      }
+    ],
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_ammo",
+        "cost": 1,
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_oberszter"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_polish_dragoons_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_polish_dragoons_s"]
+            },
+            "unit2": {
+              "units": ["cro_polish_dragoons_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_polish_dragoons_s"]
+            },
+            "unit2": {
+              "units": ["cro_polish_dragoons_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "cro_volunteers": {
+    "name": "Partia Wolontarska",
+    "base_cost": 0,
+    "recon": 1,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol",
+        "cost": -1
+      },
+      {
+        "id": "independent",
+        "cost": "triple",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_volunteers_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_volunteers_s"]
+            },
+            "unit2": {
+              "units": ["cro_volunteers_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_volunteers_s"]
+            },
+            "unit2": {
+              "units": ["cro_volunteers_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "mrc_infantry": {
+    "name": "Regiment Piechoty Najemnej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "regiment_improvements": [
+      {
+        "id": "mercenary_dragoons",
+        "cost": -3,
+        "max_amount": 1
+      }
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo",
+        "cost": 1,
+        "max_amount": 2
+      },
+      {
+        "id": "regimental_guns",
+        "cost": 1,
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_oberszter"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_musketeers_s"]
+            },
+            "unit2": {
+              "units": ["cro_musketeers_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_musketeers_m"]
+            },
+            "unit2": {
+              "units": ["cro_dragoons_mercenary_s"]
+            },
+            "unit3": {
+              "units": ["cro_dragoons_mercenary_m"]
+            },
+            "unit4": {
+              "units": ["cro_infantry_mercenary"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_major"]
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_musketeers_m"]
+            },
+            "unit2": {
+              "units": ["cro_infantry_mercenary_armored"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "mrc_reiters": {
+    "name": "Regiment Rajtarów",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol",
+        "cost": -1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_oberszter"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_reiters_mercenary_s"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_reiters_mercenary_s"]
+            },
+            "unit2": {
+              "units": ["cro_reiters_mercenary_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_major"]
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_reiters_mercenary_s"]
+            },
+            "unit2": {
+              "units": ["cro_reiters_mercenary_m"]
+            }
+          }
+        ],
+        "additional2": [
+          {
+            "unit1": {
+              "units": ["cro_reiters_mercenary_m"]
+            },
+            "unit2": {
+              "units": ["cro_reiters_mercenary_armored"]
+            }
+          }
+        ]
       }
     }
   }

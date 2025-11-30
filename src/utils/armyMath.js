@@ -49,6 +49,7 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
     return true;
 };
 
+// --- LOGIKA ZBIERANIA JEDNOSTEK (Zaktualizowana o cost_override i extra_cost) ---
 export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
     const units = [];
     if (!regimentDefinition) return units;
@@ -65,33 +66,88 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
                 if (!optEnabled?.[mapKey]) return;
                 
                 const pods = structureGroup.optional || [];
-                const selectedIds = optSelections?.[mapKey] || [];
+                const selectedKeys = optSelections?.[mapKey] || [];
 
                 pods.forEach((pod, idx) => {
-                     let unitId = selectedIds[idx];
-                     if (unitId === undefined) {
-                         const opts = Object.values(pod).map(u => u?.id).filter(Boolean);
-                         if (opts.length === 1) unitId = opts[0];
+                     let choiceKey = selectedKeys[idx];
+                     if (choiceKey === undefined || choiceKey === null) {
+                         const keys = Object.keys(pod);
+                         if (keys.length === 1) choiceKey = keys[0];
                      }
-                     if (unitId && unitId !== IDS.NONE) {
-                         units.push({ key: `${type}/optional/${idx}`, unitId });
+
+                     if (choiceKey && pod[choiceKey]) {
+                         const choiceDef = pod[choiceKey];
+                         const unitIds = choiceDef.units || (choiceDef.id ? [choiceDef.id] : []);
+                         
+                         // Pobieramy override'y kosztów z definicji opcji
+                         const costOverride = choiceDef.cost_override;
+                         const extraCost = choiceDef.extra_cost || 0;
+
+                         unitIds.forEach((uid, uIdx) => {
+                             if (uid && uid !== IDS.NONE) {
+                                 let appliedCostOverride = undefined;
+                                 let appliedExtraCost = 0;
+
+                                 // Jeśli jest override, pierwszy element pakietu przejmuje koszt, reszta ma 0
+                                 if (costOverride !== undefined) {
+                                     appliedCostOverride = (uIdx === 0) ? costOverride : 0;
+                                 }
+                                 
+                                 // Extra cost doliczamy tylko do pierwszego elementu
+                                 if (extraCost > 0 && uIdx === 0) {
+                                     appliedExtraCost = extraCost;
+                                 }
+
+                                 units.push({ 
+                                     key: `${type}/optional/${idx}/${uIdx}`, 
+                                     unitId: uid,
+                                     costOverride: appliedCostOverride,
+                                     extraCost: appliedExtraCost
+                                 });
+                             }
+                         });
                      }
                 });
                 return;
             }
 
             const pods = structureGroup[groupKey] || [];
-            const selectedIds = selections?.[groupKey] || [];
+            const selectedKeys = selections?.[groupKey] || [];
 
             pods.forEach((pod, idx) => {
-                let unitId = selectedIds[idx];
-                if (unitId === undefined) {
-                     const opts = Object.values(pod).map(u => u?.id).filter(Boolean);
-                     if (opts.length > 0) unitId = opts[0]; 
+                let choiceKey = selectedKeys[idx];
+                if (choiceKey === undefined || choiceKey === null) {
+                     const keys = Object.keys(pod);
+                     if (keys.length === 1) choiceKey = keys[0]; 
                 }
 
-                if (unitId && unitId !== IDS.NONE) {
-                    units.push({ key: `${type}/${groupKey}/${idx}`, unitId });
+                if (choiceKey && pod[choiceKey]) {
+                    const choiceDef = pod[choiceKey];
+                    const unitIds = choiceDef.units || (choiceDef.id ? [choiceDef.id] : []);
+                    
+                    const costOverride = choiceDef.cost_override;
+                    const extraCost = choiceDef.extra_cost || 0;
+
+                    unitIds.forEach((uid, uIdx) => {
+                        if (uid && uid !== IDS.NONE) {
+                            let appliedCostOverride = undefined;
+                            let appliedExtraCost = 0;
+
+                            if (costOverride !== undefined) {
+                                appliedCostOverride = (uIdx === 0) ? costOverride : 0;
+                            }
+                            if (extraCost > 0 && uIdx === 0) {
+                                appliedExtraCost = extraCost;
+                            }
+
+                            units.push({ 
+                                key: `${type}/${groupKey}/${idx}/${uIdx}`, 
+                                unitId: uid,
+                                costOverride: appliedCostOverride,
+                                extraCost: appliedExtraCost
+                            });
+                        }
+                    });
                 }
             });
         });
@@ -105,12 +161,15 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
     if (regimentConfig.additionalCustom) {
          const customDef = structure.additional?.unit_custom_cost;
          const slotName = customDef?.[0]?.depends_on || "custom";
+         // Custom slot zazwyczaj ma zdefiniowany koszt w 'unit_custom_cost' w JSONIE dodatkowym
+         // Obsługa tego jest w calculateRegimentStats przez 'customCostMap'
          units.push({ key: `additional/${slotName}_custom`, unitId: regimentConfig.additionalCustom, isCustom: true });
     }
 
     return units;
 };
 
+// --- LOGIKA KALKULACJI KOSZTÓW (Zaktualizowana) ---
 export const calculateRegimentStats = (regimentConfig, regimentId, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements) => {
     const stats = {
         cost: 0,
@@ -192,13 +251,31 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         }
     };
 
-    activeUnits.forEach(({ key: positionKey, unitId, isCustom }) => {
+    activeUnits.forEach((entry) => {
+        const { key: positionKey, unitId, isCustom, costOverride, extraCost } = entry;
+        
         if (!unitId || unitId === IDS.NONE) return;
 
-        let unitBaseCost = unitsMap[unitId]?.cost || 0;
-        if (isCustom && customCostMap[unitId] !== undefined) {
+        let unitBaseCost = 0;
+
+        // 1. Sprawdzamy Override (ma priorytet nad standardowym kosztem)
+        if (costOverride !== undefined) {
+            unitBaseCost = costOverride;
+        } 
+        // 2. Jeśli Custom Slot (Poziom II)
+        else if (isCustom && customCostMap[unitId] !== undefined) {
             unitBaseCost = customCostMap[unitId];
+        } 
+        // 3. Standardowy koszt z definicji jednostki
+        else {
+            unitBaseCost = unitsMap[unitId]?.cost || 0;
         }
+
+        // 4. Dodajemy Extra Cost (jeśli zdefiniowany)
+        if (extraCost) {
+            unitBaseCost += extraCost;
+        }
+
         stats.cost += unitBaseCost;
 
         addUnitStats(unitId, positionKey);
@@ -446,7 +523,6 @@ export const calculateMainForceKey = (configuredDivision, unitsMap, selectedFact
         return !selectedFaction.regiments[regId];
     };
 
-    // 1. Kandydaci na SG: tylko base/additional, NIE sojusznicy
     const eligibleRegiments = [
         ...(configuredDivision.base || []).map(r => ({ ...r, key: `${GROUP_TYPES.BASE}/${r.index}` })),
         ...(configuredDivision.additional || []).map(r => ({ ...r, key: `${GROUP_TYPES.ADDITIONAL}/${r.index}` }))
@@ -475,7 +551,6 @@ export const calculateMainForceKey = (configuredDivision, unitsMap, selectedFact
     return candidates.length > 0 ? candidates[0].key : null;
 };
 
-// ZMIANA: unitsMap dla kosztów, selectedFaction dla mainForce
 export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
     
@@ -517,9 +592,7 @@ export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, 
     return { isValid: true };
 };
 
-// --- NOWA FUNKCJA: Walidacja kosztu pułków sojuszniczych ---
 export const validateAlliedCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
-    // 1. Oblicz koszt Sił Głównych
     const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
     
     let mainForceCost = 0;
@@ -535,13 +608,11 @@ export const validateAlliedCost = (divisionConfig, unitsMap, selectedFaction, ge
         }
     }
 
-    // Helper: Czy pułk jest sojuszniczy?
     const isAllied = (regId) => {
         if (!selectedFaction || !selectedFaction.regiments) return false;
         return !selectedFaction.regiments[regId];
     };
 
-    // 2. Sprawdź wszystkie pułki sojusznicze
     const allRegiments = [
         ...(divisionConfig.vanguard || []),
         ...(divisionConfig.base || []),

@@ -5,7 +5,7 @@
     "recon": 0,
     "awareness": 4,
     "activations": 2,
-    "type": "cavalry",
+    "special_rules": ["allah_allah", "z_calego_imperium"],
     "unit_improvements": [
       {
         "id": "veterans"
@@ -19,27 +19,27 @@
         "general": [
           {
             "unit1": {
-              "id": "ott_sandzakbej"
+              "units": ["ott_sandzakbej"]
             }
           }
         ],
         "base1": [
           {
             "unit1": {
-              "id": "ott_sipahi_m"
+              "units": ["ott_sipahi_m"]
             }
           }
         ],
         "base2": [
           {
             "unit1": {
-              "id": "ott_sipahi_lances_m"
+              "units": ["ott_sipahi_lances_m"]
             },
             "unit2": {
-              "id": "ott_sipahi_m"
+              "units": ["ott_sipahi_m"]
             },
             "unit3": {
-              "id": "ott_sipahi_l"
+              "units": ["ott_sipahi_l"]
             }
           }
         ]
@@ -48,10 +48,10 @@
         "additional1": [
           {
             "unit1": {
-              "id": "ott_sipahi_m"
+              "units": ["ott_sipahi_m"]
             },
             "unit2": {
-              "id": "ott_sipahi_l"
+              "units": ["ott_sipahi_l"]
             }
           }
         ]
@@ -65,7 +65,6 @@
     "recon": 0,
     "awareness": 4,
     "activations": 2,
-    "type": "cavalry",
     "unit_improvements": [
       {
         "id": "veterans"
@@ -79,24 +78,24 @@
         "general": [
           {
             "unit1": {
-              "id": "ott_sandzakbej"
+              "units": ["ott_sandzakbej"]
             }
           }
         ],
         "base1": [
           {
             "unit1": {
-              "id": "ott_sipahi_m"
+              "units": ["ott_sipahi_m"]
             }
           }
         ],
         "base2": [
           {
             "unit1": {
-              "id": "ott_sipahi_lances_m"
+              "units": ["ott_sipahi_lances_m"]
             },
             "unit2": {
-              "id": "ott_sipahi_m"
+              "units": ["ott_sipahi_m"]
             }
           }
         ]
@@ -105,7 +104,7 @@
         "additional1": [
           {
             "unit1": {
-              "id": "ott_sipahi_m"
+              "units": ["ott_sipahi_m"]
             }
           }
         ]
@@ -119,7 +118,7 @@
     "recon": 0,
     "awareness": 4,
     "activations": 2,
-    "type": "cavalry",
+    "special_rules": ["allah_allah"],
     "unit_improvements": [
       {
         "id": "veterans"
@@ -133,21 +132,21 @@
         "general": [
           {
             "unit1": {
-              "id": "ott_sandzakbej"
+              "units": ["ott_sandzakbej"]
             }
           }
         ],
         "base1": [
           {
             "unit1": {
-              "id": "ott_sipahi_lances_m"
+              "units": ["ott_sipahi_lances_m"]
             }
           }
         ],
         "base2": [
           {
             "unit1": {
-              "id": "ott_sipahi_lances_m"
+              "units": ["ott_sipahi_lances_m"]
             }
           }
         ]
@@ -156,7 +155,7 @@
         "additional1": [
           {
             "unit1": {
-              "id": "ott_sipahi_lances_m"
+              "units": ["ott_sipahi_lances_m"]
             }
           }
         ]
@@ -196,59 +195,59 @@
         "general": [
           {
             "unit1": {
-              "id": "ott_aga"
+              "units": ["ott_aga"]
             }
           }
         ],
         "base1": [
           {
             "unit1": {
-              "id": "ott_beszli_s"
+              "units": ["ott_beszli_s"]
             },
             "unit2": {
-              "id": "ott_beszli_m"
+              "units": ["ott_beszli_m"]
             }
           }
         ],
         "base2": [
           {
             "unit1": {
-              "id": "ott_beszli_s"
+              "units": ["ott_beszli_s"]
             },
             "unit2": {
-              "id": "ott_beszli_m"
+              "units": ["ott_beszli_m"]
             },
             "unit3": {
-              "id": "ott_gonullu_s"
+              "units": ["ott_gonullu_s"]
             },
             "unit4": {
-              "id": "ott_gonullu_m"
+              "units": ["ott_gonullu_m"]
             }
           }
         ],
         "base3": [
           {
             "unit1": {
-              "id": "ott_beszli_s"
+              "units": ["ott_beszli_s"]
             },
             "unit2": {
-              "id": "ott_beszli_m"
+              "units": ["ott_beszli_m"]
             },
             "unit3": {
-              "id": "ott_gonullu_s"
+              "units": ["ott_gonullu_s"]
             },
             "unit4": {
-              "id": "ott_gonullu_m"
+              "units": ["ott_gonullu_m"]
             },
             "unit5": {
-              "id": "ott_segbani_m"
+              "units": ["ott_segbani_m"]
             }
           }
         ],
         "optional": [
           {
             "unit1": {
-              "id": "ott_deli_s"
+              "units": ["ott_deli_s"]
             }
           }
         ]
@@ -257,20 +256,20 @@
         "additional1": [
           {
             "unit1": {
-              "id": "ott_segbani_m"
+              "units": ["ott_segbani_m"]
             },
             "unit2": {
-              "id": "ott_azab_m"
+              "units": ["ott_azab_m"]
             },
             "unit3": {
-              "id": "ott_azab_l"
+              "units": ["ott_azab_l"]
             }
           }
         ],
         "optional": [
           {
             "unit1": {
-              "id": "ott_deli_m"
+              "units": ["ott_deli_m"]
             }
           }
         ]
@@ -280,24 +279,45 @@
 
   "ott_janissary": {
     "name": "Pułk Janczarów",
-    "base_cost": 5,
+    "base_cost": 3,
     "recon": 0,
     "awareness": 3,
     "activations": 3,
+    "special_rules": [
+      "allah_allah",
+      "aga_is_dizbar",
+      "kethuda_is_aga"
+    ],
     "regiment_improvements": [
       {
-        "id": "serdengetci_contract"
-      },
-      {
-        "id": "elite_janissaries"
+        "id": "elite_janissary_regiment_rule",
+        "army_point_cost": 3,
+        "cost": -3
       }
     ],
     "unit_improvements": [
       {
-        "id": "veterans"
+        "id": "veterans",
+        "cost": "double"
       },
       {
-        "id": "additional_ammo"
+        "id": "additional_ammo",
+        "cost": 1
+      },
+      {
+        "id": "serdengetci_contract",
+        "cost": -1,
+        "units_allowed": [
+          "ott_janissaries_s",
+          "ott_janissaries_m",
+          "ott_janissaries_5",
+          "ott_janissaries_7"
+        ]
+      },
+      {
+        "id": "regimental_guns",
+        "cost": 1,
+        "max_amount": 2
       }
     ],
     "structure": {
@@ -305,49 +325,41 @@
         "general": [
           {
             "unit1": {
-              "id": "ott_aga"
+              "units": ["ott_aga"]
             }
           }
         ],
         "base1": [
           {
             "unit1": {
-              "id": "ott_janissaries_m"
+              "units": ["ott_janissaries_m"]
             }
           }
         ],
         "base2": [
           {
             "unit1": {
-              "id": "ott_janissaries_s"
+              "units": ["ott_janissaries_s"]
             },
             "unit2": {
-              "id": "ott_janissaries_m"
+              "units": ["ott_janissaries_m"]
             }
           }
         ],
         "base3": [
           {
             "unit1": {
-              "id": "ott_janissaries_s"
+              "units": ["ott_janissaries_s"]
             },
             "unit2": {
-              "id": "ott_janissaries_m"
+              "units": ["ott_janissaries_m"]
             }
           }
         ],
         "optional": [
           {
             "unit1": {
-              "id": "ott_mehter"
-            },
-            "unit2": {
-              "id": "ott_aga"
-            }
-          },
-          {
-            "unit1": {
-              "id": "ott_light_art_s"
+              "units": ["ott_mehter"]
             }
           }
         ]
@@ -356,37 +368,247 @@
         "general": [
           {
             "unit1": {
-              "id": "ott_kethuda"
+              "units": ["ott_kethuda"]
             }
           }
         ],
         "additional1": [
           {
             "unit1": {
-              "id": "ott_janissaries_s"
+              "units": ["ott_janissaries_s"]
             },
             "unit2": {
-              "id": "ott_janissaries_m"
+              "units": ["ott_janissaries_m"]
             }
-          },
+          }
+        ],
+        "additional2": [
           {
             "unit1": {
-              "id": "ott_janissaries_s"
+              "units": ["ott_janissaries_5"]
             },
             "unit2": {
-              "id": "ott_janissaries_m"
+              "units": ["ott_janissaries_7"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "ott_sipahi_kapikulu": {
+    "name": "Sandżak Kapikularny",
+    "base_cost": 8,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "special_rules": [
+      "allah_allah",
+      "sipahi_better_equipment"
+    ],
+    "unit_improvements": [],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["ott_sandzakbej"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["ott_sipahi_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["ott_sipahi_guards_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["ott_aga"]
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["ott_sipahi_guards_m"]
+            },
+            "unit2": {
+              "units": ["ott_silahdars_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "ott_janissary_egypt": {
+    "name": "Pułk Janczarów Egipskich",
+    "base_cost": 3,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 3,
+    "special_rules": [
+      "allah_allah",
+      "aga_is_dizbar",
+      "kethuda_is_aga"
+    ],
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "cost": "double"
+      },
+      {
+        "id": "additional_ammo",
+        "cost": 1
+      },
+      {
+        "id": "regimental_guns",
+        "cost": 1,
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["ott_aga"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["ott_janissaries_egypt_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["ott_janissaries_egypt_s"]
+            },
+            "unit2": {
+              "units": ["ott_janissaries_egypt_m"]
+            }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": {
+              "units": ["ott_janissaries_egypt_s"]
+            },
+            "unit2": {
+              "units": ["ott_janissaries_egypt_m"]
             }
           }
         ],
         "optional": [
           {
             "unit1": {
-              "id": "ott_mehter"
+              "units": ["ott_mehter"]
             }
-          },
+          }
+        ]
+      },
+      "additional": {
+        "general": [
           {
             "unit1": {
-              "id": "ott_light_art_m"
+              "units": ["ott_kethuda"]
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["ott_janissaries_egypt_s"]
+            },
+            "unit2": {
+              "units": ["ott_janissaries_egypt_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "ott_sipahi_anatolia": {
+    "name": "Sandżak z ejaletów Anatolijskich",
+    "base_cost": 4,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "special_rules": [
+      "allah_allah",
+      "z_calego_imperium"
+    ],
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "cost": "double"
+      },
+      {
+        "id": "javelin",
+        "cost": -1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["ott_sandzakbej"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["ott_sipahi_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["ott_sipahi_m"]
+            },
+            "unit2": {
+              "units": ["ott_sipahi_l"]
+            },
+            "unit3": {
+              "units": ["ott_mamluk_s"]
+            },
+            "unit4": {
+              "units": ["ott_mamluk_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["ott_sipahi_m"]
+            },
+            "unit2": {
+              "units": ["ott_sipahi_l"]
+            },
+            "unit3": {
+              "units": ["ott_mamluk_s"]
+            },
+            "unit4": {
+              "units": ["ott_mamluk_m"]
             }
           }
         ]

@@ -14,32 +14,42 @@ import { calculateRuleBonuses, validateDivisionRules } from "./utils/divisionRul
 
 const createDefaultRegiments = (divisionDefinition, getRegimentDefinition) => {
     const createRegimentWithDefaults = (group, index, regimentId) => {
-        // Inicjalizujemy pełną strukturę konfiguracyjną
         const config = { 
             baseSelections: {}, 
             additionalSelections: {}, 
             additionalCustom: null,
-            additionalEnabled: false,
+            additionalEnabled: false, 
             optionalEnabled: {},
             optionalSelections: {},
             improvements: {},
             regimentImprovements: [],
-            isVanguard: false // Flaga legacy, ale warto trzymać
+            isVanguard: false 
         };
         
         const def = getRegimentDefinition(regimentId);
-        if (def && def.structure && def.structure.base) {
-            Object.entries(def.structure.base).forEach(([groupKey, pods]) => {
-                // Ignorujemy grupy opcjonalne przy domyślnym wyborze
-                if (groupKey === 'optional') return;
-
-                // Dla każdej grupy tworzymy tablicę wyborów (domyślnie pierwsza opcja)
-                config.baseSelections[groupKey] = pods.map(pod => {
-                    const options = Object.values(pod).map(u => u?.id).filter(Boolean);
-                    return options.length > 0 ? options[0] : null;
+        
+        if (def && def.structure) {
+            if (def.structure.base) {
+                Object.entries(def.structure.base).forEach(([groupKey, pods]) => {
+                    if (groupKey === 'optional') return;
+                    config.baseSelections[groupKey] = pods.map(pod => {
+                        const optionKeys = Object.keys(pod);
+                        return optionKeys.length > 0 ? optionKeys[0] : null;
+                    });
                 });
-            });
+            }
+
+            if (def.structure.additional) {
+                Object.entries(def.structure.additional).forEach(([groupKey, pods]) => {
+                    if (groupKey === 'optional') return;
+                    config.additionalSelections[groupKey] = pods.map(pod => {
+                        const optionKeys = Object.keys(pod);
+                        return optionKeys.length > 0 ? optionKeys[0] : null;
+                    });
+                });
+            }
         }
+        
         return { group, index, id: regimentId, customName: "", config: config };
     };
 
@@ -74,7 +84,8 @@ const createDefaultRegiments = (divisionDefinition, getRegimentDefinition) => {
 };
 
 function AppContent() {
-    const { factions, loading, error, improvements, globalUnits, getRegimentDefinition } = useArmyData();
+    // NOWE: Pobieramy regimentRules z kontekstu
+    const { factions, loading, error, improvements, globalUnits, getRegimentDefinition, regimentRules } = useArmyData();
 
     const [screen, setScreen] = useState(SCREENS.LIST);
     const [selectedFactionKey, setSelectedFactionKey] = useState(null);
@@ -87,7 +98,6 @@ function AppContent() {
     const selectedFaction = selectedFactionKey ? factions?.[selectedFactionKey] : null;
     const selectedDivisionDefinition = selectedFaction && selectedDivisionKey ? selectedFaction.divisions[selectedDivisionKey] : null;
     
-    // Używamy globalnej mapy jednostek
     const unitsMap = globalUnits;
 
     useEffect(() => {
@@ -121,8 +131,6 @@ function AppContent() {
         setSelectedDivisionKey(null);
         setConfiguredDivision(null);
     };
-
-    // --- CALCULATIONS ---
 
     const ruleBonuses = configuredDivision && selectedDivisionDefinition 
         ? calculateRuleBonuses(configuredDivision, selectedDivisionDefinition, unitsMap, getRegimentDefinition)
@@ -199,7 +207,7 @@ function AppContent() {
 
             {screen === SCREENS.EDITOR && selectedFaction && configuredDivision && editingRegimentIndex !== null && (
                 <RegimentEditor
-                    faction={selectedFaction} // Przekazujemy, bo potrzebne do walidacji sojuszników
+                    faction={selectedFaction} 
                     regiment={getEditingRegiment()}
                     onBack={backToSelector}
                     configuredDivision={configuredDivision}
@@ -213,6 +221,8 @@ function AppContent() {
                     
                     remainingImprovementPoints={remainingImprovementPoints}
                     unitsMap={unitsMap}
+                    
+                    regimentRules={regimentRules} // NOWE: Przekazujemy zasady
                 />
             )}
         </div>

@@ -318,3 +318,35 @@
 }
 .impPoints.ok { color: #1b7e32; }
 .impPoints.error { color: #d32f2f; }
+
+.rulesList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ruleItem {
+  background-color: #f9f9f9;
+  border-left: 3px solid #0077ff;
+  padding: 10px;
+  border-radius: 0 6px 6px 0;
+}
+
+.ruleTitle {
+  font-weight: 700;
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.ruleDesc {
+  font-size: 12px;
+  color: #555;
+  line-height: 1.4;
+}
+
+.noRules {
+  font-size: 12px;
+  color: #999;
+  font-style: italic;
+}

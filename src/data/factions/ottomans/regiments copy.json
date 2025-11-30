@@ -1,0 +1,396 @@
+{
+  "ott_sipahi_europ": {
+    "name": "Sandżak sipahów lennych z ejaletów europejskich",
+    "base_cost": 4,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "type": "cavalry",
+    "unit_improvements": [
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "javelin"
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "id": "ott_sandzakbej"
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_m"
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_lances_m"
+            },
+            "unit2": {
+              "id": "ott_sipahi_m"
+            },
+            "unit3": {
+              "id": "ott_sipahi_l"
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_m"
+            },
+            "unit2": {
+              "id": "ott_sipahi_l"
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "ott_sipahi_europ_vanguard": {
+    "name": "Sandżak sipahów lennych z ejaletów europejskich",
+    "base_cost": 4,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "type": "cavalry",
+    "unit_improvements": [
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "javelin"
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "id": "ott_sandzakbej"
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_m"
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_lances_m"
+            },
+            "unit2": {
+              "id": "ott_sipahi_m"
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_m"
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "ott_sipahi_albanian": {
+    "name": "Sandżak sipahów Bośniackich/Albańskich",
+    "base_cost": 3,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "type": "cavalry",
+    "unit_improvements": [
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "javelin"
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "id": "ott_sandzakbej"
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_lances_m"
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_lances_m"
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "id": "ott_sipahi_lances_m"
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "ott_province_eur": {
+    "name": "Prowincjonalne wojska nadworne z ejaletów europejskich",
+    "base_cost": 7,
+    "recon": 1,
+    "awareness": 4,
+    "activations": 3,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "units_allowed": ["ott_beszli_s","ott_beszli_m","ott_gonullu_s","ott_gonullu_m"]
+      },
+      {
+        "id": "javelin"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "kalkans",
+        "cost": 1,
+        "units_allowed": ["ott_beszli_s","ott_beszli_m"]
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "id": "ott_aga"
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "id": "ott_beszli_s"
+            },
+            "unit2": {
+              "id": "ott_beszli_m"
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "id": "ott_beszli_s"
+            },
+            "unit2": {
+              "id": "ott_beszli_m"
+            },
+            "unit3": {
+              "id": "ott_gonullu_s"
+            },
+            "unit4": {
+              "id": "ott_gonullu_m"
+            }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": {
+              "id": "ott_beszli_s"
+            },
+            "unit2": {
+              "id": "ott_beszli_m"
+            },
+            "unit3": {
+              "id": "ott_gonullu_s"
+            },
+            "unit4": {
+              "id": "ott_gonullu_m"
+            },
+            "unit5": {
+              "id": "ott_segbani_m"
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "id": "ott_deli_s"
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "id": "ott_segbani_m"
+            },
+            "unit2": {
+              "id": "ott_azab_m"
+            },
+            "unit3": {
+              "id": "ott_azab_l"
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "id": "ott_deli_m"
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "ott_janissary": {
+    "name": "Pułk Janczarów",
+    "base_cost": 5,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 3,
+    "regiment_improvements": [
+      {
+        "id": "serdengetci_contract"
+      },
+      {
+        "id": "elite_janissaries"
+      }
+    ],
+    "unit_improvements": [
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "additional_ammo"
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "id": "ott_aga"
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "id": "ott_janissaries_m"
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "id": "ott_janissaries_s"
+            },
+            "unit2": {
+              "id": "ott_janissaries_m"
+            }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": {
+              "id": "ott_janissaries_s"
+            },
+            "unit2": {
+              "id": "ott_janissaries_m"
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "id": "ott_mehter"
+            },
+            "unit2": {
+              "id": "ott_aga"
+            }
+          },
+          {
+            "unit1": {
+              "id": "ott_light_art_s"
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "id": "ott_kethuda"
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "id": "ott_janissaries_s"
+            },
+            "unit2": {
+              "id": "ott_janissaries_m"
+            }
+          },
+          {
+            "unit1": {
+              "id": "ott_janissaries_s"
+            },
+            "unit2": {
+              "id": "ott_janissaries_m"
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "id": "ott_mehter"
+            }
+          },
+          {
+            "unit1": {
+              "id": "ott_light_art_m"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

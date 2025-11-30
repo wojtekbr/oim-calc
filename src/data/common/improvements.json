@@ -26,7 +26,7 @@
   },
   "serdengetci_contract": {
     "name": "Kontrakt Serdengetci",
-    "cost": 3,
+    "cost": 1,
     "type": "regiment"
   },
   "elite_janissaries": {
@@ -39,5 +39,21 @@
     "name": "Nahajki i arkany",
     "cost": -1,
     "type": "unit"
+  },
+  "independent": {
+    "name": "Samodzielność",
+    "cost": "triple",
+    "type": "unit"
+  },
+  "regimental_guns": {
+    "name": "Działa Regimentowe",
+    "cost": 1,
+    "type": "unit"
+  },
+  "mercenary_dragoons": {
+    "name": "Najemni Dragoni",
+    "description": "Zamiana wszystkich dragonów w regimencie na dragonów najemnych.",
+    "type": "regiment",
+    "cost": -3
   }
 }

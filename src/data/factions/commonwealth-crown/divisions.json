@@ -1,23 +1,36 @@
 {
   "cro_koronna": {
-    "name": "Dywizja Koronna",
+    "name": "Dywizja Koronna (1650-52)",
     "improvement_points": 12,
     "base_cost": 9,
+    "general": ["cro_regimentarz"],
+    "rules": [
+{ 
+        "id": "allah_allah" 
+      }
+    ],
     "additional_units": [
-      "common_supply_wagon"
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      }
+    ],
+    "vanguard": [
+      { "options": ["cro_polish_dragoons","cro_light_cavalry","cro_crown_cavalry","cro_volunteers"]}
     ],
     "base": [
-      { "options": ["cro_crown_cavalry","cro_light_cavalry"] },
-      { "options": ["cro_crown_cavalry","cro_elite_crown_cavalry","cro_dragoons"] },
-      { "options": ["cro_crown_cavalry", "cro_volunteers"] }
+      { "options": ["cro_crown_cavalry"] },
+      { "options": ["cro_crown_cavalry","cro_elite_crown_cavalry"] }
     ],
     "additional": [
       {
         "options": [
           "none",
           "cro_crown_cavalry",
-          "cro_wolunteers",
-          "cro_reiters",
+          "cro_volunteers",
+          "mrc_reiters",
           "cro_levy_of_nobility"
         ]
       },
@@ -25,20 +38,10 @@
         "options": [
           "none",
           "cro_crown_cavalry",
-          "cro_dragoons",
-          "cro_mercenary_infantry"
+          "cro_polish_dragoons",
+          "mrc_infantry"
         ]
       }
-    ],
-    "structure": {
-      "base": {
-        "general": [],
-        "unit1": ["cro_crown_cavalry","cro_light_cavalry"],
-        "unit2": ["cro_crown_cavalry","cro_elite_cavalry","cro_dragoons"]
-      },
-      "additional": {
-        "unit2": ["cro_volunteers","cro_dragoons"]
-      }
-    }
+    ]
   }
 }

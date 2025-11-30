@@ -1,3 +1,5 @@
+/* src/pages/RegimentSelector.module.css */
+
 .container {
   padding: 24px;
   background-color: #f8f9fa;
@@ -18,11 +20,13 @@
   gap: 16px;
   margin-bottom: 24px;
 }
+
 .inputField {
   padding: 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
   width: 100%;
+  font-size: 14px;
 }
 
 /* Dashboard Summary Card */
@@ -38,6 +42,7 @@
   justify-content: space-between;
   align-items: center;
 }
+
 .summaryTitle { font-size: 20px; font-weight: 800; color: #222; }
 .summarySubtitle { font-size: 14px; color: #666; margin-top: 4px; }
 .summaryPoints { font-size: 16px; font-weight: 600; }
@@ -52,10 +57,12 @@
   border: 1px solid #e0e0e0;
   margin-bottom: 24px;
 }
+
 .sectionTitle {
   margin-top: 0;
   margin-bottom: 16px;
   font-size: 16px;
+  font-weight: 700;
   text-transform: uppercase;
   color: #555;
   border-bottom: 1px solid #eee;
@@ -85,16 +92,20 @@
   position: relative;
   text-align: center;
 }
+
 .supportTile:hover { transform: translateY(-2px); border-color: #aaa; }
 .supportTile.active {
   border-color: #0077ff;
   background-color: #f0f7ff;
+  box-shadow: 0 0 0 1px #0077ff inset;
 }
 .supportTile.locked {
   opacity: 0.5;
   cursor: not-allowed;
   background: #f5f5f5;
+  border-color: #eee;
 }
+
 .checkIcon {
   position: absolute; top: 6px; right: 6px;
   color: #0077ff; font-weight: bold;
@@ -111,16 +122,19 @@
   border-radius: 6px;
   background: #fff;
 }
+
 .configRow.error {
   border-color: #d32f2f;
   background-color: #fff5f5;
 }
+
 .selectInput {
   padding: 8px;
   border-radius: 4px;
   border: 1px solid #ccc;
   width: 100%;
 }
+
 .removeBtn {
   padding: 6px 12px;
   background: #ffebee;
@@ -128,6 +142,7 @@
   border: 1px solid #ef9a9a;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 12px;
 }
 .removeBtn:hover { background: #ffcdd2; }
 
@@ -138,61 +153,96 @@
   padding: 16px;
   border: 1px solid #eee;
   border-radius: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   background: #fff;
   transition: all 0.2s;
 }
+
 .regimentRow.mainForce {
   border: 2px solid #ff9800;
   background: #fff8e1;
 }
+
 .regimentRow.disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   pointer-events: none;
+  background: #f9f9f9;
 }
 
 .regHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 12px;
 }
-.regTitle { font-weight: 700; font-size: 15px; display: flex; alignItems: center; gap: 10px; }
-.mainForceBadge { background: #ff9800; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
-.vanguardLabel {
-  display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: normal;
-  cursor: pointer; padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd;
+
+.regTitle { 
+  font-weight: 700; 
+  font-size: 15px; 
+  display: flex; 
+  align-items: center; 
+  gap: 10px; 
+  color: #222;
 }
-.vanguardLabel.active { background: #e3f2fd; border-color: #90caf9; }
+
+.mainForceBadge { 
+  background: #ff9800; 
+  color: white; 
+  padding: 2px 6px; 
+  border-radius: 4px; 
+  font-size: 10px; 
+  text-transform: uppercase;
+}
 
 .regStats {
-  font-size: 12px; color: #555; text-align: right;
+  font-size: 12px; 
+  color: #555; 
+  text-align: right;
+  line-height: 1.4;
 }
+
 .regCost {
-  font-size: 18px; font-weight: 700; color: #1b7e32;
+  font-size: 18px; 
+  font-weight: 700; 
+  color: #1b7e32;
 }
 
 .regControls {
   display: flex;
   gap: 12px;
   align-items: center;
+  margin-top: 12px;
 }
+
 .regNameInput {
-  padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex: 1;
+  padding: 8px; 
+  border: 1px solid #ccc; 
+  border-radius: 4px; 
+  flex: 1;
 }
-.regSelect {
-  padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-width: 250px;
-}
+
 .editBtn {
-  padding: 8px 16px; background: #0077ff; color: white; border: none; border-radius: 4px; cursor: pointer;
+  padding: 8px 16px; 
+  background: #0077ff; 
+  color: white; 
+  border: none; 
+  border-radius: 4px; 
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
 }
 .editBtn:hover { background: #005ecb; }
 
 .regSupportInfo {
-  margin-top: 8px; font-size: 12px; color: #0077ff; font-style: italic;
+  margin-top: 12px; 
+  font-size: 12px; 
+  color: #0056b3; 
+  font-style: italic;
+  border-top: 1px dashed #eee;
+  padding-top: 8px;
 }
 
-/* PDF Button */
+/* PDF Button & Nav */
 .pdfBtn {
   text-decoration: none;
   padding: 10px 20px;
@@ -201,99 +251,49 @@
   border-radius: 5px;
   font-weight: bold;
   display: inline-block;
+  font-size: 14px;
 }
 .pdfBtn:hover { background-color: #b71c1c; }
+
 .backBtn {
-  border: none; background: none; color: #0077ff; font-weight: 600; cursor: pointer; font-size: 14px;
+  border: none; 
+  background: none; 
+  color: #0077ff; 
+  font-weight: 600; 
+  cursor: pointer; 
+  font-size: 14px;
+  padding: 0;
 }
+.backBtn:hover { text-decoration: underline; }
 
+/* Options Grid (Tiles) - FIX: Zmiana na Grid */
 .optionsGrid {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-  margin-bottom: 8px;
-}
-
-.optionCard {
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 10px;
-  background-color: #fff;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 180px;
-  flex: 1; /* Rozciągnij, żeby wypełnić wiersz */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.optionCard:hover {
-  border-color: #999;
-  background-color: #fafafa;
-}
-
-.optionCard.active {
-  border-color: #0077ff;
-  background-color: #e9f3ff;
-  box-shadow: 0 0 0 1px #0077ff inset;
-}
-
-.optionName {
-  font-weight: 600;
-  font-size: 13px;
-  color: #333;
-  margin-bottom: 4px;
-}
-
-.optionCost {
-  font-size: 11px;
-  color: #666;
-}
-
-/* Dostosowanie nagłówka, żeby zrobić miejsce na kafelki */
-.regHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start; /* Zmieniamy na flex-start, bo kafelki mogą być wysokie */
-  margin-bottom: 12px;
-}
-
-/* Ukrywamy stary select, ale zostawiamy input nazwy */
-.regControls {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
-  align-items: center;
+  margin-top: 12px;
+  margin-bottom: 12px;
   width: 100%;
 }
 
-.optionsGrid {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-  margin-bottom: 8px;
-}
-
 .optionCard {
   border: 1px solid #ccc;
   border-radius: 6px;
-  padding: 10px;
+  padding: 12px;
   background-color: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 180px;
-  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  position: relative; /* Dla ikonki check */
+  position: relative;
+  min-height: 70px;
 }
 
 .optionCard:hover {
   border-color: #999;
   background-color: #fafafa;
+  transform: translateY(-1px);
 }
 
 .optionCard.active {
@@ -302,11 +302,10 @@
   box-shadow: 0 0 0 1px #0077ff inset;
 }
 
-/* NOWA KLASA: Wyszarzenie dla zablokowanych opcji */
 .optionCard.disabledTile {
   opacity: 0.5;
   filter: grayscale(1);
-  pointer-events: none; /* Blokuje klikanie */
+  pointer-events: none;
   cursor: not-allowed;
   background-color: #f5f5f5;
   border-color: #eee;
@@ -322,18 +321,4 @@
 .optionCost {
   font-size: 11px;
   color: #666;
-}
-
-.regHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-
-.regControls {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  width: 100%;
 }

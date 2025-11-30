@@ -1,5 +1,5 @@
 {
-  "tat_czambul_mirzy": {
+    "tat_czambul_mirzy": {
     "name": "Czambuł Mirzy",
     "base_cost": 1,
     "recon": 2,
@@ -31,30 +31,30 @@
         "general": [
           {
             "unit1": {
-              "units": ["tat_mirza"]
+              "id": "tat_mirza"
             }
           }
         ],
         "base1": [
           {
             "unit1": {
-              "units": ["tat_ordyncy_m"]
+              "id": "tat_ordyncy_m"
             },
             "unit2": {
-              "units": ["tat_ordyncy_dzidy_m"]
+                "id": "tat_ordyncy_dzidy_m"
             }
           }
         ],
         "base2": [
           {
             "unit1": {
-              "units": ["tat_ordyncy_s"]
+              "id": "tat_ordyncy_s"
             },
             "unit2": {
-              "units": ["tat_ordyncy_m"]
+                "id": "tat_ordyncy_m"
             },
             "unit3": {
-              "units": ["tat_kazindzi_m"]
+                "id": "tat_kazindzi_m"
             }
           }
         ]
@@ -63,21 +63,19 @@
         "additional1": [
           {
             "unit1": {
-              "units": ["tat_ordyncy_s"]
+              "id": "tat_ordyncy_s"
             },
             "unit2": {
-              "units": ["tat_ordyncy_m"]
+                "id": "tat_ordyncy_m"
             },
             "unit3": {
-              "units": ["tat_ordyncy_dzidy_s"]
+                "id": "tat_ordyncy_dzidy_s"
             },
             "unit4": {
-              "units": ["tat_ordyncy_dzidy_m"]
+                "id": "tat_ordyncy_dzidy_m"
             },
             "unit5": {
-              "name_override": "2x Kazindzi S",
-              "cost_override": 9,
-              "units": ["tat_kazindzi_s", "tat_kazindzi_s"]
+                "id": "tat_kazindzi_m"
             }
           }
         ]
