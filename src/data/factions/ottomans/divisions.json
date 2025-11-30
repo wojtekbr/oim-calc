@@ -18,6 +18,19 @@
         "regiment_id": "ott_province_eur",
         "max_amount": 1
       },
+      {
+        "id": "min_regiments_present",
+        "requirements": [
+          {
+            "regiment_id": "ott_province_eur",
+            "min_amount": 1
+          },
+          {
+            "regiment_id": "ott_sipahi_europ",
+            "min_amount": 2
+          }
+        ]
+      },
       { 
         "id": "prawowierni_w_okopach" 
       },
@@ -48,22 +61,6 @@
         "options": ["ott_medium_art_s", "ott_medium_art_m"]
       },
       {
-        "name": "ott_silahdars_m",
-        "assignment_rules": {
-          "assignment_required": true,
-          "allowed_regiment_ids": ["ott_sipahi_europ", "ott_sipahi_alban"],
-          "exclusion_tag": "ott_sipahi_guards_m"
-        }
-      },
-      {
-        "name": "ott_sipahi_guards_m",
-        "assignment_rules": {
-          "assignment_required": true,
-          "allowed_regiment_ids": ["ott_sipahi_europ", "ott_sipahi_alban"],
-          "exclusion_tag": "ott_silahdars_m"
-        }
-      },
-      {
         "name":"common_supply_wagon",
         "assignment_rules": {
           "can_be_assigned": false
@@ -92,11 +89,11 @@
     ],
     "vanguard": 
       [
-      { "options": ["ott_sipahi_europ", "ott_province_eur", "tat_czambul_mirzy"] }
+      { "options": ["ott_sipahi_europ_vanguard", "ott_province_eur", "tat_czambul_mirzy"] }
      ],
     "base": [
       { "options": ["ott_sipahi_europ","ott_province_eur"] },
-      { "options": ["ott_sipahi_europ", "ott_sipahi_albanian", "ott_province_eur"] }
+      { "options": ["ott_sipahi_europ", "ott_sipahi_albanian"] }
     ],
     "additional": [
       {
@@ -107,7 +104,7 @@
           "tat_czambul_mirzy"
         ]
       },
-      { "options": ["none", "ott_sipahi_europ","tat_czambul_mirzy", "ott_janissary_egypt"] }
+      { "options": ["none", "ott_sipahi_europ","tat_czambul_mirzy"] }
     ]
   }
 }

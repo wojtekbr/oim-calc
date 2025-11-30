@@ -1,12 +1,17 @@
 import { IDS, GROUP_TYPES, RANK_TYPES } from "../constants";
 
 const resolveCostRule = (baseCost, rule) => {
-    if (typeof rule === 'number') {
-        if (rule < 0) return Math.max(1, baseCost + rule);
-        return rule;
-    }
     if (rule === 'double') return baseCost * 2;
     if (rule === 'triple') return baseCost * 3;
+
+    if (typeof rule === 'number') {
+        if (rule > 0) {
+            return baseCost * rule;
+        }
+        if (rule < 0) {
+            return Math.max(1, baseCost + rule);
+        }
+    }
     return 0;
 };
 
@@ -27,17 +32,31 @@ export const calculateSingleImprovementIMPCost = (unitDef, impId, regimentDefini
     return resolveCostRule(improvementBaseCost, rule);
 };
 
+// --- NOWE: Obliczanie kosztu PS dla ulepszenia (z obsługą override) ---
 export const calculateSingleImprovementArmyCost = (unitDef, impId, regimentDefinition, commonImprovements) => {
-    const regImpDef = regimentDefinition?.regiment_improvements?.find(i => i.id === impId);
+    // 1. Sprawdź, czy to ulepszenie pułkowe (Regiment Improvement)
+    const regImpRef = regimentDefinition?.regiment_improvements?.find(i => i.id === impId);
     const commonImpDef = commonImprovements?.[impId];
-    let cost = 0;
-    if (regImpDef && regImpDef.army_point_cost !== undefined) cost = regImpDef.army_point_cost;
-    else if (commonImpDef && commonImpDef.army_point_cost !== undefined) cost = commonImpDef.army_point_cost;
-    return cost;
+
+    // Logika dla ulepszeń pułkowych (mają stały koszt, nie mnożnik)
+    if (regImpRef || (commonImpDef && commonImpDef.type === 'regiment')) {
+        // Priorytet: Override w pułku > Definicja w pułku > Definicja wspólna
+        if (regImpRef?.army_cost_override !== undefined) return regImpRef.army_cost_override;
+        if (regImpRef?.army_point_cost !== undefined) return regImpRef.army_point_cost;
+        if (commonImpDef?.army_point_cost !== undefined) return commonImpDef.army_point_cost;
+        return 0;
+    }
+
+    // Logika dla ulepszeń jednostek (istniejąca wcześniej - tu zazwyczaj PS = 0, płaci się w PU, ale zostawiamy dla bezpieczeństwa)
+    // Zazwyczaj ulepszenia jednostek kosztują PU, a nie PS, chyba że to specjalne przypadki
+    return 0;
 };
 
 export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinition) => {
     if (!unitDef || !regimentDefinition) return false;
+    
+    if (unitDef.rank === RANK_TYPES.GROUP || unitDef.rank === 'group') return false;
+
     const regImpDef = regimentDefinition.unit_improvements?.find(i => i.id === improvementId);
     if (!regImpDef) return false; 
     if (unitDef.improvement_limitations?.includes(improvementId)) return false; 
@@ -49,7 +68,6 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
     return true;
 };
 
-// --- LOGIKA ZBIERANIA JEDNOSTEK (Zaktualizowana o cost_override i extra_cost) ---
 export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
     const units = [];
     if (!regimentDefinition) return units;
@@ -79,7 +97,6 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
                          const choiceDef = pod[choiceKey];
                          const unitIds = choiceDef.units || (choiceDef.id ? [choiceDef.id] : []);
                          
-                         // Pobieramy override'y kosztów z definicji opcji
                          const costOverride = choiceDef.cost_override;
                          const extraCost = choiceDef.extra_cost || 0;
 
@@ -88,12 +105,10 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
                                  let appliedCostOverride = undefined;
                                  let appliedExtraCost = 0;
 
-                                 // Jeśli jest override, pierwszy element pakietu przejmuje koszt, reszta ma 0
                                  if (costOverride !== undefined) {
                                      appliedCostOverride = (uIdx === 0) ? costOverride : 0;
                                  }
                                  
-                                 // Extra cost doliczamy tylko do pierwszego elementu
                                  if (extraCost > 0 && uIdx === 0) {
                                      appliedExtraCost = extraCost;
                                  }
@@ -161,15 +176,12 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
     if (regimentConfig.additionalCustom) {
          const customDef = structure.additional?.unit_custom_cost;
          const slotName = customDef?.[0]?.depends_on || "custom";
-         // Custom slot zazwyczaj ma zdefiniowany koszt w 'unit_custom_cost' w JSONIE dodatkowym
-         // Obsługa tego jest w calculateRegimentStats przez 'customCostMap'
          units.push({ key: `additional/${slotName}_custom`, unitId: regimentConfig.additionalCustom, isCustom: true });
     }
 
     return units;
 };
 
-// --- LOGIKA KALKULACJI KOSZTÓW (Zaktualizowana) ---
 export const calculateRegimentStats = (regimentConfig, regimentId, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements) => {
     const stats = {
         cost: 0,
@@ -192,21 +204,13 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     stats.activations = regimentDefinition.activations || 0;
     stats.awareness = regimentDefinition.awareness || 0; 
 
-    const regimentImprovementsDefinition = regimentDefinition.regiment_improvements || [];
-    const improvementsMap = regimentConfig.improvements || {};
-
     const customCostMap = (regimentDefinition.structure?.additional?.unit_custom_cost || [])
         .reduce((map, item) => { map[item.id] = item.cost; return map; }, {});
 
+    // Doliczanie kosztu PS za ulepszenia pułkowe (z nową logiką override)
     (regimentConfig.regimentImprovements || []).forEach(impId => {
-        const regImpDef = regimentImprovementsDefinition.find(i => i.id === impId);
-        const commonImpDef = commonImprovements?.[impId];
-        
-        let cost = 0;
-        if (regImpDef?.army_point_cost !== undefined) cost = regImpDef.army_point_cost;
-        else if (commonImpDef?.army_point_cost !== undefined) cost = commonImpDef.army_point_cost;
-        
-        stats.cost += cost;
+        // unitDef jest null, bo to ulepszenie pułkowe
+        stats.cost += calculateSingleImprovementArmyCost(null, impId, regimentDefinition, commonImprovements);
     });
 
     const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
@@ -258,20 +262,16 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
 
         let unitBaseCost = 0;
 
-        // 1. Sprawdzamy Override (ma priorytet nad standardowym kosztem)
         if (costOverride !== undefined) {
             unitBaseCost = costOverride;
         } 
-        // 2. Jeśli Custom Slot (Poziom II)
         else if (isCustom && customCostMap[unitId] !== undefined) {
             unitBaseCost = customCostMap[unitId];
         } 
-        // 3. Standardowy koszt z definicji jednostki
         else {
             unitBaseCost = unitsMap[unitId]?.cost || 0;
         }
 
-        // 4. Dodajemy Extra Cost (jeśli zdefiniowany)
         if (extraCost) {
             unitBaseCost += extraCost;
         }
@@ -280,6 +280,7 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
 
         addUnitStats(unitId, positionKey);
 
+        const improvementsMap = regimentConfig.improvements || {};
         (improvementsMap[positionKey] || []).forEach(impId => {
              stats.cost += calculateSingleImprovementArmyCost(unitsMap[unitId], impId, regimentDefinition, commonImprovements);
         });
@@ -295,6 +296,8 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
 
         if (currentRegimentData) {
             const positionKey = `${currentRegimentData.group}/${currentRegimentData.index}`;
+            const improvementsMap = regimentConfig.improvements || {};
+            
             configuredDivision.supportUnits
                 .filter(su => su.assignedTo?.positionKey === positionKey)
                 .forEach(su => {
@@ -323,6 +326,75 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     return stats;
 };
 
+// --- PU DLA PUŁKU (Zaktualizowana o obsługę override dla ulepszeń pułkowych) ---
+export const calculateRegimentImprovementPoints = (regimentConfig, regimentId, unitsMap, getRegimentDefinition, commonImprovements, assignedSupportUnits = []) => {
+    if (!unitsMap || !regimentId || regimentId === IDS.NONE) return 0;
+    const regimentDefinition = getRegimentDefinition(regimentId);
+    if (!regimentDefinition) return 0;
+
+    let totalImpCost = 0;
+
+    const getUnitPUCost = (unitId) => {
+        if (!unitId || unitId === IDS.NONE) return 0;
+        const u = unitsMap[unitId];
+        if (!u) return 0;
+        return u.improvement_points_cost || u.pu_cost || 0;
+    };
+
+    // 1. Ulepszenia Pułku - NOWA LOGIKA
+    const regimentImprovementsDefinition = regimentDefinition.regiment_improvements || [];
+    (regimentConfig.regimentImprovements || []).forEach(impId => {
+        const regImpRef = regimentImprovementsDefinition.find(i => i.id === impId);
+        const commonImpDef = commonImprovements?.[impId];
+        
+        // Priorytet: override (cost_override) > local (cost) > common (cost)
+        if (regImpRef?.cost_override !== undefined) {
+            totalImpCost += regImpRef.cost_override;
+        } else if (regImpRef?.cost !== undefined) {
+            totalImpCost += regImpRef.cost;
+        } else if (commonImpDef?.cost !== undefined) {
+            totalImpCost += commonImpDef.cost;
+        }
+    });
+
+    // 2. Jednostki wewnątrz pułku + ich ulepszenia
+    const improvementsMap = regimentConfig.improvements || {};
+    const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
+
+    activeUnits.forEach(({ key: positionKey, unitId }) => {
+        if (!unitId || unitId === IDS.NONE) return;
+        const unitDef = unitsMap[unitId];
+        if (!unitDef || unitDef.rank === RANK_TYPES.GROUP) return;
+        
+        totalImpCost += getUnitPUCost(unitId);
+
+        (improvementsMap[positionKey] || []).forEach(impId => {
+            totalImpCost += calculateSingleImprovementIMPCost(unitDef, impId, regimentDefinition, commonImprovements);
+        });
+    });
+
+    // 3. Jednostki Wsparcia
+    if (assignedSupportUnits && assignedSupportUnits.length > 0) {
+        assignedSupportUnits.forEach(su => {
+            const supportUnitDef = unitsMap[su.id];
+            if (!supportUnitDef || supportUnitDef.rank === RANK_TYPES.GROUP) return;
+
+            totalImpCost += getUnitPUCost(su.id);
+
+            const regimentPosKey = su.assignedTo?.positionKey;
+            if (regimentPosKey) {
+                const supportUnitKey = `support/${su.id}-${regimentPosKey}`;
+                (improvementsMap[supportUnitKey] || []).forEach(impId => {
+                    totalImpCost += calculateSingleImprovementIMPCost(supportUnitDef, impId, regimentDefinition, commonImprovements);
+                });
+            }
+        });
+    }
+
+    return totalImpCost;
+};
+
+// --- LOGIKA KALKULACJI PU CAŁEJ DYWIZJI ---
 export const calculateImprovementPointsCost = (divisionConfig, unitsMap, getRegimentDefinition, commonImprovements) => {
     if (!unitsMap || !divisionConfig) return 0;
     let totalImpCost = 0;
@@ -339,59 +411,27 @@ export const calculateImprovementPointsCost = (divisionConfig, unitsMap, getRegi
     }
 
     const allRegiments = [
-        ...(divisionConfig.vanguard || []),
-        ...(divisionConfig.base || []),
-        ...(divisionConfig.additional || [])
+        ...(divisionConfig.vanguard || []).map(r => ({...r, groupKey: GROUP_TYPES.VANGUARD})),
+        ...(divisionConfig.base || []).map(r => ({...r, groupKey: GROUP_TYPES.BASE})),
+        ...(divisionConfig.additional || []).map(r => ({...r, groupKey: GROUP_TYPES.ADDITIONAL}))
     ];
 
     allRegiments.forEach(regiment => {
-        const regimentId = regiment.id;
-        const regimentConfig = regiment.config || {};
-        const regimentDefinition = getRegimentDefinition(regimentId);
+        if (regiment.id === IDS.NONE) return;
         
-        if (regimentId === IDS.NONE || !regimentDefinition) return;
+        const posKey = `${regiment.group}/${regiment.index}`;
+        
+        const attachedSupport = (divisionConfig.supportUnits || [])
+            .filter(su => su.assignedTo?.positionKey === posKey);
 
-        const regimentImprovementsDefinition = regimentDefinition.regiment_improvements || [];
-        const improvementsMap = regimentConfig.improvements || {};
-
-        (regimentConfig.regimentImprovements || []).forEach(impId => {
-            const regImpDef = regimentImprovementsDefinition.find(i => i.id === impId);
-            const commonImpDef = commonImprovements?.[impId];
-            
-            if (regImpDef && regImpDef.cost !== undefined) totalImpCost += regImpDef.cost;
-            else if (commonImpDef && commonImpDef.cost !== undefined) totalImpCost += commonImpDef.cost;
-        });
-
-        const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
-
-        activeUnits.forEach(({ key: positionKey, unitId }) => {
-            if (!unitId || unitId === IDS.NONE) return;
-            const unitDef = unitsMap[unitId];
-            if (!unitDef || unitDef.rank === RANK_TYPES.GROUP) return;
-            
-            totalImpCost += getUnitPUCost(unitId);
-
-            (improvementsMap[positionKey] || []).forEach(impId => {
-                totalImpCost += calculateSingleImprovementIMPCost(unitDef, impId, regimentDefinition, commonImprovements);
-            });
-        });
-
-        if (divisionConfig.supportUnits) {
-            const regimentPositionKey = `${regiment.group}/${regiment.index}`;
-            divisionConfig.supportUnits
-                .filter(su => su.assignedTo?.positionKey === regimentPositionKey)
-                .forEach(su => {
-                    const supportUnitKey = `support/${su.id}-${regimentPositionKey}`;
-                    const supportUnitDef = unitsMap[su.id];
-                    if (!supportUnitDef || supportUnitDef.rank === RANK_TYPES.GROUP) return;
-                    
-                    totalImpCost += getUnitPUCost(su.id);
-
-                    (improvementsMap[supportUnitKey] || []).forEach(impId => {
-                        totalImpCost += calculateSingleImprovementIMPCost(supportUnitDef, impId, regimentDefinition, commonImprovements);
-                    });
-                });
-        }
+        totalImpCost += calculateRegimentImprovementPoints(
+            regiment.config, 
+            regiment.id, 
+            unitsMap, 
+            getRegimentDefinition, 
+            commonImprovements, 
+            attachedSupport
+        );
     });
 
     if (divisionConfig.supportUnits) {

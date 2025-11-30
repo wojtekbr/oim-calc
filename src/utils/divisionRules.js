@@ -2,7 +2,6 @@ import { IDS } from "../constants";
 import { collectRegimentUnits } from "./armyMath";
 
 // --- LOGIKA BIZNESOWA (REGISTRY) ---
-// Tutaj tylko zasady wpływające na matematykę/walidację
 export const DIVISION_RULES_REGISTRY = {
     "additional_pu_points_for_units": {
         getBonus: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
@@ -65,13 +64,52 @@ export const DIVISION_RULES_REGISTRY = {
 
             return errors;
         }
+    },
+
+    // --- NOWE: ZAAWANSOWANA WALIDACJA SKŁADU (ARRAY) ---
+    "composition_requirements": {
+        validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
+            const requirements = params?.requirements || [];
+            if (requirements.length === 0) return [];
+
+            const errors = [];
+
+            // 1. Zliczamy wszystkie pułki w dywizji (mapa ID -> ilość)
+            const currentCounts = {};
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []),
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+
+            allRegiments.forEach(reg => {
+                if (reg.id !== IDS.NONE) {
+                    currentCounts[reg.id] = (currentCounts[reg.id] || 0) + 1;
+                }
+            });
+
+            // 2. Iterujemy po wymaganiach i sprawdzamy stan
+            requirements.forEach(req => {
+                const targetId = req.regiment_id;
+                const minAmount = req.min_amount || 1;
+                
+                const currentAmount = currentCounts[targetId] || 0;
+
+                if (currentAmount < minAmount) {
+                    const def = getRegimentDefinition(targetId);
+                    const name = def ? def.name : targetId;
+                    // Precyzyjny komunikat błędu
+                    errors.push(`Niespełnione wymaganie: Musisz posiadać jeszcze ${minAmount - currentAmount} pułk(i/ów) typu:\n"${name}".`);
+                }
+            });
+
+            return errors;
+        }
     }
 };
 
 // --- LOGIKA PREZENTACJI (DEFINITIONS) ---
-// Tutaj definiujemy wszystkie zasady (również te opisowe)
 export const DIVISION_RULES_DEFINITIONS = {
-    // Logiczne
     "additional_pu_points_for_units": {
         title: "Dodatkowe PU za jednostki",
         getDescription: (params, context) => {
@@ -87,7 +125,7 @@ export const DIVISION_RULES_DEFINITIONS = {
     },
 
     "limit_max_same_regiments": {
-        title: "Limit Pułków",
+        title: "Maksymalna ilość pułków",
         getDescription: (params, context) => {
             const { getRegimentDefinition } = context;
             const targetId = params?.regiment_id;
@@ -100,7 +138,29 @@ export const DIVISION_RULES_DEFINITIONS = {
         }
     },
 
-    // --- ZASADY FABULARNE/GAMEPLAYOWE (BEZ LOGIKI W APP) ---
+    "min_regiments_present": {
+        title: "Minimalna ilość pułków",
+        getDescription: (params, context) => {
+            const { getRegimentDefinition } = context;
+            const requirements = params?.requirements || [];
+
+            if (requirements.length === 0) return "Brak wymagań.";
+
+            const requirementsList = requirements.map(req => {
+                const targetId = req.regiment_id;
+                const min = req.min_amount || 1;
+                const regDef = getRegimentDefinition(targetId);
+                const regName = regDef ? regDef.name : targetId;
+                
+                return `• ${min}x ${regName}`;
+            }).join("\n");
+
+            // ZMIANA TUTAJ:
+            return `Dywizja musi zawierać przynajmniej następujące pułki:\n${requirementsList}`;
+        }
+    },
+
+    // --- ZASADY FABULARNE/GAMEPLAYOWE ---
     
     "prawowierni_w_okopach": {
         title: "Prawowierni w okopach swoich",
@@ -127,7 +187,7 @@ export const DIVISION_RULES_DEFINITIONS = {
     }
 };
 
-// --- HELPERS (BEZ ZMIAN) ---
+// --- HELPERS (Bez zmian) ---
 
 export const checkDivisionConstraints = (divisionConfig, divisionDefinition, candidateRegimentId) => {
     if (!divisionConfig || !divisionDefinition || !candidateRegimentId || candidateRegimentId === IDS.NONE) {
@@ -138,6 +198,7 @@ export const checkDivisionConstraints = (divisionConfig, divisionDefinition, can
     }
     for (const ruleConfig of divisionDefinition.rules) {
         const { id, ...params } = ruleConfig;
+        
         if (id === "limit_max_same_regiments") {
             const targetRegimentId = params?.regiment_id;
             const maxLimit = (params?.max_amount !== undefined) ? params.max_amount : 1;

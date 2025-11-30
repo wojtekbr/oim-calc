@@ -4,8 +4,6 @@ import { useArmyData } from "../context/ArmyDataContext";
 import { 
     canUnitTakeImprovement, 
     calculateSingleImprovementIMPCost, 
-    validateVanguardCost, 
-    validateAlliedCost,
     calculateRegimentStats,
     collectRegimentUnits
 } from "../utils/armyMath";
@@ -61,22 +59,18 @@ export const useRegimentLogic = ({
   
   const groupKeys = (obj) => (obj && typeof obj === "object" ? Object.keys(obj) : []);
 
-  // --- POPRAWIONA INICJALIZACJA ---
   useEffect(() => {
-    // Funkcja pomocnicza: zawsze wybiera pierwszą opcję, jeśli nic nie jest wybrane
     const initForGroup = (groupObj, prevSelections = {}) => {
       const out = { ...prevSelections };
       groupKeys(groupObj).forEach((gk) => {
         const arr = groupObj[gk] || [];
         const sel = Array.isArray(out[gk]) ? [...out[gk]] : [];
         for (let i = 0; i < arr.length; i++) {
-          // Jeśli już coś wybrano (np. z loadu), zostawiamy
           if (sel[i] !== undefined && sel[i] !== null) continue;
           
           const pod = arr[i] || {};
           const optionKeys = Object.keys(pod);
           
-          // ZAWSZE wybieramy pierwszą opcję jako domyślną
           if (optionKeys.length > 0) {
               sel[i] = optionKeys[0];
           } else {
@@ -88,11 +82,9 @@ export const useRegimentLogic = ({
       return out;
     };
 
-    // 1. Inicjalizacja BASE i ADDITIONAL (teraz obie zachowują się tak samo - auto-select first)
     setBaseSelections(initForGroup(base, currentConfig.baseSelections || {}));
     setAdditionalSelections(initForGroup(additional, currentConfig.additionalSelections || {}));
     
-    // 2. Inicjalizacja OPTIONAL
     const optSelInit = { ...(currentConfig.optionalSelections || {}) };
     const optEnabledInit = { ...(currentConfig.optionalEnabled || {}) };
     
@@ -100,14 +92,12 @@ export const useRegimentLogic = ({
         if (Array.isArray(groupObj.optional)) {
             const key = `${groupType}/optional`;
             
-            // Jeśli nie ma selekcji, tworzymy tablicę z domyślnymi pierwszymi wyborami
             if (!optSelInit[key]) {
                 optSelInit[key] = groupObj.optional.map(pod => {
                     const keys = Object.keys(pod);
                     return keys.length > 0 ? keys[0] : null;
                 });
             } else {
-                // Jeśli jest tablica, ale ma nulle (stara logika), wypełniamy je
                 optSelInit[key] = optSelInit[key].map((currentVal, idx) => {
                     if (currentVal) return currentVal;
                     const pod = groupObj.optional[idx] || {};
@@ -128,7 +118,7 @@ export const useRegimentLogic = ({
     setAdditionalEnabled(!!currentConfig.additionalEnabled);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [regiment.id]); // Zależność tylko od ID pułku, żeby nie resetowało przy każdej zmianie configu
+  }, [regiment.id]);
 
   const assignedSupportUnits = useMemo(() => {
     const regimentPositionKey = `${regimentGroup}/${regimentIndex}`;
@@ -198,7 +188,6 @@ export const useRegimentLogic = ({
     return dynamicLimit - totalUsedWithLocalChanges;
   }, [currentLocalConfig, configuredDivision, calculateTotalSupplyBonus, calculateImprovementPointsCost, divisionDefinition, remainingImprovementPoints, regimentGroup, regimentIndex, unitsMap, getRegimentDefinition, commonImprovements]);
 
-  // --- HANDLERS ---
   const handleSelectInPod = (type, groupKey, index, optionKey) => {
     let currentSelection = null;
     const isOptionalGroup = groupKey === GROUP_TYPES.OPTIONAL;
@@ -211,19 +200,9 @@ export const useRegimentLogic = ({
         currentSelection = additionalSelections[groupKey]?.[index];
     }
 
-    // --- ZMIANA: Blokada odznaczania dla BASE i ADDITIONAL ---
-    // Skoro wymuszamy default, to nie chcemy pozwolić na stan "nic nie wybrano" (null),
-    // chyba że to grupa opcjonalna (tam null jest ok, ale sterujemy checkboxem enabled).
-    
     const isDeselecting = currentSelection === optionKey;
     
-    // Dla BASE i ADDITIONAL (nie-opcjonalnych) kliknięcie w to samo nic nie robi (nie odznacza)
     if (!isOptionalGroup && isDeselecting) return;
-
-    // Dla OPTIONAL pozwalamy odznaczyć? 
-    // W sumie optional sterujemy flagą "enabled", więc selekcja wewnątrz może zostać.
-    // Ale zostawmy logikę toggle dla optional, jeśli user chce wyczyścić wybór wizualnie (choć checkbox ważniejszy).
-    // UPDATE: Ustalmy spójnie - zawsze wybieramy opcję. Nie ma odznaczania na "pusty slot".
     if (isOptionalGroup && isDeselecting) return; 
 
     const newValue = optionKey;
@@ -246,7 +225,6 @@ export const useRegimentLogic = ({
         setOptionalSelections(prev => {
             const next = { ...prev };
             let arr = [...(next[mapKey] || [])];
-            // Fix length if needed (chociaż init powinien to załatwić)
             const groupDef = type === GROUP_TYPES.BASE ? base : additional;
             const optionalPods = groupDef.optional || [];
              if (arr.length < optionalPods.length) {
@@ -259,7 +237,6 @@ export const useRegimentLogic = ({
             next[mapKey] = arr;
             return next;
         });
-        // Checkbox włączamy tylko ręcznie (handleToggleOptionalGroup), tutaj tylko zmieniamy wariant
     } else if (type === GROUP_TYPES.BASE) {
         setBaseSelections(prev => {
             const next = { ...prev };
@@ -289,8 +266,6 @@ export const useRegimentLogic = ({
     
     if (isDeselecting) {
          setImprovements((p) => { const m = { ...p }; delete m[`additional/${customCostSlotName}_custom`]; return m; });
-         // Nie wyłączamy sekcji automatically, bo mogą być wybrane inne jednostki
-         // (teraz zawsze są wybrane domyślne)
          const hasAnyAdditional = hasAdditionalBaseSelection;
          if (!hasAnyAdditional) {
              setAdditionalEnabled(false);
@@ -344,16 +319,11 @@ export const useRegimentLogic = ({
     });
   };
 
-  // Obsługa włączania/wyłączania całych grup opcjonalnych
-  // (Potrzebne w UI, chociaż wcześniej było w RegimentEditor.jsx, logika powinna być tutaj)
-  // Jeśli jej nie używasz w UI, to jest martwy kod, ale warto mieć.
   const handleToggleOptionalGroup = (type, groupKey) => {
-      // Implementacja analogiczna do starej, ale nie czyścimy selections (bo mają defaulty)
       const mapKey = `${type}/${groupKey}`;
       setOptionalEnabled(prev => ({ ...prev, [mapKey]: !prev[mapKey] }));
       
-      // Jeśli wyłączamy, usuwamy improvementy
-      if (optionalEnabled[mapKey]) { // Było włączone, teraz wyłączamy
+      if (optionalEnabled[mapKey]) {
            setImprovements(prev => {
               const m = { ...prev };
               Object.keys(m).forEach(k => {
@@ -364,12 +334,10 @@ export const useRegimentLogic = ({
       }
   };
 
-  // Dodana obsługa toggle dla sekcji additional (całej)
   const handleToggleAdditional = () => {
       setAdditionalEnabled(prev => {
           const next = !prev;
           if (!next) {
-              // Wyłączenie: czyścimy improvementy, ale selekcje zostawiamy (ukryte defaulty)
               setImprovements(prevImp => {
                     const nextImp = { ...prevImp };
                     Object.keys(nextImp).forEach(key => {
@@ -377,7 +345,6 @@ export const useRegimentLogic = ({
                     });
                     return nextImp;
               });
-              // Opcjonalne w additional też wyłączamy
               setOptionalEnabled(optPrev => ({ ...optPrev, "additional/optional": false }));
               setSelectedAdditionalCustom(null);
           }
@@ -391,17 +358,8 @@ export const useRegimentLogic = ({
     
     groupRef[regimentIndex].config = currentLocalConfig;
     
-    const vanguardCheck = validateVanguardCost(tempDivisionForCheck, unitsMap, faction, getRegimentDefinition, commonImprovements);
-    if (!vanguardCheck.isValid) {
-        alert(vanguardCheck.message);
-        return;
-    }
-
-    const alliedCheck = validateAlliedCost(tempDivisionForCheck, unitsMap, faction, getRegimentDefinition, commonImprovements);
-    if (!alliedCheck.isValid) {
-        alert(alliedCheck.message);
-        return;
-    }
+    // ZMIANA: USUNIĘTO ALERTY BLOKUJĄCE ZAPIS (VANGUARD/ALLIED)
+    // Pozwalamy użytkownikowi zapisać "nielegalną" armię, walidacja odbędzie się w Selectorze.
 
     const keptSupportUnits = [];
     const removedNames = [];
@@ -459,8 +417,8 @@ export const useRegimentLogic = ({
         handleCustomSelect, 
         handleImprovementToggle, 
         handleRegimentImprovementToggle,
-        handleToggleOptionalGroup, // Dodane, bo może być potrzebne w UI
-        handleToggleAdditional,    // Dodane
+        handleToggleOptionalGroup, 
+        handleToggleAdditional,    
         saveAndGoBack, 
         onBack
     },

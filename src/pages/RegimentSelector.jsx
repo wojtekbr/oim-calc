@@ -3,12 +3,18 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import { ArmyListDocument } from '../pdf/ArmyListDocument';
 import { useRegimentSelectorLogic } from "./useRegimentSelectorLogic";
 import styles from "./RegimentSelector.module.css";
-import { calculateRegimentStats, calculateDivisionType } from "../utils/armyMath";
+import { 
+    calculateRegimentStats, 
+    calculateDivisionType,
+    validateVanguardCost,
+    validateAlliedCost,
+    calculateRegimentImprovementPoints // NOWY IMPORT
+} from "../utils/armyMath";
 import { checkDivisionConstraints, getDivisionRulesDescriptions, checkSupportUnitRequirements } from "../utils/divisionRules";
 import { IDS, GROUP_TYPES } from "../constants";
 import { useArmyData } from "../context/ArmyDataContext";
 
-// --- Sub-components ---
+// --- Sub-components (View Only) ---
 
 const SupportUnitTile = ({ unitId, isPurchased, locked, onClick, unitDef, disabledReason }) => {
     const puCost = unitDef?.improvement_points_cost || unitDef?.pu_cost || 0;
@@ -52,7 +58,7 @@ const GeneralOptionTile = ({ unitId, isActive, onClick, unitDef }) => {
             </div>
             <div className={styles.regStats} style={{marginTop: 6, fontSize: 11, textAlign:'left'}}>
                 {unitDef?.orders !== undefined && <div>Rozkazy: <strong>{unitDef.orders}</strong></div>}
-                {unitDef?.activations !== undefined && <div>Aktywacje: <strong>{unitDef.activations}</strong></div>}
+                {unitDef?.activations !== undefined && <div>Znaczniki Aktywacji: <strong>{unitDef.activations}</strong></div>}
             </div>
         </div>
     );
@@ -191,7 +197,8 @@ const RegimentBlock = ({
     supportUnits, unitsMap, configuredDivision, divisionDefinition,
     currentMainForceCost,
     isAllied,
-    currentAlliesCount
+    currentAlliesCount,
+    calculateRegimentPU // NOWE PROP
 }) => {
     return regiments.map((regiment, index) => {
         const options = definitionOptions[index].options;
@@ -219,6 +226,12 @@ const RegimentBlock = ({
         
         const isRegimentAllied = !isNone && isAllied(currentRegimentId);
         const isMainForceCandidate = !isVanguardGroup && !isNone && !isRegimentAllied && stats.cost === currentMainForceCost;
+
+        // OBLICZANIE PU DLA PUŁKU
+        const mySupport = supportUnits.filter(su => su.assignedTo?.positionKey === positionKey);
+        const puUsed = !isNone 
+            ? calculateRegimentPU(regiment.config, regiment.id, mySupport) 
+            : 0;
 
         const handleTileClick = (optId, isBlocked) => {
             if (isDisabled || isBlocked) return;
@@ -301,7 +314,7 @@ const RegimentBlock = ({
                             <div className={styles.regStats} style={{marginTop: 4}}>
                                 <div style={{fontWeight: 'bold', marginBottom: 4, color: '#444'}}>Typ: {stats.regimentType}</div>
                                 
-                                <div>Aktywacje: <strong>{finalActivations}</strong></div>
+                                <div>Znaczniki Aktywacji: <strong>{finalActivations}</strong></div>
                                 <div>Motywacja: <strong>{stats.motivation + (isMainForce?1:0)}</strong></div>
                                 
                                 {isVanguardGroup && (
@@ -309,6 +322,13 @@ const RegimentBlock = ({
                                         <div style={{marginTop: 4, color: '#d35400'}}>Zwiad: <strong>{stats.recon}</strong></div>
                                         <div style={{color: '#d35400'}}>Czujność: <strong>{stats.awareness}</strong></div>
                                     </>
+                                )}
+
+                                {/* NOWE: Wyświetlanie zużytych PU */}
+                                {puUsed > 0 && (
+                                    <div style={{marginTop: 6, color: '#2e7d32', borderTop: '1px dashed #ccc', paddingTop: 4}}>
+                                        Wykorzystane PU: <strong>{puUsed}</strong>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -334,19 +354,31 @@ export default function RegimentSelector(props) {
     const { 
         faction, divisionDefinition, configuredDivision, unitsMap, 
         remainingImprovementPoints, improvementPointsLimit, totalDivisionCost, divisionBaseCost,
-        getRegimentDefinition, onBack, validationErrors 
+        getRegimentDefinition, onBack, validationErrors: propsValidationErrors 
     } = props;
 
     const { state, handlers } = useRegimentSelectorLogic(props);
     const { improvements } = useArmyData();
     const calcStatsWrapper = (config, id) => calculateRegimentStats(config, id, configuredDivision, unitsMap, getRegimentDefinition, improvements);
     
+    // Wrapper dla nowej funkcji PU
+    const calcPuWrapper = (config, id, regimentSupport) => calculateRegimentImprovementPoints(config, id, unitsMap, getRegimentDefinition, improvements, regimentSupport);
+
+    const vanguardCheck = validateVanguardCost(configuredDivision, unitsMap, faction, getRegimentDefinition, improvements);
+    const alliedCheck = validateAlliedCost(configuredDivision, unitsMap, faction, getRegimentDefinition, improvements);
+
+    const allValidationErrors = [
+        ...(propsValidationErrors || []),
+        !vanguardCheck.isValid ? vanguardCheck.message : null,
+        !alliedCheck.isValid ? alliedCheck.message : null,
+        remainingImprovementPoints < 0 ? `Przekroczono limit Punktów Ulepszeń o ${Math.abs(remainingImprovementPoints)}.` : null
+    ].filter(Boolean);
+
+    const hasCriticalErrors = allValidationErrors.length > 0;
+
     const divisionType = calculateDivisionType(configuredDivision, unitsMap, getRegimentDefinition, improvements);
-
     const rulesDescriptions = getDivisionRulesDescriptions(divisionDefinition, unitsMap, getRegimentDefinition);
-
     const { vanguard: vanguardRegiments, base: baseRegiments, additional: additionalRegiments, supportUnits } = configuredDivision;
-
     const generalId = configuredDivision.general;
     const generalDef = generalId ? unitsMap[generalId] : null;
 
@@ -379,27 +411,34 @@ export default function RegimentSelector(props) {
         <div className={styles.container}>
             <div className={styles.header}>
                 <button className={styles.backBtn} onClick={onBack}>← Powrót do Frakcji</button>
-                <PDFDownloadLink
-                    document={
-                        <ArmyListDocument
-                            divisionDefinition={divisionDefinition}
-                            configuredDivision={configuredDivision}
-                            faction={faction}
-                            calculateRegimentStats={calcStatsWrapper}
-                            mainForceKey={state.mainForceKey}
-                            totalDivisionCost={totalDivisionCost}
-                            remainingImprovementPoints={remainingImprovementPoints}
-                            unitsMap={unitsMap}
-                            getRegimentDefinition={getRegimentDefinition}
-                            playerName={state.playerName}
-                            divisionCustomName={state.divisionCustomName}
-                        />
-                    }
-                    fileName={`Rozpiska_${state.divisionCustomName || 'Armia'}.pdf`}
-                    className={styles.pdfBtn}
-                >
-                    {({ loading }) => loading ? 'Generowanie...' : 'Eksportuj do PDF 🖨️'}
-                </PDFDownloadLink>
+                
+                {hasCriticalErrors ? (
+                    <div style={{padding: '10px 20px', background: '#e0e0e0', color: '#666', borderRadius: 5, fontWeight: 'bold', fontSize: 13, cursor: 'not-allowed'}}>
+                        🚫 Popraw błędy, aby eksportować
+                    </div>
+                ) : (
+                    <PDFDownloadLink
+                        document={
+                            <ArmyListDocument
+                                divisionDefinition={divisionDefinition}
+                                configuredDivision={configuredDivision}
+                                faction={faction}
+                                calculateRegimentStats={calcStatsWrapper}
+                                mainForceKey={state.mainForceKey}
+                                totalDivisionCost={totalDivisionCost}
+                                remainingImprovementPoints={remainingImprovementPoints}
+                                unitsMap={unitsMap}
+                                getRegimentDefinition={getRegimentDefinition}
+                                playerName={state.playerName}
+                                divisionCustomName={state.divisionCustomName}
+                            />
+                        }
+                        fileName={`Rozpiska_${state.divisionCustomName || 'Armia'}.pdf`}
+                        className={styles.pdfBtn}
+                    >
+                        {({ loading }) => loading ? 'Generowanie...' : 'Eksportuj do PDF 🖨️'}
+                    </PDFDownloadLink>
+                )}
             </div>
 
             <div className={styles.inputsRow}>
@@ -439,12 +478,12 @@ export default function RegimentSelector(props) {
                 </div>
             </div>
 
-            {validationErrors && validationErrors.length > 0 && (
+            {hasCriticalErrors && (
                 <div style={{ marginBottom: 20, padding: 15, backgroundColor: '#ffebee', border: '1px solid #ef5350', borderRadius: 8, color: '#c62828' }}>
                     <h4 style={{marginTop: 0, marginBottom: 8}}>⚠️ Błędy w konstrukcji dywizji:</h4>
                     <ul style={{margin: 0, paddingLeft: 20}}>
-                        {validationErrors.map((err, idx) => (
-                            <li key={idx}>{err}</li>
+                        {allValidationErrors.map((err, idx) => (
+                            <li key={idx} style={{marginBottom: 4, whiteSpace: 'pre-line'}}>{err}</li>
                         ))}
                     </ul>
                 </div>
@@ -570,6 +609,7 @@ export default function RegimentSelector(props) {
                         currentMainForceCost={currentMainForceCost}
                         isAllied={isAllied}
                         currentAlliesCount={currentAlliesCount}
+                        calculateRegimentPU={calcPuWrapper} // PRZEKAZUJEMY WRAPPER
                     />
                 </div>
             )}
@@ -594,6 +634,7 @@ export default function RegimentSelector(props) {
                     currentMainForceCost={currentMainForceCost}
                     isAllied={isAllied}
                     currentAlliesCount={currentAlliesCount}
+                    calculateRegimentPU={calcPuWrapper} // PRZEKAZUJEMY WRAPPER
                 />
             </div>
             
@@ -617,6 +658,7 @@ export default function RegimentSelector(props) {
                     currentMainForceCost={currentMainForceCost}
                     isAllied={isAllied}
                     currentAlliesCount={currentAlliesCount}
+                    calculateRegimentPU={calcPuWrapper} // PRZEKAZUJEMY WRAPPER
                 />
             </div>
         </div>

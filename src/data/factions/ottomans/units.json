@@ -207,7 +207,7 @@
   "ott_medium_art_s": {
     "id": "ott_medium_art_s",
     "name": "Średnie Działa Tureckie S",
-    "cost": 3,
+    "cost": 5,
     "improvement_cost": 2,
     "rank": "silver",
     "is_artillery": true
@@ -215,7 +215,7 @@
   "ott_medium_art_m": {
     "id": "ott_medium_art_m",
     "name": "Średnie Działa Tureckie M",
-    "cost": 6,
+    "cost": 8,
     "improvement_cost": 3,
     "rank": "gold",
     "is_artillery": true

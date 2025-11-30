@@ -290,9 +290,7 @@
     ],
     "regiment_improvements": [
       {
-        "id": "elite_janissary_regiment_rule",
-        "army_point_cost": 3,
-        "cost": -3
+        "id": "elite_janissaries"
       }
     ],
     "unit_improvements": [

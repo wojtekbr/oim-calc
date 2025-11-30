@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { calculateRegimentStats, calculateMainForceKey, validateVanguardCost, validateAlliedCost } from "../utils/armyMath";
+import { calculateRegimentStats, calculateMainForceKey } from "../utils/armyMath";
 import { IDS, GROUP_TYPES } from "../constants";
 import { useArmyData } from "../context/ArmyDataContext";
 import { checkSupportUnitRequirements } from "../utils/divisionRules";
@@ -124,12 +124,11 @@ export const useRegimentSelectorLogic = ({
     const tempDivision = JSON.parse(JSON.stringify(configuredDivision));
     const groupArr = tempDivision[groupKey];
     
-    // Inicjalizujemy czysty konfig
     const newConfig = { 
         baseSelections: {}, 
         additionalSelections: {}, 
         additionalCustom: null,
-        additionalEnabled: false, // DOMYŚLNIE FALSE
+        additionalEnabled: false, 
         optionalEnabled: {},
         optionalSelections: {},
         improvements: {},
@@ -140,7 +139,6 @@ export const useRegimentSelectorLogic = ({
     const def = getRegimentDefinition(newRegimentId);
     
     if (def && def.structure) {
-        // 1. Inicjalizacja BASE (Auto-select first key)
         if (def.structure.base) {
             Object.entries(def.structure.base).forEach(([slotKey, pods]) => {
                 if (slotKey === 'optional') return;
@@ -151,7 +149,6 @@ export const useRegimentSelectorLogic = ({
             });
         }
 
-        // 2. Inicjalizacja ADDITIONAL (Auto-select first key)
         if (def.structure.additional) {
              Object.entries(def.structure.additional).forEach(([slotKey, pods]) => {
                 if (slotKey === 'optional') return;
@@ -161,9 +158,6 @@ export const useRegimentSelectorLogic = ({
                     return keys.length > 0 ? keys[0] : null; 
                 });
              });
-             
-             // USUNIĘTO: newConfig.additionalEnabled = true;
-             // Teraz pozostaje false, czekając na kliknięcie checkboxa przez usera.
         }
     }
 
@@ -180,7 +174,6 @@ export const useRegimentSelectorLogic = ({
         }
     }
 
-    // Walidacja Supportu
     const unitsToRemoveIndices = [];
     const unitsToRemoveNames = [];
 
@@ -211,17 +204,8 @@ export const useRegimentSelectorLogic = ({
         if (!confirmed) return;
     }
 
-    const vanguardCheck = validateVanguardCost(tempDivision, unitsMap, faction, getRegimentDefinition, improvements);
-    if (!vanguardCheck.isValid) {
-        alert(vanguardCheck.message);
-        return;
-    }
-
-    const alliedCheck = validateAlliedCost(tempDivision, unitsMap, faction, getRegimentDefinition, improvements);
-    if (!alliedCheck.isValid) {
-        alert(alliedCheck.message);
-        return;
-    }
+    // ZMIANA: USUNIĘTO ALERTY BLOKUJĄCE ZMIANĘ PUŁKU (VANGUARD/ALLIED)
+    // Pozwalamy na zmianę, walidacja w locie w Selectorze.
 
     setConfiguredDivision((prev) => {
       const group = prev[groupKey];

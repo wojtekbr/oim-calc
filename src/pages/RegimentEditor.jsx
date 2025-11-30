@@ -7,10 +7,6 @@ import {
     calculateSingleImprovementIMPCost 
 } from "../utils/armyMath";
 
-// ... (Sub-components: SingleUnitOptionCard, MultiUnitOptionCard, ActiveOptionConfigurationPanel, GroupSection - BEZ ZMIAN)
-// Aby zaoszczędzić miejsce, pomijam ich kod wklejając, ale upewnij się że są w pliku.
-// SKOPIUJ JE Z POPRZEDNIEGO KROKU LUB ZOSTAWCIE BEZ ZMIAN
-
 // --- Sub-components (View Only) ---
 
 const SingleUnitOptionCard = ({ 
@@ -128,42 +124,49 @@ const ActiveOptionConfigurationPanel = ({
             </div>
             {unitIds.map((uid, uIdx) => {
                 const positionKey = `${basePositionKey}/${uIdx}`;
+                const unitDef = unitsMap[uid];
                 
+                // Sprawdzamy czy to grupa (np. Kethuda, Aga)
+                const isGroupRank = unitDef?.rank === 'group';
+
                 const validImprovements = unitLevelImprovements.filter(imp => {
-                    return canUnitTakeImprovement(unitsMap[uid], imp.id, regiment);
+                    return canUnitTakeImprovement(unitDef, imp.id, regiment);
                 });
 
                 return (
                     <div key={uIdx} style={{ marginBottom: 8, paddingBottom: 8, borderBottom: uIdx < unitIds.length - 1 ? '1px dashed #ccc' : 'none' }}>
                         <div style={{fontWeight: 600, fontSize: 13, marginBottom: 4, display: 'flex', justifyContent: 'space-between'}}>
-                            <span>{uIdx + 1}. {unitsMap[uid]?.name}</span>
+                            <span>{uIdx + 1}. {unitDef?.name}</span>
                             <span style={{fontWeight: 400, color: '#888', fontSize: 11}}>({helpers.getFinalUnitCost(uid, false)} PS)</span>
                         </div>
 
-                        <div className={styles.improvementsContainer} style={{marginTop: 0, border: 'none', paddingTop: 0}}>
-                            {validImprovements.length > 0 ? validImprovements.map(imp => {
-                                const isSelected = state.improvements[positionKey]?.includes(imp.id);
-                                const cost = calculateSingleImprovementIMPCost(unitsMap[uid], imp.id, regiment, commonImprovements);
-                                const canAfford = isSelected || (state.newRemainingPointsAfterLocalChanges - cost >= 0);
+                        {/* Wyświetlamy kontener ulepszeń tylko jeśli jednostka NIE JEST grupą */}
+                        {!isGroupRank && (
+                            <div className={styles.improvementsContainer} style={{marginTop: 0, border: 'none', paddingTop: 0}}>
+                                {validImprovements.length > 0 ? validImprovements.map(imp => {
+                                    const isSelected = state.improvements[positionKey]?.includes(imp.id);
+                                    const cost = calculateSingleImprovementIMPCost(unitDef, imp.id, regiment, commonImprovements);
+                                    const canAfford = isSelected || (state.newRemainingPointsAfterLocalChanges - cost >= 0);
 
-                                const commonDef = commonImprovements[imp.id];
-                                const displayName = imp.name || commonDef?.name || imp.id;
+                                    const commonDef = commonImprovements[imp.id];
+                                    const displayName = imp.name || commonDef?.name || imp.id;
 
-                                return (
-                                    <button
-                                        key={imp.id}
-                                        className={`${styles.impBadge} ${isSelected ? styles.active : ''}`}
-                                        onClick={() => handlers.handleImprovementToggle(positionKey, uid, imp.id)}
-                                        disabled={!isSelected && !canAfford}
-                                        title={`Koszt: ${cost} PU`}
-                                    >
-                                        {displayName} ({cost} PU)
-                                    </button>
-                                );
-                            }) : (
-                                <span style={{fontSize: 11, color: '#999', fontStyle: 'italic'}}>Brak dostępnych ulepszeń</span>
-                            )}
-                        </div>
+                                    return (
+                                        <button
+                                            key={imp.id}
+                                            className={`${styles.impBadge} ${isSelected ? styles.active : ''}`}
+                                            onClick={() => handlers.handleImprovementToggle(positionKey, uid, imp.id)}
+                                            disabled={!isSelected && !canAfford}
+                                            title={`Koszt: ${cost} PU`}
+                                        >
+                                            {displayName} ({cost} PU)
+                                        </button>
+                                    );
+                                }) : (
+                                    <span style={{fontSize: 11, color: '#999', fontStyle: 'italic'}}>Brak dostępnych ulepszeń</span>
+                                )}
+                            </div>
+                        )}
                     </div>
                 );
             })}
@@ -313,7 +316,7 @@ const GroupSection = ({
 
 export default function RegimentEditor(props) {
   const { state, definitions, handlers, helpers } = useRegimentLogic(props);
-  const { unitsMap, regiment, regimentRules } = props; // NOWE: odbieramy regimentRules
+  const { unitsMap, regiment, regimentRules } = props;
   const { base, additional, commonImprovements } = definitions;
   
   const formatCost = (cost) => {
@@ -507,10 +510,13 @@ export default function RegimentEditor(props) {
                     <span className={styles.statLabel}>Motywacja:</span>
                     <span className={styles.statValue}>{state.stats.totalMotivation}</span>
                 </div>
+                
+                {/* ZMIANA: Z "Aktywacje" na "Znaczniki Aktywacji" */}
                 <div className={styles.statRow}>
-                    <span className={styles.statLabel}>Aktywacje:</span>
+                    <span className={styles.statLabel}>Znaczniki Aktywacji:</span>
                     <span className={styles.statValue}>{state.stats.totalActivations}</span>
                 </div>
+                
                 <div className={styles.statRow}>
                     <span className={styles.statLabel}>Rozkazy:</span>
                     <span className={styles.statValue}>{state.stats.totalOrders}</span>

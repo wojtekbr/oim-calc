@@ -27,7 +27,7 @@
   "serdengetci_contract": {
     "name": "Kontrakt Serdengetci",
     "cost": 1,
-    "type": "regiment"
+    "type": "unit"
   },
   "elite_janissaries": {
     "name": "Elitarni Janczarzy",
