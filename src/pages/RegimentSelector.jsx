@@ -8,8 +8,7 @@ import { checkDivisionConstraints, getDivisionRulesDescriptions, checkSupportUni
 import { IDS, GROUP_TYPES } from "../constants";
 import { useArmyData } from "../context/ArmyDataContext";
 
-// ... (SupportUnitTile, GeneralOptionTile, SupportConfigRow, RegimentOptionTile - BEZ ZMIAN) ...
-// Skopiuj je z poprzedniej wersji
+// --- Sub-components ---
 
 const SupportUnitTile = ({ unitId, isPurchased, locked, onClick, unitDef, disabledReason }) => {
     const puCost = unitDef?.improvement_points_cost || unitDef?.pu_cost || 0;
@@ -101,7 +100,6 @@ const SupportConfigRow = ({ supportUnit, index, unitsMap, unitsRulesMap, regimen
         } else if (supportType === 'cavalry') {
             if (regType !== 'Konny') return false;
         }
-
         return true;
     });
 
@@ -161,7 +159,7 @@ const SupportConfigRow = ({ supportUnit, index, unitsMap, unitsRulesMap, regimen
     );
 };
 
-const RegimentOptionTile = ({ optId, isActive, onClick, getRegimentDefinition, disabled }) => {
+const RegimentOptionTile = ({ optId, isActive, onClick, getRegimentDefinition, disabled, isAllied }) => {
     const def = getRegimentDefinition(optId);
     const name = def?.name || optId;
     const cost = def?.base_cost || 0;
@@ -177,6 +175,11 @@ const RegimentOptionTile = ({ optId, isActive, onClick, getRegimentDefinition, d
             <div className={styles.optionCost}>
                 Koszt bazowy: {cost} PS
             </div>
+            {isAllied && (
+                <div style={{ fontSize: 10, color: '#d35400', marginTop: 2, fontWeight: 'bold' }}>
+                    (Pułk Sojuszniczy)
+                </div>
+            )}
         </div>
     );
 };
@@ -184,9 +187,11 @@ const RegimentOptionTile = ({ optId, isActive, onClick, getRegimentDefinition, d
 const RegimentBlock = ({ 
     group, regiments, definitionOptions, 
     mainForceKey, getRegimentDefinition, calculateStats, 
-    onNameChange, onRegimentChange, onOpenEditor, onMainForceSelect, // <-- FIX: onMainForceSelect prop
+    onNameChange, onRegimentChange, onOpenEditor, onMainForceSelect, 
     supportUnits, unitsMap, configuredDivision, divisionDefinition,
-    currentMainForceCost // <-- FIX: Potrzebujemy znać koszt aktualnych sił głównych, żeby wiedzieć kto jest kandydatem
+    currentMainForceCost,
+    isAllied,
+    currentAlliesCount
 }) => {
     return regiments.map((regiment, index) => {
         const options = definitionOptions[index].options;
@@ -211,10 +216,9 @@ const RegimentBlock = ({
         const isMainForce = mainForceKey === positionKey;
         const finalActivations = stats.activations + (isMainForce ? 1 : 0);
         const isVanguardGroup = group === GROUP_TYPES.VANGUARD;
-
-        // Logic: Czy ten pułk może być SG?
-        // Musi nie być VANGUARD, nie być NONE, i mieć koszt równy obecnemu maxCost (currentMainForceCost)
-        const isMainForceCandidate = !isVanguardGroup && !isNone && stats.cost === currentMainForceCost;
+        
+        const isRegimentAllied = !isNone && isAllied(currentRegimentId);
+        const isMainForceCandidate = !isVanguardGroup && !isNone && !isRegimentAllied && stats.cost === currentMainForceCost;
 
         const handleTileClick = (optId, isBlocked) => {
             if (isDisabled || isBlocked) return;
@@ -238,7 +242,7 @@ const RegimentBlock = ({
                         <div className={styles.regTitle}>
                             {label}
                             {isMainForce && <span className={styles.mainForceBadge}>SIŁY GŁÓWNE</span>}
-                            {/* FIX: Przycisk wyboru SG (jeśli kandydat) */}
+                            {isRegimentAllied && <span style={{background:'#d35400', color:'white', padding:'2px 6px', borderRadius:4, fontSize:11, marginLeft:6}}>SOJUSZNIK</span>}
                             {isMainForceCandidate && !isMainForce && (
                                 <button 
                                     onClick={() => onMainForceSelect(positionKey)}
@@ -254,7 +258,11 @@ const RegimentBlock = ({
                             {options.filter(optId => optId !== IDS.NONE).map(optId => {
                                 const isActive = currentRegimentId === optId;
                                 const isRuleBlocked = !isActive && !checkDivisionConstraints(configuredDivision, divisionDefinition, optId);
-                                const isBlocked = isDisabled || isRuleBlocked;
+                                
+                                const isOptionAlly = isAllied(optId);
+                                const isAllyBlocked = isOptionAlly && currentAlliesCount >= 1 && currentRegimentId !== optId;
+                                
+                                const isBlocked = isDisabled || isRuleBlocked || isAllyBlocked;
 
                                 return (
                                     <RegimentOptionTile 
@@ -262,6 +270,7 @@ const RegimentBlock = ({
                                         optId={optId}
                                         isActive={isActive}
                                         disabled={isBlocked}
+                                        isAllied={isOptionAlly}
                                         onClick={() => handleTileClick(optId, isBlocked)}
                                         getRegimentDefinition={getRegimentDefinition}
                                     />
@@ -330,20 +339,24 @@ export default function RegimentSelector(props) {
 
     const { state, handlers } = useRegimentSelectorLogic(props);
     const { improvements } = useArmyData();
-    const calcStatsWrapper = (config, id) => calculateRegimentStats(config, id, configuredDivision, faction, getRegimentDefinition, improvements);
+    const calcStatsWrapper = (config, id) => calculateRegimentStats(config, id, configuredDivision, unitsMap, getRegimentDefinition, improvements);
     
-    const divisionType = calculateDivisionType(configuredDivision, faction, getRegimentDefinition, improvements);
+    const divisionType = calculateDivisionType(configuredDivision, unitsMap, getRegimentDefinition, improvements);
 
-    // FIX: Obliczamy koszt obecnych sił głównych, żeby wiedzieć co jest kandydatem
+    const rulesDescriptions = getDivisionRulesDescriptions(divisionDefinition, unitsMap, getRegimentDefinition);
+
+    const { vanguard: vanguardRegiments, base: baseRegiments, additional: additionalRegiments, supportUnits } = configuredDivision;
+
+    const generalId = configuredDivision.general;
+    const generalDef = generalId ? unitsMap[generalId] : null;
+
     const currentMainForceCost = useMemo(() => {
         if (!state.mainForceKey) return 0;
-        // Znajdź regiment i oblicz jego koszt
         const [group, idxStr] = state.mainForceKey.split('/');
         const index = parseInt(idxStr, 10);
         let reg = null;
         if (group === GROUP_TYPES.BASE) reg = configuredDivision.base[index];
         else if (group === GROUP_TYPES.ADDITIONAL) reg = configuredDivision.additional[index];
-        // Vanguard nie może być main force, więc pomijamy
         
         if (reg) {
             return calcStatsWrapper(reg.config, reg.id).cost;
@@ -351,13 +364,16 @@ export default function RegimentSelector(props) {
         return 0;
     }, [state.mainForceKey, configuredDivision]);
 
-    // FIX: Pobieramy opisy zasad
-    const rulesDescriptions = getDivisionRulesDescriptions(divisionDefinition, unitsMap, getRegimentDefinition);
+    // Helper to check if regiment is ally
+    const isAllied = (regId) => {
+        if (regId === IDS.NONE) return false;
+        return faction.regiments && !faction.regiments[regId];
+    };
 
-    const { vanguard: vanguardRegiments, base: baseRegiments, additional: additionalRegiments, supportUnits } = configuredDivision;
-
-    const generalId = configuredDivision.general;
-    const generalDef = generalId ? unitsMap[generalId] : null;
+    const currentAlliesCount = useMemo(() => {
+        const all = [...vanguardRegiments, ...baseRegiments, ...additionalRegiments];
+        return all.filter(r => r.id !== IDS.NONE && isAllied(r.id)).length;
+    }, [configuredDivision]);
 
     return (
         <div className={styles.container}>
@@ -386,7 +402,6 @@ export default function RegimentSelector(props) {
                 </PDFDownloadLink>
             </div>
 
-            {/* ... Inputy i Summary bez zmian ... */}
             <div className={styles.inputsRow}>
                 <input 
                     className={styles.inputField} 
@@ -550,9 +565,11 @@ export default function RegimentSelector(props) {
                         onMainForceSelect={handlers.handleMainForceSelect}
                         supportUnits={supportUnits}
                         unitsMap={unitsMap}
-                        configuredDivision={configuredDivision} 
+                        configuredDivision={configuredDivision}
                         divisionDefinition={divisionDefinition}
                         currentMainForceCost={currentMainForceCost}
+                        isAllied={isAllied}
+                        currentAlliesCount={currentAlliesCount}
                     />
                 </div>
             )}
@@ -569,12 +586,14 @@ export default function RegimentSelector(props) {
                     onNameChange={handlers.handleRegimentNameChange}
                     onRegimentChange={handlers.handleRegimentChange}
                     onOpenEditor={props.onOpenRegimentEditor}
-                    onMainForceSelect={handlers.handleMainForceSelect} // FIX: Pass handler
+                    onMainForceSelect={handlers.handleMainForceSelect}
                     supportUnits={supportUnits}
                     unitsMap={unitsMap}
                     configuredDivision={configuredDivision}
                     divisionDefinition={divisionDefinition}
-                    currentMainForceCost={currentMainForceCost} // FIX: Pass cost
+                    currentMainForceCost={currentMainForceCost}
+                    isAllied={isAllied}
+                    currentAlliesCount={currentAlliesCount}
                 />
             </div>
             
@@ -590,12 +609,14 @@ export default function RegimentSelector(props) {
                     onNameChange={handlers.handleRegimentNameChange}
                     onRegimentChange={handlers.handleRegimentChange}
                     onOpenEditor={props.onOpenRegimentEditor}
-                    onMainForceSelect={handlers.handleMainForceSelect} // FIX: Pass handler
+                    onMainForceSelect={handlers.handleMainForceSelect}
                     supportUnits={supportUnits}
                     unitsMap={unitsMap}
                     configuredDivision={configuredDivision}
                     divisionDefinition={divisionDefinition}
-                    currentMainForceCost={currentMainForceCost} // FIX: Pass cost
+                    currentMainForceCost={currentMainForceCost}
+                    isAllied={isAllied}
+                    currentAlliesCount={currentAlliesCount}
                 />
             </div>
         </div>

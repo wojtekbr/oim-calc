@@ -12,36 +12,41 @@ export const useArmyData = () => {
 
 export const ArmyDataProvider = ({ children }) => {
     const [factions, setFactions] = useState(null);
-    const [improvements, setImprovements] = useState({}); // Nowy stan
+    const [improvements, setImprovements] = useState({});
+    // NOWE: Globalne słowniki
+    const [globalUnits, setGlobalUnits] = useState({});
+    const [globalRegiments, setGlobalRegiments] = useState({});
+    
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                // Ładowanie modułów
                 const unitModules = import.meta.glob("../data/factions/*/units.json", { eager: true, import: "default" });
                 const regimentModules = import.meta.glob("../data/factions/*/regiments.json", { eager: true, import: "default" });
                 const divisionModules = import.meta.glob("../data/factions/*/divisions.json", { eager: true, import: "default" });
                 const commonUnitModules = import.meta.glob("../data/common/units.json", { eager: true, import: "default" });
-                
-                // NOWE: Ładowanie definicji ulepszeń
                 const improvementModules = import.meta.glob("../data/common/improvements.json", { eager: true, import: "default" });
 
-                // Przetwarzanie ulepszeń
+                // 1. Ulepszenia
                 let commonImprovements = {};
                 for (const path in improvementModules) {
                     Object.assign(commonImprovements, improvementModules[path]);
                 }
                 setImprovements(commonImprovements);
 
-                // Przetwarzanie jednostek wspólnych
+                // 2. Jednostki Wspólne
                 let commonUnits = {};
                 for (const path in commonUnitModules) {
                     Object.assign(commonUnits, commonUnitModules[path]);
                 }
 
                 const map = {};
+                
+                // Tymczasowe kontenery na dane globalne
+                let allUnitsAccumulator = { ...commonUnits };
+                let allRegimentsAccumulator = {};
 
                 const loadModules = (modules, type) => {
                     for (const path in modules) {
@@ -54,7 +59,17 @@ export const ArmyDataProvider = ({ children }) => {
                             map[key].meta = { key, name: metaName };
                         }
                         
-                        map[key][type] = modules[path] || {};
+                        const data = modules[path] || {};
+                        map[key][type] = data;
+
+                        // NOWE: Agregacja do globalnych słowników
+                        if (type === 'units') {
+                            // Pamiętaj, że units.json może mieć klucz _meta, pomijamy go przy mergowaniu jednostek
+                            const { _meta, ...unitsData } = data;
+                            Object.assign(allUnitsAccumulator, unitsData);
+                        } else if (type === 'regiments') {
+                             Object.assign(allRegimentsAccumulator, data);
+                        }
                     }
                 };
 
@@ -62,12 +77,18 @@ export const ArmyDataProvider = ({ children }) => {
                 loadModules(regimentModules, 'regiments');
                 loadModules(divisionModules, 'divisions');
 
+                // Finalizacja struktury frakcji
                 Object.keys(map).forEach(k => {
                     map[k].units = { ...commonUnits, ...(map[k].units || {}) };
                     if (!map[k].meta) map[k].meta = { key: k, name: k };
                 });
 
                 setFactions(map);
+                
+                // NOWE: Ustawienie stanu globalnego
+                setGlobalUnits(allUnitsAccumulator);
+                setGlobalRegiments(allRegimentsAccumulator);
+
                 setLoading(false);
             } catch (e) {
                 console.error("Loading error:", e);
@@ -79,14 +100,18 @@ export const ArmyDataProvider = ({ children }) => {
         loadData();
     }, []);
 
-    const getRegimentDefinition = (factionKey, regimentKey) => {
-        if (!factions || !factionKey || !regimentKey || regimentKey === 'none') return null;
-        return factions[factionKey]?.regiments?.[regimentKey] || null;
+    // ZMIANA: getRegimentDefinition szuka teraz w globalnym rejestrze
+    // Dzięki temu znajdzie pułk tatarski nawet jak jesteś w Turcji
+    const getRegimentDefinition = (regimentKey) => {
+        if (!regimentKey || regimentKey === 'none') return null;
+        return globalRegiments[regimentKey] || null;
     };
 
     const value = {
         factions,
-        improvements, // Udostępniamy
+        improvements,
+        globalUnits,      // Eksportujemy
+        globalRegiments,  // Eksportujemy (opcjonalnie, bo mamy getRegimentDefinition)
         loading,
         error,
         getRegimentDefinition

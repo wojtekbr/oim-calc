@@ -14,16 +14,30 @@ import { calculateRuleBonuses, validateDivisionRules } from "./utils/divisionRul
 
 const createDefaultRegiments = (divisionDefinition, getRegimentDefinition) => {
     const createRegimentWithDefaults = (group, index, regimentId) => {
-        const config = { base: {}, additional: {}, improvements: {} };
+        // Inicjalizujemy pełną strukturę konfiguracyjną
+        const config = { 
+            baseSelections: {}, 
+            additionalSelections: {}, 
+            additionalCustom: null,
+            additionalEnabled: false,
+            optionalEnabled: {},
+            optionalSelections: {},
+            improvements: {},
+            regimentImprovements: [],
+            isVanguard: false // Flaga legacy, ale warto trzymać
+        };
+        
         const def = getRegimentDefinition(regimentId);
         if (def && def.structure && def.structure.base) {
-            Object.entries(def.structure.base).forEach(([slotKey, options]) => {
-                const isOptional = slotKey.toLowerCase().startsWith('optional');
-                if (!isOptional && Array.isArray(options) && options.length > 0) {
-                    config.base[slotKey] = options[0]; 
-                } else {
-                    config.base[slotKey] = null;
-                }
+            Object.entries(def.structure.base).forEach(([groupKey, pods]) => {
+                // Ignorujemy grupy opcjonalne przy domyślnym wyborze
+                if (groupKey === 'optional') return;
+
+                // Dla każdej grupy tworzymy tablicę wyborów (domyślnie pierwsza opcja)
+                config.baseSelections[groupKey] = pods.map(pod => {
+                    const options = Object.values(pod).map(u => u?.id).filter(Boolean);
+                    return options.length > 0 ? options[0] : null;
+                });
             });
         }
         return { group, index, id: regimentId, customName: "", config: config };
@@ -60,7 +74,7 @@ const createDefaultRegiments = (divisionDefinition, getRegimentDefinition) => {
 };
 
 function AppContent() {
-    const { factions, loading, error, improvements } = useArmyData();
+    const { factions, loading, error, improvements, globalUnits, getRegimentDefinition } = useArmyData();
 
     const [screen, setScreen] = useState(SCREENS.LIST);
     const [selectedFactionKey, setSelectedFactionKey] = useState(null);
@@ -72,13 +86,15 @@ function AppContent() {
 
     const selectedFaction = selectedFactionKey ? factions?.[selectedFactionKey] : null;
     const selectedDivisionDefinition = selectedFaction && selectedDivisionKey ? selectedFaction.divisions[selectedDivisionKey] : null;
-    const getRegimentDefinition = (regimentKey) => selectedFaction?.regiments[regimentKey] || null;
+    
+    // Używamy globalnej mapy jednostek
+    const unitsMap = globalUnits;
 
     useEffect(() => {
         if (screen === SCREENS.SELECTOR && selectedDivisionDefinition && !configuredDivision) {
             setConfiguredDivision(createDefaultRegiments(selectedDivisionDefinition, getRegimentDefinition));
         }
-    }, [screen, selectedDivisionDefinition, configuredDivision]);
+    }, [screen, selectedDivisionDefinition, configuredDivision, getRegimentDefinition]);
 
     const openRegimentSelector = (factionKey, divisionKey) => {
         setSelectedFactionKey(factionKey);
@@ -106,31 +122,37 @@ function AppContent() {
         setConfiguredDivision(null);
     };
 
+    // --- CALCULATIONS ---
+
     const ruleBonuses = configuredDivision && selectedDivisionDefinition 
-        ? calculateRuleBonuses(configuredDivision, selectedDivisionDefinition, selectedFaction.units, getRegimentDefinition)
+        ? calculateRuleBonuses(configuredDivision, selectedDivisionDefinition, unitsMap, getRegimentDefinition)
         : { improvementPoints: 0, supply: 0 };
 
-    const supplyFromUnits = configuredDivision ? calculateTotalSupplyBonus(configuredDivision, selectedFaction, getRegimentDefinition) : 0;
+    const supplyFromUnits = configuredDivision ? calculateTotalSupplyBonus(configuredDivision, unitsMap, getRegimentDefinition) : 0;
     const supplyBonus = supplyFromUnits + ruleBonuses.supply;
 
-    const totalImprovementsUsed = configuredDivision ? calculateImprovementPointsCost(configuredDivision, selectedFaction, getRegimentDefinition, improvements) : 0;
+    const totalImprovementsUsed = configuredDivision ? calculateImprovementPointsCost(configuredDivision, unitsMap, getRegimentDefinition, improvements) : 0;
     const improvementPointsLimit = (selectedDivisionDefinition?.improvement_points || 0) + supplyBonus + ruleBonuses.improvementPoints;
     
     const remainingImprovementPoints = improvementPointsLimit - totalImprovementsUsed;
     
     const validationErrors = (configuredDivision && selectedDivisionDefinition)
-        ? validateDivisionRules(configuredDivision, selectedDivisionDefinition, selectedFaction.units, getRegimentDefinition)
+        ? validateDivisionRules(configuredDivision, selectedDivisionDefinition, unitsMap, getRegimentDefinition)
         : [];
 
     const totalDivisionCost = configuredDivision 
-        ? calculateDivisionCost(configuredDivision, selectedFaction, getRegimentDefinition, calculateRegimentStats, improvements) 
+        ? calculateDivisionCost(configuredDivision, unitsMap, getRegimentDefinition, calculateRegimentStats, improvements) 
         : (selectedDivisionDefinition?.base_cost || 0);
 
     const getEditingRegiment = () => {
         if (!configuredDivision || editingRegimentGroup === null || editingRegimentIndex === null) return null;
         const regimentStructure = configuredDivision[editingRegimentGroup][editingRegimentIndex];
+        
+        const regDef = getRegimentDefinition(regimentStructure.id);
+        if (!regDef) return null;
+
         return {
-            ...getRegimentDefinition(regimentStructure.id),
+            ...regDef,
             id: regimentStructure.id,
             name: regimentStructure.name,
             divisionDefinition: selectedDivisionDefinition,
@@ -169,7 +191,7 @@ function AppContent() {
                     totalDivisionCost={totalDivisionCost}
                     
                     additionalUnitsDefinitions={selectedDivisionDefinition?.additional_units || []}
-                    unitsMap={selectedFaction.units}
+                    unitsMap={unitsMap}
                     
                     validationErrors={validationErrors}
                 />
@@ -177,7 +199,7 @@ function AppContent() {
 
             {screen === SCREENS.EDITOR && selectedFaction && configuredDivision && editingRegimentIndex !== null && (
                 <RegimentEditor
-                    faction={selectedFaction}
+                    faction={selectedFaction} // Przekazujemy, bo potrzebne do walidacji sojuszników
                     regiment={getEditingRegiment()}
                     onBack={backToSelector}
                     configuredDivision={configuredDivision}
@@ -185,13 +207,12 @@ function AppContent() {
                     regimentGroup={editingRegimentGroup}
                     regimentIndex={editingRegimentIndex}
                     
-                    calculateImprovementPointsCost={(div) => calculateImprovementPointsCost(div, selectedFaction, getRegimentDefinition, improvements)}
-                    calculateTotalSupplyBonus={(div) => calculateTotalSupplyBonus(div, selectedFaction, getRegimentDefinition)}
-                    // ZMIANA: Przekazujemy getRegimentDefinition, aby hook mógł liczyć zasady
+                    calculateImprovementPointsCost={(div) => calculateImprovementPointsCost(div, unitsMap, getRegimentDefinition, improvements)}
+                    calculateTotalSupplyBonus={(div) => calculateTotalSupplyBonus(div, unitsMap, getRegimentDefinition)}
                     getRegimentDefinition={getRegimentDefinition}
                     
                     remainingImprovementPoints={remainingImprovementPoints}
-                    unitsMap={selectedFaction.units}
+                    unitsMap={unitsMap}
                 />
             )}
         </div>

@@ -1,6 +1,5 @@
 import { IDS, GROUP_TYPES, RANK_TYPES } from "../constants";
 
-// Pomocnicza: Oblicza koszt ulepszenia
 const resolveCostRule = (baseCost, rule) => {
     if (typeof rule === 'number') {
         if (rule < 0) return Math.max(1, baseCost + rule);
@@ -29,7 +28,6 @@ export const calculateSingleImprovementIMPCost = (unitDef, impId, regimentDefini
 };
 
 export const calculateSingleImprovementArmyCost = (unitDef, impId, regimentDefinition, commonImprovements) => {
-    // Logika dla kosztu PS (army points)
     const regImpDef = regimentDefinition?.regiment_improvements?.find(i => i.id === impId);
     const commonImpDef = commonImprovements?.[impId];
     let cost = 0;
@@ -71,7 +69,7 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
 
                 pods.forEach((pod, idx) => {
                      let unitId = selectedIds[idx];
-                     if (!unitId) {
+                     if (unitId === undefined) {
                          const opts = Object.values(pod).map(u => u?.id).filter(Boolean);
                          if (opts.length === 1) unitId = opts[0];
                      }
@@ -87,15 +85,9 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
 
             pods.forEach((pod, idx) => {
                 let unitId = selectedIds[idx];
-                if (!unitId) {
-                     if (regimentConfig[type] && regimentConfig[type][groupKey]) {
-                         const opts = Object.values(pod).map(u => u?.id).filter(Boolean);
-                         if (opts.length > 0) unitId = opts[0]; 
-                     } else {
-                         const opts = Object.values(pod).map(u => u?.id).filter(Boolean);
-                         if (opts.length === 1) unitId = opts[0];
-                         else if (opts.length > 0) unitId = opts[0];
-                     }
+                if (unitId === undefined) {
+                     const opts = Object.values(pod).map(u => u?.id).filter(Boolean);
+                     if (opts.length > 0) unitId = opts[0]; 
                 }
 
                 if (unitId && unitId !== IDS.NONE) {
@@ -119,7 +111,7 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
     return units;
 };
 
-export const calculateRegimentStats = (regimentConfig, regimentId, configuredDivision, selectedFaction, getRegimentDefinition, commonImprovements) => {
+export const calculateRegimentStats = (regimentConfig, regimentId, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements) => {
     const stats = {
         cost: 0,
         recon: 0,
@@ -131,9 +123,8 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         regimentType: "-",
         unitNames: []
     };
-    if (!selectedFaction || !regimentId) return stats;
+    if (!unitsMap || !regimentId) return stats; 
 
-    const unitsMap = selectedFaction.units || {};
     const regimentDefinition = getRegimentDefinition(regimentId);
     if (!regimentDefinition) return stats;
 
@@ -255,12 +246,10 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     return stats;
 };
 
-export const calculateImprovementPointsCost = (divisionConfig, selectedFaction, getRegimentDefinition, commonImprovements) => {
-    if (!selectedFaction || !divisionConfig) return 0;
-    const unitsMap = selectedFaction.units || {};
+export const calculateImprovementPointsCost = (divisionConfig, unitsMap, getRegimentDefinition, commonImprovements) => {
+    if (!unitsMap || !divisionConfig) return 0;
     let totalImpCost = 0;
 
-    // Helper: get cost from unit (new field 'improvement_points_cost' or legacy 'pu_cost')
     const getUnitPUCost = (unitId) => {
         if (!unitId || unitId === IDS.NONE) return 0;
         const u = unitsMap[unitId];
@@ -303,10 +292,8 @@ export const calculateImprovementPointsCost = (divisionConfig, selectedFaction, 
             const unitDef = unitsMap[unitId];
             if (!unitDef || unitDef.rank === RANK_TYPES.GROUP) return;
             
-            // Koszt samej jednostki (jeśli ma koszt w PU)
             totalImpCost += getUnitPUCost(unitId);
 
-            // Koszt ulepszeń jednostki
             (improvementsMap[positionKey] || []).forEach(impId => {
                 totalImpCost += calculateSingleImprovementIMPCost(unitDef, impId, regimentDefinition, commonImprovements);
             });
@@ -341,9 +328,8 @@ export const calculateImprovementPointsCost = (divisionConfig, selectedFaction, 
     return totalImpCost;
 };
 
-export const calculateTotalSupplyBonus = (divisionConfig, selectedFaction, getRegimentDefinition) => {
-    if (!selectedFaction || !divisionConfig) return 0;
-    const unitsMap = selectedFaction.units || {};
+export const calculateTotalSupplyBonus = (divisionConfig, unitsMap, getRegimentDefinition) => {
+    if (!unitsMap || !divisionConfig) return 0;
     let supplyBonus = 0;
 
     const checkUnit = (unitId) => {
@@ -378,11 +364,10 @@ export const calculateTotalSupplyBonus = (divisionConfig, selectedFaction, getRe
     return supplyBonus;
 };
 
-export const calculateDivisionCost = (configuredDivision, selectedFaction, getRegimentDefinition, calculateRegimentStats, commonImprovements) => {
+export const calculateDivisionCost = (configuredDivision, unitsMap, getRegimentDefinition, calculateRegimentStats, commonImprovements) => {
     if (!configuredDivision) return 0;
     const divisionDef = configuredDivision.divisionDefinition;
     let cost = divisionDef.base_cost || 0;
-    const unitsMap = selectedFaction?.units || {};
 
     if (configuredDivision.general) {
         const genDef = unitsMap[configuredDivision.general];
@@ -399,7 +384,7 @@ export const calculateDivisionCost = (configuredDivision, selectedFaction, getRe
     
     allRegiments.forEach(regiment => {
         if (regiment.id !== IDS.NONE) {
-            cost += calculateRegimentStats(regiment.config, regiment.id, configuredDivision, selectedFaction, getRegimentDefinition, commonImprovements).cost;
+            cost += calculateRegimentStats(regiment.config, regiment.id, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements).cost;
         }
     });
 
@@ -412,10 +397,8 @@ export const calculateDivisionCost = (configuredDivision, selectedFaction, getRe
     return cost;
 };
 
-export const calculateDivisionType = (configuredDivision, selectedFaction, getRegimentDefinition, commonImprovements) => {
-    if (!configuredDivision || !selectedFaction) return "-";
-
-    const unitsMap = selectedFaction.units || {};
+export const calculateDivisionType = (configuredDivision, unitsMap, getRegimentDefinition, commonImprovements) => {
+    if (!configuredDivision || !unitsMap) return "-";
 
     const allRegiments = [
         ...(configuredDivision.vanguard || []),
@@ -429,7 +412,7 @@ export const calculateDivisionType = (configuredDivision, selectedFaction, getRe
     let footRegimentsCount = 0;
 
     allRegiments.forEach(regiment => {
-        const stats = calculateRegimentStats(regiment.config, regiment.id, configuredDivision, selectedFaction, getRegimentDefinition, commonImprovements);
+        const stats = calculateRegimentStats(regiment.config, regiment.id, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements);
 
         if (stats.regimentType === "Konny") {
             horseRegimentsCount++;
@@ -455,35 +438,36 @@ export const calculateDivisionType = (configuredDivision, selectedFaction, getRe
     return "Dywizja Mieszana";
 };
 
-export const calculateMainForceKey = (configuredDivision, selectedFaction, getRegimentDefinition, commonImprovements) => {
+export const calculateMainForceKey = (configuredDivision, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     if (!configuredDivision) return null;
 
-    // 1. Zbieramy wszystkie pułki, ale POMIJAMY VANGUARD
+    const isAllied = (regId) => {
+        if (!selectedFaction || !selectedFaction.regiments) return false;
+        return !selectedFaction.regiments[regId];
+    };
+
+    // 1. Kandydaci na SG: tylko base/additional, NIE sojusznicy
     const eligibleRegiments = [
         ...(configuredDivision.base || []).map(r => ({ ...r, key: `${GROUP_TYPES.BASE}/${r.index}` })),
         ...(configuredDivision.additional || []).map(r => ({ ...r, key: `${GROUP_TYPES.ADDITIONAL}/${r.index}` }))
-    ].filter(r => r.id !== IDS.NONE);
+    ].filter(r => r.id !== IDS.NONE && !isAllied(r.id));
 
     if (eligibleRegiments.length === 0) return null;
 
-    // 2. Obliczamy koszt każdego pułku
     let maxCost = -1;
     const regimentCosts = {};
 
     eligibleRegiments.forEach(reg => {
-        const stats = calculateRegimentStats(reg.config, reg.id, configuredDivision, selectedFaction, getRegimentDefinition, commonImprovements);
+        const stats = calculateRegimentStats(reg.config, reg.id, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements);
         regimentCosts[reg.key] = stats.cost;
         if (stats.cost > maxCost) {
             maxCost = stats.cost;
         }
     });
 
-    // 3. Kandydaci
     const candidates = eligibleRegiments.filter(r => regimentCosts[r.key] === maxCost);
-
-    // 4. Preferencja usera
     const preferredKey = configuredDivision.preferredMainForceKey;
-    
+
     if (preferredKey && candidates.some(r => r.key === preferredKey)) {
         return preferredKey;
     }
@@ -491,13 +475,12 @@ export const calculateMainForceKey = (configuredDivision, selectedFaction, getRe
     return candidates.length > 0 ? candidates[0].key : null;
 };
 
-export const validateVanguardCost = (divisionConfig, selectedFaction, getRegimentDefinition, commonImprovements) => {
-    // 1. Oblicz koszt Sił Głównych (najdroższy z Base/Additional)
-    const mainForceKey = calculateMainForceKey(divisionConfig, selectedFaction, getRegimentDefinition, commonImprovements);
+// ZMIANA: unitsMap dla kosztów, selectedFaction dla mainForce
+export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
+    const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
     
     let mainForceCost = 0;
     if (mainForceKey) {
-        // Musimy znaleźć ten pułk w strukturze, żeby obliczyć jego koszt
         const [group, idxStr] = mainForceKey.split('/');
         const idx = parseInt(idxStr, 10);
         let reg = null;
@@ -505,18 +488,17 @@ export const validateVanguardCost = (divisionConfig, selectedFaction, getRegimen
         else if (group === GROUP_TYPES.ADDITIONAL) reg = divisionConfig.additional[idx];
         
         if (reg) {
-            mainForceCost = calculateRegimentStats(reg.config, reg.id, divisionConfig, selectedFaction, getRegimentDefinition, commonImprovements).cost;
+            mainForceCost = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements).cost;
         }
     }
 
-    // 2. Znajdź najdroższy pułk w Straży Przedniej
     let maxVanguardCost = 0;
     let maxVanguardName = "";
 
     const vanguardRegiments = divisionConfig.vanguard || [];
     vanguardRegiments.forEach(reg => {
         if (reg.id !== IDS.NONE) {
-            const stats = calculateRegimentStats(reg.config, reg.id, divisionConfig, selectedFaction, getRegimentDefinition, commonImprovements);
+            const stats = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements);
             if (stats.cost > maxVanguardCost) {
                 maxVanguardCost = stats.cost;
                 const def = getRegimentDefinition(reg.id);
@@ -525,12 +507,61 @@ export const validateVanguardCost = (divisionConfig, selectedFaction, getRegimen
         }
     });
 
-    // 3. Porównanie
     if (maxVanguardCost > mainForceCost) {
         return {
             isValid: false,
             message: `Niedozwolona konfiguracja!\n\nStraż Przednia (${maxVanguardName}: ${maxVanguardCost} PS) nie może być droższa od Sił Głównych (${mainForceCost} PS).`
         };
+    }
+
+    return { isValid: true };
+};
+
+// --- NOWA FUNKCJA: Walidacja kosztu pułków sojuszniczych ---
+export const validateAlliedCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
+    // 1. Oblicz koszt Sił Głównych
+    const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
+    
+    let mainForceCost = 0;
+    if (mainForceKey) {
+        const [group, idxStr] = mainForceKey.split('/');
+        const idx = parseInt(idxStr, 10);
+        let reg = null;
+        if (group === GROUP_TYPES.BASE) reg = divisionConfig.base[idx];
+        else if (group === GROUP_TYPES.ADDITIONAL) reg = divisionConfig.additional[idx];
+        
+        if (reg) {
+            mainForceCost = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements).cost;
+        }
+    }
+
+    // Helper: Czy pułk jest sojuszniczy?
+    const isAllied = (regId) => {
+        if (!selectedFaction || !selectedFaction.regiments) return false;
+        return !selectedFaction.regiments[regId];
+    };
+
+    // 2. Sprawdź wszystkie pułki sojusznicze
+    const allRegiments = [
+        ...(divisionConfig.vanguard || []),
+        ...(divisionConfig.base || []),
+        ...(divisionConfig.additional || [])
+    ];
+
+    for (const reg of allRegiments) {
+        if (reg.id !== IDS.NONE && isAllied(reg.id)) {
+            const stats = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements);
+            
+            if (stats.cost > mainForceCost) {
+                const def = getRegimentDefinition(reg.id);
+                const name = def ? def.name : reg.id;
+                
+                return {
+                    isValid: false,
+                    message: `Niedozwolona konfiguracja!\n\nPułk sojuszniczy (${name}: ${stats.cost} PS) nie może mieć więcej punktów siły niż Siły Główne (${mainForceCost} PS).`
+                };
+            }
+        }
     }
 
     return { isValid: true };

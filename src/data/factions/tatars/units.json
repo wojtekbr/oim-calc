@@ -1,0 +1,74 @@
+{
+  "_meta": { "name": "Imperium Osmańskie" },
+
+  "tat_mirza": {
+    "id": "tat_mirza",
+    "name": "Mirza",
+    "cost": 0,
+    "improvement_cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  
+  "tat_ordyncy_s": {
+    "id": "tat_ordyncy_s",
+    "name": "Ordyńcy S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "are_scouts": true
+  },
+  "tat_ordyncy_m": {
+    "id": "tat_ordyncy_m",
+    "name": "Ordyńcy M",
+    "cost": 8,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "are_scouts": true
+  },
+  "tat_ordyncy_dzidy_s": {
+    "id": "tat_ordyncy_dzidy_s",
+    "name": "Ordyńcy z dzidami S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "are_scouts": true
+  },
+  "tat_ordyncy_dzidy_m": {
+    "id": "tat_ordyncy_dzidy_m",
+    "name": "Ordyńcy z dzidami M",
+    "cost": 8,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "are_scouts": true
+  },
+  "tat_kazindzi_s": {
+    "id": "tat_kazindzi_s",
+    "name": "Kazindzi S",
+    "cost": 6,
+    "improvement_cost": 1,
+    "rank": "bronze",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "are_looters_insubordinate": true
+  },
+  "tat_kazindzi_m": {
+    "id": "tat_kazindzi_m",
+    "name": "Kazindzi M",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "are_looters_insubordinate": true
+  }
+
+}

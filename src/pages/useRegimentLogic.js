@@ -1,11 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { IDS, GROUP_TYPES, RANK_TYPES } from "../constants";
 import { useArmyData } from "../context/ArmyDataContext";
-import { canUnitTakeImprovement, calculateSingleImprovementIMPCost, validateVanguardCost } from "../utils/armyMath"; // FIX: Import
+import { canUnitTakeImprovement, calculateSingleImprovementIMPCost, validateVanguardCost, validateAlliedCost } from "../utils/armyMath"; // FIX: Import
 import { calculateRuleBonuses, checkSupportUnitRequirements } from "../utils/divisionRules";
 
 export const useRegimentLogic = ({
-  // ... (propsy bez zmian) ...
   regiment,
   configuredDivision,
   setConfiguredDivision,
@@ -17,18 +16,11 @@ export const useRegimentLogic = ({
   remainingImprovementPoints,
   divisionDefinition: propDivisionDefinition,
   unitsMap,
-  getRegimentDefinition
+  getRegimentDefinition,
+  faction
 }) => {
-  const { improvements: commonImprovements, factions } = useArmyData(); // Pobieramy factions dla walidatora (wymaga selectedFaction)
-  
-  // Problem: hook useRegimentLogic nie dostaje `selectedFaction` bezpośrednio, a `regiment` to obiekt definicji.
-  // Walidator `validateVanguardCost` wymaga obiektu faction, który ma pole `.units`.
-  // W App.jsx przekazujemy `unitsMap`. Możemy zrekonstruować faction object.
-  const fakeFactionForValidator = { units: unitsMap };
-
-
-  // ... (reszta hooka bez zmian: State, Helpers, useEffect, useMemo) ...
-  // SKOPIUJ WSZYSTKO ZE STAREGO PLIKU AŻ DO saveAndGoBack
+  // ... (Wszystko bez zmian, skopiuj z poprzedniego pliku do saveAndGoBack) ...
+  const { improvements: commonImprovements } = useArmyData();
 
   const divisionDefinition = propDivisionDefinition || regiment.divisionDefinition || {};
   const structure = regiment.structure || {};
@@ -51,7 +43,6 @@ export const useRegimentLogic = ({
 
   const getUnitName = (id) => unitsMap?.[id]?.name || id;
   const getUnitCost = (id) => unitsMap?.[id]?.cost || 0;
-  
   const getFinalUnitCost = (id, isCustom) => {
     if (!id) return 0;
     if (isCustom && customCostDefinition) {
@@ -60,7 +51,6 @@ export const useRegimentLogic = ({
     }
     return getUnitCost(id);
   };
-
   const groupKeys = (obj) => (obj && typeof obj === "object" ? Object.keys(obj) : []);
 
   useEffect(() => {
@@ -92,12 +82,8 @@ export const useRegimentLogic = ({
     const initOptionalGroup = (groupType, groupObj) => {
         if (Array.isArray(groupObj.optional)) {
             const key = `${groupType}/optional`;
-            if (!optSelInit[key]) {
-                optSelInit[key] = groupObj.optional.map(() => null);
-            }
-            if (optEnabledInit[key] === undefined) {
-                optEnabledInit[key] = !!currentConfig.optionalEnabled?.[key] || false;
-            }
+            if (!optSelInit[key]) optSelInit[key] = groupObj.optional.map(() => null);
+            if (optEnabledInit[key] === undefined) optEnabledInit[key] = !!currentConfig.optionalEnabled?.[key] || false;
         }
     }
     initOptionalGroup(GROUP_TYPES.BASE, base);
@@ -160,8 +146,10 @@ export const useRegimentLogic = ({
   const newRemainingPointsAfterLocalChanges = useMemo(() => {
     if (remainingImprovementPoints === undefined) return 0;
     const totalDivisionLimit = divisionDefinition.improvement_points || 0;
+    
     const tmp = JSON.parse(JSON.stringify(configuredDivision));
     const oldV = configuredDivision[regimentGroup]?.[regimentIndex]?.config?.isVanguard;
+    
     tmp[regimentGroup][regimentIndex].config = {
       baseSelections,
       additionalSelections,
@@ -173,18 +161,13 @@ export const useRegimentLogic = ({
       regimentImprovements,
       isVanguard: oldV,
     };
+
     const ruleBonuses = calculateRuleBonuses(tmp, divisionDefinition, unitsMap, getRegimentDefinition);
-    const dynamicSupplyBonus = calculateTotalSupplyBonus(tmp);
+    const dynamicSupplyBonus = calculateTotalSupplyBonus(tmp, unitsMap, getRegimentDefinition);
     const dynamicLimit = totalDivisionLimit + dynamicSupplyBonus + ruleBonuses.improvementPoints;
-    const totalUsedWithLocalChanges = calculateImprovementPointsCost(tmp);
+    const totalUsedWithLocalChanges = calculateImprovementPointsCost(tmp, unitsMap, getRegimentDefinition, commonImprovements);
     return dynamicLimit - totalUsedWithLocalChanges;
-  }, [
-    baseSelections, additionalSelections, selectedAdditionalCustom, additionalEnabled, 
-    optionalEnabled, optionalSelections, improvements, regimentImprovements, 
-    configuredDivision, calculateTotalSupplyBonus, calculateImprovementPointsCost, 
-    divisionDefinition, remainingImprovementPoints, regimentGroup, regimentIndex,
-    unitsMap, getRegimentDefinition
-  ]);
+  }, [baseSelections, additionalSelections, selectedAdditionalCustom, additionalEnabled, optionalEnabled, optionalSelections, improvements, regimentImprovements, configuredDivision, calculateTotalSupplyBonus, calculateImprovementPointsCost, divisionDefinition, remainingImprovementPoints, regimentGroup, regimentIndex, unitsMap, getRegimentDefinition, faction, commonImprovements]);
 
   const totalCost = useMemo(() => {
     let cost = regiment.base_cost || 0;
@@ -240,24 +223,18 @@ export const useRegimentLogic = ({
     let regimentType = "-";
     const totalCombatUnits = mountedCount + footCount;
     if (totalCombatUnits > 0) {
-        if (footCount === 0) {
-            regimentType = "Konny";
-        } else if (footCount < totalCombatUnits / 2) {
-            regimentType = "Mieszany";
-        } else {
-            regimentType = "Pieszy";
-        }
+        if (footCount === 0) regimentType = "Konny";
+        else if (footCount < totalCombatUnits / 2) regimentType = "Mieszany";
+        else regimentType = "Pieszy";
     }
     return { totalRecon: recon, totalMotivation: motivation, totalActivations: activations, totalOrders: orders, totalAwareness: awareness, regimentType };
   }, [collectSelectedUnits, unitsMap, regiment]);
 
-  // --- ACTIONS ---
+  // ... (handleSelectInPod, handleCustomSelect, handleImprovementToggle, handleRegimentImprovementToggle, handleToggleAdditional - COPY FROM PREVIOUS) ...
   const hasAnySelection = (selectionsObj) => {
       return Object.values(selectionsObj).some(arr => arr && arr.some(id => id && id !== IDS.NONE));
   };
-
   const handleSelectInPod = (type, groupKey, index, unitId) => {
-    // ... (COPY FROM PREVIOUS) ...
     let currentSelection = null;
     const isOptionalGroup = groupKey === GROUP_TYPES.OPTIONAL;
     if (isOptionalGroup) {
@@ -271,7 +248,6 @@ export const useRegimentLogic = ({
     const newValue = isDeselecting ? null : unitId;
     const posKey = isOptionalGroup ? `${type}/optional/${index}` : `${type}/${groupKey}/${index}`;
     if (isDeselecting) setImprovements((p) => { const m = { ...p }; delete m[posKey]; return m; });
-
     if (isOptionalGroup) {
         const mapKey = `${type}/optional`;
         const groupDef = type === GROUP_TYPES.BASE ? base : additional;
@@ -366,6 +342,9 @@ export const useRegimentLogic = ({
                     Object.keys(nextImp).forEach(key => {
                         if (key.startsWith("additional/optional/")) delete nextImp[key];
                     });
+                    Object.keys(nextImp).forEach(key => {
+                        if (key.startsWith(`additional/${groupKey}/`)) delete nextImp[key];
+                    });
                     return nextImp;
                 });
             } else {
@@ -377,7 +356,6 @@ export const useRegimentLogic = ({
   };
 
   const handleCustomSelect = (unitId) => {
-    // ... (COPY FROM PREVIOUS) ...
     const isDeselecting = selectedAdditionalCustom === unitId;
     const next = isDeselecting ? null : unitId;
     setSelectedAdditionalCustom(next);
@@ -405,7 +383,6 @@ export const useRegimentLogic = ({
   };
 
   const handleImprovementToggle = (positionKey, unitId, impId) => {
-    // ... (COPY FROM PREVIOUS) ...
     const unitDef = unitsMap[unitId];
     if (unitDef?.rank === "group") return;
     const canTake = canUnitTakeImprovement(unitDef, impId, regiment);
@@ -440,7 +417,6 @@ export const useRegimentLogic = ({
   };
 
   const handleRegimentImprovementToggle = (impId) => {
-    // ... (COPY FROM PREVIOUS) ...
     setRegimentImprovements((prev) => {
         if (prev.includes(impId)) {
              const idx = prev.lastIndexOf(impId);
@@ -451,7 +427,6 @@ export const useRegimentLogic = ({
   };
 
   const handleToggleAdditional = () => {
-    // ... (COPY FROM PREVIOUS) ...
     setAdditionalEnabled((prev) => {
       const next = !prev;
       if (!next) {
@@ -477,10 +452,8 @@ export const useRegimentLogic = ({
     });
   };
 
-  // FIX: Zmodyfikowany saveAndGoBack do walidacji kosztu Vanguarda
   const saveAndGoBack = () => {
     
-    // 1. Budujemy "brudną" wersję dywizji (kopię stanu)
     const tempDivisionForCheck = JSON.parse(JSON.stringify(configuredDivision));
     const groupRef = tempDivisionForCheck[regimentGroup];
     const oldConfig = groupRef[regimentIndex].config;
@@ -497,14 +470,19 @@ export const useRegimentLogic = ({
           isVanguard: oldConfig.isVanguard
     };
     
-    // FIX: WALIDACJA KOSZTU STRAŻY PRZEDNIEJ
-    const vanguardCheck = validateVanguardCost(tempDivisionForCheck, fakeFactionForValidator, getRegimentDefinition, commonImprovements);
+    const vanguardCheck = validateVanguardCost(tempDivisionForCheck, unitsMap, faction, getRegimentDefinition, commonImprovements);
     if (!vanguardCheck.isValid) {
         alert(vanguardCheck.message);
-        return; // Blokujemy zapis
+        return;
     }
 
-    // 2. Walidacja wsparcia
+    // FIX: Walidacja Allied Cost
+    const alliedCheck = validateAlliedCost(tempDivisionForCheck, unitsMap, faction, getRegimentDefinition, commonImprovements);
+    if (!alliedCheck.isValid) {
+        alert(alliedCheck.message);
+        return;
+    }
+
     const keptSupportUnits = [];
     const removedNames = [];
 
@@ -531,10 +509,9 @@ export const useRegimentLogic = ({
         const confirmed = window.confirm(
             `Zapisanie zmian spowoduje usunięcie następujących jednostek wsparcia (niespełnione wymagania):\n\n- ${removedNames.join("\n- ")}\n\nCzy chcesz kontynuować?`
         );
-        if (!confirmed) return; // PRZERWIJ ZAPIS
+        if (!confirmed) return;
     }
 
-    // Jeśli przeszło walidację, zapisz do stanu
     setConfiguredDivision((prev) => {
          const next = JSON.parse(JSON.stringify(prev));
          next[regimentGroup][regimentIndex].config = tempDivisionForCheck[regimentGroup][regimentIndex].config;

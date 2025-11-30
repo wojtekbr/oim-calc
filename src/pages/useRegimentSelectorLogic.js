@@ -1,9 +1,8 @@
 import { useState, useMemo } from "react";
-import { calculateRegimentStats } from "../utils/armyMath";
+import { calculateRegimentStats, calculateMainForceKey, validateVanguardCost, validateAlliedCost } from "../utils/armyMath"; // FIX: Import
 import { IDS, GROUP_TYPES } from "../constants";
 import { useArmyData } from "../context/ArmyDataContext";
 import { checkSupportUnitRequirements } from "../utils/divisionRules";
-import { validateVanguardCost, calculateMainForceKey } from "../utils/armyMath"; // FIX: Import validateVanguardCost
 
 export const useRegimentSelectorLogic = ({
   configuredDivision,
@@ -17,9 +16,7 @@ export const useRegimentSelectorLogic = ({
   const [playerName, setPlayerName] = useState("");
   const [divisionCustomName, setDivisionCustomName] = useState("");
 
-  // ... (regimentsList, purchasedSlotsMap, unitsRulesMap, handleBuySupportUnit, handleRemoveSupportUnit, handleAssignSupportUnit - BEZ ZMIAN) ...
-  // SKOPIUJ JE ZE STAREGO PLIKU
-  
+  // ... (regimentsList, purchasedSlotsMap, unitsRulesMap - BEZ ZMIAN, skopiuj z poprzedniego pliku) ...
   const regimentsList = useMemo(() => {
     if (!configuredDivision) return [];
     const { vanguard, base, additional } = configuredDivision;
@@ -54,16 +51,15 @@ export const useRegimentSelectorLogic = ({
     return map;
   }, [additionalUnitsDefinitions]);
 
+  // ... (handleBuySupportUnit, handleRemoveSupportUnit, handleAssignSupportUnit - BEZ ZMIAN) ...
   const handleBuySupportUnit = (unitId, definitionIndex, remainingPoints) => {
     setConfiguredDivision(prev => {
         const currentSupportUnits = [...prev.supportUnits];
         const existingIndex = currentSupportUnits.findIndex(su => su.definitionIndex === definitionIndex);
-
         if (existingIndex !== -1 && currentSupportUnits[existingIndex].id === unitId) {
             currentSupportUnits.splice(existingIndex, 1);
             return { ...prev, supportUnits: currentSupportUnits };
         }
-
         if (existingIndex !== -1) {
             const unitDef = unitsMap[unitId];
             if (unitDef && unitDef.pu_cost) {
@@ -82,7 +78,6 @@ export const useRegimentSelectorLogic = ({
             };
             return { ...prev, supportUnits: currentSupportUnits };
         }
-
         const unitDef = unitsMap[unitId];
         if (unitDef && unitDef.pu_cost) {
             if (remainingPoints - unitDef.pu_cost < 0) {
@@ -90,13 +85,11 @@ export const useRegimentSelectorLogic = ({
                 return prev;
             }
         }
-
         currentSupportUnits.push({ 
             id: unitId, 
             definitionIndex: definitionIndex,
             assignedTo: null 
         });
-
         return { ...prev, supportUnits: currentSupportUnits };
     });
   };
@@ -118,7 +111,6 @@ export const useRegimentSelectorLogic = ({
         });
         return;
     }
-
     const [group, index] = positionKey.split('/');
     setConfiguredDivision(prev => {
       const newSupportUnits = [...prev.supportUnits];
@@ -132,18 +124,31 @@ export const useRegimentSelectorLogic = ({
 
   // --- ZMODYFIKOWANY HANDLER ZMIANY PUŁKU ---
   const handleRegimentChange = (groupKey, index, newRegimentId) => {
-    // 1. Symulacja nowego stanu
+    // 1. Symulacja
     const tempDivision = JSON.parse(JSON.stringify(configuredDivision));
     const groupArr = tempDivision[groupKey];
     
-    const newConfig = { base: {}, additional: {}, improvements: {} };
+    const newConfig = { 
+        baseSelections: {}, 
+        additionalSelections: {}, 
+        additionalCustom: null,
+        additionalEnabled: false,
+        optionalEnabled: {},
+        optionalSelections: {},
+        improvements: {},
+        regimentImprovements: [],
+        isVanguard: false 
+    };
+
     const def = getRegimentDefinition(newRegimentId);
     if (def && def.structure && def.structure.base) {
          Object.entries(def.structure.base).forEach(([slotKey, options]) => {
-             const isOptional = slotKey.toLowerCase().startsWith('optional');
-             if (!isOptional && Array.isArray(options) && options.length > 0) {
-                 // default
-             }
+             if (slotKey === 'optional') return;
+             const pods = options;
+             newConfig.baseSelections[slotKey] = pods.map(pod => {
+                 const opts = Object.values(pod).map(u => u?.id).filter(Boolean);
+                 return opts.length > 0 ? opts[0] : null;
+             });
          });
     }
 
@@ -160,7 +165,7 @@ export const useRegimentSelectorLogic = ({
         }
     }
 
-    // 2. Walidacja Supportu (Remove units if invalid)
+    // 2. Walidacja Supportu
     const unitsToRemoveIndices = [];
     const unitsToRemoveNames = [];
 
@@ -184,7 +189,6 @@ export const useRegimentSelectorLogic = ({
         }
     });
 
-    // Prompt o usuwaniu wsparcia
     if (unitsToRemoveNames.length > 0) {
         const confirmed = window.confirm(
             `Zmiana pułku spowoduje usunięcie następujących jednostek wsparcia (niespełnione wymagania):\n\n- ${unitsToRemoveNames.join("\n- ")}\n\nCzy chcesz kontynuować?`
@@ -192,17 +196,21 @@ export const useRegimentSelectorLogic = ({
         if (!confirmed) return;
     }
 
-    // FIX: 4. Walidacja Kosztu Straży Przedniej (na symulowanym stanie)
-    // Wykonujemy to po ewentualnym usunięciu wsparcia (bo wsparcie nie wpływa na koszt SG, ale warto mieć czysty stan)
-    // Ale uwaga: tempDivision ma jeszcze "stare" supportUnits. To nie szkodzi dla calculateRegimentStats w tym kontekście.
-    
-    const vanguardCheck = validateVanguardCost(tempDivision, faction, getRegimentDefinition, improvements);
+    // 3. Walidacja Vanguard Cost
+    const vanguardCheck = validateVanguardCost(tempDivision, unitsMap, faction, getRegimentDefinition, improvements);
     if (!vanguardCheck.isValid) {
         alert(vanguardCheck.message);
-        return; // Blokujemy zmianę
+        return;
     }
 
-    // 5. Właściwa aktualizacja stanu (Commit)
+    // FIX: 4. Walidacja Allied Cost
+    const alliedCheck = validateAlliedCost(tempDivision, unitsMap, faction, getRegimentDefinition, improvements);
+    if (!alliedCheck.isValid) {
+        alert(alliedCheck.message);
+        return;
+    }
+
+    // 5. Update
     setConfiguredDivision((prev) => {
       const group = prev[groupKey];
       const newGroup = [...group];
@@ -212,15 +220,27 @@ export const useRegimentSelectorLogic = ({
           newSupportUnits = newSupportUnits.filter((_, idx) => !unitsToRemoveIndices.includes(idx));
       }
 
-      const config = { base: {}, additional: {}, improvements: {} };
-      const def = getRegimentDefinition(newRegimentId);
+      const config = { 
+          baseSelections: {}, 
+          additionalSelections: {}, 
+          additionalCustom: null,
+          additionalEnabled: false,
+          optionalEnabled: {},
+          optionalSelections: {},
+          improvements: {},
+          regimentImprovements: [],
+          isVanguard: false 
+      };
       
+      const def = getRegimentDefinition(newRegimentId);
       if (def && def.structure && def.structure.base) {
          Object.entries(def.structure.base).forEach(([slotKey, options]) => {
-             const isOptional = slotKey.toLowerCase().startsWith('optional');
-             if (!isOptional && Array.isArray(options) && options.length > 0) {
-                 // default logic handled elsewhere
-             }
+             if (slotKey === 'optional') return;
+             const pods = options;
+             config.baseSelections[slotKey] = pods.map(pod => {
+                 const opts = Object.values(pod).map(u => u?.id).filter(Boolean);
+                 return opts.length > 0 ? opts[0] : null;
+             });
          });
       }
 
@@ -278,11 +298,6 @@ export const useRegimentSelectorLogic = ({
       }));
   };
 
-  // FIX: Resetowanie mainForceKey, jeśli wybrany pułk przestał być kandydatem
-  // np. zmienił się na tańszy, a inny stał się droższy.
-  // To jest trudne do zrobienia w reducerze synchronicznie, ale calculateMainForceKey robi to automatycznie.
-  // Jeśli preferredMainForceKey wskazuje na kogoś kto nie jest najdroższy, funkcja go zignoruje.
-  
   const handleMainForceSelect = (positionKey) => {
       setConfiguredDivision(prev => ({
           ...prev,
@@ -292,8 +307,8 @@ export const useRegimentSelectorLogic = ({
 
   const mainForceKey = useMemo(() => {
      if (!configuredDivision) return null;
-     return calculateMainForceKey(configuredDivision, faction, getRegimentDefinition, improvements);
-  }, [configuredDivision, faction, getRegimentDefinition, improvements]);
+     return calculateMainForceKey(configuredDivision, unitsMap, faction, getRegimentDefinition, improvements);
+  }, [configuredDivision, faction, getRegimentDefinition, improvements, unitsMap]);
 
   return {
     state: {

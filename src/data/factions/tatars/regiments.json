@@ -1,0 +1,85 @@
+{
+    "tat_czambul_mirzy": {
+    "name": "Czambuł Mirzy",
+    "base_cost": 1,
+    "recon": 2,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "units_allowed": ["tat_ordyncy_s","tat_ordyncy_m","tat_ordyncy_dzidy_s","tat_ordyncy_dzidy_m"],
+        "max_amount": 2
+      },
+      {
+        "id": "kalkans",
+        "units_allowed": ["tat_ordyncy_s","tat_ordyncy_m","tat_ordyncy_dzidy_s","tat_ordyncy_dzidy_m"],
+        "max_amount": 2
+      },
+      {
+        "id": "independent",
+        "max_amount": 1,
+        "cost": "double"
+      },
+      {
+        "id": "nahajki_i_arkany",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "id": "tat_mirza"
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "id": "tat_ordyncy_m"
+            },
+            "unit2": {
+                "id": "tat_ordyncy_dzidy_m"
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "id": "tat_ordyncy_s"
+            },
+            "unit2": {
+                "id": "tat_ordyncy_m"
+            },
+            "unit3": {
+                "id": "tat_kazindzi_m"
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "id": "tat_ordyncy_s"
+            },
+            "unit2": {
+                "id": "tat_ordyncy_m"
+            },
+            "unit3": {
+                "id": "tat_ordyncy_dzidy_s"
+            },
+            "unit4": {
+                "id": "tat_ordyncy_dzidy_m"
+            },
+            "unit5": {
+                "id": "tat_kazindzi_m"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

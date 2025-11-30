@@ -17,6 +17,18 @@
         "id": "limit_max_same_regiments",
         "regiment_id": "ott_province_eur",
         "max_amount": 1
+      },
+      { 
+        "id": "prawowierni_w_okopach" 
+      },
+      { 
+        "id": "wojsko_wybornym_ozywione_duchem" 
+      },
+      { 
+        "id": "allah_allah" 
+      },
+      { 
+        "id": "zapelnily_sie_nimi_gory" 
       }
     ],
     "additional_units": [
@@ -80,7 +92,7 @@
     ],
     "vanguard": 
       [
-      { "options": ["ott_sipahi_europ", "ott_province_eur"] }
+      { "options": ["ott_sipahi_europ", "ott_province_eur", "tat_czambul_mirzy"] }
      ],
     "base": [
       { "options": ["ott_sipahi_europ","ott_province_eur"] },
@@ -91,10 +103,11 @@
         "options": [
           "none",
           "ott_janissary",
-          "ott_sipahi_europ"
+          "ott_sipahi_europ",
+          "tat_czambul_mirzy"
         ]
       },
-      { "options": ["none", "ott_sipahi_europ"] }
+      { "options": ["none", "ott_sipahi_europ","tat_czambul_mirzy"] }
     ]
   }
 }
