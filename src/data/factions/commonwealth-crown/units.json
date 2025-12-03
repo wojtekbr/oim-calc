@@ -163,6 +163,7 @@
     "cost": 5,
     "improvement_cost": 2,
     "rank": "silver",
+    "is_cavalry": true,
     "is_light_cavalry": true
   },
   "cro_wallachian_m": {
@@ -171,6 +172,7 @@
     "cost": 7,
     "improvement_cost": 2,
     "rank": "silver",
+    "is_cavalry": true,
     "is_light_cavalry": true
   },
   "cro_tatar_style_s": {
@@ -179,6 +181,7 @@
     "cost": 5,
     "improvement_cost": 2,
     "rank": "silver",
+    "is_cavalry": true,
     "is_light_cavalry": true
   },
   "cro_tatar_style_m": {
@@ -187,6 +190,7 @@
     "cost": 7,
     "improvement_cost": 2,
     "rank": "silver",
+    "is_cavalry": true,
     "is_light_cavalry": true
   },
   "cro_pancerni_light_reg_s": {
@@ -279,7 +283,7 @@
     "cost": 5,
     "improvement_cost": 1,
     "rank": "silver",
-    "is_dragoon": true
+    "are_dragoons": true
   },
   "cro_polish_dragoons_m": {
     "id": "cro_polish_dragoons_m",
@@ -287,7 +291,7 @@
     "cost": 7,
     "improvement_cost": 2,
     "rank": "silver",
-    "is_dragoon": true
+    "are_dragoons": true
   },
   "cro_volunteers_s": {
     "id": "cro_volunteers_s",
@@ -295,7 +299,9 @@
     "cost": 3,
     "improvement_cost": 1,
     "rank": "silver",
-    "is_cavalry": true
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "are_looters_insubordinate": true
   },
   "cro_volunteers_m": {
     "id": "cro_volunteers_m",
@@ -303,7 +309,9 @@
     "cost": 5,
     "improvement_cost": 2,
     "rank": "silver",
-    "is_cavalry": true
+    "is_cavalry": true,
+    "is_light_cavalry": true,
+    "are_looters_insubordinate": truechcesz po
   },
   "cro_musketeers_s": {
     "id": "cro_musketeers_s",
@@ -327,7 +335,7 @@
     "cost": 5,
     "improvement_cost": 1,
     "rank": "silver",
-    "is_dragoon": true
+    "are_dragoons": true
   },
   "cro_dragoons_mercenary_m": {
     "id": "cro_dragoons_mercenary_m",
@@ -335,7 +343,7 @@
     "cost": 7,
     "improvement_cost": 2,
     "rank": "silver",
-    "is_dragoon": true
+    "are_dragoons": true
   },
   "cro_infantry_mercenary": {
     "id": "cro_infantry_mercenary",
@@ -359,8 +367,7 @@
     "name": "Major",
     "cost": 2,
     "rank": "group",
-    "orders": 1,
-    "activations": 1
+    "orders": 1
   },
   "cro_reiters_mercenary_s": {
     "id": "cro_reiters_mercenary_s",
@@ -368,8 +375,7 @@
     "cost": 6,
     "improvement_cost": 2,
     "rank": "silver",
-    "is_cavalry": true,
-    "has_pistols": true
+    "is_cavalry": true
   },
   "cro_reiters_mercenary_m": {
     "id": "cro_reiters_mercenary_m",
@@ -377,8 +383,7 @@
     "cost": 9,
     "improvement_cost": 3,
     "rank": "silver",
-    "is_cavalry": true,
-    "has_pistols": true
+    "is_cavalry": true
   },
   "cro_reiters_mercenary_armored": {
     "id": "cro_reiters_mercenary_armored",
@@ -387,7 +392,6 @@
     "improvement_points_cost": 1,
     "improvement_cost": 3,
     "rank": "gold",
-    "is_cavalry": true,
-    "has_pistols": true
+    "is_cavalry": true
   }  
 }
