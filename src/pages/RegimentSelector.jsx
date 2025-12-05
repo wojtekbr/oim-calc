@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { ArmyListDocument } from '../pdf/ArmyListDocument';
 import { useRegimentSelectorLogic } from "./useRegimentSelectorLogic";
@@ -8,32 +8,190 @@ import {
     calculateDivisionType,
     validateVanguardCost,
     validateAlliedCost,
-    calculateRegimentImprovementPoints // NOWY IMPORT
+    calculateRegimentImprovementPoints
 } from "../utils/armyMath";
 import { checkDivisionConstraints, getDivisionRulesDescriptions, checkSupportUnitRequirements } from "../utils/divisionRules";
 import { IDS, GROUP_TYPES } from "../constants";
 import { useArmyData } from "../context/ArmyDataContext";
 
+// --- Helpers do Placeholdera ---
+const getPlaceholderColor = (str) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+    return '#' + "00000".substring(0, 6 - c.length) + c;
+};
+
+const getPlaceholderStyle = (id, name) => {
+    const color = getPlaceholderColor(id || name);
+    return {
+        background: `linear-gradient(135deg, ${color}22 0%, ${color}66 100%)`,
+        color: '#555'
+    };
+};
+
+const getInitials = (name) => {
+    return name 
+        ? name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+        : "??";
+};
+
 // --- Sub-components (View Only) ---
 
-const SupportUnitTile = ({ unitId, isPurchased, locked, onClick, unitDef, disabledReason }) => {
+const SupportUnitTile = ({ 
+    unitId, 
+    isPurchased, 
+    locked, 
+    onClick, 
+    onRemove, 
+    onAssign, 
+    unitDef, 
+    disabledReason, 
+    assignmentInfo, 
+    regimentsList, 
+    unitsRulesMap, 
+    supportUnits, 
+    calculateStats,
+    getRegimentDefinition 
+}) => {
     const puCost = unitDef?.improvement_points_cost || unitDef?.pu_cost || 0;
-    const costPU = puCost ? ` | ${puCost} PU` : '';
+    const costPU = puCost ? ` + ${puCost} PU` : '';
     const tooltip = locked && disabledReason ? disabledReason : (unitDef?.name || unitId);
+    
+    const initials = getInitials(unitDef?.name || unitId);
+    const placeholderStyle = getPlaceholderStyle(unitId, unitDef?.name);
+
+    // --- Logika dostępnych pułków ---
+    const availableRegiments = useMemo(() => {
+        if (!isPurchased || !regimentsList) return [];
+        
+        const rules = unitsRulesMap[unitId] || {};
+        const canBeAssigned = rules.can_be_assigned !== false;
+        if (!canBeAssigned) return [];
+
+        const getSupportUnitType = (u) => {
+            if (!u) return 'infantry';
+            if (u.is_artillery) return 'artillery';
+            if (u.is_cavalry || u.is_dragoon || u.are_dragoons || u.are_proxy_dragoons) return 'cavalry';
+            return 'infantry';
+        };
+
+        const supportType = getSupportUnitType(unitDef);
+        const isDragoon = unitDef.is_dragoon || unitDef.are_dragoons || unitDef.are_proxy_dragoons;
+
+        return regimentsList.map(r => {
+            let isAllowed = true;
+
+            if (rules?.allowed_regiment_ids && rules.allowed_regiment_ids.length > 0) {
+                if (!rules.allowed_regiment_ids.includes(r.id)) isAllowed = false;
+            }
+            if (rules?.exclusion_tag && isAllowed) {
+                const otherUnitInRegiment = supportUnits.find(otherSu =>
+                    otherSu.id !== unitId &&
+                    otherSu.assignedTo?.positionKey === r.positionKey
+                );
+                if (otherUnitInRegiment) {
+                     const otherRules = unitsRulesMap[otherUnitInRegiment.id] || {};
+                     if (otherRules.exclusion_tag === rules.exclusion_tag) isAllowed = false;
+                     if (otherUnitInRegiment.id === rules.exclusion_tag) isAllowed = false;
+                     if (otherRules.exclusion_tag === unitId) isAllowed = false;
+                }
+            }
+
+            if (isAllowed && !isDragoon) {
+                const stats = calculateStats(r.config, r.id);
+                const regType = stats.regimentType; 
+                if (supportType === 'artillery' || supportType === 'infantry') {
+                    if (regType !== 'Pieszy') isAllowed = false;
+                } else if (supportType === 'cavalry') {
+                    if (regType !== 'Konny') isAllowed = false;
+                }
+            }
+
+            const regDef = getRegimentDefinition(r.id);
+            const regName = r.customName || regDef?.name || r.id;
+            
+            let prefix = '';
+            if (r.positionKey.startsWith(GROUP_TYPES.BASE)) prefix = 'Pułk';
+            else if (r.positionKey.startsWith(GROUP_TYPES.VANGUARD)) prefix = 'Straż';
+            else prefix = 'Poz. I';
+            
+            return {
+                ...r,
+                isAllowed,
+                label: `${prefix}: ${regName}`
+            };
+        });
+    }, [isPurchased, unitId, regimentsList, supportUnits, unitsRulesMap, unitDef, calculateStats, getRegimentDefinition]);
+
+    const handleAssignChange = (e) => {
+        e.stopPropagation(); 
+        onAssign(e.target.value);
+    };
+
+    // Toggle Logic
+    const handleTileClick = () => {
+        if (locked) {
+           return;
+        } 
+        
+        if (isPurchased) {
+            onRemove(); // Jeśli kupiony -> sprzedaj
+        } else {
+            onClick(); // Jeśli niekupiony -> kup (lub podmień)
+        }
+    };
+
     return (
         <div
-            className={`${styles.supportTile} ${isPurchased ? styles.active : ''} ${locked ? styles.locked : ''}`}
-            onClick={locked ? undefined : onClick}
+            className={`${styles.card} ${isPurchased ? styles.active : ''} ${locked ? styles.locked : ''}`}
+            onClick={handleTileClick}
             title={tooltip}
+            style={{cursor: locked ? 'not-allowed' : 'pointer'}}
         >
-            <div style={{ fontWeight: 'bold', fontSize: 13, marginBottom: 4 }}>{unitDef?.name || unitId}</div>
-            <div style={{ fontSize: 11, color: '#666' }}>{unitDef?.cost || 0} pkt {costPU}</div>
-            {isPurchased && <div className={styles.checkIcon}>✔</div>}
-            {locked && disabledReason && (
-                <div style={{fontSize: 9, color: 'red', marginTop: 4, fontStyle: 'italic', lineHeight: '1.2'}}>
-                    {disabledReason}
+            {isPurchased && <div className={styles.checkBadge}>✔</div>}
+            
+            <div className={styles.cardImagePlaceholder} style={placeholderStyle}>
+                {initials}
+            </div>
+
+            <div className={styles.cardContent}>
+                <div className={styles.cardTitle}>{unitDef?.name || unitId}</div>
+                
+                {locked && disabledReason && (
+                    <div style={{fontSize: 10, color: '#d32f2f', marginBottom: 4, lineHeight: 1.2, fontStyle: 'italic'}}>
+                        {disabledReason}
+                    </div>
+                )}
+
+                <div className={styles.cardCost}>
+                    {unitDef?.cost || 0} PS{costPU}
                 </div>
-            )}
+
+                {isPurchased && availableRegiments.length > 0 && (
+                    <select 
+                        className={styles.assignmentSelect}
+                        value={assignmentInfo?.positionKey || ""}
+                        onChange={handleAssignChange}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <option value="">Przydziel</option>
+                        {availableRegiments.map(r => (
+                            <option key={r.positionKey} value={r.positionKey} disabled={!r.isAllowed}>
+                                {r.label}
+                            </option>
+                        ))}
+                    </select>
+                )}
+                
+                {isPurchased && availableRegiments.length === 0 && (
+                     <div style={{fontSize: 10, color: '#666', marginTop: 8, fontStyle:'italic', textAlign:'center'}}>
+                         Tylko wsparcie dywizyjne
+                     </div>
+                )}
+            </div>
         </div>
     );
 };
@@ -44,123 +202,32 @@ const GeneralOptionTile = ({ unitId, isActive, onClick, unitDef }) => {
         ? `${unitDef?.cost || 0} PS + ${puCost} PU`
         : `${unitDef?.cost || 0} PS`;
 
+    const initials = getInitials(unitDef?.name || unitId);
+    const placeholderStyle = getPlaceholderStyle(unitId, unitDef?.name);
+
     return (
         <div 
-            className={`${styles.optionCard} ${isActive ? styles.active : ''}`}
+            className={`${styles.card} ${isActive ? styles.active : ''}`}
             onClick={onClick}
-            style={{minWidth: 200}}
         >
-            <div className={styles.optionName}>
-                {isActive && "✔ "}{unitDef?.name || unitId}
+            {isActive && <div className={styles.checkBadge}>✔</div>}
+
+            <div className={styles.cardImagePlaceholder} style={placeholderStyle}>
+                {initials}
             </div>
-            <div className={styles.optionCost}>
-                Koszt: {costLabel}
-            </div>
-            <div className={styles.regStats} style={{marginTop: 6, fontSize: 11, textAlign:'left'}}>
-                {unitDef?.orders !== undefined && <div>Rozkazy: <strong>{unitDef.orders}</strong></div>}
-                {unitDef?.activations !== undefined && <div>Znaczniki Aktywacji: <strong>{unitDef.activations}</strong></div>}
-            </div>
-        </div>
-    );
-};
 
-const SupportConfigRow = ({ supportUnit, index, unitsMap, unitsRulesMap, regimentsList, supportUnits, onAssign, onRemove, getRegimentDefinition, calculateStats }) => {
-    const unitDef = unitsMap[supportUnit.id];
-    const rules = unitsRulesMap[supportUnit.id] || {};
-    const canBeAssigned = rules.can_be_assigned !== false;
-
-    const getSupportUnitType = (u) => {
-        if (!u) return 'infantry';
-        if (u.is_artillery) return 'artillery';
-        if (u.is_cavalry || u.is_dragoon || u.are_dragoons || u.are_proxy_dragoons) return 'cavalry';
-        return 'infantry';
-    };
-
-    const supportType = getSupportUnitType(unitDef);
-    const isDragoon = unitDef.is_dragoon || unitDef.are_dragoons || unitDef.are_proxy_dragoons;
-
-    const availableRegiments = regimentsList.filter(r => {
-        if (rules?.allowed_regiment_ids && rules.allowed_regiment_ids.length > 0) {
-            if (!rules.allowed_regiment_ids.includes(r.id)) return false;
-        }
-        if (rules?.exclusion_tag) {
-            const otherUnitInRegiment = supportUnits.find(otherSu =>
-                otherSu.id !== supportUnit.id &&
-                otherSu.assignedTo?.positionKey === r.positionKey
-            );
-            if (otherUnitInRegiment) {
-                 const otherRules = unitsRulesMap[otherUnitInRegiment.id] || {};
-                 if (otherRules.exclusion_tag === rules.exclusion_tag) return false;
-                 if (otherUnitInRegiment.id === rules.exclusion_tag) return false;
-                 if (otherRules.exclusion_tag === supportUnit.id) return false;
-            }
-        }
-
-        if (isDragoon) return true;
-
-        const stats = calculateStats(r.config, r.id);
-        const regType = stats.regimentType; 
-
-        if (supportType === 'artillery' || supportType === 'infantry') {
-            if (regType !== 'Pieszy') return false;
-        } else if (supportType === 'cavalry') {
-            if (regType !== 'Konny') return false;
-        }
-        return true;
-    });
-
-    const isRequired = rules.assignment_required;
-    const isUnassigned = !supportUnit.assignedTo;
-    const isError = canBeAssigned && isRequired && isUnassigned;
-
-    return (
-        <div className={`${styles.configRow} ${isError ? styles.error : ''}`}>
-            <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 'bold', color: isError ? '#d32f2f' : 'inherit' }}>
-                    {unitDef?.name || supportUnit.id}
-                    {isError && <span style={{marginLeft: 8, fontSize: 11}}>⚠️ WYMAGANE PRZYPISANIE!</span>}
+            <div className={styles.cardContent}>
+                <div className={styles.cardTitle}>{unitDef?.name || unitId}</div>
+                
+                <div className={styles.cardSubtitle}>
+                    {unitDef?.orders !== undefined && <span>Rozkazy: <strong>{unitDef.orders}</strong></span>}
+                    {unitDef?.activations !== undefined && <span style={{marginLeft: 8}}>Akt: <strong>{unitDef.activations}</strong></span>}
                 </div>
-                <div style={{ fontSize: 12, color: '#666' }}>Koszt: {unitDef?.cost} pkt</div>
+
+                <div className={styles.cardCost}>
+                    {costLabel}
+                </div>
             </div>
-
-            <div style={{ flex: 2 }}>
-                {canBeAssigned ? (
-                    <select
-                        className={styles.selectInput}
-                        value={supportUnit.assignedTo?.positionKey || ''}
-                        onChange={(e) => onAssign(index, e.target.value)}
-                        style={{ borderColor: isError ? 'red' : '#ccc' }}
-                    >
-                        <option value="">{isError ? "⚠️ Wybierz pułk..." : "— Nieprzypisana —"}</option>
-                        {regimentsList.map(r => {
-                             const isAvailable = availableRegiments.some(ar => ar.positionKey === r.positionKey);
-                             const isCurrentlySelected = supportUnit.assignedTo?.positionKey === r.positionKey;
-                             
-                             if (!isAvailable && !isCurrentlySelected) return null;
-                             
-                             const regName = getRegimentDefinition(r.id)?.name || r.id;
-                             const displayName = r.customName || regName;
-                             
-                             let prefix = '';
-                             if (r.positionKey.startsWith(GROUP_TYPES.BASE)) prefix = 'Podst.';
-                             else if (r.positionKey.startsWith(GROUP_TYPES.VANGUARD)) prefix = 'Straż';
-                             else prefix = 'Poz. I';
-
-                             const label = `${prefix}: ${displayName}`;
-                             const disabledInfo = !isAvailable ? " (Niedozwolony typ)" : "";
-
-                             return (
-                                <option key={r.positionKey} value={r.positionKey} disabled={!isAvailable}>
-                                    {label}{disabledInfo}
-                                </option>
-                             );
-                        })}
-                    </select>
-                ) : (
-                    <div style={{ fontSize: 12, fontStyle: 'italic', color: '#666', textAlign: 'center' }}>Wsparcie Dywizyjne</div>
-                )}
-            </div>
-            <button className={styles.removeBtn} onClick={() => onRemove(index)}>Usuń</button>
         </div>
     );
 };
@@ -170,22 +237,33 @@ const RegimentOptionTile = ({ optId, isActive, onClick, getRegimentDefinition, d
     const name = def?.name || optId;
     const cost = def?.base_cost || 0;
 
+    const initials = getInitials(name);
+    const placeholderStyle = getPlaceholderStyle(optId, name);
+
     return (
         <div 
-            className={`${styles.optionCard} ${isActive ? styles.active : ''} ${disabled ? styles.disabledTile : ''}`}
+            className={`${styles.card} ${isActive ? styles.active : ''} ${disabled ? styles.disabledTile : ''}`}
             onClick={disabled ? undefined : onClick}
         >
-            <div className={styles.optionName}>
-                {isActive && "✔ "}{name}
+            {isActive && <div className={styles.checkBadge}>✔</div>}
+
+            <div className={styles.cardImagePlaceholder} style={placeholderStyle}>
+                {initials}
             </div>
-            <div className={styles.optionCost}>
-                Koszt bazowy: {cost} PS
-            </div>
-            {isAllied && (
-                <div style={{ fontSize: 10, color: '#d35400', marginTop: 2, fontWeight: 'bold' }}>
-                    (Pułk Sojuszniczy)
+
+            <div className={styles.cardContent}>
+                <div className={styles.cardTitle}>{name}</div>
+                
+                {isAllied && (
+                    <div style={{ fontSize: 10, color: '#d35400', marginBottom: 4, fontWeight: 'bold', textTransform: 'uppercase' }}>
+                        Sojusznik
+                    </div>
+                )}
+
+                <div className={styles.cardCost}>
+                    Bazowo: {cost} PS
                 </div>
-            )}
+            </div>
         </div>
     );
 };
@@ -198,7 +276,7 @@ const RegimentBlock = ({
     currentMainForceCost,
     isAllied,
     currentAlliesCount,
-    calculateRegimentPU // NOWE PROP
+    calculateRegimentPU
 }) => {
     return regiments.map((regiment, index) => {
         const options = definitionOptions[index].options;
@@ -227,7 +305,6 @@ const RegimentBlock = ({
         const isRegimentAllied = !isNone && isAllied(currentRegimentId);
         const isMainForceCandidate = !isVanguardGroup && !isNone && !isRegimentAllied && stats.cost === currentMainForceCost;
 
-        // OBLICZANIE PU DLA PUŁKU
         const mySupport = supportUnits.filter(su => su.assignedTo?.positionKey === positionKey);
         const puUsed = !isNone 
             ? calculateRegimentPU(regiment.config, regiment.id, mySupport) 
@@ -244,25 +321,25 @@ const RegimentBlock = ({
         };
 
         let label = "";
-        if (group === GROUP_TYPES.BASE) label = `Podstawa #${index + 1}`;
-        else if (group === GROUP_TYPES.VANGUARD) label = `Straż Przednia #${index + 1}`;
-        else label = `Poziom I #${index + 1}`;
+        if (group === GROUP_TYPES.VANGUARD) {
+            label = `Pułk Straży Przedniej ${index + 1}`;
+        } else {
+            label = `Pułk ${index + 1}`;
+        }
 
         return (
-            <div key={`${group}-${index}`} className={`${styles.regimentRow} ${isMainForce ? styles.mainForce : ''} ${isDisabled ? styles.disabled : ''}`}>
+            <div key={`${group}-${index}`} className={`${styles.regimentRow} ${isDisabled ? styles.disabled : ''}`}>
                 <div className={styles.regHeader}>
                     <div style={{flex: 1}}>
-                        <div className={styles.regTitle}>
-                            {label}
-                            {isMainForce && <span className={styles.mainForceBadge}>SIŁY GŁÓWNE</span>}
-                            {isRegimentAllied && <span style={{background:'#d35400', color:'white', padding:'2px 6px', borderRadius:4, fontSize:11, marginLeft:6}}>SOJUSZNIK</span>}
-                            {isMainForceCandidate && !isMainForce && (
-                                <button 
-                                    onClick={() => onMainForceSelect(positionKey)}
-                                    style={{marginLeft: 10, fontSize: 10, padding: '2px 6px', cursor: 'pointer', background: '#fff', border: '1px solid #ff9800', color: '#ef6c00', borderRadius: 4}}
-                                >
-                                    ★ Ustaw jako SG
-                                </button>
+                        <div className={styles.regTopRow}>
+                            <div className={styles.regTitle}>{label}</div>
+                            {!isDisabled && !isNone && (
+                                <input 
+                                    className={styles.regNameInput}
+                                    placeholder="Nazwa własna pułku..."
+                                    value={regiment.customName || ""}
+                                    onChange={(e) => onNameChange(group, index, e.target.value)}
+                                />
                             )}
                             {isDisabled && <span style={{fontSize: 12, fontWeight: 'normal', color: '#888', marginLeft: 10}}>{disabledMessage}</span>}
                         </div>
@@ -290,29 +367,13 @@ const RegimentBlock = ({
                                 );
                             })}
                         </div>
-                        
-                        {!isDisabled && !isNone && (
-                             <div className={styles.regControls} style={{marginTop: 8}}>
-                                <input 
-                                    className={styles.regNameInput}
-                                    placeholder="Nazwa własna pułku..."
-                                    value={regiment.customName || ""}
-                                    onChange={(e) => onNameChange(group, index, e.target.value)}
-                                />
-                                {canEdit && (
-                                    <button className={styles.editBtn} onClick={() => onOpenEditor(group, index)}>
-                                        Konfiguruj Pułk ›
-                                    </button>
-                                )}
-                             </div>
-                        )}
                     </div>
 
                     {!isDisabled && !isNone && (
                         <div style={{display:'flex', flexDirection: 'column', alignItems: 'flex-end', marginLeft: 20, minWidth: 150}}>
                             <div className={styles.regCost}>{stats.cost} pkt</div>
                             <div className={styles.regStats} style={{marginTop: 4}}>
-                                <div style={{fontWeight: 'bold', marginBottom: 4, color: '#444'}}>Typ: {stats.regimentType}</div>
+                                <div style={{marginBottom: 4, color: '#444'}}>Typ: {stats.regimentType}</div>
                                 
                                 <div>Znaczniki Aktywacji: <strong>{finalActivations}</strong></div>
                                 <div>Motywacja: <strong>{stats.motivation + (isMainForce?1:0)}</strong></div>
@@ -324,11 +385,37 @@ const RegimentBlock = ({
                                     </>
                                 )}
 
-                                {/* NOWE: Wyświetlanie zużytych PU */}
+                                {isMainForce && (
+                                    <div className={`${styles.statusLabel} ${styles.statusMainForce}`}>
+                                        SIŁY GŁÓWNE
+                                    </div>
+                                )}
+
+                                {isRegimentAllied && (
+                                    <div className={`${styles.statusLabel} ${styles.statusAlly}`}>
+                                        PUŁK SOJUSZNICZY
+                                    </div>
+                                )}
+
+                                {isMainForceCandidate && !isMainForce && (
+                                    <button 
+                                        onClick={() => onMainForceSelect(positionKey)}
+                                        className={styles.makeMainForceBtn}
+                                    >
+                                        ★ Ustaw jako Siły Główne
+                                    </button>
+                                )}
+
                                 {puUsed > 0 && (
-                                    <div style={{marginTop: 6, color: '#2e7d32', borderTop: '1px dashed #ccc', paddingTop: 4}}>
+                                    <div style={{marginTop: 6, color: '#2e7d32', borderTop: '1px dashed #ccc', paddingTop: 4, width: '100%', textAlign: 'right'}}>
                                         Wykorzystane PU: <strong>{puUsed}</strong>
                                     </div>
+                                )}
+
+                                {canEdit && (
+                                    <button className={styles.editBtn} onClick={() => onOpenEditor(group, index)}>
+                                        Konfiguruj Pułk ›
+                                    </button>
                                 )}
                             </div>
                         </div>
@@ -359,9 +446,9 @@ export default function RegimentSelector(props) {
 
     const { state, handlers } = useRegimentSelectorLogic(props);
     const { improvements } = useArmyData();
+    const [showRules, setShowRules] = useState(false);
+
     const calcStatsWrapper = (config, id) => calculateRegimentStats(config, id, configuredDivision, unitsMap, getRegimentDefinition, improvements);
-    
-    // Wrapper dla nowej funkcji PU
     const calcPuWrapper = (config, id, regimentSupport) => calculateRegimentImprovementPoints(config, id, unitsMap, getRegimentDefinition, improvements, regimentSupport);
 
     const vanguardCheck = validateVanguardCost(configuredDivision, unitsMap, faction, getRegimentDefinition, improvements);
@@ -382,6 +469,10 @@ export default function RegimentSelector(props) {
     const generalId = configuredDivision.general;
     const generalDef = generalId ? unitsMap[generalId] : null;
 
+    const unassignedSupport = useMemo(() => {
+        return supportUnits.filter(su => !su.assignedTo);
+    }, [supportUnits]);
+
     const currentMainForceCost = useMemo(() => {
         if (!state.mainForceKey) return 0;
         const [group, idxStr] = state.mainForceKey.split('/');
@@ -396,7 +487,6 @@ export default function RegimentSelector(props) {
         return 0;
     }, [state.mainForceKey, configuredDivision]);
 
-    // Helper to check if regiment is ally
     const isAllied = (regId) => {
         if (regId === IDS.NONE) return false;
         return faction.regiments && !faction.regiments[regId];
@@ -406,6 +496,29 @@ export default function RegimentSelector(props) {
         const all = [...vanguardRegiments, ...baseRegiments, ...additionalRegiments];
         return all.filter(r => r.id !== IDS.NONE && isAllied(r.id)).length;
     }, [configuredDivision]);
+
+    const activeRegimentsList = useMemo(() => {
+        const all = [
+            ...(vanguardRegiments || []).map(r => ({ ...r, group: GROUP_TYPES.VANGUARD })),
+            ...baseRegiments.map(r => ({ ...r, group: GROUP_TYPES.BASE })),
+            ...additionalRegiments.map(r => ({ ...r, group: GROUP_TYPES.ADDITIONAL }))
+        ];
+        
+        return all.filter(r => r.id !== IDS.NONE).map(r => {
+            const def = getRegimentDefinition(r.id);
+            const stats = calcStatsWrapper(r.config, r.id);
+            const isMain = state.mainForceKey === `${r.group}/${r.index}`;
+            
+            return {
+                id: r.id,
+                name: def?.name || r.id,
+                customName: r.customName,
+                stats,
+                isMain,
+                isVanguard: r.group === GROUP_TYPES.VANGUARD
+            };
+        });
+    }, [configuredDivision, state.mainForceKey]);
 
     return (
         <div className={styles.container}>
@@ -457,25 +570,92 @@ export default function RegimentSelector(props) {
                 />
             </div>
 
+            {/* SCALONE PODSUMOWANIE */}
             <div className={styles.summaryCard}>
-                <div>
-                    <div className={styles.summaryTitle}>
-                        Podsumowanie: {divisionType} ({totalDivisionCost} pkt)
+                <div className={styles.summaryHeader}>
+                    <div>
+                        <div className={styles.summaryTitle}>
+                            {divisionType} ({totalDivisionCost} PS)
+                        </div>
+                        <div className={styles.summarySubtitle}>Koszt bazowy dywizji: {divisionBaseCost} PS</div>
+                        
+                        <button className={styles.rulesToggleBtn} onClick={() => setShowRules(!showRules)}>
+                            {showRules ? "▼ Ukryj zasady specjalne" : "▶ Pokaż zasady specjalne"}
+                        </button>
                     </div>
-                    <div className={styles.summarySubtitle}>Koszt bazowy dywizji: {divisionBaseCost} pkt</div>
                     
-                    {generalDef && (
-                        <div style={{marginTop: 8, fontSize: 13, color: '#333'}}>
-                            <strong>Dowódca:</strong> {generalDef.name} 
-                            <span style={{color: '#666', marginLeft: 6}}>
-                                ({generalDef.orders} Rozkazy)
+                    <div className={`${styles.summaryPoints} ${remainingImprovementPoints < 0 ? styles.pointsError : styles.pointsOk}`}>
+                        <div>Punkty Ulepszeń:</div>
+                        <div style={{fontSize: 24}}>{remainingImprovementPoints} / {improvementPointsLimit}</div>
+                    </div>
+                </div>
+
+                {showRules && rulesDescriptions && rulesDescriptions.length > 0 && (
+                    <div className={styles.rulesContainer}>
+                        {rulesDescriptions.map(rule => (
+                            <div key={rule.id} style={{fontSize: 13, marginBottom: 8, lineHeight: 1.4}}>
+                                <strong>• {rule.title}: </strong> {rule.description}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {generalDef && (
+                    <div className={styles.summarySection}>
+                        <div className={styles.summarySectionTitle}>Dowódca Dywizji</div>
+                        <div className={styles.commanderRow}>
+                            <span className={styles.commanderName}>{generalDef.name}</span>
+                            <span className={styles.commanderStats}>
+                                {generalDef.orders} Rozkazy | {generalDef.activations} Akt.
                             </span>
                         </div>
-                    )}
-                </div>
-                <div className={`${styles.summaryPoints} ${remainingImprovementPoints < 0 ? styles.pointsError : styles.pointsOk}`}>
-                    Punkty Ulepszeń: {remainingImprovementPoints} / {improvementPointsLimit}
-                </div>
+                    </div>
+                )}
+
+                {activeRegimentsList.length > 0 && (
+                    <div className={styles.summarySection}>
+                        <div className={styles.summarySectionTitle}>Sformowane Pułki</div>
+                        <div className={styles.regimentListSimple}>
+                            {activeRegimentsList.map((reg, idx) => (
+                                <div key={idx} className={styles.regListItem}>
+                                    <div className={styles.regInfoMain}>
+                                        <div className={styles.regListName}>{reg.name}</div>
+                                        {reg.customName && <div className={styles.regListCustomName}>"{reg.customName}"</div>}
+                                        <div className={styles.regListTags}>
+                                            {reg.isMain && <span className={`${styles.tagBadge} ${styles.tagMain}`}>Siły Główne</span>}
+                                            {reg.isVanguard && <span className={`${styles.tagBadge} ${styles.tagVanguard}`}>Straż Przednia</span>}
+                                        </div>
+                                    </div>
+                                    <div className={styles.regListStats}>
+                                        <div><strong>{reg.stats.cost} PS</strong></div>
+                                        <div>Motywacja: {reg.stats.motivation + (reg.isMain?1:0)}</div>
+                                        <div>Akt: {reg.stats.activations + (reg.isMain?1:0)}</div>
+                                        {reg.isVanguard && (
+                                            <>
+                                                <div style={{color: '#d35400'}}>Zwiad: {reg.stats.recon}</div>
+                                                <div style={{color: '#d35400'}}>Czujność: {reg.stats.awareness}</div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {unassignedSupport.length > 0 && (
+                    <div className={styles.summarySection}>
+                        <div className={styles.summarySectionTitle}>Wsparcie Dywizyjne (Nieprzypisane)</div>
+                        <div className={styles.unassignedList}>
+                            {unassignedSupport.map((su, idx) => (
+                                <div key={idx} className={styles.unassignedBadge}>
+                                    <span>• {unitsMap[su.id]?.name || su.id}</span>
+                                    <span style={{fontWeight:'bold'}}>({unitsMap[su.id]?.cost || 0} pkt)</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {hasCriticalErrors && (
@@ -489,22 +669,9 @@ export default function RegimentSelector(props) {
                 </div>
             )}
 
-            {rulesDescriptions && rulesDescriptions.length > 0 && (
-                <div className={styles.section} style={{background: '#f9f9f9'}}>
-                    <h3 className={styles.sectionTitle} style={{color:'#666'}}>Zasady Specjalne Dywizji</h3>
-                    <div style={{display:'flex', flexDirection:'column', gap: 10}}>
-                        {rulesDescriptions.map(rule => (
-                            <div key={rule.id} style={{fontSize: 14}}>
-                                <strong>• {rule.title}: </strong> {rule.description}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
             {divisionDefinition.general && divisionDefinition.general.length > 0 && (
                 <div className={styles.section}>
-                    <h3 className={styles.sectionTitle}>Dowódca Dywizji</h3>
+                    <h3 className={styles.sectionTitle}>Wybór Dowódcy</h3>
                     <div className={styles.optionsGrid}>
                         {divisionDefinition.general.map(genId => (
                             <GeneralOptionTile 
@@ -536,8 +703,18 @@ export default function RegimentSelector(props) {
                                     isPurchased={state.purchasedSlotsMap[idx] === unitId} 
                                     locked={isLockedByRequirements}
                                     disabledReason={requirementCheck.reason}
+                                    
+                                    onAssign={(posKey) => handlers.handleAssignSupportUnit(idx, posKey)}
+                                    onRemove={() => handlers.handleRemoveSupportUnit(idx)}
                                     onClick={() => handlers.handleBuySupportUnit(unitId, idx, remainingImprovementPoints)}
                                     unitDef={unitsMap[unitId]}
+                                    assignmentInfo={state.purchasedSlotsMap[idx] === unitId ? configuredDivision.supportUnits.find(su => su.definitionIndex === idx)?.assignedTo : null}
+                                    
+                                    regimentsList={state.regimentsList}
+                                    unitsRulesMap={state.unitsRulesMap}
+                                    supportUnits={supportUnits}
+                                    calculateStats={calcStatsWrapper}
+                                    getRegimentDefinition={getRegimentDefinition}
                                  />
                              );
                          }
@@ -547,14 +724,25 @@ export default function RegimentSelector(props) {
                              return (
                                  <div key={idx} style={{border:'1px dashed #ccc', padding:8, borderRadius:6, background:'#fafafa'}}>
                                      <div style={{fontSize:11, textAlign:'center', marginBottom:6, color:'#666'}}>{item.name}</div>
-                                     <div style={{display:'flex', gap:6}}>
+                                     <div style={{display:'flex', gap:6, flexWrap:'wrap', justifyContent:'center'}}>
                                          {item.options.map(opt => (
                                              <SupportUnitTile key={opt} unitId={opt}
                                                 isPurchased={purchasedId === opt}
-                                                locked={(purchasedId && purchasedId !== opt) || isLockedByRequirements}
+                                                
+                                                locked={isLockedByRequirements}
                                                 disabledReason={isLockedByRequirements ? requirementCheck.reason : null}
+                                                
+                                                onAssign={(posKey) => handlers.handleAssignSupportUnit(idx, posKey)}
+                                                onRemove={() => handlers.handleRemoveSupportUnit(idx)}
                                                 onClick={() => handlers.handleBuySupportUnit(opt, idx, remainingImprovementPoints)}
                                                 unitDef={unitsMap[opt]}
+                                                assignmentInfo={purchasedId === opt ? configuredDivision.supportUnits.find(su => su.definitionIndex === idx)?.assignedTo : null}
+                                                
+                                                regimentsList={state.regimentsList}
+                                                unitsRulesMap={state.unitsRulesMap}
+                                                supportUnits={supportUnits}
+                                                calculateStats={calcStatsWrapper}
+                                                getRegimentDefinition={getRegimentDefinition}
                                              />
                                          ))}
                                      </div>
@@ -566,35 +754,43 @@ export default function RegimentSelector(props) {
                 </div>
             </div>
 
-            {supportUnits.length > 0 && (
-                <div className={styles.section} style={{backgroundColor:'#eef6fc', borderColor:'#cce3f6'}}>
-                    <h3 className={styles.sectionTitle} style={{color:'#0056b3', borderBottomColor:'#cce3f6'}}>Konfiguracja Wsparcia</h3>
-                    {supportUnits.map((su, idx) => (
-                        <SupportConfigRow 
-                            key={idx} 
-                            supportUnit={su} 
-                            index={idx}
-                            supportUnitIndex={idx}
-                            unitsMap={unitsMap}
-                            unitsRulesMap={state.unitsRulesMap}
-                            regimentsList={state.regimentsList}
-                            supportUnits={supportUnits}
-                            getRegimentDefinition={getRegimentDefinition}
-                            onAssign={handlers.handleAssignSupportUnit}
-                            onRemove={handlers.handleRemoveSupportUnit}
-                            calculateStats={calcStatsWrapper}
-                        />
-                    ))}
-                </div>
-            )}
-
+            {/* SEKCJE PUŁKÓW (Usunięto SupportConfigRow) */}
+            
             {vanguardRegiments && vanguardRegiments.length > 0 && (
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>Straż Przednia</h3>
+                    <div className={styles.regimentsGrid}>
+                        <RegimentBlock 
+                            group={GROUP_TYPES.VANGUARD} 
+                            regiments={vanguardRegiments} 
+                            definitionOptions={divisionDefinition.vanguard}
+                            mainForceKey={state.mainForceKey}
+                            getRegimentDefinition={getRegimentDefinition}
+                            calculateStats={calcStatsWrapper}
+                            onNameChange={handlers.handleRegimentNameChange}
+                            onRegimentChange={handlers.handleRegimentChange}
+                            onOpenEditor={props.onOpenRegimentEditor}
+                            onMainForceSelect={handlers.handleMainForceSelect}
+                            supportUnits={supportUnits}
+                            unitsMap={unitsMap}
+                            configuredDivision={configuredDivision}
+                            divisionDefinition={divisionDefinition}
+                            currentMainForceCost={currentMainForceCost}
+                            isAllied={isAllied}
+                            currentAlliesCount={currentAlliesCount}
+                            calculateRegimentPU={calcPuWrapper} 
+                        />
+                    </div>
+                </div>
+            )}
+
+            <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Podstawa Dywizji</h3>
+                <div className={styles.regimentsGrid}>
                     <RegimentBlock 
-                        group={GROUP_TYPES.VANGUARD} 
-                        regiments={vanguardRegiments} 
-                        definitionOptions={divisionDefinition.vanguard}
+                        group={GROUP_TYPES.BASE} 
+                        regiments={baseRegiments} 
+                        definitionOptions={divisionDefinition.base}
                         mainForceKey={state.mainForceKey}
                         getRegimentDefinition={getRegimentDefinition}
                         calculateStats={calcStatsWrapper}
@@ -609,57 +805,35 @@ export default function RegimentSelector(props) {
                         currentMainForceCost={currentMainForceCost}
                         isAllied={isAllied}
                         currentAlliesCount={currentAlliesCount}
-                        calculateRegimentPU={calcPuWrapper} // PRZEKAZUJEMY WRAPPER
+                        calculateRegimentPU={calcPuWrapper}
                     />
                 </div>
-            )}
-
-            <div className={styles.section}>
-                <h3 className={styles.sectionTitle}>Podstawa Dywizji</h3>
-                <RegimentBlock 
-                    group={GROUP_TYPES.BASE} 
-                    regiments={baseRegiments} 
-                    definitionOptions={divisionDefinition.base}
-                    mainForceKey={state.mainForceKey}
-                    getRegimentDefinition={getRegimentDefinition}
-                    calculateStats={calcStatsWrapper}
-                    onNameChange={handlers.handleRegimentNameChange}
-                    onRegimentChange={handlers.handleRegimentChange}
-                    onOpenEditor={props.onOpenRegimentEditor}
-                    onMainForceSelect={handlers.handleMainForceSelect}
-                    supportUnits={supportUnits}
-                    unitsMap={unitsMap}
-                    configuredDivision={configuredDivision}
-                    divisionDefinition={divisionDefinition}
-                    currentMainForceCost={currentMainForceCost}
-                    isAllied={isAllied}
-                    currentAlliesCount={currentAlliesCount}
-                    calculateRegimentPU={calcPuWrapper} // PRZEKAZUJEMY WRAPPER
-                />
             </div>
             
             <div className={styles.section}>
                 <h3 className={styles.sectionTitle}>Poziom I</h3>
-                 <RegimentBlock 
-                    group={GROUP_TYPES.ADDITIONAL} 
-                    regiments={additionalRegiments} 
-                    definitionOptions={divisionDefinition.additional}
-                    mainForceKey={state.mainForceKey}
-                    getRegimentDefinition={getRegimentDefinition}
-                    calculateStats={calcStatsWrapper}
-                    onNameChange={handlers.handleRegimentNameChange}
-                    onRegimentChange={handlers.handleRegimentChange}
-                    onOpenEditor={props.onOpenRegimentEditor}
-                    onMainForceSelect={handlers.handleMainForceSelect}
-                    supportUnits={supportUnits}
-                    unitsMap={unitsMap}
-                    configuredDivision={configuredDivision}
-                    divisionDefinition={divisionDefinition}
-                    currentMainForceCost={currentMainForceCost}
-                    isAllied={isAllied}
-                    currentAlliesCount={currentAlliesCount}
-                    calculateRegimentPU={calcPuWrapper} // PRZEKAZUJEMY WRAPPER
-                />
+                 <div className={styles.regimentsGrid}>
+                    <RegimentBlock 
+                        group={GROUP_TYPES.ADDITIONAL} 
+                        regiments={additionalRegiments} 
+                        definitionOptions={divisionDefinition.additional}
+                        mainForceKey={state.mainForceKey}
+                        getRegimentDefinition={getRegimentDefinition}
+                        calculateStats={calcStatsWrapper}
+                        onNameChange={handlers.handleRegimentNameChange}
+                        onRegimentChange={handlers.handleRegimentChange}
+                        onOpenEditor={props.onOpenRegimentEditor}
+                        onMainForceSelect={handlers.handleMainForceSelect}
+                        supportUnits={supportUnits}
+                        unitsMap={unitsMap}
+                        configuredDivision={configuredDivision}
+                        divisionDefinition={divisionDefinition}
+                        currentMainForceCost={currentMainForceCost}
+                        isAllied={isAllied}
+                        currentAlliesCount={currentAlliesCount}
+                        calculateRegimentPU={calcPuWrapper}
+                    />
+                 </div>
             </div>
         </div>
     );

@@ -53,17 +53,24 @@ export const useRegimentSelectorLogic = ({
   const handleBuySupportUnit = (unitId, definitionIndex, remainingPoints) => {
     setConfiguredDivision(prev => {
         const currentSupportUnits = [...prev.supportUnits];
+        // Sprawdzamy czy w tym slocie (defIndex) jest już coś kupione
         const existingIndex = currentSupportUnits.findIndex(su => su.definitionIndex === definitionIndex);
+        
+        // Jeśli klikamy w to samo co już jest kupione -> usuwamy (toggle off)
         if (existingIndex !== -1 && currentSupportUnits[existingIndex].id === unitId) {
             currentSupportUnits.splice(existingIndex, 1);
             return { ...prev, supportUnits: currentSupportUnits };
         }
+        
+        // Jeśli slot zajęty przez inną jednostkę -> podmieniamy (SWAP)
         if (existingIndex !== -1) {
             const unitDef = unitsMap[unitId];
             if (unitDef && unitDef.pu_cost) {
                  const oldId = currentSupportUnits[existingIndex].id;
                  const oldDef = unitsMap[oldId];
                  const oldCost = oldDef?.pu_cost || 0;
+                 
+                 // Obliczamy czy nas stać na podmianę: (obecne + zwrot za stare) - nowe
                  if (remainingPoints + oldCost - unitDef.pu_cost < 0) {
                     alert(`Brak Punktów Ulepszeń na zamianę. Potrzebujesz: ${unitDef.pu_cost - oldCost} więcej.`);
                     return prev;
@@ -72,10 +79,12 @@ export const useRegimentSelectorLogic = ({
             currentSupportUnits[existingIndex] = { 
                 ...currentSupportUnits[existingIndex], 
                 id: unitId,
-                assignedTo: null 
+                assignedTo: null // Reset przypisania przy zmianie typu jednostki
             };
             return { ...prev, supportUnits: currentSupportUnits };
         }
+
+        // Jeśli slot wolny -> kupujemy nową
         const unitDef = unitsMap[unitId];
         if (unitDef && unitDef.pu_cost) {
             if (remainingPoints - unitDef.pu_cost < 0) {
@@ -92,30 +101,30 @@ export const useRegimentSelectorLogic = ({
     });
   };
 
-  const handleRemoveSupportUnit = (supportUnitIndex) => {
+  // POPRAWIONE: Usuwanie po definitionIndex
+  const handleRemoveSupportUnit = (definitionIndex) => {
       setConfiguredDivision(prev => {
-          const newSupportUnits = [...prev.supportUnits];
-          newSupportUnits.splice(supportUnitIndex, 1);
+          const newSupportUnits = prev.supportUnits.filter(su => su.definitionIndex !== definitionIndex);
           return { ...prev, supportUnits: newSupportUnits };
       });
   };
 
-  const handleAssignSupportUnit = (supportUnitIndex, positionKey) => {
-    if (positionKey === "") {
-        setConfiguredDivision(prev => {
-            const newSupportUnits = [...prev.supportUnits];
-            newSupportUnits[supportUnitIndex] = { ...newSupportUnits[supportUnitIndex], assignedTo: null };
-            return { ...prev, supportUnits: newSupportUnits };
-        });
-        return;
+  // POPRAWIONE: Przypisywanie po definitionIndex
+  const handleAssignSupportUnit = (definitionIndex, positionKey) => {
+    let assignment = null;
+    
+    if (positionKey !== "") {
+        const [group, idxStr] = positionKey.split('/');
+        assignment = { group, index: parseInt(idxStr, 10), positionKey };
     }
-    const [group, index] = positionKey.split('/');
+
     setConfiguredDivision(prev => {
-      const newSupportUnits = [...prev.supportUnits];
-      newSupportUnits[supportUnitIndex] = {
-        ...newSupportUnits[supportUnitIndex],
-        assignedTo: { group, index: parseInt(index, 10), positionKey }
-      };
+      const newSupportUnits = prev.supportUnits.map(su => {
+          if (su.definitionIndex === definitionIndex) {
+              return { ...su, assignedTo: assignment };
+          }
+          return su;
+      });
       return { ...prev, supportUnits: newSupportUnits };
     });
   };
@@ -203,9 +212,6 @@ export const useRegimentSelectorLogic = ({
         );
         if (!confirmed) return;
     }
-
-    // ZMIANA: USUNIĘTO ALERTY BLOKUJĄCE ZMIANĘ PUŁKU (VANGUARD/ALLIED)
-    // Pozwalamy na zmianę, walidacja w locie w Selectorze.
 
     setConfiguredDivision((prev) => {
       const group = prev[groupKey];

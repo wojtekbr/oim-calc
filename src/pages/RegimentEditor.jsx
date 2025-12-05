@@ -7,6 +7,27 @@ import {
     calculateSingleImprovementIMPCost 
 } from "../utils/armyMath";
 
+// --- Helpers do Placeholdera ---
+
+// Generuje unikalny kolor pastelowy na podstawie tekstu (nazwy/ID)
+const getPlaceholderColor = (str) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+    return '#' + "00000".substring(0, 6 - c.length) + c;
+};
+
+// Zwraca styl tła dla placeholdera (lekki gradient)
+const getPlaceholderStyle = (id, name) => {
+    const color = getPlaceholderColor(id || name);
+    return {
+        background: `linear-gradient(135deg, ${color}22 0%, ${color}66 100%)`,
+        color: '#555'
+    };
+};
+
 // --- Sub-components (View Only) ---
 
 const SingleUnitOptionCard = ({ 
@@ -37,16 +58,31 @@ const SingleUnitOptionCard = ({
       ? `${displayCost} PS + ${unitPuCost} PU` 
       : `${displayCost} PS`;
 
+  // Inicjały do placeholdera (np. "Sipahowie Lenni" -> "SL")
+  const initials = unitDef.name 
+    ? unitDef.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+    : "??";
+
+  const placeholderStyle = getPlaceholderStyle(unitId, unitDef.name);
+
   return (
     <div 
       className={`${styles.unitCard} ${isActive ? styles.active : ''} ${onClick && !isLocked ? styles.selectable : ''}`}
       onClick={isLocked ? undefined : onClick}
-      style={isLocked ? { cursor: 'default' } : {}}
+      style={isLocked ? { cursor: 'default', opacity: 0.6, filter: 'grayscale(1)' } : {}}
+      title={unitDef.name}
     >
-      <div className={styles.unitName}>
-        {isActive && "✔ "}{unitDef.name || unitId}
+      {isActive && <div className={styles.checkBadge}>✔</div>}
+      
+      {/* Placeholder na obrazek */}
+      <div className={styles.cardImagePlaceholder} style={placeholderStyle}>
+          {initials}
       </div>
-      <div className={styles.unitCost}>{costLabel}</div>
+
+      <div className={styles.cardContent}>
+          <div className={styles.unitName}>{unitDef.name || unitId}</div>
+          <div className={styles.unitCost}>{costLabel}</div>
+      </div>
     </div>
   );
 };
@@ -79,28 +115,28 @@ const MultiUnitOptionCard = ({
 
     return (
         <div 
-            className={`${styles.unitCard} ${isActive ? styles.active : ''} ${onClick && !isLocked ? styles.selectable : ''}`}
+            className={`${styles.unitCard} ${styles.multiCard} ${isActive ? styles.active : ''} ${onClick && !isLocked ? styles.selectable : ''}`}
             onClick={isLocked ? undefined : onClick}
-            style={{ 
-                borderStyle: 'double', 
-                borderWidth: 3,
-                ...(isLocked ? { cursor: 'default' } : {})
-            }}
+            style={isLocked ? { cursor: 'default' } : {}}
         >
-            <div className={styles.unitName} style={{ marginBottom: 8, borderBottom: '1px solid #eee', paddingBottom: 4 }}>
-                {isActive && "✔ "}{displayName}
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {unitIds.map((uid, idx) => (
-                    <div key={idx} style={{ fontSize: 11, display: 'flex', justifyContent: 'space-between', color: '#555' }}>
-                        <span>• {unitsMap[uid]?.name || uid}</span>
-                    </div>
-                ))}
+            {isActive && <div className={styles.checkBadge}>✔</div>}
+
+            {/* Placeholder dla pakietu */}
+            <div className={styles.cardImagePlaceholder} style={{background: '#e0e0e0', fontSize: '18px'}}>
+                📚 {unitIds.length}x
             </div>
 
-            <div className={styles.unitCost} style={{ marginTop: 8, fontWeight: 'bold' }}>
-                Razem: {totalCost} PS
+            <div className={styles.cardContent}>
+                <div className={styles.unitName} style={{marginBottom: 8}}>{displayName}</div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, fontSize: 10, color: '#666', marginBottom: 6 }}>
+                    {unitIds.slice(0, 3).map((uid, idx) => (
+                        <div key={idx}>• {unitsMap[uid]?.name || uid}</div>
+                    ))}
+                    {unitIds.length > 3 && <div>...i {unitIds.length - 3} więcej</div>}
+                </div>
+
+                <div className={styles.unitCost}>Razem: {totalCost} PS</div>
             </div>
         </div>
     );
@@ -126,7 +162,6 @@ const ActiveOptionConfigurationPanel = ({
                 const positionKey = `${basePositionKey}/${uIdx}`;
                 const unitDef = unitsMap[uid];
                 
-                // Sprawdzamy czy to grupa (np. Kethuda, Aga)
                 const isGroupRank = unitDef?.rank === 'group';
 
                 const validImprovements = unitLevelImprovements.filter(imp => {
@@ -140,7 +175,6 @@ const ActiveOptionConfigurationPanel = ({
                             <span style={{fontWeight: 400, color: '#888', fontSize: 11}}>({helpers.getFinalUnitCost(uid, false)} PS)</span>
                         </div>
 
-                        {/* Wyświetlamy kontener ulepszeń tylko jeśli jednostka NIE JEST grupą */}
                         {!isGroupRank && (
                             <div className={styles.improvementsContainer} style={{marginTop: 0, border: 'none', paddingTop: 0}}>
                                 {validImprovements.length > 0 ? validImprovements.map(imp => {
@@ -180,12 +214,12 @@ const GroupSection = ({
   data, 
   selections, 
   handlers, 
-  logicHelpers,
-  state,
-  unitsMap,
-  unitLevelImprovements,
-  isLocked,
-  regiment,
+  logicHelpers, 
+  state, 
+  unitsMap, 
+  unitLevelImprovements, 
+  isLocked, 
+  regiment, 
   commonImprovements 
 }) => {
   const isOptionalGroup = groupKey === GROUP_TYPES.OPTIONAL;
@@ -458,6 +492,7 @@ export default function RegimentEditor(props) {
                                                 unitMap={unitsMap}
                                                 logicHelpers={helpers}
                                                 isLocked={!state.additionalEnabled}
+                                                customCosts={null} // CustomSlot nie ma override w strukturze, więc null
                                             />
                                             {isActive && (
                                                 <ActiveOptionConfigurationPanel
@@ -511,7 +546,6 @@ export default function RegimentEditor(props) {
                     <span className={styles.statValue}>{state.stats.totalMotivation}</span>
                 </div>
                 
-                {/* ZMIANA: Z "Aktywacje" na "Znaczniki Aktywacji" */}
                 <div className={styles.statRow}>
                     <span className={styles.statLabel}>Znaczniki Aktywacji:</span>
                     <span className={styles.statValue}>{state.stats.totalActivations}</span>
@@ -527,7 +561,7 @@ export default function RegimentEditor(props) {
                 </div>
             </div>
 
-            {/* NOWE: Zasady Specjalne Pułku */}
+            {/* Zasady Specjalne Pułku */}
             {specialRules.length > 0 && (
                 <div className={styles.sectionCard}>
                     <h4 className={styles.groupLabel}>Zasady Specjalne</h4>
@@ -557,14 +591,22 @@ export default function RegimentEditor(props) {
                             const isActive = state.regimentImprovements.includes(imp.id);
                             
                             const commonDef = definitions.commonImprovements?.[imp.id];
-                            const displayName = imp.name || commonDef?.name || imp.id;
+                            const displayName = commonDef?.name || imp.name || imp.id;
 
-                            const armyCost = imp.army_point_cost ?? commonDef?.army_point_cost;
-                            const puCost = imp.cost ?? commonDef?.cost;
+                            // Logika kosztów z override
+                            let armyCost = 0;
+                            if (imp.army_cost_override !== undefined) armyCost = imp.army_cost_override;
+                            else if (imp.army_point_cost !== undefined) armyCost = imp.army_point_cost;
+                            else if (commonDef?.army_point_cost !== undefined) armyCost = commonDef.army_point_cost;
+
+                            let puCost = 0;
+                            if (imp.cost_override !== undefined) puCost = imp.cost_override;
+                            else if (imp.cost !== undefined) puCost = imp.cost;
+                            else if (commonDef?.cost !== undefined) puCost = commonDef.cost;
                             
                             const costParts = [];
-                            if (typeof armyCost === 'number') costParts.push(`${armyCost} PS`);
-                            if (typeof puCost === 'number') costParts.push(`${puCost} PU`);
+                            if (armyCost > 0) costParts.push(`${armyCost} PS`);
+                            if (puCost > 0) costParts.push(`${puCost} PU`);
                             
                             const costString = costParts.length > 0 
                                 ? `(${costParts.join(" + ")})` 

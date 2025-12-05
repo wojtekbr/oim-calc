@@ -23,7 +23,7 @@
     "cost": 0,
     "improvement_cost": 0,
     "rank": "group",
-    "orders": 2
+    "orders": 2  
   },
   "cro_rotmistrz": {
     "id": "cro_rotmistrz",
@@ -32,6 +32,14 @@
     "improvement_cost": 0,
     "rank": "group",
     "orders": 1
+  },
+    "cro_cossack_style_s": {
+    "id": "cro_cossack_style_s",
+    "name": "Jazda kozacka S",
+    "cost": 5,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true
   },
   "cro_cossack_style_m": {
     "id": "cro_cossack_style_m",
@@ -92,14 +100,6 @@
     "rank": "gold",
     "is_cavalry": true,
     "has_lances": true
-  },
-  "cro_cossack_style_s": {
-    "id": "cro_cossack_style_s",
-    "name": "Jazda kozacka S",
-    "cost": 5,
-    "improvement_cost": 2,
-    "rank": "silver",
-    "is_cavalry": true
   },
   "cro_pancerni_rohatyna_s": {
     "id": "cro_pancerni_rohatyna_s",
@@ -164,7 +164,8 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true
+    "open_order": true,
+	  "are_scouts": true
   },
   "cro_wallachian_m": {
     "id": "cro_wallachian_m",
@@ -173,7 +174,8 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true
+    "open_order": true,
+	  "are_scouts": true
   },
   "cro_tatar_style_s": {
     "id": "cro_tatar_style_s",
@@ -182,7 +184,8 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true
+    "open_order": true,
+	  "are_scouts": true
   },
   "cro_tatar_style_m": {
     "id": "cro_tatar_style_m",
@@ -191,7 +194,8 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true
+    "open_order": true,
+	  "are_scouts": true
   },
   "cro_pancerni_light_reg_s": {
     "id": "cro_pancerni_light_reg_s",
@@ -215,35 +219,39 @@
     "id": "cro_pospolite_m",
     "name": "Pospolite Ruszenie M",
     "cost": 5,
-    "improvement_cost": 1,
+    "improvement_cost": 2,
     "rank": "silver",
-    "is_cavalry": true
+    "is_cavalry": true,
+	  "are_looters_insubordinate": true
   },
   "cro_pospolite_l": {
     "id": "cro_pospolite_L",
     "name": "Pospolite Ruszenie L",
     "cost": 7,
-    "improvement_cost": 2,
+    "improvement_cost": 3,
     "rank": "silver",
-    "is_cavalry": true
+    "is_cavalry": true,
+	  "are_looters_insubordinate": true
   },
   "cro_pospolite_hus_s": {
     "id": "cro_pospolite_hus_s",
     "name": "Pospolite Ruszenie po husarsku S",
     "cost": 5,
-    "improvement_cost": 1,
+    "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "has_lances": true
+    "has_lances": true,
+	  "are_looters_insubordinate": true
   },
   "cro_pospolite_hus_m": {
     "id": "cro_pospolite_hus_m",
     "name": "Pospolite Ruszenie po husarsku M",
     "cost": 7,
-    "improvement_cost": 2,
+    "improvement_cost": 3,
     "rank": "silver",
     "is_cavalry": true,
-    "has_lances": true
+    "has_lances": true,
+	  "are_looters_insubordinate": true
   },
   "cro_piechota_lanowa_s": {
     "id": "cro_piechota_lanowa_s",
@@ -258,7 +266,7 @@
     "name": "Piechota Łanowa M",
     "cost": 5,
     "improvement_cost": 2,
-    "rank": "bronze",
+    "rank": "silver",
     "is_infantry": true
   },
   "cro_light_artillery_s": {
@@ -267,15 +275,8 @@
     "cost": 3,
     "improvement_cost": 0,
     "rank": "bronze",
-    "is_artillery": true
-  },
-  "cro_oberszter": {
-    "id": "cro_oberszter",
-    "name": "Oberszter",
-    "cost": 0,
-    "rank": "group",
-    "orders": 2,
-    "activations": 1
+    "is_artillery": true,
+	  "open_order": true
   },
   "cro_polish_dragoons_s": {
     "id": "cro_polish_dragoons_s",
@@ -283,7 +284,8 @@
     "cost": 5,
     "improvement_cost": 1,
     "rank": "silver",
-    "are_dragoons": true
+    "are_dragoons": true,
+	  "are_scouts": true
   },
   "cro_polish_dragoons_m": {
     "id": "cro_polish_dragoons_m",
@@ -298,9 +300,9 @@
     "name": "Wolontarze S",
     "cost": 3,
     "improvement_cost": 1,
-    "rank": "silver",
+    "rank": "bronze",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_looters_insubordinate": true
   },
   "cro_volunteers_m": {
@@ -310,15 +312,15 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
-    "are_looters_insubordinate": truechcesz po
+    "open_order": true,
+    "are_looters_insubordinate": true
   },
   "cro_musketeers_s": {
     "id": "cro_musketeers_s",
     "name": "Skwadron muszkieterów S",
     "cost": 5,
     "improvement_cost": 1,
-    "rank": "bronze",
+    "rank": "silver",
     "is_infantry": true
   },
   "cro_musketeers_m": {
@@ -335,7 +337,8 @@
     "cost": 5,
     "improvement_cost": 1,
     "rank": "silver",
-    "are_dragoons": true
+    "are_dragoons": true,
+	  "are_scouts": true
   },
   "cro_dragoons_mercenary_m": {
     "id": "cro_dragoons_mercenary_m",
@@ -345,22 +348,43 @@
     "rank": "silver",
     "are_dragoons": true
   },
-  "cro_infantry_mercenary": {
-    "id": "cro_infantry_mercenary",
-    "name": "Piechota najemna",
+  "cro_infantry_mercenary_m": {
+    "id": "cro_infantry_mercenary_m",
+    "name": "Piechota Najemna M",
     "cost": 8,
     "improvement_cost": 3,
-    "rank": "silver",
-    "is_infantry": true
+    "rank": "gold",
+    "is_infantry": true,
+	  "is_pike_and_shot": true
   },
-  "cro_infantry_mercenary_armored": {
-    "id": "cro_infantry_mercenary_armored",
-    "name": "Opancerzona Piechota najemna",
+  "cro_infantry_mercenary_L": {
+    "id": "cro_infantry_mercenary_L",
+    "name": "Piechota Najemna L",
+    "cost": 11,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_infantry": true,
+	  "is_pike_and_shot": true
+  },
+  "cro_infantry_mercenary_armored_m": {
+    "id": "cro_infantry_mercenary_armored_m",
+    "name": "Opancerzona Piechota Najemna M",
     "cost": 8,
     "improvement_points_cost": -1,
     "improvement_cost": 3,
-    "rank": "silver",
-    "is_infantry": true
+    "rank": "gold",
+    "is_infantry": true,
+	  "is_pike_and_shot": true
+  },
+  "cro_infantry_mercenary_armored_L": {
+    "id": "cro_infantry_mercenary_armored_L",
+    "name": "Opancerzona Piechota Najemna L",
+    "cost": 8,
+    "improvement_points_cost": -1,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_infantry": true,
+	  "is_pike_and_shot": true
   },
   "cro_major": {
     "id": "cro_major",
@@ -385,12 +409,20 @@
     "rank": "silver",
     "is_cavalry": true
   },
-  "cro_reiters_mercenary_armored": {
-    "id": "cro_reiters_mercenary_armored",
-    "name": "Opancerzeni Rajtarzy M",
+    "cro_reiters_mercenary_armored_s": {
+    "id": "cro_reiters_mercenary_armored_s",
+    "name": "Opancerzeni Rajtarzy Najemni S",
+    "cost": 7,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "cro_reiters_mercenary_armored_m": {
+    "id": "cro_reiters_mercenary_armored_m",
+    "name": "Opancerzeni Rajtarzy Najemni M",
     "cost": 10,
     "improvement_points_cost": 1,
-    "improvement_cost": 3,
+    "improvement_cost": 4,
     "rank": "gold",
     "is_cavalry": true
   }  

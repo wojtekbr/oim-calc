@@ -29,25 +29,178 @@
   font-size: 14px;
 }
 
-/* Dashboard Summary Card */
+/* --- SCALONE PODSUMOWANIE --- */
 .summaryCard {
   background: white;
   border: 1px solid #e0e0e0;
   border-left: 5px solid #0077ff;
   border-radius: 8px;
   padding: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   display: flex;
+  flex-direction: column;
+}
+
+.summaryHeader {
+  display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  width: 100%;
 }
 
 .summaryTitle { font-size: 20px; font-weight: 800; color: #222; }
 .summarySubtitle { font-size: 14px; color: #666; margin-top: 4px; }
-.summaryPoints { font-size: 16px; font-weight: 600; }
+.summaryPoints { font-size: 16px; font-weight: 600; text-align: right; }
 .pointsOk { color: #1b7e32; }
 .pointsError { color: #d32f2f; }
+
+/* Przycisk rozwijania zasad */
+.rulesToggleBtn {
+  background: none;
+  border: none;
+  color: #0077ff;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 8px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.rulesToggleBtn:hover { text-decoration: underline; }
+
+.rulesContainer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #eee;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- NOWE SEKCJE WEWNĄTRZ PODSUMOWANIA --- */
+
+.summarySection {
+  margin-top: 20px;
+  border-top: 2px solid #f0f0f0;
+  padding-top: 12px;
+}
+
+.summarySectionTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+/* Wiersz Dowódcy */
+.commanderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9fbff;
+  border: 1px solid #cce3f6;
+  padding: 10px 14px;
+  border-radius: 6px;
+}
+
+.commanderName {
+  font-weight: 700;
+  color: #0056b3;
+  font-size: 14px;
+}
+
+.commanderStats {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+/* Lista Pułków (Zintegrowana) */
+.regimentListSimple {
+  border: 1px solid #eee;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.regListItem {
+  padding: 10px 14px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  background: #fff;
+}
+.regListItem:last-child { border-bottom: none; }
+.regListItem:hover { background-color: #fafafa; }
+
+.regInfoMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.regListName {
+  font-weight: 700;
+  color: #222;
+  font-size: 13px;
+}
+
+.regListCustomName {
+  font-style: italic;
+  color: #666;
+  font-size: 12px;
+}
+
+.regListTags {
+  display: flex;
+  gap: 6px;
+  margin-top: 3px;
+}
+
+.tagBadge {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.tagMain { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
+.tagVanguard { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+
+.regListStats {
+  text-align: right;
+  font-size: 12px;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Lista Wsparcia (Nieprzypisanego) */
+.unassignedList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.unassignedBadge {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
 /* Sections */
 .section {
@@ -69,82 +222,149 @@
   padding-bottom: 8px;
 }
 
-/* Support Units Grid */
-.supportGrid {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+/* Grid dla Pułków */
+.regimentsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
 }
 
-.supportTile {
+@media (min-width: 1100px) {
+  .regimentsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    align-items: start;
+  }
+}
+
+/* STYLE KART */
+.gridContainer, .supportGrid, .optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-  border-radius: 8px;
-  border: 2px solid #ccc;
-  background: white;
-  min-width: 140px;
-  min-height: 80px;
-  cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
-  text-align: center;
+  overflow: visible;
+  cursor: pointer;
+  height: 100%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  min-height: 160px;
 }
 
-.supportTile:hover { transform: translateY(-2px); border-color: #aaa; }
-.supportTile.active {
-  border-color: #0077ff;
-  background-color: #f0f7ff;
-  box-shadow: 0 0 0 1px #0077ff inset;
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border-color: #bbb;
 }
-.supportTile.locked {
-  opacity: 0.5;
+
+.card.active {
+  border: 2px solid #0077ff;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(0, 119, 255, 0.2);
+}
+
+.card.locked, .card.disabledTile {
+  opacity: 0.6;
+  filter: grayscale(1);
   cursor: not-allowed;
   background: #f5f5f5;
   border-color: #eee;
 }
 
-.checkIcon {
-  position: absolute; top: 6px; right: 6px;
-  color: #0077ff; font-weight: bold;
-}
-
-/* Support Config List */
-.configRow {
+.cardImagePlaceholder {
+  width: 100%;
+  height: 80px;
+  background-color: #eee;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 12px;
-  margin-bottom: 8px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fff;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.2);
+  text-transform: uppercase;
+  border-bottom: 1px solid #eee;
+  border-radius: 6px 6px 0 0;
 }
 
-.configRow.error {
-  border-color: #d32f2f;
-  background-color: #fff5f5;
+.cardContent {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: space-between;
 }
 
-.selectInput {
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  width: 100%;
+.cardTitle {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #222;
+  line-height: 1.3;
 }
 
-.removeBtn {
-  padding: 6px 12px;
-  background: #ffebee;
-  color: #c62828;
-  border: 1px solid #ef9a9a;
-  border-radius: 4px;
-  cursor: pointer;
+.cardSubtitle {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.cardCost {
   font-size: 12px;
+  color: #666;
+  font-weight: 600;
+  background: #f0f2f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+  margin-top: auto;
 }
-.removeBtn:hover { background: #ffcdd2; }
+
+.checkBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #0077ff;
+  color: white;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+
+/* NOWE STYLE DLA PRZYPISYWANIA WSPARCIA NA KARCIE */
+
+.assignmentSelect {
+  width: 100%;
+  margin-top: 8px;
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 11px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.assignmentSelect:focus {
+  outline: none;
+  border-color: #0077ff;
+}
+
+/* Usunięto .cardRemoveBtn bo teraz klikamy w kartę żeby odznaczyć */
 
 /* Regiment Rows */
 .regimentRow {
@@ -153,14 +373,10 @@
   padding: 16px;
   border: 1px solid #eee;
   border-radius: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 0; 
   background: #fff;
   transition: all 0.2s;
-}
-
-.regimentRow.mainForce {
-  border: 2px solid #ff9800;
-  background: #fff8e1;
+  height: 100%;
 }
 
 .regimentRow.disabled {
@@ -176,22 +392,28 @@
   margin-bottom: 12px;
 }
 
+.regTopRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
 .regTitle { 
   font-weight: 700; 
   font-size: 15px; 
-  display: flex; 
-  align-items: center; 
-  gap: 10px; 
   color: #222;
+  white-space: nowrap; 
 }
 
-.mainForceBadge { 
-  background: #ff9800; 
-  color: white; 
-  padding: 2px 6px; 
+.regNameInput {
+  padding: 6px 10px; 
+  border: 1px solid #ccc; 
   border-radius: 4px; 
-  font-size: 10px; 
-  text-transform: uppercase;
+  font-size: 13px;
+  flex: 1; 
+  max-width: 300px;
 }
 
 .regStats {
@@ -199,6 +421,9 @@
   color: #555; 
   text-align: right;
   line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .regCost {
@@ -207,39 +432,54 @@
   color: #1b7e32;
 }
 
-.regControls {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-top: 12px;
-}
-
-.regNameInput {
-  padding: 8px; 
-  border: 1px solid #ccc; 
-  border-radius: 4px; 
-  flex: 1;
-}
-
 .editBtn {
-  padding: 8px 16px; 
-  background: #0077ff; 
-  color: white; 
-  border: none; 
+  padding: 6px 12px; 
+  background: #fff; 
+  color: #0077ff; 
+  border: 1px solid #0077ff; 
   border-radius: 4px; 
   cursor: pointer;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
+  margin-top: 8px;
+  transition: all 0.2s;
+  width: 100%;
+  text-align: center;
 }
-.editBtn:hover { background: #005ecb; }
+.editBtn:hover { background: #0077ff; color: #fff; }
+
+.makeMainForceBtn {
+  margin-top: 6px;
+  font-size: 11px;
+  padding: 4px 8px;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #ff9800;
+  color: #ef6c00;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.makeMainForceBtn:hover { background: #fff3e0; }
+
+.statusLabel {
+  margin-top: 6px;
+  font-weight: bold;
+  padding-top: 4px;
+  border-top: 1px solid #eee;
+  width: 100%;
+  text-align: right;
+}
+
+.statusMainForce { color: #e65100; }
+.statusAlly { color: #d35400; }
 
 .regSupportInfo {
-  margin-top: 12px; 
+  margin-top: auto;
+  padding-top: 12px;
   font-size: 12px; 
   color: #0056b3; 
   font-style: italic;
   border-top: 1px dashed #eee;
-  padding-top: 8px;
 }
 
 /* PDF Button & Nav */
@@ -265,60 +505,3 @@
   padding: 0;
 }
 .backBtn:hover { text-decoration: underline; }
-
-/* Options Grid (Tiles) - FIX: Zmiana na Grid */
-.optionsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-  margin-top: 12px;
-  margin-bottom: 12px;
-  width: 100%;
-}
-
-.optionCard {
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 12px;
-  background-color: #fff;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  position: relative;
-  min-height: 70px;
-}
-
-.optionCard:hover {
-  border-color: #999;
-  background-color: #fafafa;
-  transform: translateY(-1px);
-}
-
-.optionCard.active {
-  border-color: #0077ff;
-  background-color: #e9f3ff;
-  box-shadow: 0 0 0 1px #0077ff inset;
-}
-
-.optionCard.disabledTile {
-  opacity: 0.5;
-  filter: grayscale(1);
-  pointer-events: none;
-  cursor: not-allowed;
-  background-color: #f5f5f5;
-  border-color: #eee;
-}
-
-.optionName {
-  font-weight: 600;
-  font-size: 13px;
-  color: #333;
-  margin-bottom: 4px;
-}
-
-.optionCost {
-  font-size: 11px;
-  color: #666;
-}

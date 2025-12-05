@@ -80,7 +80,7 @@
     "improvement_cost": 1,
     "rank": "bronze",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_scouts": true
   },
   "ott_beszli_m": {
@@ -90,7 +90,7 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_scouts": true
   },
   "ott_gonullu_s": {
@@ -100,7 +100,7 @@
     "improvement_cost": 1,
     "rank": "bronze",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_scouts": true,
     "are_looters_insubordinate": true
   },
@@ -111,7 +111,7 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_scouts": true,
     "are_looters_insubordinate": true
   },
@@ -122,7 +122,7 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "has_lances": true
   },
   "ott_segbani_m": {
@@ -157,7 +157,7 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "has_lances": true,
     "improvement_points_cost": 1,
     "improvement_limitations": ["javelin","kalkans", "veterans", "additional_ammo"]
@@ -169,7 +169,7 @@
     "improvement_cost": 3,
     "rank": "gold",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "has_lances": true,
     "improvement_points_cost": 1,
     "improvement_limitations": ["javelin","kalkans", "veterans", "additional_ammo"]

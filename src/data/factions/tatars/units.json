@@ -1,5 +1,5 @@
 {
-  "_meta": { "name": "Imperium Osmańskie" },
+  "_meta": { "name": "Chanat Krymski" },
 
   "tat_mirza": {
     "id": "tat_mirza",
@@ -17,7 +17,7 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_scouts": true
   },
   "tat_ordyncy_m": {
@@ -27,7 +27,7 @@
     "improvement_cost": 3,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_scouts": true
   },
   "tat_ordyncy_dzidy_s": {
@@ -37,7 +37,7 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_scouts": true
   },
   "tat_ordyncy_dzidy_m": {
@@ -47,7 +47,7 @@
     "improvement_cost": 3,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_scouts": true
   },
   "tat_kazindzi_s": {
@@ -57,7 +57,7 @@
     "improvement_cost": 1,
     "rank": "bronze",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_looters_insubordinate": true
   },
   "tat_kazindzi_m": {
@@ -67,7 +67,7 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_looters_insubordinate": true
   }
 

@@ -231,7 +231,7 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         }
 
         if (unitDef.is_cavalry) stats.recon += 1;
-        if (unitDef.is_light_cavalry) stats.recon += 1;
+        if (unitDef.open_order) stats.recon += 1;
         if (unitDef.has_lances) stats.recon -= 1;
         if (unitDef.is_pike_and_shot) stats.recon -= 1;
         if (unitDef.are_looters_insubordinate) stats.recon -= 1;

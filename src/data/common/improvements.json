@@ -52,8 +52,7 @@
   },
   "mercenary_dragoons": {
     "name": "Najemni Dragoni",
-    "description": "Zamiana wszystkich dragonów w regimencie na dragonów najemnych.",
     "type": "regiment",
-    "cost": -3
+    "cost": 3
   }
 }

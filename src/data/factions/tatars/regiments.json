@@ -5,6 +5,7 @@
     "recon": 2,
     "awareness": 5,
     "activations": 2,
+    "special_rules": ["tat_wzrok_bystry"],
     "unit_improvements": [
       {
         "id": "veterans",
@@ -75,6 +76,86 @@
               "units": ["tat_ordyncy_dzidy_m"]
             },
             "unit5": {
+              "name_override": "2x Kazindzi S",
+              "cost_override": 9,
+              "units": ["tat_kazindzi_s", "tat_kazindzi_s"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "tat_czambul_nogajow": {
+    "name": "Czambuł Nogajów",
+    "base_cost": 1,
+    "recon": 2,
+    "awareness": 5,
+    "activations": 2,
+    "special_rules": ["tat_wzrok_bystry"],
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2,
+        "units_allowed": ["tat_ordyncy_s", "tat_ordyncy_m", "tat_ordyncy_dzidy_s", "tat_ordyncy_dzidy_m"]
+      },
+      {
+        "id": "veterans",
+        "max_amount": 2,
+        "units_allowed": ["tat_ordyncy_s", "tat_ordyncy_m", "tat_ordyncy_dzidy_s", "tat_ordyncy_dzidy_m"]
+      },
+      {
+        "id": "independent",
+        "max_amount": 1,
+        "cost": "double"
+      },
+      {
+        "id": "nahajki_i_arkany",
+        "max_amount": 2,
+        "cost": -1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["tat_mirza"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["tat_ordyncy_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["tat_kazindzi_m"]
+            },
+            "unit2": {
+              "name_override": "2x Kazindzi S",
+              "cost_override": 9,
+              "units": ["tat_kazindzi_s", "tat_kazindzi_s"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "name_override": "Ordyńcy S",
+              "units": ["tat_ordyncy_s"]
+            },
+            "unit2": {
+              "name_override": "Ordyńcy M",
+              "units": ["tat_ordyncy_m"],
+              "extra_cost": 2
+            },
+            "unit3": {
               "name_override": "2x Kazindzi S",
               "cost_override": 9,
               "units": ["tat_kazindzi_s", "tat_kazindzi_s"]
