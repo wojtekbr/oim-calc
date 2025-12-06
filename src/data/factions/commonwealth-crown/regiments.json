@@ -8,7 +8,6 @@
     "unit_improvements": [
       {
         "id": "kalkans",
-        "cost": 1,
         "max_amount": 2
       },
       {
@@ -96,17 +95,16 @@
       }
     }
   },
-  "cro_elite_crown_cavalry": {
-    "name": "Doborowy pułk jazdy koronnej",
-    "base_cost": 4,
+
+  "cro_crown_cavalry_vanguard": {
+    "name": "Pułk jazdy koronnej",
+    "base_cost": 0,
     "recon": 0,
     "awareness": 5,
-    "activations": 3,
-    "commander_orders_bonus": 1,
+    "activations": 2,
     "unit_improvements": [
       {
         "id": "kalkans",
-        "cost": 1,
         "max_amount": 2
       },
       {
@@ -121,6 +119,94 @@
       {
         "id": "independent",
         "cost": "triple",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_m"]
+            },
+            "unit2": {
+              "units": ["cro_pancerni_s"]
+            },
+            "unit3": {
+              "units": ["cro_pancerni_m"]
+            },
+            "unit4": {
+              "units": ["cro_cosasck_style_rohatyna_s"]
+            },
+            "unit5": {
+              "units": ["cro_cosasck_style_rohatyna_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_rotmistrz"]
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_s"]
+            },
+            "unit2": {
+              "units": ["cro_cossack_style_m"]
+            },
+            "unit3": {
+              "units": ["cro_pancerni_rohatyna_s"]
+            },
+            "unit4": {
+              "units": ["cro_pancerni_rohatyna_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "cro_elite_crown_cavalry": {
+    "name": "Doborowy pułk jazdy koronnej",
+    "base_cost": 4,
+    "recon": 0,
+    "awareness": 5,
+    "activations": 3,
+    "commander_orders_bonus": 1,
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol"
+      },
+      {
+        "id": "independent",
         "max_amount": 1
       }
     ],
@@ -210,21 +296,17 @@
     "unit_improvements": [
       {
         "id": "kalkans",
-        "cost": 1,
         "max_amount": 2
       },
       {
         "id": "veterans",
-        "cost": "double",
         "max_amount": 1
       },
       {
-        "id": "additional_pistol",
-        "cost": -1
+        "id": "additional_pistol"
       },
       {
         "id": "independent",
-        "cost": "triple",
         "max_amount": 1
       }
     ],
@@ -309,6 +391,95 @@
       }
     }
   },
+
+  "cro_light_cavalry_vanguard": {
+    "name": "Pułk Jazdy Lekkiej Koronnej",
+    "base_cost": 0,
+    "recon": 2,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_wallachian_s"]
+            },
+            "unit2": {
+              "units": ["cro_wallachian_m"]
+            },
+            "unit3": {
+              "units": ["cro_tatar_style_s"]
+            },
+            "unit4": {
+              "units": ["cro_tatar_style_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_rotmistrz"]
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_s"]
+            },
+            "unit2": {
+              "units": ["cro_cossack_style_m"]
+            }
+          }
+        ],
+        "additional2": [
+          {
+            "unit1": {
+              "units": ["cro_wallachian_s"]
+            },
+            "unit2": {
+              "units": ["cro_wallachian_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+
   "cro_levy_of_nobility": {
     "name": "Pospolite Ruszenie Koronne",
     "base_cost": 2,
@@ -326,28 +497,23 @@
     "unit_improvements": [
       {
         "id": "additional_pistol",
-        "cost": -1,
         "improvement_limitations": ["cro_piechota_lanowa_s", "cro_piechota_lanowa_m", "cro_light_artillery"]
       },
       {
         "id": "additional_ammo",
-        "cost": 1,
         "max_amount": 1,
         "units_allowed": ["cro_piechota_lanowa_s", "cro_piechota_lanowa_m", "cro_light_artillery"]
       },
       {
         "id": "kalkans",
-        "cost": 1,
         "max_amount": 2
       },
       {
         "id": "veterans",
-        "cost": "double",
         "max_amount": 1
       },
       {
         "id": "independent",
-        "cost": "triple",
         "max_amount": 1
       }
     ],
@@ -363,17 +529,17 @@
         "base1": [
           {
             "unit1": {
-              "units": ["cro_pospolite_s"]
+              "units": ["cro_pospolite_m"]
             }
           }
         ],
         "base2": [
           {
             "unit1": {
-              "units": ["cro_pospolite_s"]
+              "units": ["cro_pospolite_m"]
             },
             "unit2": {
-              "units": ["cro_pospolite_m"]
+              "units": ["cro_pospolite_l"]
             },
             "unit3": {
               "units": ["cro_piechota_lanowa_s"]
@@ -386,10 +552,10 @@
         "base3": [
           {
             "unit1": {
-              "units": ["cro_pospolite_s"]
+              "units": ["cro_pospolite_m"]
             },
             "unit2": {
-              "units": ["cro_pospolite_m"]
+              "units": ["cro_pospolite_l"]
             },
             "unit3": {
               "units": ["cro_piechota_lanowa_s"]
@@ -411,10 +577,10 @@
         "additional1": [
           {
             "unit1": {
-              "units": ["cro_pospolite_s"]
+              "units": ["cro_pospolite_m"]
             },
             "unit2": {
-              "units": ["cro_pospolite_m"]
+              "units": ["cro_pospolite_l"]
             },
             "unit3": {
               "units": ["cro_pospolite_hus_s"]
@@ -443,12 +609,10 @@
     "unit_improvements": [
       {
         "id": "veterans",
-        "cost": "double",
         "max_amount": 1
       },
       {
         "id": "additional_ammo",
-        "cost": 1,
         "max_amount": 1
       }
     ],
@@ -502,16 +666,13 @@
     "unit_improvements": [
       {
         "id": "veterans",
-        "cost": "double",
         "max_amount": 1
       },
       {
-        "id": "additional_pistol",
-        "cost": -1
+        "id": "additional_pistol"
       },
       {
         "id": "independent",
-        "cost": "triple",
         "max_amount": 1
       }
     ],
@@ -565,19 +726,17 @@
     "regiment_improvements": [
       {
         "id": "mercenary_dragoons",
-        "cost": -3,
+        "cost": 3,
         "max_amount": 1
       }
     ],
     "unit_improvements": [
       {
         "id": "additional_ammo",
-        "cost": 1,
         "max_amount": 2
       },
       {
         "id": "regimental_guns",
-        "cost": 1,
         "max_amount": 1
       }
     ],
@@ -647,12 +806,10 @@
     "unit_improvements": [
       {
         "id": "veterans",
-        "cost": "double",
         "max_amount": 1
       },
       {
-        "id": "additional_pistol",
-        "cost": -1
+        "id": "additional_pistol"
       }
     ],
     "structure": {

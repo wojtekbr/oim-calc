@@ -89,7 +89,8 @@
     "improvement_cost": 4,
     "rank": "gold",
     "is_cavalry": true,
-    "has_lances": true
+    "has_lances": true,
+    "improvement_limitations": ["kalkans", "veterans", "additional_pistol"]
   },
   "cro_hussars_m": {
     "id": "cro_hussars_m",
@@ -99,7 +100,8 @@
     "improvement_cost": 5,
     "rank": "gold",
     "is_cavalry": true,
-    "has_lances": true
+    "has_lances": true,
+    "improvement_limitations": ["kalkans", "veterans", "additional_pistol"]
   },
   "cro_pancerni_rohatyna_s": {
     "id": "cro_pancerni_rohatyna_s",
@@ -161,7 +163,7 @@
     "id": "cro_wallachian_s",
     "name": "Jazda wołoska S",
     "cost": 5,
-    "improvement_cost": 2,
+    "improvement_cost": 1,
     "rank": "silver",
     "is_cavalry": true,
     "open_order": true,
@@ -181,7 +183,7 @@
     "id": "cro_tatar_style_s",
     "name": "Jazda tatarska S",
     "cost": 5,
-    "improvement_cost": 2,
+    "improvement_cost": 1,
     "rank": "silver",
     "is_cavalry": true,
     "open_order": true,

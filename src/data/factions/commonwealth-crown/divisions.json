@@ -5,8 +5,31 @@
     "base_cost": 9,
     "general": ["cro_regimentarz"],
     "rules": [
-{ 
-        "id": "allah_allah" 
+      { 
+        "id": "na_wlasnej_ziemi_3"
+      },
+      {
+        "id": "panowie_bracia",
+        "counting_regiment_ids": ["cro_crown_cavalry","cro_light_cavalry_vanguard","cro_crown_cavalry_vanguard","cro_levy_of_nobility"],
+        "excluded_regiment_ids": ["cro_levy_of_nobility"]
+      },
+      {
+        "id": "klopoty_skarbowe"
+      },
+      {
+        "id": "limit_max_units",
+        "constraints": [
+          {
+            "unit_ids": ["cro_hussars_s", "cro_hussars_m"],
+            "max_amount": 2,
+            "custom_name": "Husaria (łącznie)"
+          },
+          {
+            "unit_ids": ["cro_hussars_m"],
+            "max_amount": 1,
+            "custom_name": "Husaria (w sile M)"
+          }
+        ]
       }
     ],
     "additional_units": [
@@ -15,10 +38,15 @@
         "assignment_rules": {
           "can_be_assigned": false
         }
+      },
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["cro_light_artillery_s"]
       }
     ],
     "vanguard": [
-      { "options": ["cro_polish_dragoons","cro_light_cavalry","cro_crown_cavalry","cro_volunteers"]}
+      { "options": ["cro_polish_dragoons","cro_light_cavalry_vanguard","cro_crown_cavalry_vanguard","cro_volunteers"]}
     ],
     "base": [
       { "options": ["cro_crown_cavalry"] },

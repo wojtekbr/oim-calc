@@ -100,7 +100,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Wiersz Dowódcy */
+/* Wiersz Dowódcy Dywizji */
 .commanderRow {
   display: flex;
   justify-content: space-between;
@@ -131,16 +131,23 @@
 }
 
 .regListItem {
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-bottom: 1px solid #eee;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
+  flex-direction: column; /* Zmiana na column, żeby zmieścić detale */
+  gap: 10px;
   background: #fff;
 }
 .regListItem:last-child { border-bottom: none; }
 .regListItem:hover { background-color: #fafafa; }
+
+/* Górny pasek pułku (Nazwa + Staty) */
+.regListHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
 
 .regInfoMain {
   display: flex;
@@ -151,7 +158,7 @@
 .regListName {
   font-weight: 700;
   color: #222;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .regListCustomName {
@@ -183,6 +190,54 @@
   line-height: 1.4;
 }
 
+/* Szczegóły pułku (Jednostki + Ulepszenia) */
+.regDetails {
+  width: 100%;
+  padding-top: 8px;
+  border-top: 1px dashed #eee;
+  font-size: 12px;
+}
+
+.unitRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.unitNameCol {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.commanderBadge {
+  background: #e3f2fd;
+  color: #0d47a1;
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-weight: 700;
+  border: 1px solid #90caf9;
+}
+
+.impsList {
+  color: #2e7d32;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.regImpsRow {
+  margin-top: 6px;
+  color: #6a1b9a;
+  font-size: 11px;
+  font-weight: 600;
+  background: #f3e5f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
 /* Lista Wsparcia (Nieprzypisanego) */
 .unassignedList {
   display: flex;
@@ -202,7 +257,10 @@
   gap: 6px;
 }
 
-/* Sections */
+/* --- RESZTA STYLI BEZ ZMIAN --- */
+/* ... (pozostałe style grid, card itp. zachowane z poprzedniej wersji) ... */
+/* PONIŻEJ WKLEJAM RESZTĘ PLIKU DLA KOMPLETNOŚCI */
+
 .section {
   background: white;
   padding: 20px;
@@ -222,7 +280,6 @@
   padding-bottom: 8px;
 }
 
-/* Grid dla Pułków */
 .regimentsGrid {
   display: grid;
   grid-template-columns: 1fr;
@@ -236,7 +293,6 @@
   }
 }
 
-/* STYLE KART */
 .gridContainer, .supportGrid, .optionsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -346,8 +402,6 @@
   z-index: 2;
 }
 
-/* NOWE STYLE DLA PRZYPISYWANIA WSPARCIA NA KARCIE */
-
 .assignmentSelect {
   width: 100%;
   margin-top: 8px;
@@ -364,9 +418,40 @@
   border-color: #0077ff;
 }
 
-/* Usunięto .cardRemoveBtn bo teraz klikamy w kartę żeby odznaczyć */
+.configRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+}
 
-/* Regiment Rows */
+.configRow.error {
+  border-color: #d32f2f;
+  background-color: #fff5f5;
+}
+
+.selectInput {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+.removeBtn {
+  padding: 6px 12px;
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.removeBtn:hover { background: #ffcdd2; }
+
 .regimentRow {
   display: flex;
   flex-direction: column;
@@ -482,7 +567,6 @@
   border-top: 1px dashed #eee;
 }
 
-/* PDF Button & Nav */
 .pdfBtn {
   text-decoration: none;
   padding: 10px 20px;

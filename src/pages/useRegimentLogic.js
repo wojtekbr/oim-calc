@@ -319,19 +319,47 @@ export const useRegimentLogic = ({
     });
   };
 
+  // --- ZMIENIONA LOGIKA WZAJEMNEGO WYKLUCZANIA OPTIONAL ---
   const handleToggleOptionalGroup = (type, groupKey) => {
-      const mapKey = `${type}/${groupKey}`;
-      setOptionalEnabled(prev => ({ ...prev, [mapKey]: !prev[mapKey] }));
+      const targetKey = `${type}/${groupKey}`;
       
-      if (optionalEnabled[mapKey]) {
-           setImprovements(prev => {
-              const m = { ...prev };
-              Object.keys(m).forEach(k => {
+      // Obliczamy "rywala" (jeśli type=base to rywal=additional i odwrotnie)
+      const rivalType = type === GROUP_TYPES.BASE ? GROUP_TYPES.ADDITIONAL : GROUP_TYPES.BASE;
+      const rivalKey = `${rivalType}/${groupKey}`;
+
+      // Jaki będzie nowy stan docelowy?
+      const willEnable = !optionalEnabled[targetKey];
+
+      setOptionalEnabled(prev => {
+          const next = { ...prev };
+          next[targetKey] = willEnable;
+          
+          // Jeśli WŁĄCZAMY jedną grupę, WYŁĄCZAMY drugą
+          if (willEnable) {
+              next[rivalKey] = false;
+          }
+          return next;
+      });
+      
+      // Czyszczenie ulepszeń (dla grupy która się wyłącza)
+      setImprovements(prev => {
+          const m = { ...prev };
+          
+          // 1. Jeśli wyłączyliśmy target (uncheck) -> czyścimy target
+          if (!willEnable) {
+               Object.keys(m).forEach(k => {
                   if (k.startsWith(`${type}/${groupKey}/`)) delete m[k];
               });
-              return m;
-           });
-      }
+          }
+          
+          // 2. Jeśli włączyliśmy target (check) -> to znaczy że rywal się wyłączył -> czyścimy rywala
+          if (willEnable) {
+               Object.keys(m).forEach(k => {
+                  if (k.startsWith(`${rivalType}/${groupKey}/`)) delete m[k];
+              });
+          }
+          return m;
+       });
   };
 
   const handleToggleAdditional = () => {
@@ -358,9 +386,6 @@ export const useRegimentLogic = ({
     
     groupRef[regimentIndex].config = currentLocalConfig;
     
-    // ZMIANA: USUNIĘTO ALERTY BLOKUJĄCE ZAPIS (VANGUARD/ALLIED)
-    // Pozwalamy użytkownikowi zapisać "nielegalną" armię, walidacja odbędzie się w Selectorze.
-
     const keptSupportUnits = [];
     const removedNames = [];
 

@@ -9,7 +9,6 @@ import {
 
 // --- Helpers do Placeholdera ---
 
-// Generuje unikalny kolor pastelowy na podstawie tekstu (nazwy/ID)
 const getPlaceholderColor = (str) => {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -19,7 +18,6 @@ const getPlaceholderColor = (str) => {
     return '#' + "00000".substring(0, 6 - c.length) + c;
 };
 
-// Zwraca styl tła dla placeholdera (lekki gradient)
 const getPlaceholderStyle = (id, name) => {
     const color = getPlaceholderColor(id || name);
     return {
@@ -58,7 +56,6 @@ const SingleUnitOptionCard = ({
       ? `${displayCost} PS + ${unitPuCost} PU` 
       : `${displayCost} PS`;
 
-  // Inicjały do placeholdera (np. "Sipahowie Lenni" -> "SL")
   const initials = unitDef.name 
     ? unitDef.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
     : "??";
@@ -74,13 +71,20 @@ const SingleUnitOptionCard = ({
     >
       {isActive && <div className={styles.checkBadge}>✔</div>}
       
-      {/* Placeholder na obrazek */}
       <div className={styles.cardImagePlaceholder} style={placeholderStyle}>
           {initials}
       </div>
 
       <div className={styles.cardContent}>
           <div className={styles.unitName}>{unitDef.name || unitId}</div>
+          
+          {/* NOWE: Wyświetlanie rozkazów */}
+          {unitDef.orders > 0 && (
+              <div style={{fontSize: 11, color: '#d35400', marginBottom: 4, fontWeight: 600}}>
+                  Rozkazy: {unitDef.orders}
+              </div>
+          )}
+
           <div className={styles.unitCost}>{costLabel}</div>
       </div>
     </div>
@@ -99,6 +103,7 @@ const MultiUnitOptionCard = ({
     customCosts 
 }) => {
     let totalCost = 0;
+    let totalOrders = 0; // NOWE: Zliczanie rozkazów w pakiecie
     
     if (customCosts?.costOverride !== undefined) {
         totalCost = customCosts.costOverride;
@@ -111,6 +116,12 @@ const MultiUnitOptionCard = ({
         }
     }
 
+    // Sumowanie rozkazów
+    unitIds.forEach(id => {
+        const u = unitsMap[id];
+        if (u && u.orders) totalOrders += u.orders;
+    });
+
     const displayName = optionNameOverride || `Pakiet (${unitIds.length} jedn.)`;
 
     return (
@@ -121,7 +132,6 @@ const MultiUnitOptionCard = ({
         >
             {isActive && <div className={styles.checkBadge}>✔</div>}
 
-            {/* Placeholder dla pakietu */}
             <div className={styles.cardImagePlaceholder} style={{background: '#e0e0e0', fontSize: '18px'}}>
                 📚 {unitIds.length}x
             </div>
@@ -135,6 +145,13 @@ const MultiUnitOptionCard = ({
                     ))}
                     {unitIds.length > 3 && <div>...i {unitIds.length - 3} więcej</div>}
                 </div>
+
+                {/* NOWE: Wyświetlanie sumy rozkazów */}
+                {totalOrders > 0 && (
+                    <div style={{fontSize: 11, color: '#d35400', marginBottom: 4, fontWeight: 600}}>
+                        Rozkazy: {totalOrders}
+                    </div>
+                )}
 
                 <div className={styles.unitCost}>Razem: {totalCost} PS</div>
             </div>
@@ -350,9 +367,13 @@ const GroupSection = ({
 
 export default function RegimentEditor(props) {
   const { state, definitions, handlers, helpers } = useRegimentLogic(props);
-  const { unitsMap, regiment, regimentRules } = props;
+  const { unitsMap, regiment, regimentRules, configuredDivision, regimentGroup, regimentIndex } = props;
   const { base, additional, commonImprovements } = definitions;
   
+  // Pobieramy nazwę własną z konfiguracji
+  const currentRegimentConfig = configuredDivision?.[regimentGroup]?.[regimentIndex];
+  const customName = currentRegimentConfig?.customName;
+
   const formatCost = (cost) => {
       if (cost === 'double') return 'x2';
       if (cost === 'triple') return 'x3';
@@ -366,7 +387,7 @@ export default function RegimentEditor(props) {
     <div className={styles.container}>
       <div className={styles.topBar}>
         <div className={styles.topBarTitle}>
-            Edycja Pułku: {regiment.name}
+            Edycja Pułku
         </div>
         <div className={styles.actionButtons}>
             <button className={styles.btnSecondary} onClick={handlers.onBack}>Anuluj</button>
@@ -521,6 +542,18 @@ export default function RegimentEditor(props) {
         <div className={styles.sidebar}>
             <div className={styles.sectionCard}>
                 
+                {/* NAGŁÓWEK Z NAZWĄ PUŁKU */}
+                <div style={{marginBottom: 16, borderBottom: '2px solid #eee', paddingBottom: 12}}>
+                    <div style={{fontSize: 16, fontWeight: '800', color: '#222', lineHeight: 1.3}}>
+                        {regiment.name || "Nieznany Pułk"}
+                    </div>
+                    {customName && (
+                        <div style={{fontSize: 14, fontStyle: 'italic', color: '#666', marginTop: 4}}>
+                            "{customName}"
+                        </div>
+                    )}
+                </div>
+
                 {/* 1. Koszty */}
                 <div className={styles.pointsBox}>
                     <span className={styles.pointsLabel}>Koszt Całkowity</span>
@@ -545,16 +578,11 @@ export default function RegimentEditor(props) {
                     <span className={styles.statLabel}>Motywacja:</span>
                     <span className={styles.statValue}>{state.stats.totalMotivation}</span>
                 </div>
-                
                 <div className={styles.statRow}>
                     <span className={styles.statLabel}>Znaczniki Aktywacji:</span>
                     <span className={styles.statValue}>{state.stats.totalActivations}</span>
                 </div>
-                
-                <div className={styles.statRow}>
-                    <span className={styles.statLabel}>Rozkazy:</span>
-                    <span className={styles.statValue}>{state.stats.totalOrders}</span>
-                </div>
+                {/* USUNIĘTO WIERSZ ROZKAZÓW */}
                 <div className={styles.statRow}>
                     <span className={styles.statLabel}>Czujność (Awareness):</span>
                     <span className={styles.statValue}>{state.stats.totalAwareness}</span>

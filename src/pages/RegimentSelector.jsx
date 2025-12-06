@@ -8,7 +8,8 @@ import {
     calculateDivisionType,
     validateVanguardCost,
     validateAlliedCost,
-    calculateRegimentImprovementPoints
+    calculateRegimentImprovementPoints,
+    collectRegimentUnits // IMPORT
 } from "../utils/armyMath";
 import { checkDivisionConstraints, getDivisionRulesDescriptions, checkSupportUnitRequirements } from "../utils/divisionRules";
 import { IDS, GROUP_TYPES } from "../constants";
@@ -133,9 +134,7 @@ const SupportUnitTile = ({
 
     // Toggle Logic
     const handleTileClick = () => {
-        if (locked) {
-           return;
-        } 
+        if (locked) return;
         
         if (isPurchased) {
             onRemove(); // Jeśli kupiony -> sprzedaj
@@ -291,10 +290,7 @@ const RegimentBlock = ({
         
         if (group === GROUP_TYPES.ADDITIONAL && index > 0) {
             const previousRegiment = regiments[index - 1];
-            if (previousRegiment.id === IDS.NONE) {
-                isDisabled = true;
-                disabledMessage = "(Wymagany poprzedni pułk)";
-            }
+            // USUNIĘTO blokadę zależną od poprzedniego pułku (zgodnie z wcześniejszymi ustaleniami)
         }
 
         const stats = calculateStats(regiment.config, regiment.id);
@@ -497,6 +493,7 @@ export default function RegimentSelector(props) {
         return all.filter(r => r.id !== IDS.NONE && isAllied(r.id)).length;
     }, [configuredDivision]);
 
+    // --- PRZYGOTOWANIE DANYCH DO PODSUMOWANIA PUŁKÓW ---
     const activeRegimentsList = useMemo(() => {
         const all = [
             ...(vanguardRegiments || []).map(r => ({ ...r, group: GROUP_TYPES.VANGUARD })),
@@ -509,16 +506,54 @@ export default function RegimentSelector(props) {
             const stats = calcStatsWrapper(r.config, r.id);
             const isMain = state.mainForceKey === `${r.group}/${r.index}`;
             
+            // Pobieramy jednostki w pułku
+            const collectedUnits = collectRegimentUnits(r.config, def);
+            const detailedUnits = [];
+            
+            collectedUnits.forEach(item => {
+                const unitDef = unitsMap[item.unitId];
+                if (!unitDef) return;
+                
+                // Sprawdzamy ulepszenia dla danej jednostki (w tym pułku)
+                const imps = (r.config.improvements || {})[item.key] || [];
+                const impNames = imps.map(impId => {
+                    // Szukamy nazwy ulepszenia w słowniku improvements (commonImprovements)
+                    const impDef = improvements[impId];
+                    // Lub w definicji pułku (unit_improvements)
+                    const regImpDef = def.unit_improvements?.find(ui => ui.id === impId);
+                    return impDef?.name || regImpDef?.name || impId;
+                });
+
+                // Sprawdzamy czy to dowódca (ma orders)
+                const isCommander = unitDef.orders > 0 || item.key.includes('general');
+
+                detailedUnits.push({
+                    name: unitDef.name,
+                    imps: impNames,
+                    isCommander,
+                    orders: unitDef.orders
+                });
+            });
+
+            // Pobieramy ulepszenia pułkowe
+            const regImpNames = (r.config.regimentImprovements || []).map(impId => {
+                const impDef = improvements[impId];
+                const regImpDef = def.regiment_improvements?.find(ri => ri.id === impId);
+                return impDef?.name || regImpDef?.name || impId;
+            });
+
             return {
                 id: r.id,
                 name: def?.name || r.id,
                 customName: r.customName,
                 stats,
                 isMain,
-                isVanguard: r.group === GROUP_TYPES.VANGUARD
+                isVanguard: r.group === GROUP_TYPES.VANGUARD,
+                units: detailedUnits,
+                regImps: regImpNames
             };
         });
-    }, [configuredDivision, state.mainForceKey]);
+    }, [configuredDivision, state.mainForceKey, improvements]);
 
     return (
         <div className={styles.container}>
@@ -593,7 +628,7 @@ export default function RegimentSelector(props) {
                 {showRules && rulesDescriptions && rulesDescriptions.length > 0 && (
                     <div className={styles.rulesContainer}>
                         {rulesDescriptions.map(rule => (
-                            <div key={rule.id} style={{fontSize: 13, marginBottom: 8, lineHeight: 1.4}}>
+                            <div key={rule.id} style={{fontSize: 13, marginBottom: 8, lineHeight: 1.4, whiteSpace: 'pre-line'}}>
                                 <strong>• {rule.title}: </strong> {rule.description}
                             </div>
                         ))}
@@ -612,31 +647,55 @@ export default function RegimentSelector(props) {
                     </div>
                 )}
 
+                {/* SFORMOWANE PUŁKI - NOWA, SZCZEGÓŁOWA WERSJA */}
                 {activeRegimentsList.length > 0 && (
                     <div className={styles.summarySection}>
                         <div className={styles.summarySectionTitle}>Sformowane Pułki</div>
                         <div className={styles.regimentListSimple}>
                             {activeRegimentsList.map((reg, idx) => (
                                 <div key={idx} className={styles.regListItem}>
-                                    <div className={styles.regInfoMain}>
-                                        <div className={styles.regListName}>{reg.name}</div>
-                                        {reg.customName && <div className={styles.regListCustomName}>"{reg.customName}"</div>}
-                                        <div className={styles.regListTags}>
-                                            {reg.isMain && <span className={`${styles.tagBadge} ${styles.tagMain}`}>Siły Główne</span>}
-                                            {reg.isVanguard && <span className={`${styles.tagBadge} ${styles.tagVanguard}`}>Straż Przednia</span>}
+                                    
+                                    {/* Nagłówek Pułku */}
+                                    <div className={styles.regListHeaderRow}>
+                                        <div className={styles.regInfoMain}>
+                                            <div className={styles.regListName}>{reg.name}</div>
+                                            {reg.customName && <div className={styles.regListCustomName}>"{reg.customName}"</div>}
+                                            <div className={styles.regListTags}>
+                                                {reg.isMain && <span className={`${styles.tagBadge} ${styles.tagMain}`}>Siły Główne</span>}
+                                                {reg.isVanguard && <span className={`${styles.tagBadge} ${styles.tagVanguard}`}>Straż Przednia</span>}
+                                            </div>
+                                        </div>
+                                        <div className={styles.regListStats}>
+                                            <div><strong>{reg.stats.cost} PS</strong></div>
+                                            <div>Motywacja: {reg.stats.motivation + (reg.isMain?1:0)}</div>
+                                            {/* <div>Akt: {reg.stats.activations + (reg.isMain?1:0)}</div> */}
                                         </div>
                                     </div>
-                                    <div className={styles.regListStats}>
-                                        <div><strong>{reg.stats.cost} PS</strong></div>
-                                        <div>Motywacja: {reg.stats.motivation + (reg.isMain?1:0)}</div>
-                                        <div>Akt: {reg.stats.activations + (reg.isMain?1:0)}</div>
-                                        {reg.isVanguard && (
-                                            <>
-                                                <div style={{color: '#d35400'}}>Zwiad: {reg.stats.recon}</div>
-                                                <div style={{color: '#d35400'}}>Czujność: {reg.stats.awareness}</div>
-                                            </>
+
+                                    {/* Szczegóły jednostek */}
+                                    <div className={styles.regDetails}>
+                                        {reg.units.map((u, uIdx) => (
+                                            <div key={uIdx} className={styles.unitRow}>
+                                                <div className={styles.unitNameCol}>
+                                                    <span>• {u.name}</span>
+                                                    {u.isCommander && u.orders > 0 && (
+                                                        <span className={styles.commanderBadge}>DOW ({u.orders})</span>
+                                                    )}
+                                                </div>
+                                                {u.imps.length > 0 && (
+                                                    <div className={styles.impsList}>+ {u.imps.join(', ')}</div>
+                                                )}
+                                            </div>
+                                        ))}
+                                        
+                                        {/* Ulepszenia pułkowe */}
+                                        {reg.regImps.length > 0 && (
+                                            <div className={styles.regImpsRow}>
+                                                Ulepszenia pułku: {reg.regImps.join(', ')}
+                                            </div>
                                         )}
                                     </div>
+
                                 </div>
                             ))}
                         </div>

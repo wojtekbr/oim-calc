@@ -2,6 +2,7 @@ import { IDS } from "../constants";
 import { collectRegimentUnits } from "./armyMath";
 
 // --- LOGIKA BIZNESOWA (REGISTRY) ---
+// Tutaj definiujemy logikę walidacji i bonusów
 export const DIVISION_RULES_REGISTRY = {
     "additional_pu_points_for_units": {
         getBonus: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
@@ -66,15 +67,13 @@ export const DIVISION_RULES_REGISTRY = {
         }
     },
 
-    // --- NOWE: ZAAWANSOWANA WALIDACJA SKŁADU (ARRAY) ---
-    "composition_requirements": {
+    "min_regiments_present": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             const requirements = params?.requirements || [];
             if (requirements.length === 0) return [];
 
             const errors = [];
 
-            // 1. Zliczamy wszystkie pułki w dywizji (mapa ID -> ilość)
             const currentCounts = {};
             const allRegiments = [
                 ...(divisionConfig.vanguard || []),
@@ -88,7 +87,6 @@ export const DIVISION_RULES_REGISTRY = {
                 }
             });
 
-            // 2. Iterujemy po wymaganiach i sprawdzamy stan
             requirements.forEach(req => {
                 const targetId = req.regiment_id;
                 const minAmount = req.min_amount || 1;
@@ -98,12 +96,99 @@ export const DIVISION_RULES_REGISTRY = {
                 if (currentAmount < minAmount) {
                     const def = getRegimentDefinition(targetId);
                     const name = def ? def.name : targetId;
-                    // Precyzyjny komunikat błędu
                     errors.push(`Niespełnione wymaganie: Musisz posiadać jeszcze ${minAmount - currentAmount} pułk(i/ów) typu:\n"${name}".`);
                 }
             });
 
             return errors;
+        }
+    },
+
+    // --- NOWE: Limit maksymalnej liczby jednostek (np. Husaria) ---
+    "limit_max_units": {
+        validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
+            const constraints = params?.constraints || [];
+            if (constraints.length === 0) return [];
+
+            const errors = [];
+            
+            // 1. Zbieramy ID wszystkich jednostek z całej dywizji
+            let allUnitIds = [];
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []),
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+
+            allRegiments.forEach(reg => {
+                if (reg.id !== IDS.NONE) {
+                    const def = getRegimentDefinition(reg.id);
+                    const units = collectRegimentUnits(reg.config || {}, def);
+                    allUnitIds = allUnitIds.concat(units.map(u => u.unitId));
+                }
+            });
+
+            // Dodajemy też jednostki wsparcia (te nieprzypisane, bo przypisane są w collectRegimentUnits, jeśli tak to działa w armyMath. Ale dla pewności sprawdźmy tylko unassigned, żeby nie dublować, jeśli collectRegimentUnits je zbiera. 
+            // W armyMath collectRegimentUnits NIE zbiera supportu przypisanego! Zbiera tylko internal units. 
+            // Support units są w configuredDivision.supportUnits.
+            
+            if (divisionConfig.supportUnits) {
+                const supportIds = divisionConfig.supportUnits.map(su => su.id);
+                allUnitIds = allUnitIds.concat(supportIds);
+            }
+
+            // 2. Sprawdzamy każde ograniczenie
+            constraints.forEach(constraint => {
+                const targetIds = constraint.unit_ids || [];
+                const maxAmount = constraint.max_amount || 0;
+                
+                // Liczymy wystąpienia
+                const currentCount = allUnitIds.filter(uid => uid && targetIds.includes(uid)).length;
+
+                if (currentCount > maxAmount) {
+                     let groupName = constraint.custom_name;
+                     if (!groupName) {
+                         const uniqueTargetIds = [...new Set(targetIds)];
+                         const names = uniqueTargetIds.map(id => unitsMap[id]?.name || id);
+                         groupName = names.join(", ");
+                     }
+
+                     errors.push(`Przekroczono limit jednostek: ${groupName}.\nLimit: ${maxAmount}, Obecnie: ${currentCount}.`);
+                }
+            });
+
+            return errors;
+        }
+    },
+
+    // --- NOWE: Zasada "Panowie Bracia" ---
+    "panowie_bracia": {
+        getRegimentStatsBonus: (divisionConfig, targetRegimentId, params) => {
+            const countingIds = params?.counting_regiment_ids || [];
+            const excludedFromBonusIds = params?.excluded_regiment_ids || [];
+
+            if (!targetRegimentId || !countingIds.includes(targetRegimentId)) return null;
+            if (excludedFromBonusIds.includes(targetRegimentId)) return null;
+
+            let count = 0;
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []),
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+
+            allRegiments.forEach(reg => {
+                if (reg.id !== IDS.NONE && countingIds.includes(reg.id)) {
+                    count++;
+                }
+            });
+
+            const motivationBonus = Math.floor(count / 2);
+
+            if (motivationBonus > 0) {
+                return { motivation: motivationBonus };
+            }
+            return null;
         }
     }
 };
@@ -139,7 +224,7 @@ export const DIVISION_RULES_DEFINITIONS = {
     },
 
     "min_regiments_present": {
-        title: "Minimalna ilość pułków",
+        title: "Wymagany Skład Dywizji",
         getDescription: (params, context) => {
             const { getRegimentDefinition } = context;
             const requirements = params?.requirements || [];
@@ -155,39 +240,74 @@ export const DIVISION_RULES_DEFINITIONS = {
                 return `• ${min}x ${regName}`;
             }).join("\n");
 
-            // ZMIANA TUTAJ:
             return `Dywizja musi zawierać przynajmniej następujące pułki:\n${requirementsList}`;
         }
     },
 
-    // --- ZASADY FABULARNE/GAMEPLAYOWE ---
+    "limit_max_units": {
+        title: "Limity jednostek",
+        getDescription: (params, context) => {
+             const constraints = params?.constraints || [];
+             if (constraints.length === 0) return "";
+             
+             const lines = constraints.map(c => {
+                 const max = c.max_amount;
+                 let name = c.custom_name;
+                 
+                 if (!name && context.unitsMap && c.unit_ids) {
+                     const names = c.unit_ids.slice(0, 3).map(id => context.unitsMap[id]?.name || id);
+                     name = names.join(", ") + (c.unit_ids.length > 3 ? "..." : "");
+                 }
+                 
+                 return `• Max ${max}x ${name || "Jednostki"}`;
+             });
+             
+             return `Dywizja posiada następujące ograniczenia ilościowe:\n${lines.join("\n")}`;
+        }
+    },
+
+    "panowie_bracia": {
+        title: "Panowie Bracia!",
+        getDescription: () => {
+            return "Za każde dwa pułki Jazdy (Koronnej, Litewskiej, Lekkiej, Hetmańskie, Skrzydłowe, Pospolite Ruszenie), każdy z tych pułków (z wyjątkiem Pospolitego Ruszenia) otrzymuje +1 do Motywacji.";
+        }
+    },
     
+    "klopoty_skarbowe": {
+        title: "Kłopoty Skarbowe",
+        getDescription: () => 
+            "Armia Rzeczpospolitej wiecznie borykała się z pustkami w skarbu, przez co często wojska były opłacane z prywatnych szkatuł magnatów, a nieopłacane wojsko zawiązywało konfederacje.\n\n" +
+            "Przed fazą wystawienia wojsk, Rzuć k10:\n" +
+            "• 1-2: Wojsko zostało opłacone na czas z królewskiego skarbca: +1 motywacji dla każdego pułku jazdy: koronnej/litewskiej, lekkiej, Lewego/Prawego skrzydła.\n" +
+            "• 3-5: Wojsko zostało opłacone z prywatnej kiesy: Brak efektu.\n" +
+            "• 6-9: Została obiecana zapłata na następną kwartę: wylosuj po 1 jednostce w każdym pułku jazdy: koronnej/litewskiej, lekkiej, Lewego/Prawego skrzydła. Oddział dostaje 1D.\n" +
+            "• 10: Wojsko zawiązało Konfederację: -1 motywacji dla każdego pułku jazdy: koronnej/litewskiej, lekkiej, Lewego/Prawego skrzydła."
+    },
+
+    // --- ZASADY FABULARNE/GAMEPLAYOWE (Reszta bez zmian) ---
+    "na_wlasnej_ziemi_3": {
+        title: "Na własnej ziemi (3)",
+        getDescription: () => "Zasada opisana w podręcznikach OiM."
+    },
     "prawowierni_w_okopach": {
         title: "Prawowierni w okopach swoich",
-        getDescription: () => 
-            "W bitwach w których gracz Turecki jest Niebieskim Graczem, może za darmo wystawić Jeden element Szańców na każdy wystawiony pułk: Sandżak Sipahów lennych z ejaletów europejskich, Sandżak Sipahów Bośniacki/Albański, Sandżak z ejaletów Anatolijskich."
+        getDescription: () => "W bitwach w których gracz Turecki jest Niebieskim Graczem, może za darmo wystawić Jeden element Szańców na każdy wystawiony pułk: Sandżak Sipahów lennych z ejaletów europejskich, Sandżak Sipahów Bośniacki/Albański, Sandżak z ejaletów Anatolijskich."
     },
-
     "wojsko_wybornym_ozywione_duchem": {
         title: "Wojsko wybornym ożywione duchem",
-        getDescription: () => 
-            "Połóż przy głównodowodzącym armii 1 znacznik neutralny. Dopóki znacznik znajduje się na stole, jednostki Tureckie (ale nie sojusznicze) z rozkazem Szarża, mogą przerzucać 1 kość w niezdanym teście morale. Jeżeli dowolny z pułków Tureckich zostanie złamany, odrzuć znacznik."
+        getDescription: () => "Połóż przy głównodowodzącym armii 1 znacznik neutralny. Dopóki znacznik znajduje się na stole, jednostki Tureckie (ale nie sojusznicze) z rozkazem Szarża, mogą przerzucać 1 kość w niezdanym teście morale. Jeżeli dowolny z pułków Tureckich zostanie złamany, odrzuć znacznik."
     },
-
     "allah_allah": {
         title: "Allah Allah",
-        getDescription: () => 
-            "Zasada opisana w podręczniku Armie II. Zasada przypisana do pułku działa w ramach danego pułku. Zasada przypisana do Dywizji odnosi się do Głównodowodzącego Dywizji."
+        getDescription: () => "Zasada opisana w podręczniku Armie II. Zasada przypisana do pułku działa w ramach danego pułku. Zasada przypisana do Dywizji odnosi się do Głównodowodzącego Dywizji."
     },
-
     "zapelnily_sie_nimi_gory": {
         title: "Zapełniły się nimi góry i równiny",
-        getDescription: () => 
-            "Jeżeli gracz Turecki jest Czerwonym graczem, wszystkie pułki Tureckie (ale nie sojusznicze) mają Motywację podniesioną o 1. Jeżeli jest graczem Niebieskim wszystkie pułki Tureckie (ale nie sojusznicze) mają Motywację obniżoną o 1."
+        getDescription: () => "Jeżeli gracz Turecki jest Czerwonym graczem, wszystkie pułki Tureckie (ale nie sojusznicze) mają Motywację podniesioną o 1. Jeżeli jest graczem Niebieskim wszystkie pułki Tureckie (ale nie sojusznicze) mają Motywację obniżoną o 1."
     }
 };
 
-// --- HELPERS (Bez zmian) ---
+// --- HELPERS ---
 
 export const checkDivisionConstraints = (divisionConfig, divisionDefinition, candidateRegimentId) => {
     if (!divisionConfig || !divisionDefinition || !candidateRegimentId || candidateRegimentId === IDS.NONE) {

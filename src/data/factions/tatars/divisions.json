@@ -1,0 +1,47 @@
+{
+  "tat_czambul_beja": {
+    "name": "Czambuł Beja",
+    "improvement_points": 10,
+    "base_cost": 10,
+    "general": ["tat_bej"],
+    "rules": [
+{ 
+        "id": "allah_allah" 
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "tat_jasyr"
+      },
+      {
+        "name": "tat_zwiadowcy"
+      }
+    ],
+    "vanguard": [
+      { "options": ["tat_czambul_mirzy","tat_czambul_nogajow"]}
+    ],
+    "base": [
+      { "options": ["tat_czambul_beja"] },
+      { "options": ["tat_czambul_mirzy"] },
+      { "options": ["tat_czambul_mirzy", "tat_czambul_nogajow"] }
+    ],
+    "additional": [
+      {
+        "options": [
+          "none",
+          "tat_czambul_mirzy",
+          "tat_czambul_nogajow",
+          "tat_czambul_mirzy"
+        ]
+      },
+      {
+        "options": [
+          "none",
+          "tat_czambul_mirzy",
+          "tat_czambul_nogajow",
+          "tat_czambul_mirzy"
+        ]
+      }
+    ]
+  }
+}

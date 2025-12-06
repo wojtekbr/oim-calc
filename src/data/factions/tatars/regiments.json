@@ -147,11 +147,9 @@
         "additional1": [
           {
             "unit1": {
-              "name_override": "Ordyńcy S",
               "units": ["tat_ordyncy_s"]
             },
             "unit2": {
-              "name_override": "Ordyńcy M",
               "units": ["tat_ordyncy_m"],
               "extra_cost": 2
             },
@@ -160,6 +158,103 @@
               "cost_override": 9,
               "units": ["tat_kazindzi_s", "tat_kazindzi_s"]
             }
+          }
+        ]
+      }
+    }
+  },
+  "tat_czambul_beja": {
+    "name": "Czambuł Beja/Nuradyna",
+    "base_cost": 6,
+    "recon": 2,
+    "awareness": 5,
+    "activations": 3,
+    "special_rules": ["tat_wzrok_bystry", "sojusznik_bez_dodatkowych"],
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2,
+        "units_allowed": ["tat_ordyncy_s", "tat_ordyncy_m", "tat_ordyncy_dzidy_s", "tat_ordyncy_dzidy_m", "tat_jazda_doborowa"]
+      },
+      {
+        "id": "veterans",
+        "max_amount": 2,
+        "units_allowed": ["tat_ordyncy_s", "tat_ordyncy_m", "tat_ordyncy_dzidy_s", "tat_ordyncy_dzidy_m"]
+      },
+      {
+        "id": "independent",
+        "max_amount": 1,
+        "cost": "double"
+      },
+      {
+        "id": "nahajki_i_arkany",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { 
+            "unit1": 
+            { 
+              "units": ["tat_mirza"] 
+            } 
+          }
+        ],
+        "base1": [
+          { 
+            "unit1": 
+              { 
+              "units": ["tat_ordyncy_m"] 
+              } 
+            }
+        ],
+        "base2": [
+          { 
+            "unit1": 
+              { 
+                "units": ["tat_ordyncy_s"] 
+              }, 
+            "unit2": 
+              { 
+                "units": ["tat_ordyncy_m"] 
+              },
+            "unit3": 
+              { 
+                "units": ["tat_ordyncy_dzidy_s"] 
+              }, 
+            "unit4": 
+              { 
+                "units": ["tat_ordyncy_dzidy_m"] 
+              } 
+            }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["tat_jazda_doborowa_s"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          { 
+            "unit1": 
+              { 
+                "units": ["tat_ordyncy_s"] 
+              }, 
+            "unit2": 
+              { 
+                "units": ["tat_ordyncy_m"] 
+              }, 
+            "unit3": { "units": ["tat_jazda_doborowa_s"] }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": { "units": ["tat_jazda_doborowa_s"] },
+            "unit2": { "units": ["tat_jazda_doborowa_m"] }
           }
         ]
       }

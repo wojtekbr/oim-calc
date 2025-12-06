@@ -69,6 +69,24 @@
     "is_cavalry": true,
     "open_order": true,
     "are_looters_insubordinate": true
+  },
+  "tat_jazda_doborowa_s": {
+    "id": "tat_jazda_doborowa_s",
+    "name": "Jazda Doborowa S",
+    "cost": 8,
+    "pu_cost": 1,
+    "improvement_cost": 3,
+    "rank": "gold",
+    "is_cavalry": true
+  },
+  "tat_jazda_doborowa_m": {
+    "id": "tat_jazda_doborowa_m",
+    "name": "Jazda Doborowa M",
+    "cost": 11,
+    "pu_cost": 1,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_cavalry": true
   }
 
 }

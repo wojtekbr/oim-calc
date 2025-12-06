@@ -84,7 +84,6 @@ const createDefaultRegiments = (divisionDefinition, getRegimentDefinition) => {
 };
 
 function AppContent() {
-    // NOWE: Pobieramy regimentRules z kontekstu
     const { factions, loading, error, improvements, globalUnits, getRegimentDefinition, regimentRules } = useArmyData();
 
     const [screen, setScreen] = useState(SCREENS.LIST);
@@ -162,7 +161,7 @@ function AppContent() {
         return {
             ...regDef,
             id: regimentStructure.id,
-            name: regimentStructure.name,
+            // name: regimentStructure.name,  <-- USUNIĘTO TĘ LINIĘ (powodowała nadpisanie nazwy undefined)
             divisionDefinition: selectedDivisionDefinition,
         };
     };
@@ -222,7 +221,7 @@ function AppContent() {
                     remainingImprovementPoints={remainingImprovementPoints}
                     unitsMap={unitsMap}
                     
-                    regimentRules={regimentRules} // NOWE: Przekazujemy zasady
+                    regimentRules={regimentRules}
                 />
             )}
         </div>

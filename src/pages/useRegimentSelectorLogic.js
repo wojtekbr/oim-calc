@@ -131,7 +131,6 @@ export const useRegimentSelectorLogic = ({
 
   const handleRegimentChange = (groupKey, index, newRegimentId) => {
     const tempDivision = JSON.parse(JSON.stringify(configuredDivision));
-    const groupArr = tempDivision[groupKey];
     
     const newConfig = { 
         baseSelections: {}, 
@@ -170,21 +169,15 @@ export const useRegimentSelectorLogic = ({
         }
     }
 
-    groupArr[index] = {
-        ...groupArr[index],
-        id: newRegimentId,
-        customName: "",
-        config: newConfig
-    };
-
-    if (groupKey === GROUP_TYPES.ADDITIONAL) {
-        for (let i = index + 1; i < groupArr.length; i++) {
-            groupArr[i] = { ...groupArr[i], id: IDS.NONE, customName: "", config: {} };
-        }
-    }
-
     const unitsToRemoveIndices = [];
     const unitsToRemoveNames = [];
+
+    // Tymczasowo aplikujemy zmianę w kopii, żeby sprawdzić wymagania wsparcia
+    tempDivision[groupKey][index] = {
+        ...tempDivision[groupKey][index],
+        id: newRegimentId
+    };
+    // Uwaga: tutaj nie czyścimy reszty pułków, więc checkSupportUnitRequirements sprawdzi poprawnie dla nowego stanu
 
     tempDivision.supportUnits.forEach((su, suIdx) => {
         let unitConfig = null;
@@ -229,6 +222,7 @@ export const useRegimentSelectorLogic = ({
         config: newConfig,
       };
 
+      // Resetujemy przypisanie wsparcia TYLKO dla tego konkretnego slotu, który zmieniliśmy
       const positionKey = `${groupKey}/${index}`;
       newSupportUnits.forEach((su, i) => {
         if (su.assignedTo?.positionKey === positionKey) {
@@ -236,17 +230,8 @@ export const useRegimentSelectorLogic = ({
         }
       });
 
-      if (groupKey === GROUP_TYPES.ADDITIONAL) {
-        for (let i = index + 1; i < newGroup.length; i++) {
-          const nextPosKey = `${GROUP_TYPES.ADDITIONAL}/${i}`;
-          newSupportUnits.forEach((su, sIdx) => {
-            if (su.assignedTo?.positionKey === nextPosKey) {
-              newSupportUnits[sIdx] = { ...su, assignedTo: null };
-            }
-          });
-          newGroup[i] = { ...newGroup[i], id: IDS.NONE, customName: "", config: {} };
-        }
-      }
+      // USUNIĘTO CAŁKOWICIE BLOK IF DLA GROUP_TYPES.ADDITIONAL
+      // Pułki są teraz niezależne.
 
       return { ...prev, [groupKey]: newGroup, supportUnits: newSupportUnits };
     });

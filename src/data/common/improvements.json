@@ -9,24 +9,24 @@
     "cost": -1,
     "type": "unit"
   },
-  "pistol": {
-    "name": "Pistolety",
+  "additional_pistol": {
+    "name": "Dodatkowe pistolety",
     "cost": -1,
     "type": "unit"
   },
   "additional_ammo": {
     "name": "Dodatkowa amunicja",
-    "cost": 1,
+    "cost": "normal",
     "type": "unit"
   },
   "kalkans": {
     "name": "Kałkany",
-    "cost": 1,
+    "cost": "normal",
     "type": "unit"
   },
   "serdengetci_contract": {
     "name": "Kontrakt Serdengetci",
-    "cost": 1,
+    "cost": "normal",
     "type": "unit"
   },
   "elite_janissaries": {
@@ -47,7 +47,7 @@
   },
   "regimental_guns": {
     "name": "Działa Regimentowe",
-    "cost": 1,
+    "cost": "normal",
     "type": "unit"
   },
   "mercenary_dragoons": {

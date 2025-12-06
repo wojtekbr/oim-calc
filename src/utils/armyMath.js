@@ -1,4 +1,5 @@
 import { IDS, GROUP_TYPES, RANK_TYPES } from "../constants";
+import { DIVISION_RULES_REGISTRY } from "./divisionRules"; // IMPORT REJESTRU ZASAD
 
 const resolveCostRule = (baseCost, rule) => {
     if (rule === 'double') return baseCost * 2;
@@ -32,23 +33,16 @@ export const calculateSingleImprovementIMPCost = (unitDef, impId, regimentDefini
     return resolveCostRule(improvementBaseCost, rule);
 };
 
-// --- NOWE: Obliczanie kosztu PS dla ulepszenia (z obsługą override) ---
 export const calculateSingleImprovementArmyCost = (unitDef, impId, regimentDefinition, commonImprovements) => {
-    // 1. Sprawdź, czy to ulepszenie pułkowe (Regiment Improvement)
     const regImpRef = regimentDefinition?.regiment_improvements?.find(i => i.id === impId);
     const commonImpDef = commonImprovements?.[impId];
 
-    // Logika dla ulepszeń pułkowych (mają stały koszt, nie mnożnik)
     if (regImpRef || (commonImpDef && commonImpDef.type === 'regiment')) {
-        // Priorytet: Override w pułku > Definicja w pułku > Definicja wspólna
         if (regImpRef?.army_cost_override !== undefined) return regImpRef.army_cost_override;
         if (regImpRef?.army_point_cost !== undefined) return regImpRef.army_point_cost;
         if (commonImpDef?.army_point_cost !== undefined) return commonImpDef.army_point_cost;
         return 0;
     }
-
-    // Logika dla ulepszeń jednostek (istniejąca wcześniej - tu zazwyczaj PS = 0, płaci się w PU, ale zostawiamy dla bezpieczeństwa)
-    // Zazwyczaj ulepszenia jednostek kosztują PU, a nie PS, chyba że to specjalne przypadki
     return 0;
 };
 
@@ -207,9 +201,7 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     const customCostMap = (regimentDefinition.structure?.additional?.unit_custom_cost || [])
         .reduce((map, item) => { map[item.id] = item.cost; return map; }, {});
 
-    // Doliczanie kosztu PS za ulepszenia pułkowe (z nową logiką override)
     (regimentConfig.regimentImprovements || []).forEach(impId => {
-        // unitDef jest null, bo to ulepszenie pułkowe
         stats.cost += calculateSingleImprovementArmyCost(null, impId, regimentDefinition, commonImprovements);
     });
 
@@ -231,7 +223,7 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         }
 
         if (unitDef.is_cavalry) stats.recon += 1;
-        if (unitDef.open_order) stats.recon += 1;
+        if (unitDef.is_light_cavalry) stats.recon += 1;
         if (unitDef.has_lances) stats.recon -= 1;
         if (unitDef.is_pike_and_shot) stats.recon -= 1;
         if (unitDef.are_looters_insubordinate) stats.recon -= 1;
@@ -323,10 +315,24 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         }
     }
 
+    // --- NOWE: APLIKOWANIE BONUSÓW Z ZASAD DYWIZJI ---
+    if (configuredDivision && configuredDivision.divisionDefinition?.rules) {
+        configuredDivision.divisionDefinition.rules.forEach(rule => {
+            const ruleImpl = DIVISION_RULES_REGISTRY[rule.id];
+            if (ruleImpl && ruleImpl.getRegimentStatsBonus) {
+                const bonus = ruleImpl.getRegimentStatsBonus(configuredDivision, regimentId, rule);
+                if (bonus) {
+                    if (bonus.motivation) stats.motivation += bonus.motivation;
+                    // Tu można dodać inne bonusy w przyszłości (np. recon, activations)
+                }
+            }
+        });
+    }
+
     return stats;
 };
 
-// --- PU DLA PUŁKU (Zaktualizowana o obsługę override dla ulepszeń pułkowych) ---
+// --- PU DLA PUŁKU ---
 export const calculateRegimentImprovementPoints = (regimentConfig, regimentId, unitsMap, getRegimentDefinition, commonImprovements, assignedSupportUnits = []) => {
     if (!unitsMap || !regimentId || regimentId === IDS.NONE) return 0;
     const regimentDefinition = getRegimentDefinition(regimentId);
@@ -341,13 +347,11 @@ export const calculateRegimentImprovementPoints = (regimentConfig, regimentId, u
         return u.improvement_points_cost || u.pu_cost || 0;
     };
 
-    // 1. Ulepszenia Pułku - NOWA LOGIKA
     const regimentImprovementsDefinition = regimentDefinition.regiment_improvements || [];
     (regimentConfig.regimentImprovements || []).forEach(impId => {
         const regImpRef = regimentImprovementsDefinition.find(i => i.id === impId);
         const commonImpDef = commonImprovements?.[impId];
         
-        // Priorytet: override (cost_override) > local (cost) > common (cost)
         if (regImpRef?.cost_override !== undefined) {
             totalImpCost += regImpRef.cost_override;
         } else if (regImpRef?.cost !== undefined) {
@@ -357,7 +361,6 @@ export const calculateRegimentImprovementPoints = (regimentConfig, regimentId, u
         }
     });
 
-    // 2. Jednostki wewnątrz pułku + ich ulepszenia
     const improvementsMap = regimentConfig.improvements || {};
     const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
 
@@ -373,7 +376,6 @@ export const calculateRegimentImprovementPoints = (regimentConfig, regimentId, u
         });
     });
 
-    // 3. Jednostki Wsparcia
     if (assignedSupportUnits && assignedSupportUnits.length > 0) {
         assignedSupportUnits.forEach(su => {
             const supportUnitDef = unitsMap[su.id];
