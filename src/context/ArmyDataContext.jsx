@@ -15,7 +15,6 @@ export const ArmyDataProvider = ({ children }) => {
     const [improvements, setImprovements] = useState({});
     const [globalUnits, setGlobalUnits] = useState({});
     const [globalRegiments, setGlobalRegiments] = useState({});
-    // NOWE: Stan dla zasad specjalnych pułków
     const [regimentRules, setRegimentRules] = useState({});
     
     const [error, setError] = useState(null);
@@ -29,8 +28,11 @@ export const ArmyDataProvider = ({ children }) => {
                 const divisionModules = import.meta.glob("../data/factions/*/divisions.json", { eager: true, import: "default" });
                 const commonUnitModules = import.meta.glob("../data/common/units.json", { eager: true, import: "default" });
                 const improvementModules = import.meta.glob("../data/common/improvements.json", { eager: true, import: "default" });
-                // NOWE: Import zasad pułkowych
                 const regimentRulesModules = import.meta.glob("../data/common/regiment_rules.json", { eager: true, import: "default" });
+                
+                // Ładowanie konfiguracji frakcji
+                const factionsDefModule = import.meta.glob("../data/common/factions.json", { eager: true, import: "default" });
+                const factionsSettings = Object.values(factionsDefModule)[0] || {};
 
                 // 1. Ulepszenia
                 let commonImprovements = {};
@@ -39,7 +41,7 @@ export const ArmyDataProvider = ({ children }) => {
                 }
                 setImprovements(commonImprovements);
 
-                // 2. Zasady specjalne pułków (NOWE)
+                // 2. Zasady specjalne pułków
                 let commonRegimentRules = {};
                 for (const path in regimentRulesModules) {
                     Object.assign(commonRegimentRules, regimentRulesModules[path]);
@@ -59,12 +61,24 @@ export const ArmyDataProvider = ({ children }) => {
                 const loadModules = (modules, type) => {
                     for (const path in modules) {
                         const parts = path.split("/");
-                        const key = parts[parts.length - 2];
+                        const key = parts[parts.length - 2]; 
                         map[key] = map[key] || {};
                         
-                        if (type === 'meta') {
-                            const metaName = modules[path]._meta?.name ? modules[path]._meta.name : key;
-                            map[key].meta = { key, name: metaName };
+                        // Ustalanie nazwy i flag
+                        if (type === 'meta' || !map[key].meta) {
+                            const configEntry = Object.values(factionsSettings).find(f => f.dir === key);
+                            
+                            let metaName = configEntry ? configEntry.name : key;
+                            if (!configEntry && modules[path]._meta?.name) {
+                                metaName = modules[path]._meta.name;
+                            }
+
+                            map[key].meta = { 
+                                key, 
+                                name: metaName,
+                                // NOWE: Przekazujemy flagę hidden
+                                hidden: configEntry?.hidden || false
+                            };
                         }
                         
                         const data = modules[path] || {};
@@ -74,6 +88,11 @@ export const ArmyDataProvider = ({ children }) => {
                             const { _meta, ...unitsData } = data;
                             Object.assign(allUnitsAccumulator, unitsData);
                         } else if (type === 'regiments') {
+                             Object.keys(data).forEach(regId => {
+                                 if (typeof data[regId] === 'object') {
+                                     data[regId]._sourceFaction = key;
+                                 }
+                             });
                              Object.assign(allRegimentsAccumulator, data);
                         }
                     }
@@ -111,7 +130,7 @@ export const ArmyDataProvider = ({ children }) => {
     const value = {
         factions,
         improvements,
-        regimentRules, // Eksportujemy nowe dane
+        regimentRules,
         globalUnits,
         globalRegiments,
         loading,

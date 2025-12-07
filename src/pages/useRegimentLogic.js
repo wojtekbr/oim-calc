@@ -8,6 +8,7 @@ import {
     collectRegimentUnits
 } from "../utils/armyMath";
 import { calculateRuleBonuses, checkSupportUnitRequirements } from "../utils/divisionRules";
+import { validateRegimentRules } from "../utils/regimentRules";
 
 export const useRegimentLogic = ({
   regiment,
@@ -170,8 +171,10 @@ export const useRegimentLogic = ({
 
   const totalCost = stats.cost;
 
-  const collectSelectedUnits = useMemo(() => {
-      return collectRegimentUnits(currentLocalConfig, regiment);
+  // Obliczanie błędów zasad pułkowych
+  const regimentRuleErrors = useMemo(() => {
+      const activeUnits = collectRegimentUnits(currentLocalConfig, regiment);
+      return validateRegimentRules(activeUnits, regiment);
   }, [currentLocalConfig, regiment]);
 
   const newRemainingPointsAfterLocalChanges = useMemo(() => {
@@ -222,21 +225,37 @@ export const useRegimentLogic = ({
 
     if (isOptionalGroup) {
         const mapKey = `${type}/optional`;
-        setOptionalSelections(prev => {
-            const next = { ...prev };
-            let arr = [...(next[mapKey] || [])];
-            const groupDef = type === GROUP_TYPES.BASE ? base : additional;
-            const optionalPods = groupDef.optional || [];
-             if (arr.length < optionalPods.length) {
-                 const padded = Array(optionalPods.length).fill(null);
-                 arr.forEach((v, i) => padded[i] = v);
-                 arr = padded;
-            }
+        const targetKey = mapKey;
+        
+        const rivalType = type === GROUP_TYPES.BASE ? GROUP_TYPES.ADDITIONAL : GROUP_TYPES.BASE;
+        const rivalKey = `${rivalType}/optional`;
 
-            arr[index] = newValue;
-            next[mapKey] = arr;
+        const willEnable = !optionalEnabled[targetKey];
+
+        setOptionalEnabled(prev => {
+            const next = { ...prev };
+            next[targetKey] = willEnable;
+            
+            if (willEnable) {
+                next[rivalKey] = false;
+            }
             return next;
         });
+        
+        setImprovements(prev => {
+            const m = { ...prev };
+            if (!willEnable) {
+               Object.keys(m).forEach(k => {
+                  if (k.startsWith(`${type}/${groupKey}/`)) delete m[k];
+              });
+            }
+            if (willEnable) {
+               Object.keys(m).forEach(k => {
+                  if (k.startsWith(`${rivalType}/${groupKey}/`)) delete m[k];
+              });
+          }
+          return m;
+       });
     } else if (type === GROUP_TYPES.BASE) {
         setBaseSelections(prev => {
             const next = { ...prev };
@@ -319,40 +338,30 @@ export const useRegimentLogic = ({
     });
   };
 
-  // --- ZMIENIONA LOGIKA WZAJEMNEGO WYKLUCZANIA OPTIONAL ---
   const handleToggleOptionalGroup = (type, groupKey) => {
       const targetKey = `${type}/${groupKey}`;
-      
-      // Obliczamy "rywala" (jeśli type=base to rywal=additional i odwrotnie)
       const rivalType = type === GROUP_TYPES.BASE ? GROUP_TYPES.ADDITIONAL : GROUP_TYPES.BASE;
       const rivalKey = `${rivalType}/${groupKey}`;
 
-      // Jaki będzie nowy stan docelowy?
       const willEnable = !optionalEnabled[targetKey];
 
       setOptionalEnabled(prev => {
           const next = { ...prev };
           next[targetKey] = willEnable;
           
-          // Jeśli WŁĄCZAMY jedną grupę, WYŁĄCZAMY drugą
           if (willEnable) {
               next[rivalKey] = false;
           }
           return next;
       });
       
-      // Czyszczenie ulepszeń (dla grupy która się wyłącza)
       setImprovements(prev => {
           const m = { ...prev };
-          
-          // 1. Jeśli wyłączyliśmy target (uncheck) -> czyścimy target
           if (!willEnable) {
                Object.keys(m).forEach(k => {
                   if (k.startsWith(`${type}/${groupKey}/`)) delete m[k];
               });
           }
-          
-          // 2. Jeśli włączyliśmy target (check) -> to znaczy że rywal się wyłączył -> czyścimy rywala
           if (willEnable) {
                Object.keys(m).forEach(k => {
                   if (k.startsWith(`${rivalType}/${groupKey}/`)) delete m[k];
@@ -381,29 +390,52 @@ export const useRegimentLogic = ({
   };
 
   const saveAndGoBack = () => {
+    // Blokada jeśli są błędy pułkowe
+    if (regimentRuleErrors && regimentRuleErrors.length > 0) {
+        alert("Popraw błędy w konfiguracji pułku przed zapisaniem.");
+        return;
+    }
+
     const tempDivisionForCheck = JSON.parse(JSON.stringify(configuredDivision));
     const groupRef = tempDivisionForCheck[regimentGroup];
     
     groupRef[regimentIndex].config = currentLocalConfig;
     
+    // --- NOWA LOGIKA: Scalamy listy definicji wsparcia ---
+    const artDefs = divisionDefinition.division_artillery || [];
+    const addDefs = divisionDefinition.additional_units || [];
+    // Scalamy dokładnie tak jak w Selectorze: najpierw artyleria, potem dodatkowe
+    const allSupportDefinitions = [...artDefs, ...addDefs];
+
     const keptSupportUnits = [];
     const removedNames = [];
 
     (tempDivisionForCheck.supportUnits || []).forEach(su => {
         let unitConfig = null;
-        if (su.definitionIndex !== undefined && divisionDefinition.additional_units) {
-            unitConfig = divisionDefinition.additional_units[su.definitionIndex];
+        
+        // Szukamy po indeksie w SCALONEJ liście
+        if (su.definitionIndex !== undefined) {
+            unitConfig = allSupportDefinitions[su.definitionIndex];
         } else {
-            unitConfig = divisionDefinition.additional_units?.find(u => 
+            // Fallback po nazwie (rzadziej używane)
+            unitConfig = allSupportDefinitions.find(u => 
                 (typeof u === 'string' && u === su.id) || 
                 (u.name === su.id)
             );
         }
+
         if (unitConfig) {
             const check = checkSupportUnitRequirements(unitConfig, tempDivisionForCheck, getRegimentDefinition);
-            if (check.isAllowed) keptSupportUnits.push(su);
-            else removedNames.push(getUnitName(su.id));
+            if (check.isAllowed) {
+                keptSupportUnits.push(su);
+            } else {
+                // Dodajemy powód usunięcia do komunikatu
+                const reasonMsg = check.reason ? ` (${check.reason})` : "";
+                removedNames.push(`${getUnitName(su.id)}${reasonMsg}`);
+            }
         } else {
+            // Jeśli nie znaleziono konfigu, zostawiamy (bezpieczniej) lub usuwamy (rygorystyczniej)
+            // Zostawiamy, żeby nie usuwać "dziwnych" jednostek
             keptSupportUnits.push(su);
         }
     });
@@ -430,7 +462,8 @@ export const useRegimentLogic = ({
       baseSelections, additionalSelections, additionalEnabled, 
       optionalEnabled, optionalSelections, selectedAdditionalCustom,
       improvements, regimentImprovements, newRemainingPointsAfterLocalChanges,
-      stats, totalCost, assignedSupportUnits, hasAdditionalBaseSelection
+      stats, totalCost, assignedSupportUnits, hasAdditionalBaseSelection,
+      regimentRuleErrors 
     },
     definitions: {
         structure, base, additional, customCostDefinition, customCostSlotName,

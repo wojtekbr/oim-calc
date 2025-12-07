@@ -8,6 +8,8 @@ export const useRegimentSelectorLogic = ({
   configuredDivision,
   setConfiguredDivision,
   getRegimentDefinition,
+  // ZMIANA: Odbieramy dwie listy definicji
+  divisionArtilleryDefinitions, 
   additionalUnitsDefinitions,
   unitsMap,
   faction
@@ -15,6 +17,11 @@ export const useRegimentSelectorLogic = ({
   const { improvements } = useArmyData();
   const [playerName, setPlayerName] = useState("");
   const [divisionCustomName, setDivisionCustomName] = useState("");
+
+  // ZMIANA: Scalamy definicje w jedną listę dla logiki, aby indeksy były unikalne
+  const allSupportDefinitions = useMemo(() => {
+      return [...(divisionArtilleryDefinitions || []), ...(additionalUnitsDefinitions || [])];
+  }, [divisionArtilleryDefinitions, additionalUnitsDefinitions]);
 
   const regimentsList = useMemo(() => {
     if (!configuredDivision) return [];
@@ -39,7 +46,7 @@ export const useRegimentSelectorLogic = ({
 
   const unitsRulesMap = useMemo(() => {
     const map = {};
-    additionalUnitsDefinitions.forEach(item => {
+    allSupportDefinitions.forEach(item => {
       if (typeof item === 'object' && item.name && !item.type) {
         map[item.name] = item.assignment_rules || {};
       }
@@ -48,21 +55,18 @@ export const useRegimentSelectorLogic = ({
       }
     });
     return map;
-  }, [additionalUnitsDefinitions]);
+  }, [allSupportDefinitions]);
 
   const handleBuySupportUnit = (unitId, definitionIndex, remainingPoints) => {
     setConfiguredDivision(prev => {
         const currentSupportUnits = [...prev.supportUnits];
-        // Sprawdzamy czy w tym slocie (defIndex) jest już coś kupione
         const existingIndex = currentSupportUnits.findIndex(su => su.definitionIndex === definitionIndex);
         
-        // Jeśli klikamy w to samo co już jest kupione -> usuwamy (toggle off)
         if (existingIndex !== -1 && currentSupportUnits[existingIndex].id === unitId) {
             currentSupportUnits.splice(existingIndex, 1);
             return { ...prev, supportUnits: currentSupportUnits };
         }
         
-        // Jeśli slot zajęty przez inną jednostkę -> podmieniamy (SWAP)
         if (existingIndex !== -1) {
             const unitDef = unitsMap[unitId];
             if (unitDef && unitDef.pu_cost) {
@@ -70,7 +74,6 @@ export const useRegimentSelectorLogic = ({
                  const oldDef = unitsMap[oldId];
                  const oldCost = oldDef?.pu_cost || 0;
                  
-                 // Obliczamy czy nas stać na podmianę: (obecne + zwrot za stare) - nowe
                  if (remainingPoints + oldCost - unitDef.pu_cost < 0) {
                     alert(`Brak Punktów Ulepszeń na zamianę. Potrzebujesz: ${unitDef.pu_cost - oldCost} więcej.`);
                     return prev;
@@ -79,12 +82,11 @@ export const useRegimentSelectorLogic = ({
             currentSupportUnits[existingIndex] = { 
                 ...currentSupportUnits[existingIndex], 
                 id: unitId,
-                assignedTo: null // Reset przypisania przy zmianie typu jednostki
+                assignedTo: null 
             };
             return { ...prev, supportUnits: currentSupportUnits };
         }
 
-        // Jeśli slot wolny -> kupujemy nową
         const unitDef = unitsMap[unitId];
         if (unitDef && unitDef.pu_cost) {
             if (remainingPoints - unitDef.pu_cost < 0) {
@@ -101,7 +103,6 @@ export const useRegimentSelectorLogic = ({
     });
   };
 
-  // POPRAWIONE: Usuwanie po definitionIndex
   const handleRemoveSupportUnit = (definitionIndex) => {
       setConfiguredDivision(prev => {
           const newSupportUnits = prev.supportUnits.filter(su => su.definitionIndex !== definitionIndex);
@@ -109,15 +110,12 @@ export const useRegimentSelectorLogic = ({
       });
   };
 
-  // POPRAWIONE: Przypisywanie po definitionIndex
   const handleAssignSupportUnit = (definitionIndex, positionKey) => {
     let assignment = null;
-    
     if (positionKey !== "") {
         const [group, idxStr] = positionKey.split('/');
         assignment = { group, index: parseInt(idxStr, 10), positionKey };
     }
-
     setConfiguredDivision(prev => {
       const newSupportUnits = prev.supportUnits.map(su => {
           if (su.definitionIndex === definitionIndex) {
@@ -132,59 +130,44 @@ export const useRegimentSelectorLogic = ({
   const handleRegimentChange = (groupKey, index, newRegimentId) => {
     const tempDivision = JSON.parse(JSON.stringify(configuredDivision));
     
+    // Tworzymy domyślny konfig dla nowego pułku
     const newConfig = { 
-        baseSelections: {}, 
-        additionalSelections: {}, 
-        additionalCustom: null,
-        additionalEnabled: false, 
-        optionalEnabled: {},
-        optionalSelections: {},
-        improvements: {},
-        regimentImprovements: [],
-        isVanguard: false 
+        baseSelections: {}, additionalSelections: {}, additionalCustom: null, additionalEnabled: false, 
+        optionalEnabled: {}, optionalSelections: {}, improvements: {}, regimentImprovements: [], isVanguard: false 
     };
 
     const def = getRegimentDefinition(newRegimentId);
-    
     if (def && def.structure) {
         if (def.structure.base) {
             Object.entries(def.structure.base).forEach(([slotKey, pods]) => {
                 if (slotKey === 'optional') return;
-                newConfig.baseSelections[slotKey] = pods.map(pod => {
-                    const keys = Object.keys(pod);
-                    return keys.length > 0 ? keys[0] : null; 
-                });
+                newConfig.baseSelections[slotKey] = pods.map(pod => Object.keys(pod)[0] || null);
             });
         }
-
         if (def.structure.additional) {
              Object.entries(def.structure.additional).forEach(([slotKey, pods]) => {
                 if (slotKey === 'optional') return;
-                
-                newConfig.additionalSelections[slotKey] = pods.map(pod => {
-                    const keys = Object.keys(pod);
-                    return keys.length > 0 ? keys[0] : null; 
-                });
+                newConfig.additionalSelections[slotKey] = pods.map(pod => Object.keys(pod)[0] || null);
              });
         }
     }
 
-    const unitsToRemoveIndices = [];
-    const unitsToRemoveNames = [];
-
-    // Tymczasowo aplikujemy zmianę w kopii, żeby sprawdzić wymagania wsparcia
+    // Aplikujemy zmianę w kopii, aby walidator widział nowy stan
     tempDivision[groupKey][index] = {
         ...tempDivision[groupKey][index],
-        id: newRegimentId
+        id: newRegimentId,
+        config: newConfig // Ważne: musimy ustawić config, żeby walidator mógł przeliczyć jednostki
     };
-    // Uwaga: tutaj nie czyścimy reszty pułków, więc checkSupportUnitRequirements sprawdzi poprawnie dla nowego stanu
+
+    const unitsToRemoveIndices = [];
+    const unitsToRemoveNames = [];
 
     tempDivision.supportUnits.forEach((su, suIdx) => {
         let unitConfig = null;
         if (su.definitionIndex !== undefined) {
-            unitConfig = additionalUnitsDefinitions[su.definitionIndex];
+            unitConfig = allSupportDefinitions[su.definitionIndex]; // Używamy scalonej listy definicji
         } else {
-             unitConfig = additionalUnitsDefinitions.find(u => 
+             unitConfig = allSupportDefinitions.find(u => 
                 (typeof u === 'string' && u === su.id) || 
                 (u.name === su.id)
             );
@@ -222,16 +205,13 @@ export const useRegimentSelectorLogic = ({
         config: newConfig,
       };
 
-      // Resetujemy przypisanie wsparcia TYLKO dla tego konkretnego slotu, który zmieniliśmy
+      // Reset przypisania tylko dla tego slotu
       const positionKey = `${groupKey}/${index}`;
       newSupportUnits.forEach((su, i) => {
         if (su.assignedTo?.positionKey === positionKey) {
           newSupportUnits[i] = { ...su, assignedTo: null };
         }
       });
-
-      // USUNIĘTO CAŁKOWICIE BLOK IF DLA GROUP_TYPES.ADDITIONAL
-      // Pułki są teraz niezależne.
 
       return { ...prev, [groupKey]: newGroup, supportUnits: newSupportUnits };
     });
@@ -246,17 +226,11 @@ export const useRegimentSelectorLogic = ({
   };
 
   const handleGeneralChange = (unitId) => {
-      setConfiguredDivision(prev => ({
-          ...prev,
-          general: unitId
-      }));
+      setConfiguredDivision(prev => ({ ...prev, general: unitId }));
   };
 
   const handleMainForceSelect = (positionKey) => {
-      setConfiguredDivision(prev => ({
-          ...prev,
-          preferredMainForceKey: positionKey
-      }));
+      setConfiguredDivision(prev => ({ ...prev, preferredMainForceKey: positionKey }));
   };
 
   const mainForceKey = useMemo(() => {
@@ -268,18 +242,11 @@ export const useRegimentSelectorLogic = ({
     state: {
       playerName, setPlayerName,
       divisionCustomName, setDivisionCustomName,
-      regimentsList, 
-      purchasedSlotsMap, 
-      unitsRulesMap, mainForceKey
+      regimentsList, purchasedSlotsMap, unitsRulesMap, mainForceKey
     },
     handlers: {
-      handleBuySupportUnit, 
-      handleAssignSupportUnit,
-      handleRemoveSupportUnit,
-      handleRegimentChange, 
-      handleRegimentNameChange,
-      handleGeneralChange,
-      handleMainForceSelect
+      handleBuySupportUnit, handleAssignSupportUnit, handleRemoveSupportUnit,
+      handleRegimentChange, handleRegimentNameChange, handleGeneralChange, handleMainForceSelect
     }
   };
 };

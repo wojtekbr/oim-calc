@@ -48,6 +48,11 @@
   color: white;
 }
 .btnPrimary:hover { background-color: #005ecb; }
+.btnPrimary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
 
 .btnSecondary {
   background-color: #e0e0e0;
@@ -110,6 +115,18 @@
   border-bottom: 2px solid #f0f0f0;
 }
 
+.sectionHeaderCheckbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.sectionHeaderCheckbox input {
+  width: 20px; 
+  height: 20px; 
+  margin-right: 10px; 
+  cursor: pointer;
+}
+
 .supportHeader {
   border-bottom-color: #cce3f6;
 }
@@ -166,6 +183,17 @@
 
 .groupLabelOptional {
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.checkboxInput {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.clickableSpan {
+  cursor: pointer;
 }
 
 .podContainer {
@@ -178,40 +206,119 @@
   color: #888;
 }
 
-.regimentImprovementsList {
+/* --- ACTIVE CONFIG PANEL (Panel edycji wybranej jednostki) --- */
+.activeConfigPanel {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #0077ff;
+}
+
+.activeConfigTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.activeUnitRow {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #ccc;
+}
+.activeUnitRow:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.activeUnitHeader {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.activeUnitCostLabel {
+  font-weight: 400;
+  color: #888;
+  font-size: 11px;
+}
+
+.cleanImprovementsContainer {
+  margin-top: 0;
+  border: none;
+  padding-top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.emptyImprovements {
+  font-size: 11px;
+  color: #999;
+  font-style: italic;
+}
+
+/* --- MULTI CARD INTERNALS --- */
+.multiCardTitle {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: #222;
+  line-height: 1.3;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+}
+
+.multiCardList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+  font-size: 11px;
+  color: #555;
+  margin-bottom: 6px;
 }
 
-.regimentImprovementLabel {
-  font-size: 13px;
+.multiCardItem {
+  display: flex;
+  justify-content: space-between;
 }
 
-/* --- NOWE STYLE KART (GRID) --- */
+.multiCardTotalCost {
+  font-size: 12px;
+  color: #666;
+  margin-top: 8px;
+  font-weight: 700;
+  background: #f0f2f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
 
-/* Zmiana kontenera na Grid dla równego układu */
+/* --- STYLE KART (GRID) --- */
 .unitsRow {
   display: grid;
-  /* Karty będą miały min 130px, a max wypełnią dostępną przestrzeń */
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
 }
 
-/* Karta Jednostki - Wygląd "Trading Card" */
 .unitCard {
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 0; /* Content ma własny padding */
+  padding: 0;
   display: flex;
   flex-direction: column;
   transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  height: 100%; /* Rozciągnij do wysokości gridu */
+  height: 100%;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
@@ -225,23 +332,20 @@
   transform: scale(0.98);
 }
 
-/* Stan Aktywny (Wybrany) */
 .unitCard.active {
   border: 2px solid #0077ff;
   background-color: #fff;
   box-shadow: 0 0 0 2px rgba(0, 119, 255, 0.2);
 }
 
-/* Specjalny styl dla pakietów (MultiUnit) */
 .unitCard.multiCard {
   border-style: double;
   border-width: 4px;
 }
 
-/* Placeholder na obrazek */
 .cardImagePlaceholder {
   width: 100%;
-  height: 90px; /* Stała wysokość obrazka */
+  height: 90px;
   background-color: #eee;
   display: flex;
   align-items: center;
@@ -253,12 +357,11 @@
   border-bottom: 1px solid #eee;
 }
 
-/* Treść karty */
 .cardContent {
   padding: 10px;
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Wypycha treść */
+  flex-grow: 1;
   justify-content: space-between;
 }
 
@@ -268,6 +371,13 @@
   margin-bottom: 4px;
   color: #222;
   line-height: 1.3;
+}
+
+.unitOrders {
+  font-size: 11px;
+  color: #d35400;
+  margin-bottom: 4px;
+  font-weight: 600;
 }
 
 .unitCost {
@@ -281,7 +391,6 @@
   align-self: flex-start;
 }
 
-/* "Checkmark" gdy wybrany */
 .checkBadge {
   position: absolute;
   top: 6px;
@@ -300,17 +409,7 @@
   z-index: 2;
 }
 
-/* --- KONIEC STYLI KART --- */
-
-.improvementsContainer {
-  margin-top: auto;
-  padding-top: 8px;
-  border-top: 1px dashed #ccc;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
+/* Improvements Buttons */
 .impBadge {
   font-size: 11px;
   padding: 3px 8px;
@@ -334,6 +433,28 @@
 .impBadge:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* --- SIDEBAR STYLES --- */
+
+.sidebarHeader {
+  margin-bottom: 16px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 12px;
+}
+
+.sidebarTitle {
+  font-size: 16px;
+  font-weight: 800;
+  color: #222;
+  line-height: 1.3;
+}
+
+.sidebarSubtitle {
+  font-size: 14px;
+  font-style: italic;
+  color: #666;
+  margin-top: 4px;
 }
 
 /* Sidebar Stats & Summary */
@@ -378,6 +499,69 @@
 
 .statLabel { color: #555; }
 .statValue { font-weight: 700; color: #222; }
+.statValueType { text-transform: uppercase; color: #0077ff; }
+
+/* Error Box */
+.errorBox {
+  margin-bottom: 24px;
+  padding: 12px;
+  background-color: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 6px;
+  color: #c62828;
+  font-size: 13px;
+}
+.errorList {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+/* Rules */
+.regimentImprovementsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ruleEntry {
+  margin-bottom: 8px;
+}
+
+.ruleEntryTitle {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.ruleEntryDesc {
+  font-size: 11px;
+  color: #555;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.regimentImprovementLabel {
+  font-size: 13px;
+}
+
+/* Table */
+.tableContainer {
+  margin-bottom: 10px;
+}
+
+.tableHeader {
+  margin-bottom: 10px;
+}
+
+.tableHeader h4 {
+  margin-bottom: 4px;
+}
+
+.pointsDisplay {
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
 .impPoints {
   font-weight: bold;
@@ -385,34 +569,52 @@
 .impPoints.ok { color: #1b7e32; }
 .impPoints.error { color: #d32f2f; }
 
-.rulesList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.impTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
 }
 
-.ruleItem {
-  background-color: #f9f9f9;
-  border-left: 3px solid #0077ff;
-  padding: 10px;
-  border-radius: 0 6px 6px 0;
+.impTableHeadRow {
+  border-bottom: 2px solid #eee;
+  color: #666;
 }
 
-.ruleTitle {
-  font-weight: 700;
-  font-size: 13px;
+.tableTh {
+  text-align: left;
+  padding-bottom: 4px;
+}
+.tableThCenter {
+  text-align: center;
+  padding-bottom: 4px;
+}
+.tableThRight {
+  text-align: right;
+  padding-bottom: 4px;
+}
+
+.impTableRow {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tableTd {
+  padding: 6px 0;
   color: #333;
-  margin-bottom: 4px;
+}
+.tableTdCenter {
+  padding: 6px 0;
+  text-align: center;
+  color: #666;
+}
+.tableTdRight {
+  padding: 6px 0;
+  text-align: right;
+  font-weight: bold;
 }
 
-.ruleDesc {
-  font-size: 12px;
-  color: #555;
-  line-height: 1.4;
+.limitReached {
+  color: #d32f2f;
 }
-
-.noRules {
-  font-size: 12px;
-  color: #999;
-  font-style: italic;
+.limitOk {
+  color: #0056b3;
 }

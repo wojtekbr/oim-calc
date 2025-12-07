@@ -24,10 +24,6 @@
           {
             "regiment_id": "ott_province_eur",
             "min_amount": 1
-          },
-          {
-            "regiment_id": "ott_sipahi_europ",
-            "min_amount": 2
           }
         ]
       },
@@ -45,21 +41,6 @@
       }
     ],
     "additional_units": [
-      {
-        "type": "group",
-        "name": "Lekka Artyleria",
-        "options": ["ott_light_art_s", "ott_light_art_m"]
-      },
-      {
-        "type": "group",
-        "name": "Lekka Artyleria",
-        "options": ["ott_light_art_s", "ott_light_art_m"]
-      },
-      {
-        "type": "group",
-        "name": "Średnia Artyleria",
-        "options": ["ott_medium_art_s", "ott_medium_art_m"]
-      },
       {
         "name":"common_supply_wagon",
         "assignment_rules": {
@@ -85,6 +66,23 @@
             "min_amount": 1
           }
         ]
+      }
+    ],
+    "division_artillery": [
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["ott_light_art_s", "ott_light_art_m"]
+      },
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["ott_light_art_s", "ott_light_art_m"]
+      },
+      {
+        "type": "group",
+        "name": "Średnia Artyleria",
+        "options": ["ott_medium_art_s", "ott_medium_art_m"]
       }
     ],
     "vanguard": 

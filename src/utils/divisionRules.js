@@ -112,7 +112,6 @@ export const DIVISION_RULES_REGISTRY = {
 
             const errors = [];
             
-            // 1. Zbieramy ID wszystkich jednostek z całej dywizji
             let allUnitIds = [];
             const allRegiments = [
                 ...(divisionConfig.vanguard || []),
@@ -127,22 +126,17 @@ export const DIVISION_RULES_REGISTRY = {
                     allUnitIds = allUnitIds.concat(units.map(u => u.unitId));
                 }
             });
-
-            // Dodajemy też jednostki wsparcia (te nieprzypisane, bo przypisane są w collectRegimentUnits, jeśli tak to działa w armyMath. Ale dla pewności sprawdźmy tylko unassigned, żeby nie dublować, jeśli collectRegimentUnits je zbiera. 
-            // W armyMath collectRegimentUnits NIE zbiera supportu przypisanego! Zbiera tylko internal units. 
-            // Support units są w configuredDivision.supportUnits.
             
+            // Dodajemy też jednostki wsparcia (te nieprzypisane, bo przypisane nie są w collectRegimentUnits)
             if (divisionConfig.supportUnits) {
                 const supportIds = divisionConfig.supportUnits.map(su => su.id);
                 allUnitIds = allUnitIds.concat(supportIds);
             }
 
-            // 2. Sprawdzamy każde ograniczenie
             constraints.forEach(constraint => {
                 const targetIds = constraint.unit_ids || [];
                 const maxAmount = constraint.max_amount || 0;
                 
-                // Liczymy wystąpienia
                 const currentCount = allUnitIds.filter(uid => uid && targetIds.includes(uid)).length;
 
                 if (currentCount > maxAmount) {
@@ -161,7 +155,7 @@ export const DIVISION_RULES_REGISTRY = {
         }
     },
 
-    // --- NOWE: Zasada "Panowie Bracia" ---
+    // --- NOWE: Zasada "Panowie Bracia" (Logika Bonusu) ---
     "panowie_bracia": {
         getRegimentStatsBonus: (divisionConfig, targetRegimentId, params) => {
             const countingIds = params?.counting_regiment_ids || [];
@@ -268,9 +262,7 @@ export const DIVISION_RULES_DEFINITIONS = {
 
     "panowie_bracia": {
         title: "Panowie Bracia!",
-        getDescription: () => {
-            return "Za każde dwa pułki Jazdy (Koronnej, Litewskiej, Lekkiej, Hetmańskie, Skrzydłowe, Pospolite Ruszenie), każdy z tych pułków (z wyjątkiem Pospolitego Ruszenia) otrzymuje +1 do Motywacji.";
-        }
+        getDescription: () => "Za każde dwa pułki Jazdy (Koronnej, Litewskiej, Lekkiej, Hetmańskie, Skrzydłowe, Pospolite Ruszenie), każdy z tych pułków (z wyjątkiem Pospolitego Ruszenia) otrzymuje +1 do Motywacji."
     },
     
     "klopoty_skarbowe": {
@@ -404,6 +396,7 @@ export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegi
     }
 
     for (const req of unitConfig.requirements) {
+        // 1. Wymaganie: Konkretna jednostka w konkretnym pułku
         if (req.type === "regiment_contains_unit") {
             const { regiment_id, unit_id, min_amount = 1 } = req;
             const targetRegiments = [
@@ -431,6 +424,27 @@ export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegi
 
             if (!found) {
                 return { isAllowed: false, reason: `Wymagana jednostka (x${min_amount}) w pułku docelowym.` };
+            }
+        }
+        
+        // 2. Wymaganie: Dywizja zawiera dowolny z podanych pułków
+        if (req.type === "division_contains_any_regiment") {
+            const { regiment_ids } = req;
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []),
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+            
+            const found = allRegiments.some(r => r.id !== IDS.NONE && regiment_ids.includes(r.id));
+
+            if (!found) {
+                const names = regiment_ids.map(rid => {
+                    const def = getRegimentDefinition(rid);
+                    return def ? def.name : rid;
+                }).join("\nLUB ");
+                
+                return { isAllowed: false, reason: `Wymagany jeden z pułków:\n${names}` };
             }
         }
     }

@@ -38,11 +38,18 @@
         "assignment_rules": {
           "can_be_assigned": false
         }
-      },
+      }],
+    "division_artillery": [
       {
         "type": "group",
         "name": "Lekka Artyleria",
-        "options": ["cro_light_artillery_s"]
+        "options": ["cro_light_artillery_s"],
+        "requirements": [
+          {
+            "type": "division_contains_any_regiment",
+            "regiment_ids": ["cro_polish_dragoons", "mrc_infantry"]
+          }
+        ]
       }
     ],
     "vanguard": [

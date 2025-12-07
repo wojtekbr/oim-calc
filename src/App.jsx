@@ -161,7 +161,6 @@ function AppContent() {
         return {
             ...regDef,
             id: regimentStructure.id,
-            // name: regimentStructure.name,  <-- USUNIĘTO TĘ LINIĘ (powodowała nadpisanie nazwy undefined)
             divisionDefinition: selectedDivisionDefinition,
         };
     };
@@ -174,7 +173,8 @@ function AppContent() {
         <div style={{ padding: 0 }}>
             {screen === SCREENS.LIST && (
                 <div style={{padding: 20}}>
-                     <h1 style={{ marginTop: 0 }}>Army Editor</h1>
+                     {/* ZMIANA: Nowy tytuł */}
+                     <h1 style={{ marginTop: 0 }}>Kreator Dywizji Ogniem i Mieczem II</h1>
                      <FactionList
                         factions={factions}
                         onOpenDivision={openRegimentSelector}
@@ -197,9 +197,10 @@ function AppContent() {
                     improvementPointsLimit={improvementPointsLimit}
                     totalDivisionCost={totalDivisionCost}
                     
+                    divisionArtilleryDefinitions={selectedDivisionDefinition?.division_artillery || []}
                     additionalUnitsDefinitions={selectedDivisionDefinition?.additional_units || []}
-                    unitsMap={unitsMap}
                     
+                    unitsMap={unitsMap}
                     validationErrors={validationErrors}
                 />
             )}

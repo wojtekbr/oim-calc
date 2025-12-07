@@ -1,0 +1,129 @@
+{
+    "_meta": { "name": "Najemne" },
+
+   "mrc_musketeers_s": {
+    "id": "mrc_musketeers_s",
+    "name": "Skwadron muszkieterów S",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "silver",
+    "is_infantry": true
+  },
+  "mrc_musketeers_m": {
+    "id": "mrc_musketeers_m",
+    "name": "Skwadron muszkieterów M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "bronze",
+    "is_infantry": true
+  },
+  "mrc_dragoons_mercenary_s": {
+    "id": "mrc_dragoons_mercenary_s",
+    "name": "Dragoni najemni S",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "silver",
+    "are_dragoons": true,
+	  "are_scouts": true
+  },
+  "mrc_dragoons_mercenary_m": {
+    "id": "mrc_dragoons_mercenary_m",
+    "name": "Dragoni najemni M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "are_dragoons": true
+  },
+  "mrc_infantry_mercenary_m": {
+    "id": "mrc_infantry_mercenary_m",
+    "name": "Piechota Najemna M",
+    "cost": 8,
+    "improvement_cost": 3,
+    "rank": "gold",
+    "is_infantry": true,
+	  "is_pike_and_shot": true
+  },
+  "mrc_infantry_mercenary_L": {
+    "id": "mrc_infantry_mercenary_L",
+    "name": "Piechota Najemna L",
+    "cost": 11,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_infantry": true,
+	  "is_pike_and_shot": true
+  },
+  "mrc_infantry_mercenary_armored_m": {
+    "id": "mrc_infantry_mercenary_armored_m",
+    "name": "Opancerzona Piechota Najemna M",
+    "cost": 8,
+    "improvement_points_cost": -1,
+    "improvement_cost": 3,
+    "rank": "gold",
+    "is_infantry": true,
+	  "is_pike_and_shot": true
+  },
+  "mrc_infantry_mercenary_armored_L": {
+    "id": "mrc_infantry_mercenary_armored_L",
+    "name": "Opancerzona Piechota Najemna L",
+    "cost": 8,
+    "improvement_points_cost": -1,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_infantry": true,
+	  "is_pike_and_shot": true
+  },
+  "mrc_pulkownik": {
+    "id": "mrc_pulkownik",
+    "name": "Pułkownik",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "mrc_podpulkownik": {
+    "id": "mrc_podpulkownik",
+    "name": "Podpułkownik",
+    "cost": 2,
+    "rank": "group",
+    "orders": 1
+  },
+  "mrc_major": {
+    "id": "mrc_major",
+    "name": "Major",
+    "cost": 2,
+    "rank": "group",
+    "orders": 1
+  },
+  "mrc_reiters_mercenary_s": {
+    "id": "mrc_reiters_mercenary_s",
+    "name": "Rajtarzy najemni S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "mrc_reiters_mercenary_m": {
+    "id": "mrc_reiters_mercenary_m",
+    "name": "Rajtarzy najemni M",
+    "cost": 9,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+    "mrc_reiters_mercenary_armored_s": {
+    "id": "mrc_reiters_mercenary_armored_s",
+    "name": "Opancerzeni Rajtarzy Najemni S",
+    "cost": 7,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "mrc_reiters_mercenary_armored_m": {
+    "id": "mrc_reiters_mercenary_armored_m",
+    "name": "Opancerzeni Rajtarzy Najemni M",
+    "cost": 10,
+    "improvement_points_cost": 1,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_cavalry": true
+  }  
+}
