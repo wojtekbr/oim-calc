@@ -186,7 +186,6 @@
       },
       {
         "id": "kalkans",
-        "cost": 1,
         "units_allowed": ["ott_beszli_s","ott_beszli_m"]
       }
     ],
@@ -299,8 +298,7 @@
         "cost": "double"
       },
       {
-        "id": "additional_ammo",
-        "cost": 1
+        "id": "additional_ammo"
       },
       {
         "id": "serdengetci_contract",
@@ -314,7 +312,6 @@
       },
       {
         "id": "regimental_guns",
-        "cost": 1,
         "max_amount": 2
       }
     ],
@@ -466,12 +463,10 @@
         "cost": "double"
       },
       {
-        "id": "additional_ammo",
-        "cost": 1
+        "id": "additional_ammo"
       },
       {
         "id": "regimental_guns",
-        "cost": 1,
         "max_amount": 2
       }
     ],
@@ -552,12 +547,10 @@
     ],
     "unit_improvements": [
       {
-        "id": "veterans",
-        "cost": "double"
+        "id": "veterans"
       },
       {
-        "id": "javelin",
-        "cost": -1
+        "id": "javelin"
       }
     ],
     "structure": {

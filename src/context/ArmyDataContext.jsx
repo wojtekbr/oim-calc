@@ -10,6 +10,30 @@ export const useArmyData = () => {
     return context;
 };
 
+// Helper do głębokiego łączenia obiektów (dla structure_overrides)
+const deepMerge = (target, source) => {
+    for (const key in source) {
+        const sourceVal = source[key];
+        const targetVal = target[key];
+
+        // Jeśli oba są obiektami (i NIE są tablicami), wchodzimy głębiej (rekurencja)
+        if (sourceVal && typeof sourceVal === 'object' && !Array.isArray(sourceVal)) {
+            if (targetVal && typeof targetVal === 'object' && !Array.isArray(targetVal)) {
+                deepMerge(targetVal, sourceVal);
+            } else {
+                // Jeśli target nie był obiektem, po prostu go nadpisujemy
+                target[key] = sourceVal;
+            }
+        } else {
+            // Jeśli źródło to tablica (Array) lub typ prosty (string, number, boolean)
+            // -> NADPISUJEMY CAŁOŚĆ (Replace).
+            // To pozwala na całkowitą wymianę listy jednostek w wariancie frakcyjnym.
+            target[key] = sourceVal;
+        }
+    }
+    return target;
+};
+
 export const ArmyDataProvider = ({ children }) => {
     const [factions, setFactions] = useState(null);
     const [improvements, setImprovements] = useState({});
@@ -26,11 +50,11 @@ export const ArmyDataProvider = ({ children }) => {
                 const unitModules = import.meta.glob("../data/factions/*/units.json", { eager: true, import: "default" });
                 const regimentModules = import.meta.glob("../data/factions/*/regiments.json", { eager: true, import: "default" });
                 const divisionModules = import.meta.glob("../data/factions/*/divisions.json", { eager: true, import: "default" });
+                
                 const commonUnitModules = import.meta.glob("../data/common/units.json", { eager: true, import: "default" });
                 const improvementModules = import.meta.glob("../data/common/improvements.json", { eager: true, import: "default" });
                 const regimentRulesModules = import.meta.glob("../data/common/regiment_rules.json", { eager: true, import: "default" });
                 
-                // Ładowanie konfiguracji frakcji
                 const factionsDefModule = import.meta.glob("../data/common/factions.json", { eager: true, import: "default" });
                 const factionsSettings = Object.values(factionsDefModule)[0] || {};
 
@@ -64,11 +88,11 @@ export const ArmyDataProvider = ({ children }) => {
                         const key = parts[parts.length - 2]; 
                         map[key] = map[key] || {};
                         
-                        // Ustalanie nazwy i flag
                         if (type === 'meta' || !map[key].meta) {
                             const configEntry = Object.values(factionsSettings).find(f => f.dir === key);
                             
                             let metaName = configEntry ? configEntry.name : key;
+                            
                             if (!configEntry && modules[path]._meta?.name) {
                                 metaName = modules[path]._meta.name;
                             }
@@ -76,7 +100,6 @@ export const ArmyDataProvider = ({ children }) => {
                             map[key].meta = { 
                                 key, 
                                 name: metaName,
-                                // NOWE: Przekazujemy flagę hidden
                                 hidden: configEntry?.hidden || false
                             };
                         }
@@ -88,6 +111,7 @@ export const ArmyDataProvider = ({ children }) => {
                             const { _meta, ...unitsData } = data;
                             Object.assign(allUnitsAccumulator, unitsData);
                         } else if (type === 'regiments') {
+                             // Oznaczamy pułk jego frakcją źródłową
                              Object.keys(data).forEach(regId => {
                                  if (typeof data[regId] === 'object') {
                                      data[regId]._sourceFaction = key;
@@ -122,9 +146,34 @@ export const ArmyDataProvider = ({ children }) => {
         loadData();
     }, []);
 
-    const getRegimentDefinition = (regimentKey) => {
+    const getRegimentDefinition = (regimentKey, factionKey = null) => {
         if (!regimentKey || regimentKey === 'none') return null;
-        return globalRegiments[regimentKey] || null;
+        
+        const baseDef = globalRegiments[regimentKey];
+        if (!baseDef) return null;
+
+        if (!factionKey || !baseDef.faction_variants || !baseDef.faction_variants[factionKey]) {
+            return baseDef;
+        }
+
+        // Deep copy bazy
+        const variantDef = JSON.parse(JSON.stringify(baseDef));
+        const variantRules = baseDef.faction_variants[factionKey];
+
+        // A. Dodawanie zasad specjalnych
+        if (variantRules.special_rules_add) {
+            variantDef.special_rules = [
+                ...(variantDef.special_rules || []),
+                ...variantRules.special_rules_add
+            ];
+        }
+
+        // B. Nadpisywanie struktury (Deep Merge z podmienianiem tablic)
+        if (variantRules.structure_overrides) {
+            deepMerge(variantDef.structure, variantRules.structure_overrides);
+        }
+
+        return variantDef;
     };
 
     const value = {

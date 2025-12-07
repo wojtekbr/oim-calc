@@ -86,69 +86,61 @@
     "awareness": 4,
     "activations": 2,
     "unit_improvements": [
-      {
-        "id": "veterans",
-        "max_amount": 1
-      },
-      {
-        "id": "additional_pistol"
-      }
+      { "id": "veterans", "max_amount": 1 },
+      { "id": "additional_pistol" }
     ],
     "structure": {
       "base": {
         "general": [
-          {
-            "unit1": {
-              "units": ["mrc_pulkownik"]
-            }
-          }
+          { "unit1": { "units": ["mrc_pulkownik"] } }
         ],
         "base1": [
-          {
-            "unit1": {
-              "units": ["mrc_reiters_mercenary_s"]
-            },
-            "unit2": {
-              "units": ["mrc_reiters_mercenary_m"]
-            }
-          }
+          { "unit1": { "units": ["mrc_reiters_mercenary_s"] }, "unit2": { "units": ["mrc_reiters_mercenary_m"] } }
         ],
         "base2": [
-          {
-            "unit1": {
-              "units": ["mrc_reiters_mercenary_s"]
-            },
-            "unit2": {
-              "units": ["mrc_reiters_mercenary_m"]
-            },
-            "unit3": {
-              "units": ["mrc_reiters_mercenary_armored_s"]
-            },
-            "unit4": {
-              "units": ["mrc_reiters_mercenary_armored_m"]
-            }
-          }
+          { "unit1": { "units": ["mrc_reiters_mercenary_s"] }, "unit2": { "units": ["mrc_reiters_mercenary_m"] }, "unit3": { "units": ["mrc_reiters_mercenary_armored_s"] }, "unit4": { "units": ["mrc_reiters_mercenary_armored_m"] } }
         ]
       },
       "additional": {
         "general": [
-          {
-            "unit1": {
-              "units": ["mrc_major"]
+          { 
+            "unit1": { 
+              "units": ["mrc_major"],
+              "extra_cost": 2  
             },
-            "unit2": {
-              "units": ["mrc_podpulkownik"]
+            "unit2": { 
+              "units": ["mrc_podpulkownik"],
+              "extra_cost": 2
             }
           }
         ],
         "additional1": [
-          {
-            "unit1": {
-              "units": ["mrc_reiters_mercenary_s"]
-            }
-          }
+          { "unit1": { "units": ["mrc_reiters_mercenary_s"] } }
         ]
       }
+    },
+    "faction_variants": {
+      "ottomans": {
+        "special_rules_add": ["szwedzki_podpulkownik"],
+        "structure_overrides": {
+          "additional": {
+            "general": [
+              { 
+                "unit1": { 
+                  "units": ["mrc_podpulkownik"],
+                  "mandatory": true
+                }
+              }
+            ]
+          }
+        }
+      },
+      "tatars": {
+        "special_rules_add": ["roznorodne_wyposazenie"]
+      },
+      "commonwealth-crown": {
+        "special_rules_add": ["krolewski_arsenal"]
+      }
     }
-  }
+   }
 }

@@ -5,7 +5,8 @@ import {
     canUnitTakeImprovement, 
     calculateSingleImprovementIMPCost, 
     calculateRegimentStats,
-    collectRegimentUnits
+    collectRegimentUnits,
+    calculateMainForceKey // NOWY IMPORT
 } from "../utils/armyMath";
 import { calculateRuleBonuses, checkSupportUnitRequirements } from "../utils/divisionRules";
 import { validateRegimentRules } from "../utils/regimentRules";
@@ -149,25 +150,45 @@ export const useRegimentLogic = ({
   }, [baseSelections, additionalSelections, selectedAdditionalCustom, additionalEnabled, optionalEnabled, optionalSelections, improvements, regimentImprovements, currentConfig.isVanguard]);
 
   const stats = useMemo(() => {
+      // 1. Tworzymy tymczasową dywizję z AKTUALNYM stanem edytowanego pułku
+      // Musimy to zrobić, aby calculateMainForceKey wzięło pod uwagę zmiany kosztów, które właśnie robisz
+      const tmpDivision = JSON.parse(JSON.stringify(configuredDivision));
+      tmpDivision[regimentGroup][regimentIndex].config = currentLocalConfig;
+
+      // 2. Liczymy statystyki bazowe pułku
       const rawStats = calculateRegimentStats(
           currentLocalConfig,
           regiment.id,
-          configuredDivision,
+          tmpDivision,
           unitsMap,
           getRegimentDefinition,
           commonImprovements
       );
 
+      // 3. Sprawdzamy czy w NOWYM układzie sił ten pułk jest Siłami Głównymi
+      const mainForceKey = calculateMainForceKey(
+          tmpDivision, 
+          unitsMap, 
+          faction, 
+          getRegimentDefinition, 
+          commonImprovements
+      );
+      
+      const currentKey = `${regimentGroup}/${regimentIndex}`;
+      const isMainForce = mainForceKey === currentKey;
+
+      // 4. Aplikujemy bonusy (zazwyczaj +1 Motywacja, +1 Aktywacja)
       return {
           totalRecon: rawStats.recon,
-          totalMotivation: rawStats.motivation,
-          totalActivations: rawStats.activations,
+          totalMotivation: rawStats.motivation + (isMainForce ? 1 : 0),
+          totalActivations: rawStats.activations + (isMainForce ? 1 : 0),
           totalOrders: rawStats.orders,
           totalAwareness: rawStats.awareness,
           regimentType: rawStats.regimentType,
-          cost: rawStats.cost
+          cost: rawStats.cost,
+          isMainForce // Zwracamy flagę, żeby wyświetlić badge w UI
       };
-  }, [currentLocalConfig, regiment.id, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements]);
+  }, [currentLocalConfig, regiment.id, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements, faction, regimentGroup, regimentIndex]);
 
   const totalCost = stats.cost;
 
@@ -205,10 +226,15 @@ export const useRegimentLogic = ({
 
     const isDeselecting = currentSelection === optionKey;
     
-    if (!isOptionalGroup && isDeselecting) return;
-    if (isOptionalGroup && isDeselecting) return; 
+    const groupDef = type === GROUP_TYPES.BASE ? base : additional;
+    const pod = groupDef[groupKey]?.[index];
+    const optionDef = pod?.[optionKey];
+    
+    const isToggleable = !!optionDef?.is_toggle;
 
-    const newValue = optionKey;
+    if (isDeselecting && !isOptionalGroup && !isToggleable) return;
+
+    const newValue = (isDeselecting && (isOptionalGroup || isToggleable)) ? null : optionKey;
     
     if (newValue !== currentSelection) {
         setImprovements((p) => { 
@@ -390,7 +416,6 @@ export const useRegimentLogic = ({
   };
 
   const saveAndGoBack = () => {
-    // Blokada jeśli są błędy pułkowe
     if (regimentRuleErrors && regimentRuleErrors.length > 0) {
         alert("Popraw błędy w konfiguracji pułku przed zapisaniem.");
         return;
@@ -401,41 +426,24 @@ export const useRegimentLogic = ({
     
     groupRef[regimentIndex].config = currentLocalConfig;
     
-    // --- NOWA LOGIKA: Scalamy listy definicji wsparcia ---
-    const artDefs = divisionDefinition.division_artillery || [];
-    const addDefs = divisionDefinition.additional_units || [];
-    // Scalamy dokładnie tak jak w Selectorze: najpierw artyleria, potem dodatkowe
-    const allSupportDefinitions = [...artDefs, ...addDefs];
-
     const keptSupportUnits = [];
     const removedNames = [];
 
     (tempDivisionForCheck.supportUnits || []).forEach(su => {
         let unitConfig = null;
-        
-        // Szukamy po indeksie w SCALONEJ liście
-        if (su.definitionIndex !== undefined) {
-            unitConfig = allSupportDefinitions[su.definitionIndex];
+        if (su.definitionIndex !== undefined && divisionDefinition.additional_units) {
+            unitConfig = divisionDefinition.additional_units[su.definitionIndex];
         } else {
-            // Fallback po nazwie (rzadziej używane)
-            unitConfig = allSupportDefinitions.find(u => 
+            unitConfig = divisionDefinition.additional_units?.find(u => 
                 (typeof u === 'string' && u === su.id) || 
                 (u.name === su.id)
             );
         }
-
         if (unitConfig) {
             const check = checkSupportUnitRequirements(unitConfig, tempDivisionForCheck, getRegimentDefinition);
-            if (check.isAllowed) {
-                keptSupportUnits.push(su);
-            } else {
-                // Dodajemy powód usunięcia do komunikatu
-                const reasonMsg = check.reason ? ` (${check.reason})` : "";
-                removedNames.push(`${getUnitName(su.id)}${reasonMsg}`);
-            }
+            if (check.isAllowed) keptSupportUnits.push(su);
+            else removedNames.push(getUnitName(su.id));
         } else {
-            // Jeśli nie znaleziono konfigu, zostawiamy (bezpieczniej) lub usuwamy (rygorystyczniej)
-            // Zostawiamy, żeby nie usuwać "dziwnych" jednostek
             keptSupportUnits.push(su);
         }
     });

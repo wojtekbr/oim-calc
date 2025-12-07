@@ -72,7 +72,8 @@
         "general": [
           {
             "unit1": {
-              "units": ["cro_rotmistrz"]
+              "units": ["cro_rotmistrz"],
+              "is_toggle": true
             }
           }
         ],
@@ -162,7 +163,8 @@
         "general": [
           {
             "unit1": {
-              "units": ["cro_rotmistrz"]
+              "units": ["cro_rotmistrz"],
+              "is_toggle": true
             }
           }
         ],
@@ -200,7 +202,8 @@
       },
       {
         "id": "veterans",
-        "max_amount": 1
+        "max_amount": 1,
+        "units_allowed": ["cro_cossack_style_s","cro_cossack_style_m","cro_pancerni_rohatyna_s","cro_pancerni_rohatyna_m"]
       },
       {
         "id": "additional_pistol"
@@ -257,7 +260,8 @@
         "general": [
           {
             "unit1": {
-              "units": ["cro_rotmistrz"]
+              "units": ["cro_rotmistrz"],
+              "is_toggle": true
             }
           }
         ],
@@ -354,7 +358,8 @@
         "general": [
           {
             "unit1": {
-              "units": ["cro_rotmistrz"]
+              "units": ["cro_rotmistrz"],
+              "is_toggle": true
             }
           }
         ],
@@ -365,15 +370,11 @@
             },
             "unit2": {
               "units": ["cro_cossack_style_m"]
-            }
-          }
-        ],
-        "additional2": [
-          {
-            "unit1": {
+            },
+            "unit3": {
               "units": ["cro_wallachian_s"]
             },
-            "unit2": {
+            "unit4": {
               "units": ["cro_wallachian_m"]
             }
           }
@@ -452,7 +453,8 @@
         "general": [
           {
             "unit1": {
-              "units": ["cro_rotmistrz"]
+              "units": ["cro_rotmistrz"],
+              "is_toggle": true
             }
           }
         ],
@@ -463,15 +465,11 @@
             },
             "unit2": {
               "units": ["cro_cossack_style_m"]
-            }
-          }
-        ],
-        "additional2": [
-          {
-            "unit1": {
+            },
+            "unit3": {
               "units": ["cro_wallachian_s"]
             },
-            "unit2": {
+            "unit4": {
               "units": ["cro_wallachian_m"]
             }
           }
@@ -503,18 +501,6 @@
         "id": "additional_ammo",
         "max_amount": 1,
         "units_allowed": ["cro_piechota_lanowa_s", "cro_piechota_lanowa_m", "cro_light_artillery"]
-      },
-      {
-        "id": "kalkans",
-        "max_amount": 2
-      },
-      {
-        "id": "veterans",
-        "max_amount": 1
-      },
-      {
-        "id": "independent",
-        "max_amount": 1
       }
     ],
     "structure": {
@@ -621,7 +607,7 @@
         "general": [
           {
             "unit1": {
-              "units": ["cro_oberszter"]
+              "units": ["cro_colonel"]
             }
           }
         ],

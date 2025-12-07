@@ -49,7 +49,6 @@ const SupportUnitTile = ({
     const puCost = unitDef?.improvement_points_cost || unitDef?.pu_cost || 0;
     const costPU = puCost ? ` + ${puCost} PU` : '';
     const tooltip = locked && disabledReason ? disabledReason : (unitDef?.name || unitId);
-    
     const initials = getInitials(unitDef?.name || unitId);
     const placeholderStyle = getPlaceholderStyle(unitId, unitDef?.name);
 
@@ -120,15 +119,14 @@ const SupportUnitTile = ({
             <div className={styles.cardImagePlaceholder} style={placeholderStyle}>{initials}</div>
             <div className={styles.cardContent}>
                 <div className={styles.cardTitle}>{unitDef?.name || unitId}</div>
-                {locked && disabledReason && <div className={styles.tileError}>{disabledReason}</div>}
+                {locked && disabledReason && (<div style={{fontSize: 10, color: '#d32f2f', marginBottom: 4, lineHeight: 1.2, fontStyle: 'italic'}}>{disabledReason}</div>)}
                 <div className={styles.cardCost}>{unitDef?.cost || 0} PS{costPU}</div>
-                {isPurchased && availableRegiments.length > 0 && (
+                {isPurchased && (
                     <select className={styles.assignmentSelect} value={assignmentInfo?.positionKey || ""} onChange={handleAssignChange} onClick={(e) => e.stopPropagation()}>
                         <option value="">Przydziel</option>
                         {availableRegiments.map(r => (<option key={r.positionKey} value={r.positionKey}>{r.label}</option>))}
                     </select>
                 )}
-                {isPurchased && availableRegiments.length === 0 && <div className={styles.tileEmptyHint}>Tylko wsparcie dywizyjne</div>}
             </div>
         </div>
     );
@@ -167,7 +165,7 @@ const RegimentOptionTile = ({ optId, isActive, onClick, getRegimentDefinition, d
             <div className={styles.cardImagePlaceholder} style={placeholderStyle}>{initials}</div>
             <div className={styles.cardContent}>
                 <div className={styles.cardTitle}>{name}</div>
-                {isAllied && <div className={styles.allyLabel}>Sojusznik</div>}
+                {isAllied && (<div style={{ fontSize: 10, color: '#d35400', marginBottom: 4, fontWeight: 'bold', textTransform: 'uppercase' }}>Sojusznik</div>)}
                 <div className={styles.cardCost}>Bazowo: {cost} PS</div>
             </div>
         </div>
@@ -207,11 +205,10 @@ const RegimentBlock = ({ group, regiments, definitionOptions, mainForceKey, getR
         return (
             <div key={`${group}-${index}`} className={`${styles.regimentRow} ${isDisabled ? styles.disabled : ''}`}>
                 <div className={styles.regHeader}>
-                    <div className={styles.regHeaderLeft}>
+                    <div style={{flex: 1}}>
                         <div className={styles.regTopRow}>
                             <div className={styles.regTitle}>{label}</div>
                             {!isDisabled && !isNone && (<input className={styles.regNameInput} placeholder="Nazwa własna pułku..." value={regiment.customName || ""} onChange={(e) => onNameChange(group, index, e.target.value)} />)}
-                            {isDisabled && <span className={styles.disabledMsg}>Zablokowane</span>}
                         </div>
                         <div className={styles.optionsGrid}>
                             {options.filter(optId => optId !== IDS.NONE).map(optId => {
@@ -225,17 +222,17 @@ const RegimentBlock = ({ group, regiments, definitionOptions, mainForceKey, getR
                         </div>
                     </div>
                     {!isDisabled && !isNone && (
-                        <div className={styles.regHeaderRight}>
+                        <div style={{display:'flex', flexDirection: 'column', alignItems: 'flex-end', marginLeft: 20, minWidth: 150}}>
                             <div className={styles.regCost}>{stats.cost} pkt</div>
-                            <div className={styles.regStats}>
-                                <div className={styles.statItem}>Typ: {stats.regimentType}</div>
-                                <div className={styles.statItem}>Znaczniki Aktywacji: <strong>{finalActivations}</strong></div>
-                                <div className={styles.statItem}>Motywacja: <strong>{stats.motivation + (isMainForce?1:0)}</strong></div>
-                                {isVanguardGroup && (<><div className={styles.statVanguard}>Zwiad: <strong>{stats.recon}</strong></div><div className={styles.statAwareness}>Czujność: <strong>{stats.awareness}</strong></div></>)}
-                                {isMainForce && <div className={`${styles.statusLabel} ${styles.statusMainForce}`}>SIŁY GŁÓWNE</div>}
-                                {isRegimentAllied && <div className={`${styles.statusLabel} ${styles.statusAlly}`}>PUŁK SOJUSZNICZY</div>}
+                            <div className={styles.regStats} style={{marginTop: 4}}>
+                                <div style={{marginBottom: 4, color: '#444'}}>Typ: {stats.regimentType}</div>
+                                <div>Znaczniki Aktywacji: <strong>{finalActivations}</strong></div>
+                                <div>Motywacja: <strong>{stats.motivation + (isMainForce?1:0)}</strong></div>
+                                {isVanguardGroup && (<><div style={{marginTop: 4, color: '#d35400'}}>Zwiad: <strong>{stats.recon}</strong></div><div style={{color: '#d35400'}}>Czujność: <strong>{stats.awareness}</strong></div></>)}
+                                {isMainForce && (<div className={`${styles.statusLabel} ${styles.statusMainForce}`}>SIŁY GŁÓWNE</div>)}
+                                {isRegimentAllied && (<div className={`${styles.statusLabel} ${styles.statusAlly}`}>PUŁK SOJUSZNICZY</div>)}
                                 {isMainForceCandidate && !isMainForce && (<button onClick={() => onMainForceSelect(positionKey)} className={styles.makeMainForceBtn}>★ Ustaw jako Siły Główne</button>)}
-                                {puUsed > 0 && <div className={styles.puUsage}>Wykorzystane PU: <strong>{puUsed}</strong></div>}
+                                {puUsed > 0 && (<div style={{marginTop: 6, color: '#2e7d32', borderTop: '1px dashed #ccc', paddingTop: 4, width: '100%', textAlign: 'right'}}>Wykorzystane PU: <strong>{puUsed}</strong></div>)}
                                 {canEdit && (<button className={styles.editBtn} onClick={() => onOpenEditor(group, index)}>Konfiguruj Pułk ›</button>)}
                             </div>
                         </div>
@@ -292,10 +289,20 @@ export default function RegimentSelector(props) {
         return 0;
     }, [state.mainForceKey, configuredDivision]);
 
+    // ZMIANA: POPRAWIONA FUNKCJA isAllied
     const isAllied = (regId) => {
         if (regId === IDS.NONE) return false;
-        return faction.regiments && !faction.regiments[regId];
+        // 1. Jeśli jest na liście pułków frakcji -> Nie jest sojusznikiem (jest rodzimy)
+        if (faction.regiments && faction.regiments[regId]) return false;
+        
+        // 2. Jeśli pochodzi z frakcji "mercenaries" -> Nie jest sojusznikiem (jest najemny)
+        const def = getRegimentDefinition(regId);
+        if (def && def._sourceFaction === 'mercenaries') return false;
+
+        // 3. W przeciwnym razie -> Jest sojusznikiem
+        return true;
     };
+
     const currentAlliesCount = useMemo(() => {
         const all = [...vanguardRegiments, ...baseRegiments, ...additionalRegiments];
         return all.filter(r => r.id !== IDS.NONE && isAllied(r.id)).length;
@@ -342,10 +349,12 @@ export default function RegimentSelector(props) {
 
     return (
         <div className={styles.container}>
+            {/* ... (Reszta renderowania bez zmian) ... */}
+            {/* Pamiętaj, aby wkleić resztę returna z poprzedniej wersji (header, inputs, summaryCard, sections) */}
             <div className={styles.header}>
                 <button className={styles.backBtn} onClick={onBack}>← Powrót do Frakcji</button>
                 {hasCriticalErrors ? (
-                    <div className={styles.disabledPdfBtn}>🚫 Popraw błędy, aby eksportować</div>
+                    <div style={{padding: '10px 20px', background: '#e0e0e0', color: '#666', borderRadius: 5, fontWeight: 'bold', fontSize: 13, cursor: 'not-allowed'}}>🚫 Popraw błędy, aby eksportować</div>
                 ) : (
                     <PDFDownloadLink document={<ArmyListDocument divisionDefinition={divisionDefinition} configuredDivision={configuredDivision} faction={faction} calculateRegimentStats={calcStatsWrapper} mainForceKey={state.mainForceKey} totalDivisionCost={totalDivisionCost} remainingImprovementPoints={remainingImprovementPoints} unitsMap={unitsMap} getRegimentDefinition={getRegimentDefinition} playerName={state.playerName} divisionCustomName={state.divisionCustomName} />} fileName={`Rozpiska_${state.divisionCustomName || 'Armia'}.pdf`} className={styles.pdfBtn}>
                         {({ loading }) => loading ? 'Generowanie...' : 'Eksportuj do PDF 🖨️'}
@@ -368,15 +377,15 @@ export default function RegimentSelector(props) {
                     <div className={`${styles.summaryPoints} ${remainingImprovementPoints < 0 ? styles.pointsError : styles.pointsOk}`}><div>Punkty Ulepszeń:</div><div style={{fontSize: 24}}>{remainingImprovementPoints} / {improvementPointsLimit}</div></div>
                 </div>
 
-                {showRules && rulesDescriptions && rulesDescriptions.length > 0 && (<div className={styles.rulesContainer}>{rulesDescriptions.map(rule => (<div key={rule.id} className={styles.ruleLine}><strong>• {rule.title}: </strong> {rule.description}</div>))}</div>)}
+                {showRules && rulesDescriptions && rulesDescriptions.length > 0 && (<div className={styles.rulesContainer}>{rulesDescriptions.map(rule => (<div key={rule.id} style={{fontSize: 13, marginBottom: 8, lineHeight: 1.4, whiteSpace: 'pre-line'}}><strong>• {rule.title}: </strong> {rule.description}</div>))}</div>)}
 
                 <div className={styles.summaryInfoRow}>
-                    <div className={styles.summarySection}>
+                    <div className={styles.summarySection} style={{marginTop: 0, borderTop: 'none'}}>
                          <div className={styles.summarySectionTitle}>Dowódca Dywizji</div>
-                         {generalDef ? (<div className={styles.commanderRow}><span className={styles.commanderName}>{generalDef.name}</span><span className={styles.commanderStats}>{generalDef.orders} Rozkazy | {generalDef.activations} Akt.</span></div>) : (<div className={styles.noCommanderMsg}>Nie wybrano dowódcy</div>)}
+                         {generalDef ? (<div className={styles.commanderRow}><span className={styles.commanderName}>{generalDef.name}</span><span className={styles.commanderStats}>{generalDef.orders} Rozkazy | {generalDef.activations} Akt.</span></div>) : (<div style={{fontSize: 13, color: '#999', fontStyle:'italic'}}>Nie wybrano dowódcy</div>)}
                     </div>
                     {unassignedSupport.length > 0 && (
-                        <div className={styles.summarySection}>
+                        <div className={styles.summarySection} style={{marginTop: 0, borderTop: 'none'}}>
                             <div className={styles.summarySectionTitle}>Wsparcie Dywizyjne (Nieprzypisane)</div>
                             <div className={styles.unassignedList}>{unassignedSupport.map((su, idx) => (<div key={idx} className={styles.unassignedBadge}><span>• {unitsMap[su.id]?.name || su.id}</span><span style={{fontWeight:'bold'}}>({unitsMap[su.id]?.cost || 0} pkt)</span></div>))}</div>
                         </div>

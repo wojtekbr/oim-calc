@@ -136,7 +136,7 @@ export const useRegimentSelectorLogic = ({
         optionalEnabled: {}, optionalSelections: {}, improvements: {}, regimentImprovements: [], isVanguard: false 
     };
 
-    const def = getRegimentDefinition(newRegimentId);
+    const def = getRegimentDefinition(newRegimentId, faction.meta.key);
     if (def && def.structure) {
         if (def.structure.base) {
             Object.entries(def.structure.base).forEach(([slotKey, pods]) => {
@@ -235,7 +235,7 @@ export const useRegimentSelectorLogic = ({
 
   const mainForceKey = useMemo(() => {
      if (!configuredDivision) return null;
-     return calculateMainForceKey(configuredDivision, unitsMap, faction, getRegimentDefinition, improvements);
+     return calculateMainForceKey(configuredDivision, unitsMap, faction, (id) => getRegimentDefinition(id, faction.meta.key), improvements);
   }, [configuredDivision, faction, getRegimentDefinition, improvements, unitsMap]);
 
   return {

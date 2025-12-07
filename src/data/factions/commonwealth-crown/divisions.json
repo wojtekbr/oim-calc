@@ -10,7 +10,7 @@
       },
       {
         "id": "panowie_bracia",
-        "counting_regiment_ids": ["cro_crown_cavalry","cro_light_cavalry_vanguard","cro_crown_cavalry_vanguard","cro_levy_of_nobility"],
+        "counting_regiment_ids": ["cro_crown_cavalry","cro_light_cavalry_vanguard","cro_crown_cavalry_vanguard","cro_levy_of_nobility","cro_elite_crown_cavalry"],
         "excluded_regiment_ids": ["cro_levy_of_nobility"]
       },
       {

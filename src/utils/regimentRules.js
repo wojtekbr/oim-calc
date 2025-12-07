@@ -104,6 +104,10 @@ export const REGIMENT_RULES_DEFINITIONS = {
   "hus_m_req_pospolite_l_x2": {
     title: "Wymagania Husarskie M",
     description: "Żeby wystawić Pospolite Ruszenie po Husarsku w rozmiarze M należy wystawić przynajmniej 2 jednostki Pospolitego Ruszenia w rozmiarze L (M)."
+  },
+  "roznorodne_wyposazenie": {
+    title: "Różnorodne wyposażenie",
+    description: "Zasada specjalna opisana w podręczniku (1)."
   }
 };
 

@@ -155,7 +155,7 @@ function AppContent() {
         if (!configuredDivision || editingRegimentGroup === null || editingRegimentIndex === null) return null;
         const regimentStructure = configuredDivision[editingRegimentGroup][editingRegimentIndex];
         
-        const regDef = getRegimentDefinition(regimentStructure.id);
+        const regDef = getRegimentDefinition(regimentStructure.id, selectedFactionKey);
         if (!regDef) return null;
 
         return {
