@@ -125,29 +125,23 @@ export const useRegimentSelectorLogic = ({
     });
   };
 
-  // NOWA FUNKCJA: Obsługa dynamicznego dodawania/usuwania pułków w Additional
-  const handleToggleAdditionalRegiment = (regimentId, maxAmount) => {
+  // --- ZMIANA: Obsługa sourceIndex ("slotów") ---
+  const handleToggleAdditionalRegiment = (regimentId, sourceIndex, maxAmount) => {
       setConfiguredDivision(prev => {
           const currentAdditional = [...prev.additional];
           
-          // Sprawdź czy już mamy ten pułk
-          const existingIndex = currentAdditional.findIndex(r => r.id === regimentId);
+          // Sprawdzamy, czy w tablicy jest już pułk powiązany z tym konkretnym kafelkiem (sourceIndex)
+          const existingIndex = currentAdditional.findIndex(r => r.sourceIndex === sourceIndex);
 
           if (existingIndex !== -1) {
-              // JEŚLI JEST -> USUŃ (Toggle OFF)
-              // Uwaga: Usuwanie zmienia indeksy. Musimy zaktualizować indeksy w pozostałych obiektach
-              // oraz uważać na przypisania wsparcia (które bazują na indeksach).
-              
-              // 1. Usuwamy
+              // JEŚLI JEST -> USUŃ (Sprzedaj ten konkretny)
               currentAdditional.splice(existingIndex, 1);
               
-              // 2. Przeliczamy indeksy
+              // Aktualizujemy indeksy tablicowe (dla positionKey)
+              // sourceIndex pozostaje w obiektach bez zmian, bo on wskazuje na pochodzenie z puli!
               const updatedAdditional = currentAdditional.map((r, idx) => ({ ...r, index: idx }));
               
-              // 3. Czyścimy wsparcie przypisane do usuniętego indeksu i aktualizujemy resztę?
-              // To jest skomplikowane przy zmianie indeksów.
-              // UPROSZCZENIE: Przy usuwaniu pułku z puli, odpinamy wsparcie od WSZYSTKICH dodatkowych pułków, 
-              // żeby uniknąć błędnych przypisań. (Można to zoptymalizować, ale to bezpieczniejsza opcja).
+              // Czyścimy wsparcie (bezpieczniej odpiąć wszystko z Additional przy zmianie struktury)
               const newSupportUnits = prev.supportUnits.map(su => {
                   if (su.assignedTo && su.assignedTo.group === GROUP_TYPES.ADDITIONAL) {
                       return { ...su, assignedTo: null };
@@ -158,7 +152,7 @@ export const useRegimentSelectorLogic = ({
               return { ...prev, additional: updatedAdditional, supportUnits: newSupportUnits };
 
           } else {
-              // JEŚLI NIE MA -> DODAJ (Toggle ON)
+              // JEŚLI NIE MA -> DODAJ (Kup ten konkretny)
               if (currentAdditional.length >= maxAmount) {
                   alert(`Osiągnięto limit ${maxAmount} pułków dodatkowych.`);
                   return prev;
@@ -188,8 +182,9 @@ export const useRegimentSelectorLogic = ({
 
               const newRegiment = {
                   group: GROUP_TYPES.ADDITIONAL,
-                  index: currentAdditional.length, // Nowy indeks na końcu
+                  index: currentAdditional.length, // Nowy indeks w tablicy
                   id: regimentId,
+                  sourceIndex: sourceIndex, // KLUCZOWE: Zapamiętujemy, z którego kafelka pochodzi
                   customName: "",
                   config: newConfig
               };
@@ -200,7 +195,7 @@ export const useRegimentSelectorLogic = ({
   };
 
   const handleRegimentChange = (groupKey, index, newRegimentId) => {
-    // Ta funkcja nadal obsługuje zmiany w VANGUARD i BASE (stary styl slotów)
+    // Obsługa starego typu (sloty vanguard/base)
     const tempDivision = JSON.parse(JSON.stringify(configuredDivision));
     const groupArr = tempDivision[groupKey];
     
@@ -306,7 +301,7 @@ export const useRegimentSelectorLogic = ({
     handlers: {
       handleBuySupportUnit, handleAssignSupportUnit, handleRemoveSupportUnit,
       handleRegimentChange, handleRegimentNameChange, handleGeneralChange, handleMainForceSelect,
-      handleToggleAdditionalRegiment // Nowy handler
+      handleToggleAdditionalRegiment
     }
   };
 };

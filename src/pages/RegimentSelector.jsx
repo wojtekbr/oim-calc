@@ -226,10 +226,7 @@ const RegimentOptionTile = ({ optId, isActive, onClick, getRegimentDefinition, d
     const def = getRegimentDefinition(optId);
     const name = def?.name || optId;
     const cost = def?.base_cost || 0;
-    
-    // Obliczamy dynamiczny koszt PU
-    let puCost = def?.improvement_points_cost || 0;
-    // (Można tu w przyszłości dodać logikę dywizyjną, jeśli chcemy wyświetlać ją na kafelku)
+    const puCost = def?.improvement_points_cost || 0;
 
     const initials = getInitials(name);
     const placeholderStyle = getPlaceholderStyle(optId, name);
@@ -262,7 +259,6 @@ const RegimentOptionTile = ({ optId, isActive, onClick, getRegimentDefinition, d
     );
 };
 
-// --- Wybrany Pułk (Edytowalny pasek) ---
 const SelectedRegimentRow = ({ 
     group, index, regiment, mainForceKey, getRegimentDefinition, calculateStats, 
     onNameChange, onOpenEditor, onMainForceSelect, supportUnits, unitsMap, 
@@ -314,12 +310,12 @@ const SelectedRegimentRow = ({
     );
 };
 
-// Stary RegimentBlock dla kompatybilności z VANGUARD i BASE
 const RegimentBlock = ({ group, regiments, definitionOptions, mainForceKey, getRegimentDefinition, calculateStats, onNameChange, onRegimentChange, onOpenEditor, onMainForceSelect, supportUnits, unitsMap, configuredDivision, divisionDefinition, currentMainForceCost, isAllied, currentAlliesCount, calculateRegimentPU }) => {
     return regiments.map((regiment, index) => {
         const options = definitionOptions[index].options;
         const currentRegimentId = regiment.id;
         const positionKey = `${group}/${index}`;
+        
         const handleTileClick = (optId, isBlocked) => {
             if (isBlocked) return;
             let newId = optId;
@@ -391,7 +387,7 @@ export default function RegimentSelector(props) {
     const hasCriticalErrors = allValidationErrors.length > 0;
 
     const divisionType = calculateDivisionType(configuredDivision, unitsMap, getRegimentDefinition, improvements);
-    const rulesDescriptions = getDivisionRulesDescriptions(divisionDefinition, unitsMap, getRegimentDefinition);
+    const rulesDescriptions = getDivisionRulesDescriptions(divisionDefinition, unitsMap, getRegimentDefinition, improvements);
     const { vanguard: vanguardRegiments, base: baseRegiments, additional: additionalRegiments, supportUnits } = configuredDivision;
     const generalId = configuredDivision.general;
     const generalDef = generalId ? unitsMap[generalId] : null;
@@ -414,16 +410,12 @@ export default function RegimentSelector(props) {
         return 0;
     }, [state.mainForceKey, configuredDivision]);
 
+    // ZMIANA: Logika sojusznika (z obsługą najemników)
     const isAllied = (regId) => {
         if (regId === IDS.NONE) return false;
-        // 1. Jeśli jest na liście pułków frakcji -> Nie jest sojusznikiem (jest rodzimy)
         if (faction.regiments && faction.regiments[regId]) return false;
-        
-        // 2. Jeśli pochodzi z frakcji "mercenaries" -> Nie jest sojusznikiem (jest najemny)
         const def = getRegimentDefinition(regId);
         if (def && def._sourceFaction === 'mercenaries') return false;
-
-        // 3. W przeciwnym razie -> Jest sojusznikiem
         return true;
     };
 
@@ -493,29 +485,60 @@ export default function RegimentSelector(props) {
             };
         });
     }, [configuredDivision, state.mainForceKey, improvements, supportUnits]);
-    
+
     return (
         <div className={styles.container}>
             <div className={styles.header}>
                 <button className={styles.backBtn} onClick={onBack}>← Powrót do Frakcji</button>
-
-                {/* ZMIANA: Dodano nazwę dywizji */}
+                
+                {/* Nazwa dywizji */}
                 <div style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a1a' }}>
                     {divisionDefinition.name}
                 </div>
 
                 {hasCriticalErrors ? (
-                    <div className={styles.disabledPdfBtn}>🚫 Popraw błędy, aby eksportować</div>
+                    <div style={{padding: '10px 20px', background: '#e0e0e0', color: '#666', borderRadius: 5, fontWeight: 'bold', fontSize: 13, cursor: 'not-allowed'}}>
+                        🚫 Popraw błędy, aby eksportować
+                    </div>
                 ) : (
-                    <PDFDownloadLink document={<ArmyListDocument divisionDefinition={divisionDefinition} configuredDivision={configuredDivision} faction={faction} calculateRegimentStats={calcStatsWrapper} mainForceKey={state.mainForceKey} totalDivisionCost={totalDivisionCost} remainingImprovementPoints={remainingImprovementPoints} unitsMap={unitsMap} getRegimentDefinition={getRegimentDefinition} playerName={state.playerName} divisionCustomName={state.divisionCustomName} />} fileName={`Rozpiska_${state.divisionCustomName || 'Armia'}.pdf`} className={styles.pdfBtn}>
+                    <PDFDownloadLink
+                        document={
+                            <ArmyListDocument
+                                divisionDefinition={divisionDefinition}
+                                configuredDivision={configuredDivision}
+                                faction={faction}
+                                calculateRegimentStats={calcStatsWrapper}
+                                mainForceKey={state.mainForceKey}
+                                totalDivisionCost={totalDivisionCost}
+                                remainingImprovementPoints={remainingImprovementPoints}
+                                unitsMap={unitsMap}
+                                getRegimentDefinition={getRegimentDefinition}
+                                playerName={state.playerName}
+                                divisionCustomName={state.divisionCustomName}
+                            />
+                        }
+                        fileName={`Rozpiska_${state.divisionCustomName || 'Armia'}.pdf`}
+                        className={styles.pdfBtn}
+                    >
                         {({ loading }) => loading ? 'Generowanie...' : 'Eksportuj do PDF 🖨️'}
                     </PDFDownloadLink>
                 )}
             </div>
 
             <div className={styles.inputsRow}>
-                <input className={styles.inputField} placeholder="Nazwa Gracza" value={state.playerName} onChange={e => state.setPlayerName(e.target.value)} />
-                <input className={styles.inputField} placeholder="Nazwa Własna Dywizji" value={state.divisionCustomName} onChange={e => state.setDivisionCustomName(e.target.value)} style={{ flex: 2 }} />
+                <input 
+                    className={styles.inputField} 
+                    placeholder="Nazwa Gracza" 
+                    value={state.playerName} 
+                    onChange={e => state.setPlayerName(e.target.value)} 
+                />
+                <input 
+                    className={styles.inputField} 
+                    placeholder="Nazwa Własna Dywizji" 
+                    value={state.divisionCustomName} 
+                    onChange={e => state.setDivisionCustomName(e.target.value)} 
+                    style={{ flex: 2 }}
+                />
             </div>
 
             {/* SCALONE PODSUMOWANIE */}
@@ -527,15 +550,27 @@ export default function RegimentSelector(props) {
                         <button className={styles.rulesToggleBtn} onClick={() => setShowRules(!showRules)}>{showRules ? "▼ Ukryj zasady specjalne" : "▶ Pokaż zasady specjalne"}
                         </button>
                     </div>
-                    <div className={`${styles.summaryPoints} ${remainingImprovementPoints < 0 ? styles.pointsError : styles.pointsOk}`}><div>Punkty Ulepszeń:</div><div style={{fontSize: 24}}>{remainingImprovementPoints} / {improvementPointsLimit}</div></div>
+                    
+                    <div className={`${styles.summaryPoints} ${remainingImprovementPoints < 0 ? styles.pointsError : styles.pointsOk}`}>
+                        <div>Punkty Ulepszeń:</div>
+                        <div style={{fontSize: 24}}>{remainingImprovementPoints} / {improvementPointsLimit}</div>
+                    </div>
                 </div>
 
-                {showRules && rulesDescriptions && rulesDescriptions.length > 0 && (<div className={styles.rulesContainer}>{rulesDescriptions.map(rule => (<div key={rule.id} className={styles.ruleLine}><strong>• {rule.title}: </strong> {rule.description}</div>))}</div>)}
+                {showRules && rulesDescriptions && rulesDescriptions.length > 0 && (
+                    <div className={styles.rulesContainer}>
+                        {rulesDescriptions.map(rule => (
+                            <div key={rule.id} style={{fontSize: 13, marginBottom: 8, lineHeight: 1.4, whiteSpace: 'pre-line'}}>
+                                <strong>• {rule.title}: </strong> {rule.description}
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 <div className={styles.summaryInfoRow}>
                     <div className={styles.summarySection} style={{marginTop: 0, borderTop: 'none'}}>
                          <div className={styles.summarySectionTitle}>Dowódca Dywizji</div>
-                         {generalDef ? (<div className={styles.commanderRow}><span className={styles.commanderName}>{generalDef.name}</span><span className={styles.commanderStats}>{generalDef.orders} Rozkazy | {generalDef.activations} Akt.</span></div>) : (<div className={styles.noCommanderMsg}>Nie wybrano dowódcy</div>)}
+                         {generalDef ? (<div className={styles.commanderRow}><span className={styles.commanderName}>{generalDef.name}</span><span className={styles.commanderStats}>{generalDef.orders} Rozkazy | {generalDef.activations} Akt.</span></div>) : (<div style={{fontSize: 13, color: '#999', fontStyle:'italic'}}>Nie wybrano dowódcy</div>)}
                     </div>
                     {unassignedSupport.length > 0 && (
                         <div className={styles.summarySection} style={{marginTop: 0, borderTop: 'none'}}>
@@ -575,8 +610,13 @@ export default function RegimentSelector(props) {
                                             </div>
                                         ))}
                                         
-                                        {reg.regImps.length > 0 && (<div className={styles.regImpsRow}>Ulepszenia: {reg.regImps.join(', ')}</div>)}
+                                        {reg.regImps.length > 0 && (
+                                            <div className={styles.regImpsRow}>
+                                                Ulepszenia: {reg.regImps.join(', ')}
+                                            </div>
+                                        )}
                                     </div>
+
                                 </div>
                             ))}
                         </div>
@@ -584,19 +624,37 @@ export default function RegimentSelector(props) {
                 )}
             </div>
 
-            {hasCriticalErrors && (<div className={styles.errorContainer}><h4 className={styles.errorHeader}>⚠️ Błędy w konstrukcji dywizji:</h4><ul className={styles.errorList}>{allValidationErrors.map((err, idx) => (<li key={idx} className={styles.errorItem}>{err}</li>))}</ul></div>)}
+            {hasCriticalErrors && (
+                <div style={{ marginBottom: 20, padding: 15, backgroundColor: '#ffebee', border: '1px solid #ef5350', borderRadius: 8, color: '#c62828' }}>
+                    <h4 style={{marginTop: 0, marginBottom: 8}}>⚠️ Błędy w konstrukcji dywizji:</h4>
+                    <ul style={{margin: 0, paddingLeft: 20}}>
+                        {allValidationErrors.map((err, idx) => (
+                            <li key={idx} style={{marginBottom: 4, whiteSpace: 'pre-line'}}>{err}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
 
             {divisionDefinition.general && divisionDefinition.general.length > 0 && (
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>Wybór Dowódcy</h3>
-                    <div className={styles.optionsGrid}>{divisionDefinition.general.map(genId => (<GeneralOptionTile key={genId} unitId={genId} unitDef={unitsMap[genId]} isActive={configuredDivision.general === genId} onClick={() => handlers.handleGeneralChange(genId)} />))}</div>
+                    <div className={styles.optionsGrid}>
+                        {divisionDefinition.general.map(genId => (
+                            <GeneralOptionTile 
+                                key={genId} 
+                                unitId={genId} 
+                                unitDef={unitsMap[genId]}
+                                isActive={configuredDivision.general === genId}
+                                onClick={() => handlers.handleGeneralChange(genId)}
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
 
             <div className={styles.section}>
                 <h3 className={styles.sectionTitle}>Dostępne Wsparcie</h3>
                 <div className={styles.supportColumns}>
-                    {/* KOLUMNA 1: Artyleria Dywizyjna */}
                     <div>
                         <div className={styles.supportGroupTitle}>Artyleria Dywizyjna</div>
                         <div className={styles.supportGrid}>
@@ -651,7 +709,6 @@ export default function RegimentSelector(props) {
                         </div>
                     </div>
 
-                    {/* KOLUMNA 2: Elementy Dodatkowe */}
                     <div>
                         <div className={styles.supportGroupTitle}>Elementy Dodatkowe</div>
                         <div className={styles.supportGrid}>
@@ -709,12 +766,11 @@ export default function RegimentSelector(props) {
             </div>
 
             {/* SEKCJE PUŁKÓW */}
-            
             {vanguardRegiments && vanguardRegiments.length > 0 && (
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>Straż Przednia</h3>
                     <div className={styles.regimentsGrid}>
-                        <RegimentBlock group={GROUP_TYPES.VANGUARD} regiments={configuredDivision.vanguard} definitionOptions={divisionDefinition.vanguard} mainForceKey={state.mainForceKey} getRegimentDefinition={getRegimentDefinition} calculateStats={calcStatsWrapper} onNameChange={handlers.handleRegimentNameChange} onRegimentChange={handlers.handleRegimentChange} onOpenEditor={props.onOpenRegimentEditor} onMainForceSelect={handlers.handleMainForceSelect} supportUnits={supportUnits} unitsMap={unitsMap} configuredDivision={configuredDivision} divisionDefinition={divisionDefinition} currentMainForceCost={currentMainForceCost} isAllied={isAllied} currentAlliesCount={currentAlliesCount} calculateRegimentPU={calcPuWrapper} />
+                        <RegimentBlock group={GROUP_TYPES.VANGUARD} regiments={configuredDivision.vanguard} definitionOptions={divisionDefinition.vanguard} mainForceKey={state.mainForceKey} getRegimentDefinition={getRegimentDefinition} calculateStats={calcStatsWrapper} onNameChange={handlers.handleRegimentNameChange} onRegimentChange={handlers.handleRegimentChange} onOpenEditor={props.onOpenRegimentEditor} onMainForceSelect={handlers.handleMainForceSelect} supportUnits={configuredDivision.supportUnits} unitsMap={unitsMap} configuredDivision={configuredDivision} divisionDefinition={divisionDefinition} currentMainForceCost={currentMainForceCost} isAllied={isAllied} currentAlliesCount={currentAlliesCount} calculateRegimentPU={calcPuWrapper} />
                     </div>
                 </div>
             )}
@@ -722,7 +778,7 @@ export default function RegimentSelector(props) {
             <div className={styles.section}>
                 <h3 className={styles.sectionTitle}>Podstawa Dywizji</h3>
                 <div className={styles.regimentsGrid}>
-                    <RegimentBlock group={GROUP_TYPES.BASE} regiments={configuredDivision.base} definitionOptions={divisionDefinition.base} mainForceKey={state.mainForceKey} getRegimentDefinition={getRegimentDefinition} calculateStats={calcStatsWrapper} onNameChange={handlers.handleRegimentNameChange} onRegimentChange={handlers.handleRegimentChange} onOpenEditor={props.onOpenRegimentEditor} onMainForceSelect={handlers.handleMainForceSelect} supportUnits={supportUnits} unitsMap={unitsMap} configuredDivision={configuredDivision} divisionDefinition={divisionDefinition} currentMainForceCost={currentMainForceCost} isAllied={isAllied} currentAlliesCount={currentAlliesCount} calculateRegimentPU={calcPuWrapper} />
+                    <RegimentBlock group={GROUP_TYPES.BASE} regiments={configuredDivision.base} definitionOptions={divisionDefinition.base} mainForceKey={state.mainForceKey} getRegimentDefinition={getRegimentDefinition} calculateStats={calcStatsWrapper} onNameChange={handlers.handleRegimentNameChange} onRegimentChange={handlers.handleRegimentChange} onOpenEditor={props.onOpenRegimentEditor} onMainForceSelect={handlers.handleMainForceSelect} supportUnits={configuredDivision.supportUnits} unitsMap={unitsMap} configuredDivision={configuredDivision} divisionDefinition={divisionDefinition} currentMainForceCost={currentMainForceCost} isAllied={isAllied} currentAlliesCount={currentAlliesCount} calculateRegimentPU={calcPuWrapper} />
                 </div>
             </div>
             
@@ -737,8 +793,11 @@ export default function RegimentSelector(props) {
                         </div>
                         
                         <div className={styles.optionsGrid}>
-                            {additionalPool.map(regId => {
-                                const isSelected = configuredDivision.additional.some(r => r.id === regId);
+                            {additionalPool.map((regId, idx) => {
+                                // ZMIANA: Sprawdzamy, czy w naszych wybranych pułkach jest ktoś,
+                                // kto "pochodzi" z tego konkretnego kafelka (sourceIndex == idx).
+                                const isSelected = configuredDivision.additional.some(r => r.sourceIndex === idx);
+                                
                                 const isLimitReached = configuredDivision.additional.length >= additionalMax;
                                 const isBlocked = !isSelected && isLimitReached;
                                 const isOptionAlly = isAllied(regId);
@@ -746,13 +805,14 @@ export default function RegimentSelector(props) {
 
                                 return (
                                     <RegimentOptionTile 
-                                        key={regId} 
+                                        key={`${regId}-${idx}`} 
                                         optId={regId} 
                                         isActive={isSelected} 
                                         disabled={isBlocked || (isAllyBlocked)}
                                         isAllied={isOptionAlly}
                                         divisionDefinition={divisionDefinition}
-                                        onClick={() => handlers.handleToggleAdditionalRegiment(regId, additionalMax)}
+                                        // ZMIANA: Przekazujemy idx jako sourceIndex
+                                        onClick={() => handlers.handleToggleAdditionalRegiment(regId, idx, additionalMax)}
                                         getRegimentDefinition={getRegimentDefinition} 
                                     />
                                 );
@@ -783,7 +843,7 @@ export default function RegimentSelector(props) {
                     </div>
                 ) : (
                     <div className={styles.regimentsGrid}>
-                        <RegimentBlock group={GROUP_TYPES.ADDITIONAL} regiments={additionalRegiments} definitionOptions={divisionDefinition.additional} mainForceKey={state.mainForceKey} getRegimentDefinition={getRegimentDefinition} calculateStats={calcStatsWrapper} onNameChange={handlers.handleRegimentNameChange} onRegimentChange={handlers.handleRegimentChange} onOpenEditor={props.onOpenRegimentEditor} onMainForceSelect={handlers.handleMainForceSelect} supportUnits={configuredDivision.supportUnits} unitsMap={unitsMap} configuredDivision={configuredDivision} divisionDefinition={divisionDefinition} currentMainForceCost={state.currentMainForceCost} isAllied={isAllied} currentAlliesCount={currentAlliesCount} calculateRegimentPU={calcPuWrapper} />
+                        <RegimentBlock group={GROUP_TYPES.ADDITIONAL} regiments={configuredDivision.additional} definitionOptions={divisionDefinition.additional} mainForceKey={state.mainForceKey} getRegimentDefinition={getRegimentDefinition} calculateStats={calcStatsWrapper} onNameChange={handlers.handleRegimentNameChange} onRegimentChange={handlers.handleRegimentChange} onOpenEditor={props.onOpenRegimentEditor} onMainForceSelect={handlers.handleMainForceSelect} supportUnits={configuredDivision.supportUnits} unitsMap={unitsMap} configuredDivision={configuredDivision} divisionDefinition={divisionDefinition} currentMainForceCost={state.currentMainForceCost} isAllied={isAllied} currentAlliesCount={currentAlliesCount} calculateRegimentPU={calcPuWrapper} />
                     </div>
                 )}
             </div>
