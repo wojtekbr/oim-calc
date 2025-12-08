@@ -61,13 +61,21 @@ const createDefaultRegiments = (divisionDefinition, getRegimentDefinition) => {
         createRegimentWithDefaults(GROUP_TYPES.BASE, index, group.options[0])
     );
 
-    const additionalRegiments = divisionDefinition.additional.map((group, index) => ({
-        group: GROUP_TYPES.ADDITIONAL,
-        index,
-        id: IDS.NONE,
-        customName: "",
-        config: {},
-    }));
+    // ZMIANA: Obsługa nowej struktury additional_regiments
+    let additionalRegiments = [];
+    if (divisionDefinition.additional_regiments) {
+        // Nowa logika: Startujemy z pustą listą (użytkownik dodaje z puli)
+        additionalRegiments = [];
+    } else if (divisionDefinition.additional) {
+        // Stara logika: Startujemy ze slotami "none"
+        additionalRegiments = divisionDefinition.additional.map((group, index) => ({
+            group: GROUP_TYPES.ADDITIONAL,
+            index,
+            id: IDS.NONE,
+            customName: "",
+            config: {},
+        }));
+    }
 
     const defaultGeneral = divisionDefinition.general && divisionDefinition.general.length > 0 
         ? divisionDefinition.general[0] 
@@ -79,7 +87,7 @@ const createDefaultRegiments = (divisionDefinition, getRegimentDefinition) => {
         base: baseRegiments,
         additional: additionalRegiments,
         supportUnits: [],
-        divisionDefinition: divisionDefinition // To jest kopia z momentu utworzenia
+        divisionDefinition: divisionDefinition
     };
 };
 
@@ -155,14 +163,13 @@ function AppContent() {
         if (!configuredDivision || editingRegimentGroup === null || editingRegimentIndex === null) return null;
         const regimentStructure = configuredDivision[editingRegimentGroup][editingRegimentIndex];
         
-        // Używamy helpera z obsługą frakcji (dla najemników)
         const regDef = getRegimentDefinition(regimentStructure.id, selectedFactionKey);
         if (!regDef) return null;
 
         return {
             ...regDef,
             id: regimentStructure.id,
-            // Nie przekazujemy tu divisionDefinition, robimy to przez props
+            divisionDefinition: selectedDivisionDefinition,
         };
     };
 
@@ -209,7 +216,6 @@ function AppContent() {
                 <RegimentEditor
                     faction={selectedFaction} 
                     regiment={getEditingRegiment()}
-                    // KLUCZOWE: Przekazujemy aktualną, świeżą definicję dywizji
                     divisionDefinition={selectedDivisionDefinition}
                     onBack={backToSelector}
                     configuredDivision={configuredDivision}

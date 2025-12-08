@@ -59,24 +59,17 @@
       { "options": ["cro_crown_cavalry"] },
       { "options": ["cro_crown_cavalry","cro_elite_crown_cavalry"] }
     ],
-    "additional": [
-      {
-        "options": [
-          "none",
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
           "cro_crown_cavalry",
           "cro_volunteers",
           "mrc_reiters",
-          "cro_levy_of_nobility"
-        ]
-      },
-      {
-        "options": [
-          "none",
+          "cro_levy_of_nobility",
           "cro_crown_cavalry",
           "cro_polish_dragoons",
           "mrc_infantry"
         ]
-      }
-    ]
+    }
   }
 }

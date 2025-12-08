@@ -93,17 +93,17 @@
       { "options": ["ott_sipahi_europ","ott_province_eur"] },
       { "options": ["ott_sipahi_europ", "ott_sipahi_albanian"] }
     ],
-    "additional": [
-      {
-        "options": [
+
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
           "none",
           "ott_janissary",
           "ott_sipahi_europ",
+          "ott_sipahi_europ",
           "tat_czambul_mirzy"
         ]
-      },
-      { "options": ["none", "ott_sipahi_europ","tat_czambul_mirzy"] }
-    ]
+    }
   },
   "ott_anatolian": {
     "name": "Armia Ejaletu Anatolijskiego",
@@ -215,17 +215,16 @@
       { "options": ["ott_sandzak_ana","ott_province_ana"] },
       { "options": ["ott_sandzak_ana"] }
     ],
-    "additional": [
-      {
-        "options": [
-          "none",
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
           "ott_janissary",
-          "ott_sipahi_europ",
+          "ott_janissary_egypt",
+          "ott_sandzak_ana",
+          "ott_sandzak_ana",
           "tat_czambul_mirzy"
         ]
-      },
-      { "options": ["none", "ott_janissary_egypt", "ott_sandzak_ana","tat_czambul_mirzy"] }
-    ]
+    }
   },
   "ott_grand_vezir": {
     "name": "Armia Wielkiego Wezyra 1663-64",
@@ -284,6 +283,12 @@
         "regiment_ids": ["ott_janissary"],
         "improvement_id": "elite_janissaries",
         "max_amount": 1
+      },
+      {
+        "id": "extra_regiment_cost",
+        "regiment_ids": ["ott_sipahi_albanian"],
+        "pu_cost": 3,
+        "ps_cost": 0
       }
     ],
     "additional_units": [
@@ -346,16 +351,9 @@
       { "options": ["ott_sipahi_kapikulu","ott_sipahi_europ","ott_sandzak_ana"] },
       { "options": ["ott_janissary"] }
     ],
-    "additional": [
-      {
-        "options": [
-          "none",
-          "ott_janissary",
-          "ott_sipahi_europ",
-          "tat_czambul_mirzy"
-        ]
-      },
-      { "options": ["none", "ott_sipahi_europ","ott_janissary_egypt", "ott_sandzak_ana","tat_czambul_mirzy"] }
-    ]
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": ["ott_janissary", "ott_sipahi_europ","ott_sandzak_ana","ott_sipahi_albanian","tat_czambul_mirzy"]
+    }
   }
 }

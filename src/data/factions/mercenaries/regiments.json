@@ -120,7 +120,7 @@
       }
     },
     "faction_variants": {
-      "ottomans": {
+      "sweden": {
         "special_rules_add": ["szwedzki_podpulkownik"],
         "structure_overrides": {
           "additional": {
@@ -135,10 +135,10 @@
           }
         }
       },
-      "tatars": {
+      "brandenburg": {
         "special_rules_add": ["roznorodne_wyposazenie"]
       },
-      "commonwealth-crown": {
+      "danmark": {
         "special_rules_add": ["krolewski_arsenal"]
       }
     }

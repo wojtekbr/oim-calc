@@ -34,8 +34,8 @@ const SingleUnitOptionCard = ({
   isActive, 
   onClick, 
   unitMap, 
-  logicHelpers,
-  isLocked,
+  logicHelpers, 
+  isLocked, 
   customCosts 
 }) => {
   const unitDef = unitMap[unitId];
@@ -367,7 +367,8 @@ const GroupSection = ({
 
 export default function RegimentEditor(props) {
   const { state, definitions, handlers, helpers } = useRegimentLogic(props);
-  const { unitsMap, regiment, configuredDivision, regimentGroup, regimentIndex } = props;
+  // ZMIANA: Dodano divisionDefinition do destrukturyzacji
+  const { unitsMap, regiment, configuredDivision, regimentGroup, regimentIndex, divisionDefinition } = props;
   const { base, additional, commonImprovements } = definitions;
   
   const currentRegimentConfig = configuredDivision?.[regimentGroup]?.[regimentIndex];
@@ -545,12 +546,17 @@ export default function RegimentEditor(props) {
         <div className={styles.sidebar}>
             <div className={styles.sectionCard}>
                 
-                <div style={{marginBottom: 16, borderBottom: '2px solid #eee', paddingBottom: 12}}>
-                    <div style={{fontSize: 16, fontWeight: '800', color: '#222', lineHeight: 1.3}}>
+                <div className={styles.sidebarHeader}>
+                    {/* ZMIANA: Wyświetlanie nazwy dywizji */}
+                    <div style={{fontSize: 11, color: '#666', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px'}}>
+                        {divisionDefinition?.name || "Dywizja"}
+                    </div>
+
+                    <div className={styles.sidebarTitle}>
                         {regiment.name || "Nieznany Pułk"}
                     </div>
                     {customName && (
-                        <div style={{fontSize: 14, fontStyle: 'italic', color: '#666', marginTop: 4}}>
+                        <div className={styles.sidebarSubtitle}>
                             "{customName}"
                         </div>
                     )}

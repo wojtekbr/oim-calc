@@ -401,6 +401,7 @@
       "sipahi_better_equipment"
     ],
     "unit_improvements": [],
+    "improvement_points_cost": 2,
     "structure": {
       "base": {
         "general": [

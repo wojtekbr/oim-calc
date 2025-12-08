@@ -123,16 +123,6 @@
     "are_scouts": true,
     "are_looters_insubordinate": true
   },
-  "ott_deli_s_double": {
-    "id": "ott_deli_s_double",
-    "name": "2x Deli S",
-    "cost": 8,
-    "improvement_cost": 2,
-    "rank": "silver",
-    "is_cavalry": true,
-    "open_order": true,
-    "has_lances": true
-  },
   "ott_segbani_m": {
     "id": "ott_segbani_m",
     "name": "Segbani M",
