@@ -535,7 +535,7 @@
       }
     }
   },
-  "ott_sipahi_anatolia": {
+  "ott_sandzak_ana": {
     "name": "Sandżak z ejaletów Anatolijskich",
     "base_cost": 4,
     "recon": 0,
@@ -600,6 +600,185 @@
             },
             "unit4": {
               "units": ["ott_mamluk_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "ott_sandzak_ana_vanguard": {
+    "name": "Sandżak z ejaletów Anatolijskich",
+    "base_cost": 4,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "special_rules": [
+      "allah_allah",
+      "z_calego_imperium"
+    ],
+    "unit_improvements": [
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "javelin"
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["ott_sandzakbej"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["ott_sipahi_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["ott_sipahi_m"]
+            },
+            "unit2": {
+              "units": ["ott_mamluk_s"]
+            },
+            "unit3": {
+              "units": ["ott_mamluk_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["ott_sipahi_m"]
+            },
+            "unit2": {
+              "units": ["ott_mamluk_s"]
+            },
+            "unit3": {
+              "units": ["ott_mamluk_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "ott_province_ana": {
+    "name": "Prowincjonalne wojska nadworne z ejaletów anatolijskich",
+    "base_cost": 5,
+    "recon": 1,
+    "awareness": 4,
+    "activations": 3,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "units_allowed": ["ott_beszli_s","ott_beszli_m","ott_gonullu_s","ott_gonullu_m"]
+      },
+      {
+        "id": "javelin",
+        "units_allowed": ["ott_beszli_s","ott_beszli_m","ott_gonullu_s","ott_gonullu_m"]
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "kalkans",
+        "units_allowed": ["ott_beszli_s","ott_beszli_m"]
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["ott_aga"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["ott_beszli_s"]
+            },
+            "unit2": {
+              "units": ["ott_beszli_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["ott_beszli_s"]
+            },
+            "unit2": {
+              "units": ["ott_beszli_m"]
+            },
+            "unit3": {
+              "units": ["ott_gonullu_s"]
+            },
+            "unit4": {
+              "units": ["ott_gonullu_m"]
+            }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": {
+              "units": ["ott_segbani_m"]
+            },
+            "unit2": {
+              "units": ["ott_azab_m"]
+            },
+            "unit3": {
+              "units": ["ott_azab_l"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["ott_deli_s"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["ott_gonullu_s"]
+            },
+            "unit2": {
+              "units": ["ott_gonullu_m"]
+            },
+            "unit3": {
+              "units": ["ott_segbani_m"]
+            },
+            "unit4": {
+              "units": ["ott_azab_m"]
+            },
+            "unit5": {
+              "units": ["ott_azab_l"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "name_override": "2x Deli S",
+              "units": ["ott_deli_s", "ott_deli_s"]
             }
           }
         ]

@@ -273,7 +273,7 @@ export default function RegimentSelector(props) {
 
     const hasCriticalErrors = allValidationErrors.length > 0;
     const divisionType = calculateDivisionType(configuredDivision, unitsMap, getRegimentDefinition, improvements);
-    const rulesDescriptions = getDivisionRulesDescriptions(divisionDefinition, unitsMap, getRegimentDefinition);
+    const rulesDescriptions = getDivisionRulesDescriptions(divisionDefinition, unitsMap, getRegimentDefinition, improvements);
     const { vanguard: vanguardRegiments, base: baseRegiments, additional: additionalRegiments, supportUnits } = configuredDivision;
     const generalId = configuredDivision.general;
     const generalDef = generalId ? unitsMap[generalId] : null;

@@ -88,15 +88,21 @@ export const DIVISION_RULES_REGISTRY = {
             });
 
             requirements.forEach(req => {
-                const targetId = req.regiment_id;
+                const targetIds = Array.isArray(req.regiment_id) ? req.regiment_id : [req.regiment_id];
                 const minAmount = req.min_amount || 1;
                 
-                const currentAmount = currentCounts[targetId] || 0;
+                let currentTotal = 0;
+                targetIds.forEach(tid => {
+                    currentTotal += (currentCounts[tid] || 0);
+                });
 
-                if (currentAmount < minAmount) {
-                    const def = getRegimentDefinition(targetId);
-                    const name = def ? def.name : targetId;
-                    errors.push(`Niespełnione wymaganie: Musisz posiadać jeszcze ${minAmount - currentAmount} pułk(i/ów) typu:\n"${name}".`);
+                if (currentTotal < minAmount) {
+                    const names = targetIds.map(tid => {
+                        const def = getRegimentDefinition(tid);
+                        return def ? def.name : tid;
+                    }).join("\nLUB ");
+
+                    errors.push(`Niespełnione wymaganie: Musisz posiadać jeszcze ${minAmount - currentTotal} pułk(i/ów) z grupy:\n"${names}".`);
                 }
             });
 
@@ -104,7 +110,6 @@ export const DIVISION_RULES_REGISTRY = {
         }
     },
 
-    // --- NOWE: Limit maksymalnej liczby jednostek (np. Husaria) ---
     "limit_max_units": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             const constraints = params?.constraints || [];
@@ -127,7 +132,6 @@ export const DIVISION_RULES_REGISTRY = {
                 }
             });
             
-            // Dodajemy też jednostki wsparcia (te nieprzypisane, bo przypisane nie są w collectRegimentUnits)
             if (divisionConfig.supportUnits) {
                 const supportIds = divisionConfig.supportUnits.map(su => su.id);
                 allUnitIds = allUnitIds.concat(supportIds);
@@ -155,7 +159,48 @@ export const DIVISION_RULES_REGISTRY = {
         }
     },
 
-    // --- NOWE: Zasada "Panowie Bracia" (Logika Bonusu) ---
+    "limit_regiments_with_improvement": {
+        validate: (divisionConfig, unitsMap, getRegimentDefinition, params, improvements) => {
+            const targetRegimentIds = params?.regiment_ids || [];
+            const improvementId = params?.improvement_id;
+            const maxAmount = params?.max_amount || 1;
+
+            if (!improvementId || targetRegimentIds.length === 0) return [];
+
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []),
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+
+            let count = 0;
+
+            allRegiments.forEach(reg => {
+                if (reg.id !== IDS.NONE && targetRegimentIds.includes(reg.id)) {
+                    const hasRegimentImp = (reg.config.regimentImprovements || []).includes(improvementId);
+                    const hasUnitImp = Object.values(reg.config.improvements || {}).some(imps => imps.includes(improvementId));
+
+                    if (hasRegimentImp || hasUnitImp) {
+                        count++;
+                    }
+                }
+            });
+
+            if (count > maxAmount) {
+                const regNames = targetRegimentIds.map(rid => {
+                     const def = getRegimentDefinition(rid);
+                     return def ? def.name : rid;
+                }).join(", ");
+
+                const impName = improvements ? (improvements[improvementId]?.name || improvementId) : improvementId;
+
+                return [`Przekroczono limit: Tylko ${maxAmount} pułk(ów) typu:\n"${regNames}"\nmoże posiadać ulepszenie: "${impName}".`];
+            }
+
+            return [];
+        }
+    },
+
     "panowie_bracia": {
         getRegimentStatsBonus: (divisionConfig, targetRegimentId, params) => {
             const countingIds = params?.counting_regiment_ids || [];
@@ -196,9 +241,7 @@ export const DIVISION_RULES_DEFINITIONS = {
             const requiredAmount = params?.required_unit_amount || 2;
             const bonusPoints = params?.bonus_pu || 6;
             const unitIds = params?.unit_ids || [];
-
             const unitNames = unitIds.map(id => unitsMap[id]?.name || id).join(" lub ");
-
             return `Jeśli Twoja dywizja zawiera przynajmniej ${requiredAmount} jednostek typu "${unitNames}", otrzymasz dodatkowo ${bonusPoints} Punktów Ulepszeń.`;
         }
     },
@@ -209,10 +252,8 @@ export const DIVISION_RULES_DEFINITIONS = {
             const { getRegimentDefinition } = context;
             const targetId = params?.regiment_id;
             const max = params?.max_amount || 1;
-
             const regDef = getRegimentDefinition(targetId);
             const regName = regDef ? regDef.name : targetId;
-
             return `Możesz posiadać maksymalnie ${max} pułk(i/ów) typu: "${regName}".`;
         }
     },
@@ -222,18 +263,16 @@ export const DIVISION_RULES_DEFINITIONS = {
         getDescription: (params, context) => {
             const { getRegimentDefinition } = context;
             const requirements = params?.requirements || [];
-
             if (requirements.length === 0) return "Brak wymagań.";
-
             const requirementsList = requirements.map(req => {
-                const targetId = req.regiment_id;
+                const targetIds = Array.isArray(req.regiment_id) ? req.regiment_id : [req.regiment_id];
                 const min = req.min_amount || 1;
-                const regDef = getRegimentDefinition(targetId);
-                const regName = regDef ? regDef.name : targetId;
-                
-                return `• ${min}x ${regName}`;
+                const names = targetIds.map(tid => {
+                    const regDef = getRegimentDefinition(tid);
+                    return regDef ? regDef.name : tid;
+                }).join(" LUB ");
+                return `• ${min}x ${names}`;
             }).join("\n");
-
             return `Dywizja musi zawierać przynajmniej następujące pułki:\n${requirementsList}`;
         }
     },
@@ -243,20 +282,32 @@ export const DIVISION_RULES_DEFINITIONS = {
         getDescription: (params, context) => {
              const constraints = params?.constraints || [];
              if (constraints.length === 0) return "";
-             
              const lines = constraints.map(c => {
                  const max = c.max_amount;
                  let name = c.custom_name;
-                 
                  if (!name && context.unitsMap && c.unit_ids) {
                      const names = c.unit_ids.slice(0, 3).map(id => context.unitsMap[id]?.name || id);
                      name = names.join(", ") + (c.unit_ids.length > 3 ? "..." : "");
                  }
-                 
                  return `• Max ${max}x ${name || "Jednostki"}`;
              });
-             
              return `Dywizja posiada następujące ograniczenia ilościowe:\n${lines.join("\n")}`;
+        }
+    },
+
+    "limit_regiments_with_improvement": {
+        title: "Limit Ulepszeń",
+        getDescription: (params, context) => {
+            const { getRegimentDefinition, improvements } = context;
+            const targetRegimentIds = params?.regiment_ids || [];
+            const improvementId = params?.improvement_id;
+            const maxAmount = params?.max_amount || 1;
+            const regNames = targetRegimentIds.map(rid => {
+                const def = getRegimentDefinition(rid);
+                return def ? def.name : rid;
+            }).join(", ");
+            const impName = improvements ? (improvements[improvementId]?.name || improvementId) : improvementId;
+            return `Tylko ${maxAmount} pułk(ów) typu "${regNames}" może zostać ulepszonych o "${impName}".`;
         }
     },
 
@@ -276,7 +327,6 @@ export const DIVISION_RULES_DEFINITIONS = {
             "• 10: Wojsko zawiązało Konfederację: -1 motywacji dla każdego pułku jazdy: koronnej/litewskiej, lekkiej, Lewego/Prawego skrzydła."
     },
 
-    // --- ZASADY FABULARNE/GAMEPLAYOWE (Reszta bez zmian) ---
     "na_wlasnej_ziemi_3": {
         title: "Na własnej ziemi (3)",
         getDescription: () => "Zasada opisana w podręcznikach OiM."
@@ -299,7 +349,7 @@ export const DIVISION_RULES_DEFINITIONS = {
     }
 };
 
-// --- HELPERS ---
+// --- HELPERS (PRZYWRÓCONE!) ---
 
 export const checkDivisionConstraints = (divisionConfig, divisionDefinition, candidateRegimentId) => {
     if (!divisionConfig || !divisionDefinition || !candidateRegimentId || candidateRegimentId === IDS.NONE) {
@@ -354,7 +404,7 @@ export const calculateRuleBonuses = (divisionConfig, divisionDefinition, unitsMa
     return totalBonus;
 };
 
-export const validateDivisionRules = (divisionConfig, divisionDefinition, unitsMap, getRegimentDefinition) => {
+export const validateDivisionRules = (divisionConfig, divisionDefinition, unitsMap, getRegimentDefinition, improvements) => {
     let allErrors = [];
     if (!divisionDefinition?.rules || !Array.isArray(divisionDefinition.rules)) return allErrors;
 
@@ -362,7 +412,7 @@ export const validateDivisionRules = (divisionConfig, divisionDefinition, unitsM
         const { id, ...params } = ruleConfig;
         const ruleImpl = DIVISION_RULES_REGISTRY[id];
         if (ruleImpl && ruleImpl.validate) {
-            const errors = ruleImpl.validate(divisionConfig, unitsMap, getRegimentDefinition, params);
+            const errors = ruleImpl.validate(divisionConfig, unitsMap, getRegimentDefinition, params, improvements);
             if (errors && errors.length > 0) {
                 allErrors = allErrors.concat(errors);
             }
@@ -371,7 +421,7 @@ export const validateDivisionRules = (divisionConfig, divisionDefinition, unitsM
     return allErrors;
 };
 
-export const getDivisionRulesDescriptions = (divisionDefinition, unitsMap, getRegimentDefinition) => {
+export const getDivisionRulesDescriptions = (divisionDefinition, unitsMap, getRegimentDefinition, improvements) => {
     if (!divisionDefinition?.rules || !Array.isArray(divisionDefinition.rules)) return [];
 
     return divisionDefinition.rules.map(ruleConfig => {
@@ -380,7 +430,7 @@ export const getDivisionRulesDescriptions = (divisionDefinition, unitsMap, getRe
 
         if (!definition) return null;
 
-        const description = definition.getDescription(params, { unitsMap, getRegimentDefinition });
+        const description = definition.getDescription(params, { unitsMap, getRegimentDefinition, improvements });
 
         return {
             id,
@@ -396,7 +446,6 @@ export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegi
     }
 
     for (const req of unitConfig.requirements) {
-        // 1. Wymaganie: Konkretna jednostka w konkretnym pułku
         if (req.type === "regiment_contains_unit") {
             const { regiment_id, unit_id, min_amount = 1 } = req;
             const targetRegiments = [
@@ -427,7 +476,6 @@ export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegi
             }
         }
         
-        // 2. Wymaganie: Dywizja zawiera dowolny z podanych pułków
         if (req.type === "division_contains_any_regiment") {
             const { regiment_ids } = req;
             const allRegiments = [
@@ -435,7 +483,7 @@ export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegi
                 ...(divisionConfig.base || []),
                 ...(divisionConfig.additional || [])
             ];
-            
+
             const found = allRegiments.some(r => r.id !== IDS.NONE && regiment_ids.includes(r.id));
 
             if (!found) {

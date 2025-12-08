@@ -79,7 +79,7 @@ const createDefaultRegiments = (divisionDefinition, getRegimentDefinition) => {
         base: baseRegiments,
         additional: additionalRegiments,
         supportUnits: [],
-        divisionDefinition: divisionDefinition
+        divisionDefinition: divisionDefinition // To jest kopia z momentu utworzenia
     };
 };
 
@@ -144,7 +144,7 @@ function AppContent() {
     const remainingImprovementPoints = improvementPointsLimit - totalImprovementsUsed;
     
     const validationErrors = (configuredDivision && selectedDivisionDefinition)
-        ? validateDivisionRules(configuredDivision, selectedDivisionDefinition, unitsMap, getRegimentDefinition)
+        ? validateDivisionRules(configuredDivision, selectedDivisionDefinition, unitsMap, getRegimentDefinition, improvements)
         : [];
 
     const totalDivisionCost = configuredDivision 
@@ -155,13 +155,14 @@ function AppContent() {
         if (!configuredDivision || editingRegimentGroup === null || editingRegimentIndex === null) return null;
         const regimentStructure = configuredDivision[editingRegimentGroup][editingRegimentIndex];
         
+        // Używamy helpera z obsługą frakcji (dla najemników)
         const regDef = getRegimentDefinition(regimentStructure.id, selectedFactionKey);
         if (!regDef) return null;
 
         return {
             ...regDef,
             id: regimentStructure.id,
-            divisionDefinition: selectedDivisionDefinition,
+            // Nie przekazujemy tu divisionDefinition, robimy to przez props
         };
     };
 
@@ -173,7 +174,6 @@ function AppContent() {
         <div style={{ padding: 0 }}>
             {screen === SCREENS.LIST && (
                 <div style={{padding: 20}}>
-                     {/* ZMIANA: Nowy tytuł */}
                      <h1 style={{ marginTop: 0 }}>Kreator Dywizji Ogniem i Mieczem II</h1>
                      <FactionList
                         factions={factions}
@@ -209,6 +209,8 @@ function AppContent() {
                 <RegimentEditor
                     faction={selectedFaction} 
                     regiment={getEditingRegiment()}
+                    // KLUCZOWE: Przekazujemy aktualną, świeżą definicję dywizji
+                    divisionDefinition={selectedDivisionDefinition}
                     onBack={backToSelector}
                     configuredDivision={configuredDivision}
                     setConfiguredDivision={setConfiguredDivision}

@@ -6,7 +6,7 @@ import {
     calculateSingleImprovementIMPCost, 
     calculateRegimentStats,
     collectRegimentUnits,
-    calculateMainForceKey // NOWY IMPORT
+    calculateMainForceKey
 } from "../utils/armyMath";
 import { calculateRuleBonuses, checkSupportUnitRequirements } from "../utils/divisionRules";
 import { validateRegimentRules } from "../utils/regimentRules";
@@ -28,7 +28,9 @@ export const useRegimentLogic = ({
 }) => {
   const { improvements: commonImprovements } = useArmyData();
 
+  // Priorytet dla propsa z App.jsx
   const divisionDefinition = propDivisionDefinition || regiment.divisionDefinition || {};
+  
   const structure = regiment.structure || {};
   const base = structure.base || {};
   const additional = structure.additional || {};
@@ -150,12 +152,9 @@ export const useRegimentLogic = ({
   }, [baseSelections, additionalSelections, selectedAdditionalCustom, additionalEnabled, optionalEnabled, optionalSelections, improvements, regimentImprovements, currentConfig.isVanguard]);
 
   const stats = useMemo(() => {
-      // 1. Tworzymy tymczasową dywizję z AKTUALNYM stanem edytowanego pułku
-      // Musimy to zrobić, aby calculateMainForceKey wzięło pod uwagę zmiany kosztów, które właśnie robisz
       const tmpDivision = JSON.parse(JSON.stringify(configuredDivision));
       tmpDivision[regimentGroup][regimentIndex].config = currentLocalConfig;
 
-      // 2. Liczymy statystyki bazowe pułku
       const rawStats = calculateRegimentStats(
           currentLocalConfig,
           regiment.id,
@@ -165,7 +164,6 @@ export const useRegimentLogic = ({
           commonImprovements
       );
 
-      // 3. Sprawdzamy czy w NOWYM układzie sił ten pułk jest Siłami Głównymi
       const mainForceKey = calculateMainForceKey(
           tmpDivision, 
           unitsMap, 
@@ -177,7 +175,6 @@ export const useRegimentLogic = ({
       const currentKey = `${regimentGroup}/${regimentIndex}`;
       const isMainForce = mainForceKey === currentKey;
 
-      // 4. Aplikujemy bonusy (zazwyczaj +1 Motywacja, +1 Aktywacja)
       return {
           totalRecon: rawStats.recon,
           totalMotivation: rawStats.motivation + (isMainForce ? 1 : 0),
@@ -186,13 +183,12 @@ export const useRegimentLogic = ({
           totalAwareness: rawStats.awareness,
           regimentType: rawStats.regimentType,
           cost: rawStats.cost,
-          isMainForce // Zwracamy flagę, żeby wyświetlić badge w UI
+          isMainForce
       };
   }, [currentLocalConfig, regiment.id, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements, faction, regimentGroup, regimentIndex]);
 
   const totalCost = stats.cost;
 
-  // Obliczanie błędów zasad pułkowych
   const regimentRuleErrors = useMemo(() => {
       const activeUnits = collectRegimentUnits(currentLocalConfig, regiment);
       return validateRegimentRules(activeUnits, regiment);
@@ -426,23 +422,36 @@ export const useRegimentLogic = ({
     
     groupRef[regimentIndex].config = currentLocalConfig;
     
+    // SCALANIE DEFINICJI (To naprawia błąd indeksów!)
+    const artDefs = divisionDefinition.division_artillery || [];
+    const addDefs = divisionDefinition.additional_units || [];
+    const allSupportDefinitions = [...artDefs, ...addDefs];
+
     const keptSupportUnits = [];
     const removedNames = [];
 
     (tempDivisionForCheck.supportUnits || []).forEach(su => {
         let unitConfig = null;
-        if (su.definitionIndex !== undefined && divisionDefinition.additional_units) {
-            unitConfig = divisionDefinition.additional_units[su.definitionIndex];
+        
+        // Szukamy po indeksie w SCALONEJ liście
+        if (su.definitionIndex !== undefined) {
+            unitConfig = allSupportDefinitions[su.definitionIndex];
         } else {
-            unitConfig = divisionDefinition.additional_units?.find(u => 
+            // Fallback po nazwie
+            unitConfig = allSupportDefinitions.find(u => 
                 (typeof u === 'string' && u === su.id) || 
                 (u.name === su.id)
             );
         }
+
         if (unitConfig) {
             const check = checkSupportUnitRequirements(unitConfig, tempDivisionForCheck, getRegimentDefinition);
-            if (check.isAllowed) keptSupportUnits.push(su);
-            else removedNames.push(getUnitName(su.id));
+            if (check.isAllowed) {
+                keptSupportUnits.push(su);
+            } else {
+                const reasonMsg = check.reason ? ` (${check.reason})` : "";
+                removedNames.push(`${getUnitName(su.id)}${reasonMsg}`);
+            }
         } else {
             keptSupportUnits.push(su);
         }

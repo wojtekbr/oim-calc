@@ -42,6 +42,14 @@
     "rank": "group",
     "orders": 2
   },
+  "ott_grand_vezir": {
+    "id": "ott_grand_vezir",
+    "name": "Wielki Wezyr",
+    "cost": 0,
+    "rank": "group",
+    "orders": 4,
+    "activations": 4
+  },
   "ott_bejlerbej": {
     "id": "ott_bejlerbej",
     "name": "Bejlerbej",
@@ -288,5 +296,28 @@
     "rank": "gold",
     "is_cavalry": true,
     "has_lances": true
+  },
+  "ott_levends": {
+    "id": "ott_levends",
+    "name": "Lewendowie",
+    "cost": 2,
+    "improvement_points_cost": 1,
+    "rank": "group"
+  },
+  "ott_tufekczi_s": {
+    "id": "ott_tufekczi_s",
+    "name": "Tufekczi S",
+    "cost": 5,
+    "improvement_points_cost": 1,
+    "rank": "silver",
+    "are_proxy_dragoons": true
+  },
+  "ott_tufekczi_m": {
+    "id": "ott_tufekczi_m",
+    "name": "Tufekczi M",
+    "cost": 7,
+    "improvement_points_cost": 2,
+    "rank": "silver",
+    "are_proxy_dragoons": true
   }
 }

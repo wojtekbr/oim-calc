@@ -80,7 +80,7 @@ const SingleUnitOptionCard = ({
           <div className={styles.unitName}>{unitDef.name || unitId}</div>
           
           {unitDef.orders > 0 && (
-              <div style={{fontSize: 11, color: '#d35400', marginBottom: 4, fontWeight: 600}}>
+              <div className={styles.unitOrders}>
                   Rozkazy: {unitDef.orders}
               </div>
           )}
@@ -92,14 +92,14 @@ const SingleUnitOptionCard = ({
 };
 
 const MultiUnitOptionCard = ({ 
-    optionKey,
-    optionNameOverride,
+    optionKey, 
+    optionNameOverride, 
     unitIds, 
     isActive, 
     onClick, 
     unitsMap, 
-    logicHelpers,
-    isLocked,
+    logicHelpers, 
+    isLocked, 
     customCosts 
 }) => {
     let totalCost = 0;
@@ -136,22 +136,24 @@ const MultiUnitOptionCard = ({
             </div>
 
             <div className={styles.cardContent}>
-                <div className={styles.unitName} style={{marginBottom: 8}}>{displayName}</div>
+                <div className={styles.multiCardTitle}>{displayName}</div>
                 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, fontSize: 10, color: '#666', marginBottom: 6 }}>
+                <div className={styles.multiCardList}>
                     {unitIds.slice(0, 3).map((uid, idx) => (
-                        <div key={idx}>• {unitsMap[uid]?.name || uid}</div>
+                        <div key={idx} className={styles.multiCardItem}>
+                            <span>• {unitsMap[uid]?.name || uid}</span>
+                        </div>
                     ))}
                     {unitIds.length > 3 && <div>...i {unitIds.length - 3} więcej</div>}
                 </div>
 
                 {totalOrders > 0 && (
-                    <div style={{fontSize: 11, color: '#d35400', marginBottom: 4, fontWeight: 600}}>
+                    <div className={styles.unitOrders}>
                         Rozkazy: {totalOrders}
                     </div>
                 )}
 
-                <div className={styles.unitCost}>Razem: {totalCost} PS</div>
+                <div className={styles.multiCardTotalCost}>Razem: {totalCost} PS</div>
             </div>
         </div>
     );
@@ -169,8 +171,8 @@ const ActiveOptionConfigurationPanel = ({
     helpers
 }) => {
     return (
-        <div style={{ marginTop: 12, padding: 12, background: '#f8f9fa', borderRadius: 8, borderLeft: '4px solid #0077ff' }}>
-            <div style={{fontSize: 11, fontWeight: '700', textTransform: 'uppercase', marginBottom: 8, color: '#666'}}>
+        <div className={styles.activeConfigPanel}>
+            <div className={styles.activeConfigTitle}>
                 Konfiguracja Wybranych Jednostek:
             </div>
             {unitIds.map((uid, uIdx) => {
@@ -184,14 +186,14 @@ const ActiveOptionConfigurationPanel = ({
                 });
 
                 return (
-                    <div key={uIdx} style={{ marginBottom: 8, paddingBottom: 8, borderBottom: uIdx < unitIds.length - 1 ? '1px dashed #ccc' : 'none' }}>
-                        <div style={{fontWeight: 600, fontSize: 13, marginBottom: 4, display: 'flex', justifyContent: 'space-between'}}>
+                    <div key={uIdx} className={styles.activeUnitRow}>
+                        <div className={styles.activeUnitHeader}>
                             <span>{uIdx + 1}. {unitDef?.name}</span>
-                            <span style={{fontWeight: 400, color: '#888', fontSize: 11}}>({helpers.getFinalUnitCost(uid, false)} PS)</span>
+                            <span className={styles.activeUnitCostLabel}>({helpers.getFinalUnitCost(uid, false)} PS)</span>
                         </div>
 
                         {!isGroupRank && (
-                            <div className={styles.improvementsContainer} style={{marginTop: 0, border: 'none', paddingTop: 0}}>
+                            <div className={styles.cleanImprovementsContainer}>
                                 {validImprovements.length > 0 ? validImprovements.map(imp => {
                                     const isSelected = state.improvements[positionKey]?.includes(imp.id);
                                     const cost = calculateSingleImprovementIMPCost(unitDef, imp.id, regiment, commonImprovements);
@@ -212,7 +214,7 @@ const ActiveOptionConfigurationPanel = ({
                                         </button>
                                     );
                                 }) : (
-                                    <span style={{fontSize: 11, color: '#999', fontStyle: 'italic'}}>Brak dostępnych ulepszeń</span>
+                                    <span className={styles.emptyImprovements}>Brak dostępnych ulepszeń</span>
                                 )}
                             </div>
                         )}
@@ -250,19 +252,19 @@ const GroupSection = ({
   return (
     <div className={styles.groupContainer}>
       {isOptionalGroup && (
-          <div className={`${styles.groupLabel} ${styles.groupLabelOptional}`} style={{display: 'flex', alignItems: 'center'}}>
+          <div className={styles.groupLabelOptional}>
              {!isLocked ? (
                  <>
                     <input 
                         type="checkbox" 
+                        className={styles.checkboxInput}
                         checked={!!state.optionalEnabled[mapKey]} 
                         onChange={() => handlers.handleToggleOptionalGroup(type, groupKey)}
-                        style={{marginRight: 8, cursor: 'pointer'}}
                         disabled={type === GROUP_TYPES.ADDITIONAL && !state.additionalEnabled} 
                     />
                     <span 
+                        className={styles.clickableSpan}
                         onClick={() => !(type === GROUP_TYPES.ADDITIONAL && !state.additionalEnabled) && handlers.handleToggleOptionalGroup(type, groupKey)}
-                        style={{cursor: 'pointer'}}
                     >
                         Jednostka dodatkowa (Opcjonalne)
                     </span>
@@ -382,7 +384,6 @@ export default function RegimentEditor(props) {
   const specialRules = regiment.special_rules || [];
   const rulesDescriptions = getRegimentRulesDescriptions(regiment);
 
-  // Blokada przycisku jeśli są błędy
   const hasErrors = state.regimentRuleErrors && state.regimentRuleErrors.length > 0;
 
   return (
@@ -544,7 +545,6 @@ export default function RegimentEditor(props) {
         <div className={styles.sidebar}>
             <div className={styles.sectionCard}>
                 
-                {/* NAGŁÓWEK Z NAZWĄ PUŁKU */}
                 <div style={{marginBottom: 16, borderBottom: '2px solid #eee', paddingBottom: 12}}>
                     <div style={{fontSize: 16, fontWeight: '800', color: '#222', lineHeight: 1.3}}>
                         {regiment.name || "Nieznany Pułk"}
@@ -573,7 +573,7 @@ export default function RegimentEditor(props) {
                         fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase',
                         borderRadius: 4, textAlign: 'center', border: '1px solid #ffe0b2'
                     }}>
-                        ★ Siły Główne (Bonusy aktywne)
+                        ★ Siły Główne
                     </div>
                 )}
 
@@ -586,11 +586,10 @@ export default function RegimentEditor(props) {
                 <div className={styles.statRow}><span className={styles.statLabel}>Czujność (Awareness):</span><span className={styles.statValue}>{state.stats.totalAwareness}</span></div>
             </div>
 
-            {/* Błędy Walidacji */}
             {state.regimentRuleErrors && state.regimentRuleErrors.length > 0 && (
-                <div style={{ marginBottom: 24, padding: 12, backgroundColor: '#ffebee', border: '1px solid #ef5350', borderRadius: 6, color: '#c62828', fontSize: 13 }}>
+                <div className={styles.errorBox}>
                     <strong>⚠️ Niespełnione zasady pułku:</strong>
-                    <ul style={{ margin: '8px 0 0 0', paddingLeft: 20 }}>
+                    <ul className={styles.errorList}>
                         {state.regimentRuleErrors.map((err, i) => (
                             <li key={i}>{err}</li>
                         ))}
@@ -598,22 +597,20 @@ export default function RegimentEditor(props) {
                 </div>
             )}
 
-            {/* Zasady Specjalne */}
             {rulesDescriptions.length > 0 && (
                 <div className={styles.sectionCard}>
                     <h4 className={styles.groupLabel}>Zasady Specjalne</h4>
                     <div className={styles.regimentImprovementsList}>
                         {rulesDescriptions.map(rule => (
-                            <div key={rule.id} style={{marginBottom: 8}}>
-                                <div style={{fontWeight: 'bold', fontSize: 13}}>{rule.title}</div>
-                                {rule.description && <div style={{fontSize: 11, color: '#555', marginTop: 2, lineHeight: 1.3}}>{rule.description}</div>}
+                            <div key={rule.id} className={styles.ruleEntry}>
+                                <div className={styles.ruleEntryTitle}>{rule.title}</div>
+                                {rule.description && <div className={styles.ruleEntryDesc}>{rule.description}</div>}
                             </div>
                         ))}
                     </div>
                 </div>
             )}
 
-            {/* Ulepszenia Pułku */}
             {definitions.regimentLevelImprovements.length > 0 && (
                 <div className={styles.sectionCard}>
                     <h4 className={styles.groupLabel}>Ulepszenia Pułku</h4>
@@ -657,54 +654,55 @@ export default function RegimentEditor(props) {
                 </div>
             )}
 
-            {/* Tabela Ulepszeń Jednostek */}
             {definitions.unitLevelImprovements.length > 0 && (
                 <div className={styles.sectionCard}>
-                    <div style={{marginBottom: 10}}>
-                        <h4 className={styles.groupLabel} style={{marginBottom: 4}}>Dostępne Ulepszenia</h4>
-                        <div style={{fontSize: 12, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                            <span>Pozostałe punkty:</span>
-                            <span className={`${styles.impPoints} ${state.newRemainingPointsAfterLocalChanges < 0 ? styles.error : styles.ok}`}>
-                                {state.newRemainingPointsAfterLocalChanges}
-                            </span>
+                    <div className={styles.tableContainer}>
+                        <div className={styles.tableHeader}>
+                            <h4 className={styles.groupLabel}>Dostępne Ulepszenia</h4>
+                            <div className={styles.pointsDisplay}>
+                                <span>Pozostałe punkty:</span>
+                                <span className={`${styles.impPoints} ${state.newRemainingPointsAfterLocalChanges < 0 ? styles.error : styles.ok}`}>
+                                    {state.newRemainingPointsAfterLocalChanges}
+                                </span>
+                            </div>
                         </div>
+                        
+                        <table className={styles.impTable}>
+                            <thead>
+                                <tr className={styles.impTableHeadRow}>
+                                    <th className={styles.tableTh}>Nazwa</th>
+                                    <th className={styles.tableThCenter}>Koszt</th>
+                                    <th className={styles.tableThRight}>Ilość</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {definitions.unitLevelImprovements.map(imp => {
+                                    const commonDef = definitions.commonImprovements?.[imp.id];
+                                    const name = imp.name || commonDef?.name || imp.id;
+                                    
+                                    let rawCost = imp.cost_override !== undefined ? imp.cost_override : (imp.cost !== undefined ? imp.cost : commonDef?.cost);
+                                    
+                                    const currentCount = Object.values(state.improvements)
+                                        .flat()
+                                        .filter(id => id === imp.id).length;
+
+                                    const limitLabel = imp.max_amount ? `${currentCount} / ${imp.max_amount}` : `${currentCount} / ∞`;
+                                    const isLimitReached = imp.max_amount && currentCount >= imp.max_amount;
+                                    const limitClass = isLimitReached ? styles.limitReached : styles.limitOk;
+
+                                    return (
+                                        <tr key={imp.id} className={styles.impTableRow}>
+                                            <td className={styles.tableTd}>{name}</td>
+                                            <td className={styles.tableTdCenter}>{formatCost(rawCost)}</td>
+                                            <td className={`${styles.tableTdRight} ${limitClass}`}>
+                                                {limitLabel}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
                     </div>
-                    
-                    <table style={{width: '100%', borderCollapse: 'collapse', fontSize: 12}}>
-                        <thead>
-                            <tr style={{borderBottom: '2px solid #eee', color: '#666'}}>
-                                <th style={{textAlign: 'left', paddingBottom: 4}}>Nazwa</th>
-                                <th style={{textAlign: 'center', paddingBottom: 4}}>Koszt</th>
-                                <th style={{textAlign: 'right', paddingBottom: 4}}>Ilość</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {definitions.unitLevelImprovements.map(imp => {
-                                const commonDef = definitions.commonImprovements?.[imp.id];
-                                const name = imp.name || commonDef?.name || imp.id;
-                                
-                                let rawCost = imp.cost_override !== undefined ? imp.cost_override : (imp.cost !== undefined ? imp.cost : commonDef?.cost);
-                                
-                                const currentCount = Object.values(state.improvements)
-                                    .flat()
-                                    .filter(id => id === imp.id).length;
-
-                                const limitLabel = imp.max_amount ? `${currentCount} / ${imp.max_amount}` : `${currentCount} / ∞`;
-                                const isLimitReached = imp.max_amount && currentCount >= imp.max_amount;
-                                const limitClass = isLimitReached ? styles.limitReached : styles.limitOk;
-
-                                return (
-                                    <tr key={imp.id} style={{borderBottom: '1px solid #f0f0f0'}}>
-                                        <td style={{padding: '6px 0', color: '#333'}}>{name}</td>
-                                        <td style={{padding: '6px 0', textAlign: 'center', color: '#666'}}>{formatCost(rawCost)}</td>
-                                        <td style={{padding: '6px 0', textAlign: 'right', fontWeight: 'bold', color: isLimitReached ? '#d32f2f' : '#0056b3'}}>
-                                            {limitLabel}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
                 </div>
             )}
         </div>

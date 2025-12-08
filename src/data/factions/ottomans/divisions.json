@@ -22,7 +22,7 @@
         "id": "min_regiments_present",
         "requirements": [
           {
-            "regiment_id": "ott_province_eur",
+            "regiment_id": ["ott_province_eur"],
             "min_amount": 1
           }
         ]
@@ -103,6 +103,259 @@
         ]
       },
       { "options": ["none", "ott_sipahi_europ","tat_czambul_mirzy"] }
+    ]
+  },
+  "ott_anatolian": {
+    "name": "Armia Ejaletu Anatolijskiego",
+    "improvement_points": 10,
+    "base_cost": 11,
+    "general": ["ott_bejlerbej"],
+    "rules": [
+      {
+        "id": "additional_pu_points_for_units",
+        "unit_ids": [
+          "ott_segbani_m"
+        ],
+        "required_unit_amount": 2,
+        "bonus_pu": 6
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_id": "ott_province_ana",
+        "max_amount": 1
+      },
+      {
+        "id": "min_regiments_present",
+        "requirements": [
+          {
+            "regiment_id": ["ott_province_ana"],
+            "min_amount": 1
+          }
+        ]
+      },
+      {
+        "id": "limit_max_units",
+        "constraints": [
+          {
+            "unit_ids": ["ott_mamluks_s", "ott_mamluks_m"],
+            "max_amount": 4,
+            "custom_name": "Mamelucy (łącznie)"
+          }
+        ]
+      },
+      { 
+        "id": "prawowierni_w_okopach" 
+      },
+      { 
+        "id": "wojsko_wybornym_ozywione_duchem" 
+      },
+      { 
+        "id": "allah_allah" 
+      },
+      { 
+        "id": "zapelnily_sie_nimi_gory" 
+      }
+    ],
+    "additional_units": [
+      {
+        "name":"common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name":"common_transport_camel",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name":"ott_czausz",
+        "assignment_rules": {
+          "can_be_assigned": false
+        },
+        "requirements": [
+          {
+            "type": "regiment_contains_unit",
+            "regiment_id": "ott_province_ana",
+            "unit_id": "ott_segbani_m",
+            "min_amount": 1
+          }
+        ]
+      },
+      {
+        "name": "ott_levends"
+      },
+      {
+        "name": "ott_levends"
+      }
+    ],
+    "division_artillery": [
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["ott_light_art_s", "ott_light_art_m"]
+      },
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["ott_light_art_s", "ott_light_art_m"]
+      },
+      {
+        "type": "group",
+        "name": "Średnia Artyleria",
+        "options": ["ott_medium_art_s"]
+      }
+    ],
+    "vanguard": 
+      [
+      { "options": ["ott_sandzak_ana_vanguard", "ott_province_ana"] }
+     ],
+    "base": [
+      { "options": ["ott_sandzak_ana","ott_province_ana"] },
+      { "options": ["ott_sandzak_ana"] }
+    ],
+    "additional": [
+      {
+        "options": [
+          "none",
+          "ott_janissary",
+          "ott_sipahi_europ",
+          "tat_czambul_mirzy"
+        ]
+      },
+      { "options": ["none", "ott_janissary_egypt", "ott_sandzak_ana","tat_czambul_mirzy"] }
+    ]
+  },
+  "ott_grand_vezir": {
+    "name": "Armia Wielkiego Wezyra 1663-64",
+    "improvement_points": 12,
+    "base_cost": 18,
+    "general": ["ott_grand_vezir"],
+    "rules": [
+      {
+        "id": "additional_pu_points_for_units",
+        "unit_ids": [
+          "ott_segbani_m"
+        ],
+        "required_unit_amount": 2,
+        "bonus_pu": 6
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_id": "ott_province_ana",
+        "max_amount": 1
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_id": "ott_province_eur",
+        "max_amount": 1
+      },
+      {
+        "id": "min_regiments_present",
+        "requirements": [
+          {
+            "regiment_id": ["ott_province_eur", "ott_province_ana"],
+            "min_amount": 1
+          }
+        ]
+      },
+      {
+        "id": "limit_max_units",
+        "constraints": [
+          {
+            "unit_ids": ["ott_mamluks_s", "ott_mamluks_m"],
+            "max_amount": 4,
+            "custom_name": "Mamelucy (łącznie)"
+          }
+        ]
+      },
+      { 
+        "id": "wojsko_wybornym_ozywione_duchem" 
+      },
+      { 
+        "id": "allah_allah" 
+      },
+      { 
+        "id": "zapelnily_sie_nimi_gory" 
+      },
+      {
+        "id": "limit_regiments_with_improvement",
+        "regiment_ids": ["ott_janissary"],
+        "improvement_id": "elite_janissaries",
+        "max_amount": 1
+      }
+    ],
+    "additional_units": [
+      {
+        "name":"common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name":"common_transport_camel",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name":"ott_czausz",
+        "assignment_rules": {
+          "can_be_assigned": false
+        },
+        "requirements": [
+          {
+            "type": "regiment_contains_unit",
+            "regiment_id": "ott_province_ana",
+            "unit_id": "ott_segbani_m",
+            "min_amount": 1
+          }
+        ]
+      },
+      {
+        "name": "ott_tufekczi_s"
+      },
+      {
+        "name": "ott_tufekczi_m"
+      }
+    ],
+    "division_artillery": [
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["ott_light_art_s", "ott_light_art_m"]
+      },
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["ott_light_art_s", "ott_light_art_m"]
+      },
+      {
+        "type": "group",
+        "name": "Średnia Artyleria",
+        "options": ["ott_medium_art_s"]
+      }
+    ],
+    "vanguard": 
+      [
+      { "options": ["tat_czambul_mirzy","ott_sandzak_ana_vanguard", "ott_sipahi_europ_vanguard", "ott_province_ana", "ott_province_eur"] }
+     ],
+    "base": [
+      { "options": ["ott_province_eur","ott_province_ana","ott_sipahi_europ","ott_sandzak_ana"] },
+      { "options": ["ott_sipahi_kapikulu","ott_sipahi_europ","ott_sandzak_ana"] },
+      { "options": ["ott_janissary"] }
+    ],
+    "additional": [
+      {
+        "options": [
+          "none",
+          "ott_janissary",
+          "ott_sipahi_europ",
+          "tat_czambul_mirzy"
+        ]
+      },
+      { "options": ["none", "ott_sipahi_europ","ott_janissary_egypt", "ott_sandzak_ana","tat_czambul_mirzy"] }
     ]
   }
 }
