@@ -134,14 +134,13 @@ export const useRegimentSelectorLogic = ({
           const existingIndex = currentAdditional.findIndex(r => r.sourceIndex === sourceIndex);
 
           if (existingIndex !== -1) {
-              // JEŚLI JEST -> USUŃ (Sprzedaj ten konkretny)
+              // JEŚLI JEST -> USUŃ (Sprzedaj ten konkretny obiekt)
               currentAdditional.splice(existingIndex, 1);
               
               // Aktualizujemy indeksy tablicowe (dla positionKey)
-              // sourceIndex pozostaje w obiektach bez zmian, bo on wskazuje na pochodzenie z puli!
               const updatedAdditional = currentAdditional.map((r, idx) => ({ ...r, index: idx }));
               
-              // Czyścimy wsparcie (bezpieczniej odpiąć wszystko z Additional przy zmianie struktury)
+              // Czyścimy wsparcie dla additional (bezpiecznik)
               const newSupportUnits = prev.supportUnits.map(su => {
                   if (su.assignedTo && su.assignedTo.group === GROUP_TYPES.ADDITIONAL) {
                       return { ...su, assignedTo: null };
@@ -152,7 +151,7 @@ export const useRegimentSelectorLogic = ({
               return { ...prev, additional: updatedAdditional, supportUnits: newSupportUnits };
 
           } else {
-              // JEŚLI NIE MA -> DODAJ (Kup ten konkretny)
+              // JEŚLI NIE MA -> DODAJ (Kup nową instancję z tym sourceIndex)
               if (currentAdditional.length >= maxAmount) {
                   alert(`Osiągnięto limit ${maxAmount} pułków dodatkowych.`);
                   return prev;
@@ -184,7 +183,7 @@ export const useRegimentSelectorLogic = ({
                   group: GROUP_TYPES.ADDITIONAL,
                   index: currentAdditional.length, // Nowy indeks w tablicy
                   id: regimentId,
-                  sourceIndex: sourceIndex, // KLUCZOWE: Zapamiętujemy, z którego kafelka pochodzi
+                  sourceIndex: sourceIndex, // KLUCZOWE: Wiążemy z kafelkiem z puli
                   customName: "",
                   config: newConfig
               };

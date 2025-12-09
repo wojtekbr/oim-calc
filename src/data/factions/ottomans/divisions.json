@@ -97,7 +97,6 @@
     "additional_regiments": {
       "max_amount": 2,
       "regiments_list": [
-          "none",
           "ott_janissary",
           "ott_sipahi_europ",
           "ott_sipahi_europ",
