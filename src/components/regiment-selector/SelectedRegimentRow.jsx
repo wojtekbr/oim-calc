@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "../../pages/RegimentSelector.module.css";
+import { GROUP_TYPES } from "../../constants";
 import { collectRegimentUnits } from "../../utils/armyMath";
 
 export const SelectedRegimentRow = ({
@@ -18,15 +19,22 @@ export const SelectedRegimentRow = ({
     const finalMotivation = stats.motivation + (isMainForce ? 1 : 0);
 
     const isRegimentAllied = isAllied(regiment.id);
-    const isMainForceCandidate = !isRegimentAllied && stats.cost === currentMainForceCost && !isMainForce;
 
+    // FIX: Dodano warunek group !== VANGUARD
+    const isMainForceCandidate =
+        group !== GROUP_TYPES.VANGUARD &&
+        !isRegimentAllied &&
+        stats.cost === currentMainForceCost &&
+        !isMainForce;
+
+    // Filtrujemy wsparcie dla tego pułku
     const mySupport = supportUnits.filter(su => su.assignedTo?.positionKey === positionKey);
     const puUsed = calculateRegimentPU(regiment.config, regiment.id, mySupport);
 
     const def = getRegimentDefinition(regiment.id);
     const defName = def ? def.name : regiment.id;
 
-    // Zbieramy listę wszystkich jednostek do wyświetlenia
+    // Zbieramy listę wszystkich jednostek do wyświetlenia (jednostki pułku + wsparcie)
     const internalUnits = collectRegimentUnits(regiment.config, def).map(u => ({
         id: u.unitId,
         isSupport: false
@@ -41,9 +49,8 @@ export const SelectedRegimentRow = ({
 
     return (
         <div className={styles.regimentRow}>
-            {/* ZMIANA: Usunięto style inline, gap w CSS załatwia sprawę */}
             <div className={styles.regHeader}>
-                <div style={{flex: 1, minWidth: 0}}> {/* minWidth: 0 zapobiega rozpychaniu flexa przez tekst */}
+                <div style={{flex: 1, minWidth: 0}}>
                     <div className={styles.regTopRow}>
                         <div className={styles.regTitle}>#{index+1} {defName}</div>
                         <input
@@ -54,6 +61,7 @@ export const SelectedRegimentRow = ({
                         />
                     </div>
 
+                    {/* Lista jednostek (Przywrócona) */}
                     <div className={styles.regimentUnitsPreview}>
                         {allUnits.map((u, i) => {
                             const unitName = unitsMap[u.id]?.name || u.id;
@@ -80,6 +88,7 @@ export const SelectedRegimentRow = ({
                         {isMainForce && <div className={`${styles.statusLabel} ${styles.statusMainForce}`}>SIŁY GŁÓWNE</div>}
                         {isRegimentAllied && <div className={`${styles.statusLabel} ${styles.statusAlly}`}>PUŁK SOJUSZNICZY</div>}
 
+                        {/* Przycisk tylko dla kandydatów spoza Straży Przedniej */}
                         {isMainForceCandidate && (
                             <button
                                 onClick={() => onMainForceSelect(positionKey)}
@@ -95,6 +104,8 @@ export const SelectedRegimentRow = ({
                     </div>
                 </div>
             </div>
+
+            {/* Usunięto stary pasek "Wsparcie: ..." na rzecz listy powyżej */}
         </div>
     );
 };
