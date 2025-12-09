@@ -15,14 +15,9 @@ export const SelectedRegimentRow = ({
 
     // Bonusy za bycie siłami głównymi (+1)
     const finalActivations = stats.activations + (isMainForce ? 1 : 0);
-    const finalMotivation = stats.motivation + (isMainForce ? 1 : 0); // Zakładamy, że stats.motivation to baza
+    const finalMotivation = stats.motivation + (isMainForce ? 1 : 0);
 
     const isRegimentAllied = isAllied(regiment.id);
-
-    // Warunek wyświetlenia przycisku:
-    // 1. Nie jest sojusznikiem.
-    // 2. Jego koszt jest równy kosztowi obecnych sił głównych (czyli jest kandydatem).
-    // 3. Nie jest już wybrany jako siły główne.
     const isMainForceCandidate = !isRegimentAllied && stats.cost === currentMainForceCost && !isMainForce;
 
     const mySupport = supportUnits.filter(su => su.assignedTo?.positionKey === positionKey);
@@ -46,8 +41,9 @@ export const SelectedRegimentRow = ({
 
     return (
         <div className={styles.regimentRow}>
+            {/* ZMIANA: Usunięto style inline, gap w CSS załatwia sprawę */}
             <div className={styles.regHeader}>
-                <div style={{flex: 1}}>
+                <div style={{flex: 1, minWidth: 0}}> {/* minWidth: 0 zapobiega rozpychaniu flexa przez tekst */}
                     <div className={styles.regTopRow}>
                         <div className={styles.regTitle}>#{index+1} {defName}</div>
                         <input
@@ -72,11 +68,11 @@ export const SelectedRegimentRow = ({
                     </div>
                 </div>
 
-                <div style={{display:'flex', flexDirection: 'column', alignItems: 'flex-end', marginLeft: 20, minWidth: 180}}>
+                <div className={styles.regRightColumn}>
                     <div className={styles.regCost}>{stats.cost} pkt</div>
 
-                    <div className={styles.regStats} style={{marginTop: 8}}>
-                        <div style={{marginBottom: 6, color: '#444', fontWeight: 600}}>Typ: {stats.regimentType}</div>
+                    <div className={styles.regStats}>
+                        <div className={styles.regTypeLabel}>Typ: {stats.regimentType}</div>
 
                         <div>Znaczniki Aktywacji: <strong>{finalActivations}</strong></div>
                         <div>Motywacja: <strong>{finalMotivation}</strong></div>
@@ -84,7 +80,6 @@ export const SelectedRegimentRow = ({
                         {isMainForce && <div className={`${styles.statusLabel} ${styles.statusMainForce}`}>SIŁY GŁÓWNE</div>}
                         {isRegimentAllied && <div className={`${styles.statusLabel} ${styles.statusAlly}`}>PUŁK SOJUSZNICZY</div>}
 
-                        {/* PRZYCISK WYBORU SIŁ GŁÓWNYCH */}
                         {isMainForceCandidate && (
                             <button
                                 onClick={() => onMainForceSelect(positionKey)}
@@ -94,7 +89,7 @@ export const SelectedRegimentRow = ({
                             </button>
                         )}
 
-                        {puUsed > 0 && <div style={{marginTop: 6, color: '#2e7d32', fontSize:11}}>Wykorzystane PU: <strong>{puUsed}</strong></div>}
+                        {puUsed > 0 && <div className={styles.puUsedLabel}>Wykorzystane PU: <strong>{puUsed}</strong></div>}
 
                         <button className={styles.editBtn} onClick={() => onOpenEditor(group, index)}>Konfiguruj Pułk ›</button>
                     </div>
