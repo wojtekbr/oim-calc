@@ -21,7 +21,6 @@ export const RegimentBlock = ({ group, regiments, definitionOptions, mainForceKe
              return (
                 <div key={`${group}-${index}`} className={styles.regimentRow}>
                      <div style={{marginBottom: 10}}>
-                        <div style={{fontSize: 11, fontWeight: 'bold', color: '#666', textTransform: 'uppercase', marginBottom: 6}}>Zmień wybór:</div>
                         <div className={styles.optionsGrid}>
                             {options.filter(optId => optId !== IDS.NONE).map(optId => {
                                 const isActive = currentRegimentId === optId;
