@@ -1,10 +1,11 @@
 import { IDS, GROUP_TYPES, RANK_TYPES } from "../constants";
 import { DIVISION_RULES_REGISTRY } from "./divisionRules";
-import { applyRegimentRuleStats } from "./regimentRules";
+import { REGIMENT_RULES_REGISTRY, applyRegimentRuleStats } from "./regimentRules";
 
-// Pomocnicza: Oblicza koszt ulepszenia
+// Pomocnicza: Oblicza koszt ulepszenia (obsługa stringów "double", "triple")
 const resolveCostRule = (baseCost, rule) => {
     const safeBase = Number(baseCost) || 0;
+
     if (rule === 'normal') return safeBase;
     if (rule === 'double') return safeBase * 2;
     if (rule === 'triple') return safeBase * 3;
@@ -17,7 +18,7 @@ const resolveCostRule = (baseCost, rule) => {
 };
 
 export const calculateSingleImprovementIMPCost = (unitDef, impId, regimentDefinition, commonImprovements) => {
-    const improvementBaseCost = unitDef?.improvement_cost || 0;
+    const improvementBaseCost = Number(unitDef?.improvement_cost || 0);
     const regImpDef = regimentDefinition?.unit_improvements?.find(i => i.id === impId);
     const commonImpDef = commonImprovements?.[impId];
 
@@ -38,10 +39,12 @@ export const calculateSingleImprovementArmyCost = (unitDef, impId, regimentDefin
     const commonImpDef = commonImprovements?.[impId];
 
     if (regImpRef || (commonImpDef && commonImpDef.type === 'regiment')) {
-        if (regImpRef?.army_cost_override !== undefined) return regImpRef.army_cost_override;
-        if (regImpRef?.army_point_cost !== undefined) return regImpRef.army_point_cost;
-        if (commonImpDef?.army_point_cost !== undefined) return commonImpDef.army_point_cost;
-        return 0;
+        let val = 0;
+        if (regImpRef?.army_cost_override !== undefined) val = regImpRef.army_cost_override;
+        else if (regImpRef?.army_point_cost !== undefined) val = regImpRef.army_point_cost;
+        else if (commonImpDef?.army_point_cost !== undefined) val = commonImpDef.army_point_cost;
+
+        return Number(val) || 0;
     }
     return 0;
 };
@@ -314,15 +317,12 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         }
     }
 
-    // Aplikowanie zasad pułkowych (modyfikacja statystyk)
     stats = applyRegimentRuleStats(stats, activeUnits, regimentDefinition);
 
-    // Aplikowanie zasad dywizyjnych (modyfikacja statystyk i kosztów PS)
     if (configuredDivision && configuredDivision.divisionDefinition?.rules) {
         configuredDivision.divisionDefinition.rules.forEach(rule => {
             const ruleImpl = DIVISION_RULES_REGISTRY[rule.id];
 
-            // Bonusy do statystyk
             if (ruleImpl && ruleImpl.getRegimentStatsBonus) {
                 const bonus = ruleImpl.getRegimentStatsBonus(configuredDivision, regimentId, rule);
                 if (bonus) {
@@ -330,7 +330,6 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
                 }
             }
 
-            // Bonusy do kosztu PS
             if (ruleImpl && ruleImpl.getRegimentCostModifier) {
                 const costMod = ruleImpl.getRegimentCostModifier(configuredDivision, regimentId, rule);
                 if (costMod && costMod.ps) {
@@ -343,12 +342,108 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     return stats;
 };
 
+export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition, targetUnitId, targetImpId) => {
+    if (!regimentDefinition) return false;
+
+    const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
+
+    // Inicjalizujemy stan zużycia zasad
+    const rulesUsageState = {};
+    if (regimentDefinition.special_rules) {
+        regimentDefinition.special_rules.forEach((ruleEntry, idx) => {
+            rulesUsageState[idx] = { usedCount: 0 };
+        });
+    }
+
+    let isTargetFree = false;
+
+    // Symulujemy przejście przez wszystkie jednostki
+    activeUnits.forEach(u => {
+        const unitImps = regimentConfig.improvements?.[u.key] || [];
+
+        // Budujemy listę ulepszeń do sprawdzenia dla tej jednostki.
+        // Jeśli to jest nasza docelowa jednostka (targetUnitId),
+        // to "udajemy", że ma już to ulepszenie (targetImpId), żeby sprawdzić czy zostanie uznane za darmowe.
+        const impsToCheck = (u.unitId === targetUnitId)
+            ? [...unitImps, targetImpId] // Dodajemy symulacyjnie
+            : unitImps; // Inne jednostki sprawdzamy bez zmian
+
+        impsToCheck.forEach(impId => {
+            if (regimentDefinition.special_rules) {
+                regimentDefinition.special_rules.forEach((ruleEntry, ruleIdx) => {
+                    const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
+                    const params = typeof ruleEntry === 'object' ? ruleEntry : {};
+                    const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
+
+                    if (ruleImpl && ruleImpl.isImprovementFree) {
+                        // Sprawdzamy czy zasada "pokrywa" to ulepszenie
+                        const isFree = ruleImpl.isImprovementFree(u.unitId, impId, params, rulesUsageState[ruleIdx]);
+
+                        // Jeśli to jest TO ulepszenie, o które pytamy, i system uznał je za darmowe
+                        if (u.unitId === targetUnitId && impId === targetImpId && isFree) {
+                            isTargetFree = true;
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+    return isTargetFree;
+};
+
+// --- NOWA FUNKCJA: Obliczanie "efektywnej" liczby ulepszeń (pomijając darmowe) ---
+export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefinition, improvementId) => {
+    if (!regimentDefinition) return 0;
+
+    const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
+
+    // Inicjalizacja stanu dla zasad
+    const rulesUsageState = {};
+    if (regimentDefinition.special_rules) {
+        regimentDefinition.special_rules.forEach((ruleEntry, idx) => {
+            rulesUsageState[idx] = { usedCount: 0 };
+        });
+    }
+
+    let count = 0;
+
+    activeUnits.forEach(u => {
+        const unitImps = regimentConfig.improvements?.[u.key] || [];
+
+        if (unitImps.includes(improvementId)) {
+            let isFree = false;
+
+            if (regimentDefinition.special_rules) {
+                regimentDefinition.special_rules.forEach((ruleEntry, ruleIdx) => {
+                    const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
+                    const params = typeof ruleEntry === 'object' ? ruleEntry : {};
+                    const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
+
+                    if (ruleImpl && ruleImpl.isImprovementFree) {
+                        // Sprawdzamy czy zasada czyni to ulepszenie darmowym
+                        if (ruleImpl.isImprovementFree(u.unitId, improvementId, params, rulesUsageState[ruleIdx])) {
+                            isFree = true;
+                        }
+                    }
+                });
+            }
+
+            if (!isFree) {
+                count++;
+            }
+        }
+    });
+
+    return count;
+};
+
 export const calculateRegimentImprovementPoints = (
     regimentConfig,
     regimentId,
     unitsMap,
     getRegimentDefinition,
-    commonImprovements, // Corrected variable name
+    commonImprovements, // Nazwa poprawna
     assignedSupportUnits = [],
     divisionDefinition = null
 ) => {
@@ -358,7 +453,6 @@ export const calculateRegimentImprovementPoints = (
 
     let totalImpCost = 0;
 
-    // 0. Regiment Base PU Cost
     if (regimentDefinition.improvement_points_cost) {
         totalImpCost += Number(regimentDefinition.improvement_points_cost) || 0;
     }
@@ -370,7 +464,6 @@ export const calculateRegimentImprovementPoints = (
         return Number(u.improvement_points_cost || u.pu_cost || 0);
     };
 
-    // 1. Regiment Improvements
     const regimentImprovementsDefinition = regimentDefinition.regiment_improvements || [];
     (regimentConfig.regimentImprovements || []).forEach(impId => {
         const regImpRef = regimentImprovementsDefinition.find(i => i.id === impId);
@@ -387,7 +480,6 @@ export const calculateRegimentImprovementPoints = (
         totalImpCost += Number(cost) || 0;
     });
 
-    // 2. Unit Improvements
     const improvementsMap = regimentConfig.improvements || {};
     const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
 
@@ -404,7 +496,6 @@ export const calculateRegimentImprovementPoints = (
         });
     });
 
-    // 3. Support Units
     if (assignedSupportUnits && assignedSupportUnits.length > 0) {
         assignedSupportUnits.forEach(su => {
             const supportUnitDef = unitsMap[su.id];
@@ -423,13 +514,37 @@ export const calculateRegimentImprovementPoints = (
         });
     }
 
-    // 4. DIVISION RULES - DISCOUNTS (e.g. "Czaty")
+    // --- ZNIŻKI Z ZASAD PUŁKOWYCH ---
+    if (regimentDefinition.special_rules) {
+        regimentDefinition.special_rules.forEach(ruleEntry => {
+            const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
+            const params = typeof ruleEntry === 'object' ? ruleEntry : {};
+
+            const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
+            if (ruleImpl && ruleImpl.calculateImprovementDiscount) {
+                // Przekazujemy funkcję kosztu (Dependency Injection)
+                const discount = ruleImpl.calculateImprovementDiscount(
+                    activeUnits,
+                    regimentConfig,
+                    commonImprovements,
+                    params,
+                    unitsMap,
+                    regimentDefinition,
+                    calculateSingleImprovementIMPCost // <-- To pozwala obsłużyć "double"
+                );
+                totalImpCost -= (Number(discount) || 0);
+            }
+        });
+    }
+
+    // --- ZNIŻKI Z ZASAD DYWIZYJNYCH ---
     if (divisionDefinition?.rules) {
+        const activeUnitsList = collectRegimentUnits(regimentConfig, regimentDefinition);
+
         divisionDefinition.rules.forEach(ruleConfig => {
             let ruleId = ruleConfig.id;
             let params = ruleConfig;
 
-            // Map alias "czaty" to generic rule
             if (ruleId === "czaty") {
                 ruleId = "free_improvement_for_specific_units";
                 params = {
@@ -441,14 +556,8 @@ export const calculateRegimentImprovementPoints = (
 
             const ruleImpl = DIVISION_RULES_REGISTRY[ruleId];
             if (ruleImpl && ruleImpl.calculateDiscount) {
-                // Ensure commonImprovements is passed correctly
-                const discount = ruleImpl.calculateDiscount(regimentConfig, activeUnits, commonImprovements, params);
-
-                // Safety check against NaN
-                const safeDiscount = Number(discount);
-                if (!isNaN(safeDiscount)) {
-                    totalImpCost -= safeDiscount;
-                }
+                const discount = ruleImpl.calculateDiscount(regimentConfig, activeUnitsList, commonImprovements, params);
+                totalImpCost -= (Number(discount) || 0);
             }
         });
     }
@@ -485,7 +594,6 @@ export const calculateImprovementPointsCost = (divisionConfig, unitsMap, getRegi
         const attachedSupport = (divisionConfig.supportUnits || [])
             .filter(su => su.assignedTo?.positionKey === posKey);
 
-        // Pass commonImprovements and divisionDefinition
         totalImpCost += calculateRegimentImprovementPoints(
             regiment.config,
             regiment.id,
@@ -496,7 +604,6 @@ export const calculateImprovementPointsCost = (divisionConfig, unitsMap, getRegi
             divisionConfig.divisionDefinition
         );
 
-        // Extra Regiment Cost (PU)
         if (divisionConfig.divisionDefinition?.rules) {
             divisionConfig.divisionDefinition.rules.forEach(rule => {
                 const ruleImpl = DIVISION_RULES_REGISTRY[rule.id];

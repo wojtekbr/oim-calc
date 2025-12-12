@@ -76,37 +76,26 @@ export default function RegimentSelector(props) {
         }
     };
 
-    // --- Helper renderowania wsparcia (wewnątrz komponentu, ma dostęp do scope) ---
+    // --- Helper renderowania wsparcia ---
     const renderSupportItem = (item, idx) => {
         const renderTile = (unitId) => {
             const isPurchased = state.purchasedSlotsMap[idx] === unitId;
-
-            // 1. Sprawdź wymagania specyficzne dla tej opcji/pakietu
             const specificUnitDef = state.unitsMap[unitId];
-            let reqCheck = checkSupportUnitRequirements(
-                specificUnitDef,
-                configuredDivision,
-                getRegimentDefinition,
-                state.unitsMap
-            );
+            let reqCheck = { isAllowed: true, reason: null };
 
-            // 2. Jeśli opcja OK, sprawdź wymagania grupy (item)
+            if (specificUnitDef) {
+                reqCheck = checkSupportUnitRequirements(specificUnitDef, configuredDivision, getRegimentDefinition, state.unitsMap);
+            }
+
             if (reqCheck.isAllowed) {
-                reqCheck = checkSupportUnitRequirements(
-                    item,
-                    configuredDivision,
-                    getRegimentDefinition,
-                    state.unitsMap
-                );
+                const groupReqCheck = checkSupportUnitRequirements(item, configuredDivision, getRegimentDefinition, state.unitsMap);
+                if (!groupReqCheck.isAllowed) {
+                    reqCheck = groupReqCheck;
+                }
             }
 
             const locked = !isPurchased && !reqCheck.isAllowed;
-
-            // Pobieramy instancje (może być ich wiele jeśli to pakiet)
             const purchasedInstances = configuredDivision.supportUnits.filter(su => su.definitionIndex === idx);
-
-            // FIX: Dla pojedynczych jednostek (stary system), bierzemy assignment pierwszej instancji
-            // Dzięki temu kafelek nie "odskakuje" wizualnie
             const assignmentInfo = purchasedInstances.length > 0 ? purchasedInstances[0].assignedTo : null;
 
             return (
@@ -117,11 +106,8 @@ export default function RegimentSelector(props) {
                     onRemove={() => handlers.handleRemoveSupportUnit(idx)}
                     onClick={() => handlers.handleBuySupportUnit(unitId, idx, remainingImprovementPoints)}
                     unitDef={specificUnitDef}
-
-                    // FIX: Przekazujemy oba, aby SupportUnitTile mógł obsłużyć i pakiety, i pojedyncze
                     assignmentInfo={assignmentInfo}
                     purchasedInstances={purchasedInstances}
-
                     regimentsList={state.regimentsList} unitsRulesMap={state.unitsRulesMap} supportUnits={configuredDivision.supportUnits} calculateStats={calcStatsWrapper} getRegimentDefinition={getRegimentDefinition}
                 />
             );
@@ -186,7 +172,7 @@ export default function RegimentSelector(props) {
             <div className={styles.twoColumnRow}>
                 <div className={styles.columnWrapper}>
                     {divisionDefinition.general && divisionDefinition.general.length > 0 && (
-                        <div className={styles.sectionRowFit}>
+                        <div className={styles.sectionRow}>
                             <div className={styles.sectionLabel}><span className={styles.sectionLabelText}>Głównodowodzący</span></div>
                             <div className={styles.sectionContent}>
                                 <div className={styles.optionsGrid}>
@@ -199,7 +185,7 @@ export default function RegimentSelector(props) {
                     )}
                 </div>
                 <div className={styles.columnWrapper}>
-                    <div className={styles.sectionRowFit}>
+                    <div className={styles.sectionRow}>
                         <div className={styles.sectionLabel}><span className={styles.sectionLabelText}>Wsparcie</span></div>
                         <div className={styles.sectionContent}>
                             <div className={styles.supportColumns}>

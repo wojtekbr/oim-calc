@@ -542,6 +542,19 @@ export const DIVISION_RULES_DEFINITIONS = {
     "czaty": {
         title: "Czaty",
         getDescription: () => "W każdym pułku, jednej jednostce (S Mołojców Strzelców i S Rejestrowych lub M Czerni) można za darmo przydzielić Ulepszenie: Partyzanci."
+    },
+    "tam_duzo_myltykow": {
+        title: "Tam dużo myłtyków",
+        getDescription: () => "Zasada opisana w podręczniku OiM2"
+    },
+    "rozlaly_sie_zagony tatarskie": {
+        title: "Rozlały się zagony",
+        getDescription: () => "Jeżeli Gracz dowodzący tą armią wygra przeciwstawny test Zwiadu i wybierze efekt Zwiadu: Flankowanie, to może zamienić go na Dalekie obejście.\n" +
+            "Zamiast w strefie rozstawienia, można jeden pułk jazdy albo dragonów, albo piechoty z zasadą Podragonieni wystawić w kontakcie z boczną krawędzią pola bitwy, nie bliżej niż 12” od krawędzi należącej do przeciwnika lub dowolnej jego Jednostki."
+    },
+    "jasyr": {
+        title: "Jasyr",
+        getDescription: () => "Za każdy Czambuł (Beja, Nuradyna, Mirzy, Nogajów) niebędący pułkiem Straży Przedniej, gracz tatarski musi wystawić grupę Jasyr. Po zakończeniu wstawienia, przeciwnik gracza tatarskiego ustawia Jasyr w zasięgu 4” od dowolnej Jednostki tatarskiej w dowolnej podstrefie rozstawienia lub jeżeli nie ma strefy rozstawienia, w 4\" od dowolnej Jednostki tatarskiej z wyłączeniem jednostek z pułku Straży Przedniej. Każdy pułk tatarski otrzymuje +1 motywacji. Jeżeli na koniec gry przynajmniej połowa grup Jasyru przekroczy próg ucieczki, Przeciwnik otrzymuje 1VP (punkty liczone za scenariusz. Przekroczenie progu ucieczki przez każdą grupę Jasyru powoduje, że każdy pułk Tatarski traci 1 punkt motywacji. "
     }
 };
 
