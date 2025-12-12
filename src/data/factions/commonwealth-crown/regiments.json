@@ -485,7 +485,7 @@
     "awareness": 3,
     "activations": 2,
     "special_rules": [
-      "posluch",
+      "posluch_kor",
       "pospolitacy",
       "lanowa_makes_mixed",
       "artillery_req_lanowa_m",

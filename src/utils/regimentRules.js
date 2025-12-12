@@ -56,6 +56,23 @@ export const REGIMENT_RULES_REGISTRY = {
              }
              return null;
          }
+    },
+
+    "chlopscy_szpiedzy": {
+        modifyStats: (stats, activeUnits) => {
+            const peasantCount = activeUnits.filter(u => u.unitId.includes("czer")).length;
+
+            if (peasantCount > 0) {
+                return {
+                    recon: (stats.recon || 0) + peasantCount,
+                    awareness: (stats.awareness || 0) + 1
+                };
+            }
+            return {
+                recon: (stats.recon || 0),
+                awareness: (stats.awareness || 0)
+            };
+        }
     }
 };
 
@@ -81,9 +98,9 @@ export const REGIMENT_RULES_DEFINITIONS = {
     title: "Kethuda ma statystyki Agi",
     description: "Kethuda w tym pułku posiada statystyki Agi (G1)."
   },
-  "posluch": {
+  "posluch_kor": {
     title: "Posłuch",
-    description: "Zasada specjalna opisana w podręczniku."
+    description: "Każdy Pułkownik z Partii Wolontarskiej, raz podczas wydawania rozkazu jednostce Wolontarzy może pominąć zasadę Niesubordynacja. Gracz musi poinformować przeciwnika w momencie korzystania z tej zasady."
   },
   "pospolitacy": {
     title: "Pospolitacy",
@@ -108,7 +125,16 @@ export const REGIMENT_RULES_DEFINITIONS = {
   "roznorodne_wyposazenie": {
     title: "Różnorodne wyposażenie",
     description: "Zasada specjalna opisana w podręczniku (1)."
-  }
+  },
+  "posluch_cos": {
+        title: "Posłuch",
+        description: "Raz podczas wydawania rozkazu jednostce można pominąć zasadę Niesubordynacja. Gracz musi poinformować przeciwnika w momencie korzystania z tej zasady."
+    },
+
+    "chlopscy_szpiedzy": {
+        title: "Chłopscy szpiedzy",
+        description: "Wystawiając Pułk Czerni, Dywizja dostaje dodatkowo tyle wartości wywiadu, ile Jednostek Czerni zostało wystawionych i +1 Czujności"
+    },
 };
 
 // --- HELPERS ---

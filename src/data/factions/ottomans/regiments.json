@@ -363,7 +363,8 @@
         "general": [
           {
             "unit1": {
-              "units": ["ott_kethuda"]
+              "units": ["ott_kethuda"],
+              "is_toggle": true
             }
           }
         ],
@@ -430,7 +431,8 @@
         "general": [
           {
             "unit1": {
-              "units": ["ott_aga"]
+              "units": ["ott_aga"],
+              "is_toggle": true
             }
           }
         ],
@@ -519,7 +521,8 @@
         "general": [
           {
             "unit1": {
-              "units": ["ott_kethuda"]
+              "units": ["ott_kethuda"],
+              "is_toggle": true
             }
           }
         ],

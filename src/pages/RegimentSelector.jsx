@@ -5,15 +5,14 @@ import { useRegimentSelectorLogic } from "./useRegimentSelectorLogic";
 import styles from "./RegimentSelector.module.css";
 import {
     calculateRegimentStats,
-    calculateDivisionType,
+    calculateRegimentImprovementPoints,
     validateVanguardCost,
     validateAlliedCost,
-    calculateRegimentImprovementPoints
+    calculateDivisionType
 } from "../utils/armyMath";
-import { checkDivisionConstraints, getDivisionRulesDescriptions, checkSupportUnitRequirements } from "../utils/divisionRules";
-import { IDS, GROUP_TYPES } from "../constants";
+import { getDivisionRulesDescriptions, checkSupportUnitRequirements } from "../utils/divisionRules";
+import { GROUP_TYPES } from "../constants";
 import { useArmyData } from "../context/ArmyDataContext";
-import { getInitials, getPlaceholderStyle } from "../utils/uiHelpers";
 
 // --- IMPORTY KOMPONENTÓW ---
 import { SupportUnitTile } from "../components/regiment-selector/SupportUnitTile";
@@ -35,9 +34,9 @@ export default function RegimentSelector(props) {
     const { improvements } = useArmyData();
     const [showRules, setShowRules] = useState(false);
 
-    // --- Helpery obliczeniowe (Wrappery) ---
+    // --- Helpery obliczeniowe ---
     const calcStatsWrapper = (config, id) => calculateRegimentStats(config, id, configuredDivision, unitsMap, getRegimentDefinition, improvements);
-    const calcPuWrapper = (config, id, regimentSupport) => calculateRegimentImprovementPoints(config, id, unitsMap, getRegimentDefinition, improvements, regimentSupport);
+    const calcPuWrapper = (config, id, regimentSupport) => calculateRegimentImprovementPoints(config, id, unitsMap, getRegimentDefinition, improvements, regimentSupport, divisionDefinition);
 
     // --- Walidacje ---
     const vanguardCheck = validateVanguardCost(configuredDivision, unitsMap, faction, getRegimentDefinition, improvements);
@@ -60,8 +59,6 @@ export default function RegimentSelector(props) {
     const generalId = configuredDivision.general;
     const generalDef = generalId ? unitsMap[generalId] : null;
 
-    // Unassigned support - pobieramy z props, ale filtrujemy lokalnie lub w hooku. Hook ma to w 'state.activeRegimentsList' ale to lista pułków.
-    // Prościej:
     const unassignedSupport = configuredDivision.supportUnits.filter(su => !su.assignedTo);
 
     const useNewAdditionalLogic = !!divisionDefinition.additional_regiments;
@@ -79,6 +76,77 @@ export default function RegimentSelector(props) {
         }
     };
 
+    // --- Helper renderowania wsparcia (wewnątrz komponentu, ma dostęp do scope) ---
+    const renderSupportItem = (item, idx) => {
+        const renderTile = (unitId) => {
+            const isPurchased = state.purchasedSlotsMap[idx] === unitId;
+
+            // 1. Sprawdź wymagania specyficzne dla tej opcji/pakietu
+            const specificUnitDef = state.unitsMap[unitId];
+            let reqCheck = checkSupportUnitRequirements(
+                specificUnitDef,
+                configuredDivision,
+                getRegimentDefinition,
+                state.unitsMap
+            );
+
+            // 2. Jeśli opcja OK, sprawdź wymagania grupy (item)
+            if (reqCheck.isAllowed) {
+                reqCheck = checkSupportUnitRequirements(
+                    item,
+                    configuredDivision,
+                    getRegimentDefinition,
+                    state.unitsMap
+                );
+            }
+
+            const locked = !isPurchased && !reqCheck.isAllowed;
+
+            // Pobieramy instancje (może być ich wiele jeśli to pakiet)
+            const purchasedInstances = configuredDivision.supportUnits.filter(su => su.definitionIndex === idx);
+
+            // FIX: Dla pojedynczych jednostek (stary system), bierzemy assignment pierwszej instancji
+            // Dzięki temu kafelek nie "odskakuje" wizualnie
+            const assignmentInfo = purchasedInstances.length > 0 ? purchasedInstances[0].assignedTo : null;
+
+            return (
+                <SupportUnitTile
+                    key={unitId} unitId={unitId} isPurchased={isPurchased} locked={locked}
+                    disabledReason={reqCheck.reason}
+                    onAssign={(posKey, instanceId) => handlers.handleAssignSupportUnit(idx, posKey, instanceId)}
+                    onRemove={() => handlers.handleRemoveSupportUnit(idx)}
+                    onClick={() => handlers.handleBuySupportUnit(unitId, idx, remainingImprovementPoints)}
+                    unitDef={specificUnitDef}
+
+                    // FIX: Przekazujemy oba, aby SupportUnitTile mógł obsłużyć i pakiety, i pojedyncze
+                    assignmentInfo={assignmentInfo}
+                    purchasedInstances={purchasedInstances}
+
+                    regimentsList={state.regimentsList} unitsRulesMap={state.unitsRulesMap} supportUnits={configuredDivision.supportUnits} calculateStats={calcStatsWrapper} getRegimentDefinition={getRegimentDefinition}
+                />
+            );
+        };
+
+        if (typeof item === 'string' || (typeof item === 'object' && !item.type)) {
+            const unitId = typeof item === 'string' ? item : (item.name || item.id);
+            return renderTile(unitId);
+        }
+        if (typeof item === 'object' && item.type === 'group') {
+            return (
+                <div key={idx} className={styles.supportGroupContainer}>
+                    <div className={styles.supportGroupName}>{item.name}</div>
+                    <div className={styles.supportGroupFlex}>
+                        {item.options.map(opt => {
+                            const optId = typeof opt === 'object' ? opt.id : opt;
+                            return renderTile(optId);
+                        })}
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
+
     return (
         <div className={`${styles.container} ${getThemeClass()}`} onContextMenu={(e) => { e.preventDefault(); return false; }}>
             <div className={styles.header}>
@@ -94,11 +162,10 @@ export default function RegimentSelector(props) {
             </div>
 
             <div className={styles.inputsRow}>
-                <input className={styles.inputField} placeholder="Nazwa Gracza" value={state.playerName} onChange={e => state.setPlayerName(e.target.value)} style={{ flex: 1 }} />
+                <input className={styles.inputField} placeholder="Gracz" value={state.playerName} onChange={e => state.setPlayerName(e.target.value)} style={{ flex: 1 }} />
                 <input className={styles.inputField} placeholder="Nazwa Własna Dywizji" value={state.divisionCustomName} onChange={e => state.setDivisionCustomName(e.target.value)} style={{ flex: 3 }} />
             </div>
 
-            {/* PODSUMOWANIE (Wydzielony Komponent) */}
             <SummaryCard
                 divisionType={divisionType}
                 totalDivisionCost={totalDivisionCost}
@@ -116,12 +183,10 @@ export default function RegimentSelector(props) {
 
             {hasCriticalErrors && (<div className={styles.errorContainer}><h4 className={styles.errorHeader}>⚠️ Błędy w konstrukcji dywizji:</h4><ul className={styles.errorList}>{allValidationErrors.map((err, idx) => (<li key={idx} className={styles.errorItem}>{err}</li>))}</ul></div>)}
 
-            {/* --- KONTENER NA DWA RZĘDY SEKCJI (DOWÓDCA + WSPARCIE) --- */}
             <div className={styles.twoColumnRow}>
-                {/* DOWÓDCA */}
                 <div className={styles.columnWrapper}>
                     {divisionDefinition.general && divisionDefinition.general.length > 0 && (
-                        <div className={styles.sectionRow} style={{ height: '100%', marginBottom: 0 }}>
+                        <div className={styles.sectionRowFit}>
                             <div className={styles.sectionLabel}><span className={styles.sectionLabelText}>Głównodowodzący</span></div>
                             <div className={styles.sectionContent}>
                                 <div className={styles.optionsGrid}>
@@ -133,44 +198,21 @@ export default function RegimentSelector(props) {
                         </div>
                     )}
                 </div>
-                {/* WSPARCIE */}
                 <div className={styles.columnWrapper}>
-                    <div className={styles.sectionRow} style={{ height: '100%', marginBottom: 0 }}>
+                    <div className={styles.sectionRowFit}>
                         <div className={styles.sectionLabel}><span className={styles.sectionLabelText}>Wsparcie</span></div>
                         <div className={styles.sectionContent}>
                             <div className={styles.supportColumns}>
                                 <div>
                                     <div className={styles.supportGroupTitle}>Artyleria Dywizyjna</div>
                                     <div className={styles.supportGrid}>
-                                        {divisionArtilleryDefinitions.map((item, idx) => {
-                                            const realIdx = idx;
-                                            const renderTile = (unitId) => {
-                                                const isPurchased = state.purchasedSlotsMap[realIdx] === unitId;
-                                                const reqCheck = checkSupportUnitRequirements(item, configuredDivision, getRegimentDefinition);
-                                                const locked = !isPurchased && !reqCheck.isAllowed;
-                                                return (<SupportUnitTile key={unitId} unitId={unitId} isPurchased={isPurchased} locked={locked} disabledReason={reqCheck.reason} onAssign={(posKey) => handlers.handleAssignSupportUnit(realIdx, posKey)} onRemove={() => handlers.handleRemoveSupportUnit(realIdx)} onClick={() => handlers.handleBuySupportUnit(unitId, realIdx, remainingImprovementPoints)} unitDef={unitsMap[unitId]} assignmentInfo={state.purchasedSlotsMap[realIdx] === unitId ? configuredDivision.supportUnits.find(su => su.definitionIndex === realIdx)?.assignedTo : null} regimentsList={state.regimentsList} unitsRulesMap={state.unitsRulesMap} supportUnits={configuredDivision.supportUnits} calculateStats={calcStatsWrapper} getRegimentDefinition={getRegimentDefinition} />);
-                                            };
-                                            if (typeof item === 'string' || (typeof item === 'object' && !item.type)) return renderTile(typeof item === 'string' ? item : (item.name || item.id));
-                                            if (typeof item === 'object' && item.type === 'group') return (<div key={realIdx} className={styles.supportGroupContainer}><div className={styles.supportGroupName}>{item.name}</div><div className={styles.supportGroupFlex}>{item.options.map(opt => renderTile(opt))}</div></div>);
-                                            return null;
-                                        })}
+                                        {divisionArtilleryDefinitions.map((item, idx) => renderSupportItem(item, idx))}
                                     </div>
                                 </div>
                                 <div>
                                     <div className={styles.supportGroupTitle}>Elementy Dodatkowe</div>
                                     <div className={styles.supportGrid}>
-                                        {additionalUnitsDefinitions.map((item, idx) => {
-                                            const realIdx = idx + divisionArtilleryDefinitions.length;
-                                            const renderTile = (unitId) => {
-                                                const isPurchased = state.purchasedSlotsMap[realIdx] === unitId;
-                                                const reqCheck = checkSupportUnitRequirements(item, configuredDivision, getRegimentDefinition);
-                                                const locked = !isPurchased && !reqCheck.isAllowed;
-                                                return (<SupportUnitTile key={unitId} unitId={unitId} isPurchased={isPurchased} locked={locked} disabledReason={reqCheck.reason} onAssign={(posKey) => handlers.handleAssignSupportUnit(realIdx, posKey)} onRemove={() => handlers.handleRemoveSupportUnit(realIdx)} onClick={() => handlers.handleBuySupportUnit(unitId, realIdx, remainingImprovementPoints)} unitDef={unitsMap[unitId]} assignmentInfo={state.purchasedSlotsMap[realIdx] === unitId ? configuredDivision.supportUnits.find(su => su.definitionIndex === realIdx)?.assignedTo : null} regimentsList={state.regimentsList} unitsRulesMap={state.unitsRulesMap} supportUnits={configuredDivision.supportUnits} calculateStats={calcStatsWrapper} getRegimentDefinition={getRegimentDefinition} />);
-                                            };
-                                            if (typeof item === 'string' || (typeof item === 'object' && !item.type)) return renderTile(typeof item === 'string' ? item : (item.name || item.id));
-                                            if (typeof item === 'object' && item.type === 'group') return (<div key={realIdx} className={styles.supportGroupContainer}><div className={styles.supportGroupName}>{item.name}</div><div className={styles.supportGroupFlex}>{item.options.map(opt => renderTile(opt))}</div></div>);
-                                            return null;
-                                        })}
+                                        {additionalUnitsDefinitions.map((item, idx) => renderSupportItem(item, idx + divisionArtilleryDefinitions.length))}
                                     </div>
                                 </div>
                             </div>
@@ -179,7 +221,6 @@ export default function RegimentSelector(props) {
                 </div>
             </div>
 
-            {/* SEKCJA: STRAŻ PRZEDNIA */}
             {vanguardRegiments && vanguardRegiments.length > 0 && (
                 <div className={styles.sectionRow}>
                     <div className={styles.sectionLabel}><span className={styles.sectionLabelText}>Straż Przednia</span></div>
@@ -191,7 +232,6 @@ export default function RegimentSelector(props) {
                 </div>
             )}
 
-            {/* SEKCJA: PODSTAWA DYWIZJI */}
             <div className={styles.sectionRow}>
                 <div className={styles.sectionLabel}><span className={styles.sectionLabelText}>Podstawa Dywizji</span></div>
                 <div className={styles.sectionContent}>
@@ -201,15 +241,13 @@ export default function RegimentSelector(props) {
                 </div>
             </div>
 
-            {/* SEKCJA: PUŁKI DODATKOWE */}
             <div className={styles.sectionRow}>
                 <div className={styles.sectionLabel}><span className={styles.sectionLabelText}>Pułki Dodatkowe</span></div>
                 <div className={styles.sectionContent}>
                     {useNewAdditionalLogic ? (
                         <div>
                             <div style={{fontSize: 12, color: '#666', marginBottom: 12}}>
-                                Wybierz maksymalnie <strong>{additionalMax}</strong> pułki z poniższej listy.
-                                Obecnie wybrano: <strong>{configuredDivision.additional.length} / {additionalMax}</strong>
+                                Wybrano: <strong>{configuredDivision.additional.length} / {additionalMax}</strong>
                             </div>
                             <div className={styles.optionsGrid}>
                                 {additionalPool.map((regId, idx) => {
@@ -222,11 +260,7 @@ export default function RegimentSelector(props) {
 
                                     return (
                                         <RegimentOptionTile key={`${regId}-${idx}`} optId={regId} isActive={isSelected} disabled={isBlocked || (isAllyBlocked)} isAllied={isOptionAlly} divisionDefinition={divisionDefinition} onClick={() => handlers.handleToggleAdditionalRegiment(regId, idx, additionalMax)} getRegimentDefinition={getRegimentDefinition}>
-                                            {isSelected && (
-                                                <div style={{ marginTop: 5, fontSize: 10, background: '#333', color: '#fff', padding: '2px 6px', borderRadius: 4, cursor: 'pointer', zIndex: 10, textAlign: 'center' }} onClick={(e) => { e.stopPropagation(); props.onOpenRegimentEditor(GROUP_TYPES.ADDITIONAL, selectedInstance.index); }}>
-                                                    EDYTUJ
-                                                </div>
-                                            )}
+                                            {isSelected && (<div style={{ marginTop: 5, fontSize: 10, background: '#333', color: '#fff', padding: '2px 6px', borderRadius: 4, cursor: 'pointer', zIndex: 10, textAlign: 'center' }} onClick={(e) => { e.stopPropagation(); props.onOpenRegimentEditor(GROUP_TYPES.ADDITIONAL, selectedInstance.index); }}>EDYTUJ</div>)}
                                         </RegimentOptionTile>
                                     );
                                 })}

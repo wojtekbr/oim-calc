@@ -21,6 +21,30 @@ export const useRegimentSelectorLogic = ({
         return [...(divisionArtilleryDefinitions || []), ...(additionalUnitsDefinitions || [])];
     }, [divisionArtilleryDefinitions, additionalUnitsDefinitions]);
 
+    // --- 1. Rozszerzona mapa jednostek (obsługa pakietów) ---
+    const augmentedUnitsMap = useMemo(() => {
+        const newMap = { ...unitsMap };
+
+        allSupportDefinitions.forEach(def => {
+            // Przypadek: Grupa opcji
+            if (typeof def === 'object' && def.type === 'group' && Array.isArray(def.options)) {
+                def.options.forEach(opt => {
+                    if (typeof opt === 'object' && opt.id) {
+                        newMap[opt.id] = {
+                            ...opt,
+                            cost: opt.cost || opt.cost_override || 0
+                        };
+                    }
+                });
+            }
+            // Przypadek: Pojedyncza definicja inline
+            else if (typeof def === 'object' && def.id && !def.type) {
+                newMap[def.id] = { ...def, cost: def.cost || def.cost_override || 0 };
+            }
+        });
+        return newMap;
+    }, [unitsMap, allSupportDefinitions]);
+
     const regimentsList = useMemo(() => {
         if (!configuredDivision) return [];
         const { vanguard, base, additional } = configuredDivision;
@@ -31,14 +55,27 @@ export const useRegimentSelectorLogic = ({
         ].filter(r => r.id !== IDS.NONE);
     }, [configuredDivision]);
 
+    // Mapa zakupionych slotów (Slot Index -> ID jednostki/pakietu)
     const purchasedSlotsMap = useMemo(() => {
         if (!configuredDivision) return {};
         const map = {};
-        configuredDivision.supportUnits.forEach((su) => {
+
+        const byIndex = {};
+        configuredDivision.supportUnits.forEach(su => {
             if (su.definitionIndex !== undefined) {
-                map[su.definitionIndex] = su.id;
+                if (!byIndex[su.definitionIndex]) byIndex[su.definitionIndex] = [];
+                byIndex[su.definitionIndex].push(su);
             }
         });
+
+        Object.keys(byIndex).forEach(idx => {
+            const units = byIndex[idx];
+            if (units.length > 0) {
+                // Jeśli jednostka ma sourcePackId, używamy go do podświetlenia kafelka pakietu
+                map[idx] = units[0].sourcePackId || units[0].id;
+            }
+        });
+
         return map;
     }, [configuredDivision]);
 
@@ -52,53 +89,67 @@ export const useRegimentSelectorLogic = ({
             else if (typeof item === 'string') {
                 map[item] = {};
             }
+            if (typeof item === 'object' && item.type === 'group' && Array.isArray(item.options)) {
+                item.options.forEach(opt => {
+                    if (typeof opt === 'object' && opt.id) {
+                        map[opt.id] = opt.assignment_rules || {};
+                    } else if (typeof opt === 'string') {
+                        map[opt] = {};
+                    }
+                });
+            }
         });
         return map;
     }, [allSupportDefinitions]);
 
-    // --- Handlery (bez zmian) ---
+    // --- Handlery ---
+
     const handleBuySupportUnit = (unitId, definitionIndex, remainingPoints) => {
         setConfiguredDivision(prev => {
-            const currentSupportUnits = [...prev.supportUnits];
-            const existingIndex = currentSupportUnits.findIndex(su => su.definitionIndex === definitionIndex);
+            const existingUnitsInSlot = prev.supportUnits.filter(su => su.definitionIndex === definitionIndex);
 
-            if (existingIndex !== -1 && currentSupportUnits[existingIndex].id === unitId) {
-                currentSupportUnits.splice(existingIndex, 1);
-                return { ...prev, supportUnits: currentSupportUnits };
+            // Toggle Off logic
+            const isToggleOff = existingUnitsInSlot.length > 0 && (
+                existingUnitsInSlot[0].id === unitId ||
+                existingUnitsInSlot[0].sourcePackId === unitId
+            );
+
+            let newSupportUnits = prev.supportUnits.filter(su => su.definitionIndex !== definitionIndex);
+
+            if (isToggleOff) {
+                return { ...prev, supportUnits: newSupportUnits };
             }
 
-            if (existingIndex !== -1) {
-                const unitDef = unitsMap[unitId];
-                if (unitDef && unitDef.pu_cost) {
-                    const oldId = currentSupportUnits[existingIndex].id;
-                    const oldDef = unitsMap[oldId];
-                    const oldCost = oldDef?.pu_cost || 0;
-                    if (remainingPoints + oldCost - unitDef.pu_cost < 0) {
-                        alert(`Brak Punktów Ulepszeń na zamianę. Potrzebujesz: ${unitDef.pu_cost - oldCost} więcej.`);
-                        return prev;
-                    }
-                }
-                currentSupportUnits[existingIndex] = {
-                    ...currentSupportUnits[existingIndex],
+            // Zakup
+            const unitDef = augmentedUnitsMap[unitId];
+            const cost = unitDef?.pu_cost || 0;
+
+            if (remainingPoints - cost < 0) {
+                // Opcjonalnie: walidacja kosztu (na razie soft check)
+            }
+
+            // Obsługa pakietów (pole "units" w definicji)
+            if (unitDef && unitDef.units && Array.isArray(unitDef.units)) {
+                const packUnits = unitDef.units.map(subUnitId => ({
+                    id: subUnitId,
+                    definitionIndex: definitionIndex,
+                    sourcePackId: unitId,
+                    assignedTo: null,
+                    instanceId: Math.random().toString(36).substr(2, 9)
+                }));
+                newSupportUnits = [...newSupportUnits, ...packUnits];
+            } else {
+                // Pojedyncza jednostka
+                newSupportUnits.push({
                     id: unitId,
-                    assignedTo: null
-                };
-                return { ...prev, supportUnits: currentSupportUnits };
+                    definitionIndex: definitionIndex,
+                    sourcePackId: null,
+                    assignedTo: null,
+                    instanceId: Math.random().toString(36).substr(2, 9)
+                });
             }
 
-            const unitDef = unitsMap[unitId];
-            if (unitDef && unitDef.pu_cost) {
-                if (remainingPoints - unitDef.pu_cost < 0) {
-                    alert(`Brak Punktów Ulepszeń. Koszt: ${unitDef.pu_cost}, Pozostało: ${remainingPoints}`);
-                    return prev;
-                }
-            }
-            currentSupportUnits.push({
-                id: unitId,
-                definitionIndex: definitionIndex,
-                assignedTo: null
-            });
-            return { ...prev, supportUnits: currentSupportUnits };
+            return { ...prev, supportUnits: newSupportUnits };
         });
     };
 
@@ -109,14 +160,22 @@ export const useRegimentSelectorLogic = ({
         });
     };
 
-    const handleAssignSupportUnit = (definitionIndex, positionKey) => {
+    const handleAssignSupportUnit = (definitionIndex, positionKey, specificInstanceId = null) => {
         let assignment = null;
         if (positionKey !== "") {
             const [group, idxStr] = positionKey.split('/');
             assignment = { group, index: parseInt(idxStr, 10), positionKey };
         }
+
         setConfiguredDivision(prev => {
             const newSupportUnits = prev.supportUnits.map(su => {
+                if (specificInstanceId) {
+                    if (su.instanceId === specificInstanceId) {
+                        return { ...su, assignedTo: assignment };
+                    }
+                    return su;
+                }
+                // Fallback dla pojedynczych jednostek bez instanceId (kompatybilność wsteczna)
                 if (su.definitionIndex === definitionIndex) {
                     return { ...su, assignedTo: assignment };
                 }
@@ -132,8 +191,10 @@ export const useRegimentSelectorLogic = ({
             const existingIndex = currentAdditional.findIndex(r => r.sourceIndex === sourceIndex);
 
             if (existingIndex !== -1) {
+                // Usuwanie
                 currentAdditional.splice(existingIndex, 1);
                 const updatedAdditional = currentAdditional.map((r, idx) => ({ ...r, index: idx }));
+                // Czyścimy wsparcie przypisane do usuniętych slotów
                 const newSupportUnits = prev.supportUnits.map(su => {
                     if (su.assignedTo && su.assignedTo.group === GROUP_TYPES.ADDITIONAL) {
                         return { ...su, assignedTo: null };
@@ -142,14 +203,17 @@ export const useRegimentSelectorLogic = ({
                 });
                 return { ...prev, additional: updatedAdditional, supportUnits: newSupportUnits };
             } else {
+                // Dodawanie
                 if (currentAdditional.length >= maxAmount) {
                     alert(`Osiągnięto limit ${maxAmount} pułków dodatkowych.`);
                     return prev;
                 }
+
                 const newConfig = {
                     baseSelections: {}, additionalSelections: {}, additionalCustom: null, additionalEnabled: false,
                     optionalEnabled: {}, optionalSelections: {}, improvements: {}, regimentImprovements: [], isVanguard: false
                 };
+
                 const def = getRegimentDefinition(regimentId, faction?.meta?.key);
                 if (def && def.structure) {
                     if (def.structure.base) {
@@ -165,6 +229,7 @@ export const useRegimentSelectorLogic = ({
                         });
                     }
                 }
+
                 const newRegiment = {
                     group: GROUP_TYPES.ADDITIONAL,
                     index: currentAdditional.length,
@@ -173,6 +238,7 @@ export const useRegimentSelectorLogic = ({
                     customName: "",
                     config: newConfig
                 };
+
                 return { ...prev, additional: [...currentAdditional, newRegiment] };
             }
         });
@@ -200,9 +266,12 @@ export const useRegimentSelectorLogic = ({
                 });
             }
         }
+
         const unitsToRemoveIndices = [];
         const unitsToRemoveNames = [];
         tempDivision[groupKey][index] = { ...tempDivision[groupKey][index], id: newRegimentId };
+
+        // Walidacja wsparcia po zmianie pułku
         tempDivision.supportUnits.forEach((su, suIdx) => {
             let unitConfig = null;
             if (su.definitionIndex !== undefined) {
@@ -211,7 +280,7 @@ export const useRegimentSelectorLogic = ({
                 unitConfig = allSupportDefinitions.find(u => (typeof u === 'string' && u === su.id) || (u.name === su.id));
             }
             if (unitConfig) {
-                const check = checkSupportUnitRequirements(unitConfig, tempDivision, getRegimentDefinition);
+                const check = checkSupportUnitRequirements(unitConfig, tempDivision, getRegimentDefinition, augmentedUnitsMap);
                 if (!check.isAllowed) {
                     unitsToRemoveIndices.push(suIdx);
                     unitsToRemoveNames.push(unitsMap[su.id]?.name || su.id);
@@ -262,13 +331,14 @@ export const useRegimentSelectorLogic = ({
 
     const mainForceKey = useMemo(() => {
         if (!configuredDivision) return null;
-        return calculateMainForceKey(configuredDivision, unitsMap, faction, getRegimentDefinition, improvements);
-    }, [configuredDivision, faction, getRegimentDefinition, improvements, unitsMap]);
+        return calculateMainForceKey(configuredDivision, augmentedUnitsMap, faction, getRegimentDefinition, improvements);
+    }, [configuredDivision, faction, getRegimentDefinition, improvements, augmentedUnitsMap]);
 
-    // --- OBLICZENIA DLA VIEW (PRZENIESIONE Z KOMPONENTU) ---
+    // --- Funkcje pomocnicze eksportowane do stanu ---
 
     const calcStatsWrapper = (config, id) => calculateRegimentStats(config, id, configuredDivision, unitsMap, getRegimentDefinition, improvements);
 
+    // !!! TO BYŁO BRAKUJĄCE OGNIWO !!!
     const isAllied = (regId) => {
         if (regId === IDS.NONE) return false;
         if (faction.regiments && faction.regiments[regId]) return false;
@@ -289,6 +359,7 @@ export const useRegimentSelectorLogic = ({
         let reg = null;
         if (group === GROUP_TYPES.BASE) reg = configuredDivision.base[index];
         else if (group === GROUP_TYPES.ADDITIONAL) reg = configuredDivision.additional[index];
+
         if (reg) return calcStatsWrapper(reg.config, reg.id).cost;
         return 0;
     }, [mainForceKey, configuredDivision]);
@@ -319,15 +390,19 @@ export const useRegimentSelectorLogic = ({
                 const isCommander = unitDef.orders > 0 || (key && key.includes('general'));
                 regimentUnitsList.push({ name: unitDef.name, imps: impNames, isCommander, orders: unitDef.orders, isSupport });
             };
+
             const collectedUnits = collectRegimentUnits(r.config, def);
             collectedUnits.forEach(item => addUnitToList(item.unitId, item.key, false));
+
             const assignedSupport = configuredDivision.supportUnits.filter(su => su.assignedTo?.positionKey === regimentPosKey);
             assignedSupport.forEach(su => { const key = `support/${su.id}-${regimentPosKey}`; addUnitToList(su.id, key, true); });
+
             const regImpNames = (r.config.regimentImprovements || []).map(impId => {
                 const impDef = improvements[impId];
                 const regImpDef = def.regiment_improvements?.find(ri => ri.id === impId);
                 return impDef?.name || regImpDef?.name || impId;
             });
+
             return { id: r.id, name: def?.name || r.id, customName: r.customName, stats, isMain, isVanguard: r.group === GROUP_TYPES.VANGUARD, units: regimentUnitsList, regImps: regImpNames };
         });
     }, [configuredDivision, mainForceKey, improvements]);
@@ -338,11 +413,12 @@ export const useRegimentSelectorLogic = ({
             divisionCustomName, setDivisionCustomName,
             regimentsList, purchasedSlotsMap, unitsRulesMap, mainForceKey,
 
-            // Nowe dane obliczone (Derived State)
+            // WAŻNE: Eksportujemy funkcję isAllied, aby widok jej używał
             isAllied,
             currentAlliesCount,
             currentMainForceCost,
-            activeRegimentsList
+            activeRegimentsList,
+            unitsMap: augmentedUnitsMap
         },
         handlers: {
             handleBuySupportUnit, handleAssignSupportUnit, handleRemoveSupportUnit,
