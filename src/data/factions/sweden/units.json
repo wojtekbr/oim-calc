@@ -1,0 +1,97 @@
+{
+  "_meta": {
+    "name": "Królestwo Szwecji"
+  },
+  "swe_pulkownik": {
+    "id": "swe_pulkownik",
+    "name": "Pułkownik",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "swe_general": {
+    "id": "swe_general",
+    "name": "Generał",
+    "cost": 0,
+    "rank": "group",
+    "orders": 3
+  },
+  "swe_major": {
+    "id": "swe_major",
+    "name": "Major",
+    "cost": 2,
+    "rank": "group",
+    "orders": 1
+  },
+  "swe_major_2o": {
+    "id": "swe_major",
+    "name": "Major",
+    "cost": 4,
+    "rank": "group",
+    "orders": 2
+  },
+  "swe_podragonieni_m": {
+    "id": "swe_podragonieni_m",
+    "name": "Podragonieni Muszkieterzy M",
+    "cost": 7,
+    "are_proxy_dragoons": true,
+    "rank": "silver",
+    "improvement_cost": 2
+  },
+  "swe_skwadron_muszkieterow_s": {
+    "id": "swe_skwadron_muszkieterow",
+    "name": "Skwadron Muszkieterów",
+    "cost": 5,
+    "pu_cost": -1,
+    "improvement_cost": 2,
+    "special_rules": ["independent"],
+    "rank": "silver"
+  },
+  "swe_piechota_krajowa_m": {
+    "id": "swe_piechota_krajowa_m",
+    "name": "Piechota Krajowa M",
+    "cost": 8,
+    "is_infantry": true,
+    "improvement_cost": 3,
+    "rank": "silver"
+  },
+  "swe_piechota_krajowa_l": {
+    "id": "swe_piechota_krajowa_l",
+    "name": "Piechota Krajowa L",
+    "cost": 11,
+    "rank": "gold",
+    "improvement_cost": 4
+  },
+  "swe_piechota_krajowa_l_v1": {
+    "id": "swe_piechota_krajowa_l_v1",
+    "name": "Piechota Krajowa L",
+    "cost": 11,
+    "improvement_points_cost": 1,
+    "rank": "gold",
+    "improvement_cost": 4
+  },
+  "swe_jazda_krajowa_m": {
+    "id": "swe_jazda_krajowa_m",
+    "name": "Szwedzka Jazda Krajowa M",
+    "cost": 9,
+    "is_cavalry": true,
+    "rank": "silver",
+    "improvement_cost": 3
+  },
+  "swe_light_artillery_s": {
+    "id": "swe_light_artillery_s",
+    "name": "Lekkie Działa S",
+    "cost": 3,
+    "is_artillery": true,
+    "rank": "bronze",
+    "improvement_cost": 2
+  },
+  "swe_medium_artillery_s": {
+    "id": "swe_medium_artillery_s",
+    "name": "Średnie Działa S",
+    "cost": 5,
+    "is_artillery": true,
+    "rank": "silver",
+    "improvement_cost": 2
+  }
+}

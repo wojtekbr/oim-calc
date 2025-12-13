@@ -56,6 +56,72 @@ export const REGIMENT_RULES_REGISTRY = {
              }
              return null;
          }
+    },
+
+    "chlopscy_szpiedzy": {
+        modifyStats: (stats, activeUnits) => {
+            const peasantCount = activeUnits.filter(u => u.unitId.includes("czer")).length;
+
+            if (peasantCount > 0) {
+                return {
+                    recon: (stats.recon || 0) + peasantCount,
+                    awareness: (stats.awareness || 0) + 1
+                };
+            }
+            return {
+                recon: (stats.recon || 0),
+                awareness: (stats.awareness || 0)
+            };
+        }
+    },
+    "free_unit_improvement": {
+        // 1. Zniżka Kosztu (PU)
+        calculateImprovementDiscount: (activeUnits, config, improvementsMap, params, unitsMap, regimentDefinition, costCalculator) => {
+            const targetUnitIds = params?.unit_ids || [];
+            let targetImpIds = params?.improvement_ids || [];
+            if (params?.improvement_id) targetImpIds.push(params.improvement_id);
+
+            if (targetUnitIds.length === 0 || targetImpIds.length === 0 || !improvementsMap) return 0;
+
+            for (const unit of activeUnits) {
+                if (targetUnitIds.includes(unit.unitId)) {
+                    const unitImps = config.improvements?.[unit.key] || [];
+                    const foundImpId = unitImps.find(impId => targetImpIds.includes(impId));
+
+                    if (foundImpId) {
+                        const unitDef = unitsMap[unit.unitId];
+                        let realCost = 0;
+                        if (costCalculator && unitDef) {
+                            realCost = costCalculator(unitDef, foundImpId, regimentDefinition, improvementsMap);
+                        } else {
+                            const impDef = improvementsMap[foundImpId];
+                            realCost = Number(impDef?.cost || 0);
+                        }
+                        return Number(realCost) || 0;
+                    }
+                }
+            }
+            return 0;
+        },
+
+        // 2. NOWOŚĆ: Darmowość Slotu (nie wlicza się do limitu)
+        isImprovementFree: (unitId, impId, params, usageState) => {
+            const targetUnitIds = params?.unit_ids || [];
+            let targetImpIds = params?.improvement_ids || [];
+            if (params?.improvement_id) targetImpIds.push(params.improvement_id);
+
+            // Domyślny limit darmowych na pułk (zazwyczaj 1)
+            const maxPerRegiment = params?.max_per_regiment || 1;
+
+            if (targetUnitIds.includes(unitId) && targetImpIds.includes(impId)) {
+                // Jeśli nie wykorzystano jeszcze puli darmowych w tym pułku
+                if (usageState.usedCount < maxPerRegiment) {
+                    usageState.usedCount++; // Zużywamy "darmowy żeton"
+                    return true; // Jest darmowe -> nie wliczaj do limitu
+                }
+            }
+            return false;
+        }
     }
 };
 
@@ -81,9 +147,9 @@ export const REGIMENT_RULES_DEFINITIONS = {
     title: "Kethuda ma statystyki Agi",
     description: "Kethuda w tym pułku posiada statystyki Agi (G1)."
   },
-  "posluch": {
+  "posluch_kor": {
     title: "Posłuch",
-    description: "Zasada specjalna opisana w podręczniku."
+    description: "Każdy Pułkownik z Partii Wolontarskiej, raz podczas wydawania rozkazu jednostce Wolontarzy może pominąć zasadę Niesubordynacja. Gracz musi poinformować przeciwnika w momencie korzystania z tej zasady."
   },
   "pospolitacy": {
     title: "Pospolitacy",
@@ -108,7 +174,23 @@ export const REGIMENT_RULES_DEFINITIONS = {
   "roznorodne_wyposazenie": {
     title: "Różnorodne wyposażenie",
     description: "Zasada specjalna opisana w podręczniku (1)."
-  }
+  },
+  "posluch_cos": {
+        title: "Posłuch",
+        description: "Raz podczas wydawania rozkazu jednostce można pominąć zasadę Niesubordynacja. Gracz musi poinformować przeciwnika w momencie korzystania z tej zasady."
+    },
+
+    "chlopscy_szpiedzy": {
+        title: "Chłopscy szpiedzy",
+        description: "Wystawiając Pułk Czerni, Dywizja dostaje dodatkowo tyle wartości wywiadu, ile Jednostek Czerni zostało wystawionych i +1 Czujności"
+    },
+    "free_unit_improvement": {
+        title: "Darmowe Ulepszenie",
+        getDescription: (params) => {
+            const impNames = (params?.improvement_ids || [params?.improvement_id]).join(" lub ");
+            return `Wybrana jednostka może otrzymać darmowe ulepszenie: ${impNames}. Nie wlicza się ono do limitu ulepszeń.`;
+        }
+    }
 };
 
 // --- HELPERS ---
@@ -117,11 +199,14 @@ export const validateRegimentRules = (activeUnits, regimentDefinition) => {
     const errors = [];
     if (!regimentDefinition?.special_rules) return errors;
 
-    // Przyjmujemy activeUnits z zewnątrz, aby uniknąć cyklicznego importu collectRegimentUnits
-    regimentDefinition.special_rules.forEach(ruleId => {
+    regimentDefinition.special_rules.forEach(ruleEntry => {
+        // Obsługa: string LUB obiekt { id: "...", ...params }
+        const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
+        const params = typeof ruleEntry === 'object' ? ruleEntry : {};
+
         const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
         if (ruleImpl && ruleImpl.validate) {
-            const error = ruleImpl.validate(activeUnits);
+            const error = ruleImpl.validate(activeUnits, params);
             if (error) errors.push(error);
         }
     });
@@ -133,10 +218,13 @@ export const applyRegimentRuleStats = (baseStats, activeUnits, regimentDefinitio
 
     let newStats = { ...baseStats };
 
-    regimentDefinition.special_rules.forEach(ruleId => {
+    regimentDefinition.special_rules.forEach(ruleEntry => {
+        const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
+        const params = typeof ruleEntry === 'object' ? ruleEntry : {};
+
         const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
         if (ruleImpl && ruleImpl.modifyStats) {
-            const mods = ruleImpl.modifyStats(newStats, activeUnits);
+            const mods = ruleImpl.modifyStats(newStats, activeUnits, params);
             if (mods) {
                 newStats = { ...newStats, ...mods };
             }
@@ -147,10 +235,20 @@ export const applyRegimentRuleStats = (baseStats, activeUnits, regimentDefinitio
 
 export const getRegimentRulesDescriptions = (regimentDefinition) => {
     if (!regimentDefinition?.special_rules) return [];
-    
-    return regimentDefinition.special_rules.map(ruleId => {
+
+    return regimentDefinition.special_rules.map(ruleEntry => {
+        const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
+        const params = typeof ruleEntry === 'object' ? ruleEntry : {};
+
         const def = REGIMENT_RULES_DEFINITIONS[ruleId];
         if (!def) return null;
-        return { id: ruleId, title: def.title, description: def.description };
+
+        // Obsługa override nazwy i dynamicznego opisu
+        const title = params.name_override || def.title;
+        const description = typeof def.description === 'function'
+            ? def.description(params)
+            : def.description;
+
+        return { id: ruleId, title, description };
     }).filter(Boolean);
 };

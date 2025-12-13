@@ -9,7 +9,41 @@
     "rank": "group",
     "orders": 2
   },
-  
+
+  "tat_bej": {
+    "id": "tat_bej",
+    "name": "Bej",
+    "cost": 0,
+    "improvement_cost": 0,
+    "rank": "group",
+    "orders": 4
+  },
+
+  "tat_nuradyn": {
+    "id": "tat_nuradyn",
+    "name": "Nuradyn",
+    "cost": 0,
+    "improvement_cost": 0,
+    "rank": "group",
+    "orders": 3
+  },
+
+  "tat_jasyr": {
+    "id": "tat_jasyr",
+    "name": "Jasyr",
+    "cost": 0,
+    "improvement_cost": 0,
+    "rank": "group",
+    "orders": 3
+  },
+  "tat_zwiadowcy": {
+    "id": "tat_zwiadowcy",
+    "name": "Zwiadowcy",
+    "cost": 3,
+    "improvement_cost": 0,
+    "rank": "group",
+    "orders": 3
+  },
   "tat_ordyncy_s": {
     "id": "tat_ordyncy_s",
     "name": "Ordyńcy S",
@@ -87,6 +121,26 @@
     "improvement_cost": 4,
     "rank": "gold",
     "is_cavalry": true
+  },
+  "tat_basza": {
+    "id": "tat_basza",
+    "name": "Basza",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "tat_kapykulu_s": {
+    "id": "tat_kapykulu_s",
+    "name": "Kapykułu S",
+    "cost": 5,
+    "improvement_cost": 2,
+    "rank": "silver"
+  },
+  "tat_kapykulu_m": {
+    "id": "tat_kapykulu_m",
+    "name": "Kapykułu M",
+    "cost": 7,
+    "improvement_cost": 3,
+    "rank": "silver"
   }
-
 }

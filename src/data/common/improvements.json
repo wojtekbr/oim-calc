@@ -54,5 +54,15 @@
     "name": "Najemni Dragoni",
     "type": "regiment",
     "cost": 3
+  },
+  "partisans": {
+    "name": "Partyzanci",
+    "type": "unit",
+    "cost": "double"
+  },
+  "swivel_guns": {
+    "name": "Śmigownice",
+    "type": "unit",
+    "cost": "+1"
   }
 }

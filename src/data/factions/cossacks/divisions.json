@@ -1,0 +1,337 @@
+{
+  "cro_koronna": {
+    "name": "Dywizja Kozacka (1648-51)",
+    "improvement_points": 10,
+    "base_cost": 9,
+    "general": ["koz_pulkownik_head"],
+    "rules": [
+      { 
+        "id": "czaty"
+      },
+      {
+        "id": "Kiedy kozak nie ma wody, błota albo jam to przepadł"
+      },
+      {
+        "id": "Wozy taborowe"
+      },
+      {
+        "id": "conditional_unit_restriction",
+        "trigger_regiment_id": "koz_pulk_konnych_kozakow",
+        "target_regiment_ids": ["koz_pulk_kozacki", "koz_pulk_kozacki", "koz_doborowy_pulk_kozacki"],
+        "banned_unit_ids": ["koz_konni_molojcy_s", "koz_konni_molojcy_m"]
+      },
+      {
+        "id": "banned_units_in_vanguard",
+        "banned_unit_ids": ["koz_wozy_taborowe", "koz_umocnienia_taborowe"]
+      },
+      {
+        "id": "free_improvement_for_specific_units",
+        "unit_ids": ["koz_molojcy_strzelcy_s", "koz_molojcy_rejestrowi_s", "koz_czern_m"],
+        "improvement_id": "partisans",
+        "max_per_regiment": 1
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "koz_plastuni"
+      },
+      {
+        "name": "koz_plastuni"
+      }
+    ],
+    "division_artillery": [
+      {
+        "type": "group",
+        "name": "Bateria Dział Kozackich",
+        "options": [
+          "koz_artillery_s",
+          "koz_artillery_m",
+          {
+            "id": "koz_artillery_2s_pack",
+            "name": "2x Bateria Dział Kozackich S",
+            "cost": 10,
+            "requirements": [
+              { "type": "has_any_additional_regiment" }
+            ],
+            "units": ["koz_artillery_s", "koz_artillery_s"]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "Tabor",
+        "options": [
+          {
+            "id": "koz_wozy_taborowe",
+            "name": "Wozy Taborowe",
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
+              { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 2 
+              }
+            ]
+          },
+          {
+            "id": "koz_umocnienia_taborowe",
+            "name": "Umocnienia Taborowe",
+            "cost": 4,
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
+               { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "Tabor",
+        "options": [
+          {
+            "id": "koz_wozy_taborowe",
+            "name": "Wozy Taborowe",
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
+              { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 2 
+              }
+            ]
+          },
+          {
+            "id": "koz_umocnienia_taborowe",
+            "name": "Umocnienia Taborowe",
+            "cost": 4,
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
+               { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "Tabor",
+        "options": [
+          {
+            "id": "koz_wozy_taborowe",
+            "name": "Wozy Taborowe",
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
+              { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 2 
+              }
+            ]
+          },
+          {
+            "id": "koz_umocnienia_taborowe",
+            "name": "Umocnienia Taborowe",
+            "cost": 4,
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
+               { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "Tabor",
+        "options": [
+          {
+            "id": "koz_wozy_taborowe",
+            "name": "Wozy Taborowe",
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
+              { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 2 
+              }
+            ]
+          },
+          {
+            "id": "koz_umocnienia_taborowe",
+            "name": "Umocnienia Taborowe",
+            "cost": 4,
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
+               { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "Tabor",
+        "options": [
+          {
+            "id": "koz_wozy_taborowe",
+            "name": "Wozy Taborowe",
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
+              { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 2 
+              }
+            ]
+          },
+          {
+            "id": "koz_umocnienia_taborowe",
+            "name": "Umocnienia Taborowe",
+            "cost": 4,
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
+               { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "Tabor",
+        "options": [
+          {
+            "id": "koz_wozy_taborowe",
+            "name": "Wozy Taborowe",
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
+              { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 2 
+              }
+            ]
+          },
+          {
+            "id": "koz_umocnienia_taborowe",
+            "name": "Umocnienia Taborowe",
+            "cost": 4,
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
+               { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "Tabor",
+        "options": [
+          {
+            "id": "koz_wozy_taborowe",
+            "name": "Wozy Taborowe",
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
+              { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 2 
+              }
+            ]
+          },
+          {
+            "id": "koz_umocnienia_taborowe",
+            "name": "Umocnienia Taborowe",
+            "cost": 4,
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
+               { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "Tabor",
+        "options": [
+          {
+            "id": "koz_wozy_taborowe",
+            "name": "Wozy Taborowe",
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
+              { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 2 
+              }
+            ]
+          },
+          {
+            "id": "koz_umocnienia_taborowe",
+            "name": "Umocnienia Taborowe",
+            "cost": 4,
+            "requirements": [
+              { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
+               { 
+                "type": "limit_per_regiment_count", 
+                "regiment_ids": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki","koz_piechota_rejestrowa"], 
+                "amount_per_regiment": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "koz_obozny",
+        "requirements": [
+          {
+            "type": "division_contains_any_unit",
+            "unit_ids": ["koz_wozy_taborowe", "koz_umocnienia_taborowe"],
+            "min_amount": 1
+          }
+        ]
+      }
+    ],
+    "vanguard": [
+      { "options": ["tat_czambul_mirzy","koz_pulk_kozacki","koz_pulk_konnych_kozakow"]}
+    ],
+    "base": [
+      { "options": ["koz_pulk_kozacki"] },
+      { "options": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki", "koz_piechota_rejestrowa"] }
+    ],
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
+          "koz_pulk_kozacki",
+          "koz_pulk_kozacki",
+          "koz_pulk_czerni",
+          "koz_pulk_czerni",
+          "koz_piechota_rejestrowa"
+        ]
+    }
+  }
+}

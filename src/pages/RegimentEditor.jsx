@@ -4,7 +4,9 @@ import styles from "./RegimentEditor.module.css";
 import { GROUP_TYPES } from "../constants";
 import { 
     canUnitTakeImprovement, 
-    calculateSingleImprovementIMPCost 
+    calculateSingleImprovementIMPCost,
+    calculateEffectiveImprovementCount,
+    checkIfImprovementWouldBeFree
 } from "../utils/armyMath";
 import { getRegimentRulesDescriptions } from "../utils/regimentRules";
 
@@ -159,6 +161,7 @@ const MultiUnitOptionCard = ({
     );
 };
 
+// --- ZMODYFIKOWANY PANEL KONFIGURACJI ---
 const ActiveOptionConfigurationPanel = ({
     unitIds,
     basePositionKey,
@@ -168,7 +171,9 @@ const ActiveOptionConfigurationPanel = ({
     regiment,
     commonImprovements,
     unitLevelImprovements,
-    helpers
+    helpers,
+    currentConfig,
+    divisionDefinition // Przekazujemy definicję dywizji (dla zasad globalnych)
 }) => {
     return (
         <div className={styles.activeConfigPanel}>
@@ -196,8 +201,28 @@ const ActiveOptionConfigurationPanel = ({
                             <div className={styles.cleanImprovementsContainer}>
                                 {validImprovements.length > 0 ? validImprovements.map(imp => {
                                     const isSelected = state.improvements[positionKey]?.includes(imp.id);
+                                    
+                                    // 1. Sprawdzamy czy to konkretne ulepszenie będzie darmowe (ZASADY PUŁKOWE + DYWIZYJNE)
+                                    const willBeFree = checkIfImprovementWouldBeFree(currentConfig, regiment, uid, imp.id, divisionDefinition);
+
+                                    // 2. Koszt i "stać nas"
                                     const cost = calculateSingleImprovementIMPCost(unitDef, imp.id, regiment, commonImprovements);
-                                    const canAfford = isSelected || (state.newRemainingPointsAfterLocalChanges - cost >= 0);
+                                    const canAfford = isSelected || willBeFree || (state.newRemainingPointsAfterLocalChanges - cost >= 0);
+
+                                    // 3. Sprawdzamy limit ("płatny") (ZASADY PUŁKOWE + DYWIZYJNE)
+                                    const effectiveCount = calculateEffectiveImprovementCount(currentConfig, regiment, imp.id, divisionDefinition);
+                                    const isLimitReached = imp.max_amount && effectiveCount >= imp.max_amount;
+
+                                    const isDisabled = !isSelected && (
+                                        (isLimitReached && !willBeFree) || 
+                                        (!willBeFree && !canAfford)
+                                    );
+
+                                    let tooltip = willBeFree ? "0 PU (Darmowe)" : `${cost} PU`;
+                                    if (!isSelected) {
+                                        if (isLimitReached && !willBeFree) tooltip += " (Limit osiągnięty)";
+                                        else if (!willBeFree && !canAfford) tooltip += " (Brak punktów)";
+                                    }
 
                                     const commonDef = commonImprovements[imp.id];
                                     const displayName = imp.name || commonDef?.name || imp.id;
@@ -207,10 +232,10 @@ const ActiveOptionConfigurationPanel = ({
                                             key={imp.id}
                                             className={`${styles.impBadge} ${isSelected ? styles.active : ''}`}
                                             onClick={() => handlers.handleImprovementToggle(positionKey, uid, imp.id)}
-                                            disabled={!isSelected && !canAfford}
-                                            title={`Koszt: ${cost} PU`}
+                                            disabled={isDisabled}
+                                            title={tooltip}
                                         >
-                                            {displayName} ({cost} PU)
+                                            {displayName} {willBeFree ? "(0 PU)" : `(${cost} PU)`}
                                         </button>
                                     );
                                 }) : (
@@ -237,7 +262,9 @@ const GroupSection = ({
   unitLevelImprovements, 
   isLocked, 
   regiment, 
-  commonImprovements 
+  commonImprovements,
+  currentConfig,
+  divisionDefinition // Przekazujemy definicję dywizji
 }) => {
   const isOptionalGroup = groupKey === GROUP_TYPES.OPTIONAL;
   const mapKey = `${type}/optional`;
@@ -352,6 +379,8 @@ const GroupSection = ({
                             commonImprovements={commonImprovements}
                             unitLevelImprovements={unitLevelImprovements}
                             helpers={logicHelpers}
+                            currentConfig={currentConfig}
+                            divisionDefinition={divisionDefinition} // Przekazujemy
                         />
                     )}
                 </div>
@@ -367,7 +396,6 @@ const GroupSection = ({
 
 export default function RegimentEditor(props) {
   const { state, definitions, handlers, helpers } = useRegimentLogic(props);
-  // ZMIANA: Dodano divisionDefinition do destrukturyzacji
   const { unitsMap, regiment, configuredDivision, regimentGroup, regimentIndex, divisionDefinition } = props;
   const { base, additional, commonImprovements } = definitions;
   
@@ -386,6 +414,18 @@ export default function RegimentEditor(props) {
   const rulesDescriptions = getRegimentRulesDescriptions(regiment);
 
   const hasErrors = state.regimentRuleErrors && state.regimentRuleErrors.length > 0;
+
+  // Przygotowujemy tymczasowy config do obliczeń w widoku
+  const tempConfig = {
+      baseSelections: state.baseSelections,
+      additionalSelections: state.additionalSelections,
+      additionalCustom: state.selectedAdditionalCustom,
+      additionalEnabled: state.additionalEnabled,
+      optionalEnabled: state.optionalEnabled,
+      optionalSelections: state.optionalSelections,
+      improvements: state.improvements,
+      regimentImprovements: state.regimentImprovements
+  };
 
   return (
     <div className={styles.container}>
@@ -427,6 +467,8 @@ export default function RegimentEditor(props) {
                         unitLevelImprovements={definitions.unitLevelImprovements}
                         regiment={regiment}
                         commonImprovements={commonImprovements}
+                        currentConfig={tempConfig}
+                        divisionDefinition={divisionDefinition} // Przekazujemy
                     />
                 ))}
             </div>
@@ -452,6 +494,8 @@ export default function RegimentEditor(props) {
                                     commonImprovements={commonImprovements}
                                     unitLevelImprovements={definitions.unitLevelImprovements}
                                     helpers={helpers}
+                                    currentConfig={tempConfig}
+                                    divisionDefinition={divisionDefinition} // Przekazujemy
                                 />
                             ); 
                         })}
@@ -495,6 +539,8 @@ export default function RegimentEditor(props) {
                                 isLocked={isOptionalLocked}
                                 regiment={regiment}
                                 commonImprovements={commonImprovements}
+                                currentConfig={tempConfig}
+                                divisionDefinition={divisionDefinition} // Przekazujemy
                             />
                         );
                     })}
@@ -530,6 +576,8 @@ export default function RegimentEditor(props) {
                                                     commonImprovements={commonImprovements}
                                                     unitLevelImprovements={definitions.unitLevelImprovements}
                                                     helpers={helpers}
+                                                    currentConfig={tempConfig}
+                                                    divisionDefinition={divisionDefinition} // Przekazujemy
                                                 />
                                             )}
                                         </div>
@@ -547,7 +595,6 @@ export default function RegimentEditor(props) {
             <div className={styles.sectionCard}>
                 
                 <div className={styles.sidebarHeader}>
-                    {/* ZMIANA: Wyświetlanie nazwy dywizji */}
                     <div style={{fontSize: 11, color: '#666', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px'}}>
                         {divisionDefinition?.name || "Dywizja"}
                     </div>
@@ -592,7 +639,7 @@ export default function RegimentEditor(props) {
                 <div className={styles.statRow}><span className={styles.statLabel}>Czujność (Awareness):</span><span className={styles.statValue}>{state.stats.totalAwareness}</span></div>
             </div>
 
-            {state.regimentRuleErrors && state.regimentRuleErrors.length > 0 && (
+            {hasErrors && (
                 <div className={styles.errorBox}>
                     <strong>⚠️ Niespełnione zasady pułku:</strong>
                     <ul className={styles.errorList}>
@@ -688,12 +735,11 @@ export default function RegimentEditor(props) {
                                     
                                     let rawCost = imp.cost_override !== undefined ? imp.cost_override : (imp.cost !== undefined ? imp.cost : commonDef?.cost);
                                     
-                                    const currentCount = Object.values(state.improvements)
-                                        .flat()
-                                        .filter(id => id === imp.id).length;
+                                    // FIX: Przekazujemy divisionDefinition do kalkulatora limitów
+                                    const effectiveCount = calculateEffectiveImprovementCount(tempConfig, regiment, imp.id, divisionDefinition);
 
-                                    const limitLabel = imp.max_amount ? `${currentCount} / ${imp.max_amount}` : `${currentCount} / ∞`;
-                                    const isLimitReached = imp.max_amount && currentCount >= imp.max_amount;
+                                    const limitLabel = imp.max_amount ? `${effectiveCount} / ${imp.max_amount}` : `${effectiveCount} / ∞`;
+                                    const isLimitReached = imp.max_amount && effectiveCount >= imp.max_amount;
                                     const limitClass = isLimitReached ? styles.limitReached : styles.limitOk;
 
                                     return (

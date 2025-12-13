@@ -5,7 +5,15 @@
     "recon": 2,
     "awareness": 5,
     "activations": 2,
-    "special_rules": ["tat_wzrok_bystry"],
+    "special_rules": [
+      "tat_wzrok_bystry",
+      {
+        "id": "free_unit_improvement",
+        "name_override": "Wzrok ich bystry i bardziej przenikliwy",
+        "unit_ids": ["tat_ordyncy_s"],
+        "improvement_ids": ["independent"]
+      }
+    ],
     "unit_improvements": [
       {
         "id": "veterans",
@@ -91,7 +99,15 @@
     "recon": 2,
     "awareness": 5,
     "activations": 2,
-    "special_rules": ["tat_wzrok_bystry"],
+    "special_rules": [
+      "tat_wzrok_bystry",
+      {
+        "id": "free_unit_improvement",
+        "name_override": "Wzrok ich bystry i bardziej przenikliwy",
+        "unit_ids": ["tat_ordyncy_s"],
+        "improvement_ids": ["independent"]
+      }
+    ],
     "unit_improvements": [
       {
         "id": "kalkans",
@@ -169,7 +185,16 @@
     "recon": 2,
     "awareness": 5,
     "activations": 3,
-    "special_rules": ["tat_wzrok_bystry", "sojusznik_bez_dodatkowych"],
+    "special_rules": [
+      "tat_wzrok_bystry",
+      {
+        "id": "free_unit_improvement",
+        "name_override": "Wzrok ich bystry i bardziej przenikliwy",
+        "unit_ids": ["tat_ordyncy_s"],
+        "improvement_ids": ["independent"]
+      },
+      "sojusznik_bez_dodatkowych"
+    ],
     "unit_improvements": [
       {
         "id": "kalkans",
@@ -255,6 +280,52 @@
           {
             "unit1": { "units": ["tat_jazda_doborowa_s"] },
             "unit2": { "units": ["tat_jazda_doborowa_m"] }
+          }
+        ]
+      }
+    }
+  },
+  "tat_korpus_kapykulu": {
+    "name": "Korpus Kapykułu",
+    "base_cost": 0,
+    "recon": 1,
+    "awareness": 3,
+    "activations": 2,
+    "type": "infantry",
+    "special_rules": ["podragoniona_piechota"],
+    "unit_improvements": [
+      {
+        "id": "regimental_guns",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["tat_basza"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["tat_kapykulu_s"] },
+            "unit2": { "units": ["tat_kapykulu_m"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["tat_kapykulu_s"] },
+            "unit2": { "units": ["tat_kapykulu_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": { "units": ["tat_kapykulu_s"] },
+            "unit2": { "units": ["tat_kapykulu_m"] }
           }
         ]
       }

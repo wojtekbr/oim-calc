@@ -15,5 +15,9 @@
     "name": "Wojska Najemne",
     "dir": "mercenaries",
     "hidden": true
+  },
+  "kozacy": {
+    "name": "Kozacy",
+    "dir": "cossacks"
   }
 }

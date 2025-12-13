@@ -163,6 +163,8 @@
   opacity: 0.5;
   filter: grayscale(1);
   transition: all 0.3s ease;
+  pointer-events: none;
+  user-select: none;
 }
 .disabledContent:hover {
   opacity: 0.8;

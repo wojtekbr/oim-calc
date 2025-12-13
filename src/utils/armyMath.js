@@ -1,28 +1,24 @@
 import { IDS, GROUP_TYPES, RANK_TYPES } from "../constants";
 import { DIVISION_RULES_REGISTRY } from "./divisionRules";
-import { applyRegimentRuleStats } from "./regimentRules";
+import { REGIMENT_RULES_REGISTRY, applyRegimentRuleStats } from "./regimentRules";
 
-// Pomocnicza: Oblicza koszt ulepszenia
+// Pomocnicza: Oblicza koszt ulepszenia (obsługa stringów "double", "triple")
 const resolveCostRule = (baseCost, rule) => {
-    // Obsługa kosztu "normal" (x1)
-    if (rule === 'normal') return baseCost;
-    
-    if (rule === 'double') return baseCost * 2;
-    if (rule === 'triple') return baseCost * 3;
+    const safeBase = Number(baseCost) || 0;
+
+    if (rule === 'normal') return safeBase;
+    if (rule === 'double') return safeBase * 2;
+    if (rule === 'triple') return safeBase * 3;
 
     if (typeof rule === 'number') {
-        if (rule > 0) {
-            return baseCost * rule;
-        }
-        if (rule < 0) {
-            return Math.max(1, baseCost + rule);
-        }
+        if (rule > 0) return safeBase * rule;
+        if (rule < 0) return Math.max(1, safeBase + rule);
     }
     return 0;
 };
 
 export const calculateSingleImprovementIMPCost = (unitDef, impId, regimentDefinition, commonImprovements) => {
-    const improvementBaseCost = unitDef?.improvement_cost || 0;
+    const improvementBaseCost = Number(unitDef?.improvement_cost || 0);
     const regImpDef = regimentDefinition?.unit_improvements?.find(i => i.id === impId);
     const commonImpDef = commonImprovements?.[impId];
 
@@ -43,10 +39,12 @@ export const calculateSingleImprovementArmyCost = (unitDef, impId, regimentDefin
     const commonImpDef = commonImprovements?.[impId];
 
     if (regImpRef || (commonImpDef && commonImpDef.type === 'regiment')) {
-        if (regImpRef?.army_cost_override !== undefined) return regImpRef.army_cost_override;
-        if (regImpRef?.army_point_cost !== undefined) return regImpRef.army_point_cost;
-        if (commonImpDef?.army_point_cost !== undefined) return commonImpDef.army_point_cost;
-        return 0;
+        let val = 0;
+        if (regImpRef?.army_cost_override !== undefined) val = regImpRef.army_cost_override;
+        else if (regImpRef?.army_point_cost !== undefined) val = regImpRef.army_point_cost;
+        else if (commonImpDef?.army_point_cost !== undefined) val = commonImpDef.army_point_cost;
+
+        return Number(val) || 0;
     }
     return 0;
 };
@@ -56,8 +54,8 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
     if (unitDef.rank === RANK_TYPES.GROUP || unitDef.rank === 'group') return false;
 
     const regImpDef = regimentDefinition.unit_improvements?.find(i => i.id === improvementId);
-    if (!regImpDef) return false; 
-    if (unitDef.improvement_limitations?.includes(improvementId)) return false; 
+    if (!regImpDef) return false;
+    if (unitDef.improvement_limitations?.includes(improvementId)) return false;
     if (regImpDef.units_allowed && Array.isArray(regImpDef.units_allowed)) {
         if (!regImpDef.units_allowed.includes(unitDef.id)) return false;
     } else if (regImpDef.limitations && Array.isArray(regImpDef.limitations)) {
@@ -69,9 +67,9 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
 export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
     const units = [];
     if (!regimentDefinition) return units;
-    
+
     const structure = regimentDefinition.structure || {};
-    
+
     const processGroup = (type, structureGroup, selections, isEnabled, optSelections, optEnabled) => {
         if (!structureGroup) return;
         if (!isEnabled) return;
@@ -80,47 +78,46 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
             if (groupKey === GROUP_TYPES.OPTIONAL) {
                 const mapKey = `${type}/optional`;
                 if (!optEnabled?.[mapKey]) return;
-                
+
                 const pods = structureGroup.optional || [];
                 const selectedKeys = optSelections?.[mapKey] || [];
 
                 pods.forEach((pod, idx) => {
-                     let choiceKey = selectedKeys[idx];
-                     // FIX: Szanujemy null jako "odznaczone".
-                     if (choiceKey === undefined) {
-                         const keys = Object.keys(pod);
-                         if (keys.length === 1) choiceKey = keys[0];
-                     }
+                    let choiceKey = selectedKeys[idx];
+                    if (choiceKey === undefined) {
+                        const keys = Object.keys(pod);
+                        if (keys.length === 1) choiceKey = keys[0];
+                    }
 
-                     if (choiceKey && pod[choiceKey]) {
-                         const choiceDef = pod[choiceKey];
-                         const unitIds = choiceDef.units || (choiceDef.id ? [choiceDef.id] : []);
-                         
-                         const costOverride = choiceDef.cost_override;
-                         const extraCost = choiceDef.extra_cost || 0;
+                    if (choiceKey && pod[choiceKey]) {
+                        const choiceDef = pod[choiceKey];
+                        const unitIds = choiceDef.units || (choiceDef.id ? [choiceDef.id] : []);
 
-                         unitIds.forEach((uid, uIdx) => {
-                             if (uid && uid !== IDS.NONE) {
-                                 let appliedCostOverride = undefined;
-                                 let appliedExtraCost = 0;
+                        const costOverride = choiceDef.cost_override;
+                        const extraCost = choiceDef.extra_cost || 0;
 
-                                 if (costOverride !== undefined) {
-                                     appliedCostOverride = (uIdx === 0) ? costOverride : 0;
-                                 }
-                                 
-                                 if (extraCost > 0 && uIdx === 0) {
-                                     appliedExtraCost = extraCost;
-                                 }
+                        unitIds.forEach((uid, uIdx) => {
+                            if (uid && uid !== IDS.NONE) {
+                                let appliedCostOverride = undefined;
+                                let appliedExtraCost = 0;
 
-                                 units.push({ 
-                                     key: `${type}/optional/${idx}/${uIdx}`, 
-                                     unitId: uid,
-                                     costOverride: appliedCostOverride,
-                                     extraCost: appliedExtraCost
-                                 });
-                             }
-                         });
-                     }
+                                if (costOverride !== undefined) {
+                                    appliedCostOverride = (uIdx === 0) ? costOverride : 0;
+                                }
+
+                                if (extraCost > 0 && uIdx === 0) {
+                                    appliedExtraCost = extraCost;
+                                }
+
+                                units.push({
+                                    key: `${type}/optional/${idx}/${uIdx}`,
+                                    unitId: uid,
+                                    costOverride: appliedCostOverride,
+                                    extraCost: appliedExtraCost
+                                });
+                            }
+                        });
+                    }
                 });
                 return;
             }
@@ -130,16 +127,15 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
 
             pods.forEach((pod, idx) => {
                 let choiceKey = selectedKeys[idx];
-                // FIX: Szanujemy null jako "odznaczone".
                 if (choiceKey === undefined) {
-                     const keys = Object.keys(pod);
-                     if (keys.length === 1) choiceKey = keys[0]; 
+                    const keys = Object.keys(pod);
+                    if (keys.length === 1) choiceKey = keys[0];
                 }
 
                 if (choiceKey && pod[choiceKey]) {
                     const choiceDef = pod[choiceKey];
                     const unitIds = choiceDef.units || (choiceDef.id ? [choiceDef.id] : []);
-                    
+
                     const costOverride = choiceDef.cost_override;
                     const extraCost = choiceDef.extra_cost || 0;
 
@@ -155,8 +151,8 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
                                 appliedExtraCost = extraCost;
                             }
 
-                            units.push({ 
-                                key: `${type}/${groupKey}/${idx}/${uIdx}`, 
+                            units.push({
+                                key: `${type}/${groupKey}/${idx}/${uIdx}`,
                                 unitId: uid,
                                 costOverride: appliedCostOverride,
                                 extraCost: appliedExtraCost
@@ -174,9 +170,9 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
     processGroup(GROUP_TYPES.ADDITIONAL, structure.additional, regimentConfig.additionalSelections, additionalEnabled, regimentConfig.optionalSelections, regimentConfig.optionalEnabled);
 
     if (regimentConfig.additionalCustom) {
-         const customDef = structure.additional?.unit_custom_cost;
-         const slotName = customDef?.[0]?.depends_on || "custom";
-         units.push({ key: `additional/${slotName}_custom`, unitId: regimentConfig.additionalCustom, isCustom: true });
+        const customDef = structure.additional?.unit_custom_cost;
+        const slotName = customDef?.[0]?.depends_on || "custom";
+        units.push({ key: `additional/${slotName}_custom`, unitId: regimentConfig.additionalCustom, isCustom: true });
     }
 
     return units;
@@ -194,7 +190,7 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         regimentType: "-",
         unitNames: []
     };
-    if (!unitsMap || !regimentId) return stats; 
+    if (!unitsMap || !regimentId) return stats;
 
     const regimentDefinition = getRegimentDefinition(regimentId);
     if (!regimentDefinition) return stats;
@@ -202,7 +198,7 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     stats.cost = regimentDefinition.base_cost || 0;
     stats.recon = regimentDefinition.recon || 0;
     stats.activations = regimentDefinition.activations || 0;
-    stats.awareness = regimentDefinition.awareness || 0; 
+    stats.awareness = regimentDefinition.awareness || 0;
 
     const customCostMap = (regimentDefinition.structure?.additional?.unit_custom_cost || [])
         .reduce((map, item) => { map[item.id] = item.cost; return map; }, {});
@@ -255,17 +251,17 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
 
     activeUnits.forEach((entry) => {
         const { key: positionKey, unitId, isCustom, costOverride, extraCost } = entry;
-        
+
         if (!unitId || unitId === IDS.NONE) return;
 
         let unitBaseCost = 0;
 
         if (costOverride !== undefined) {
             unitBaseCost = costOverride;
-        } 
+        }
         else if (isCustom && customCostMap[unitId] !== undefined) {
             unitBaseCost = customCostMap[unitId];
-        } 
+        }
         else {
             unitBaseCost = unitsMap[unitId]?.cost || 0;
         }
@@ -280,14 +276,14 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
 
         const improvementsMap = regimentConfig.improvements || {};
         (improvementsMap[positionKey] || []).forEach(impId => {
-             stats.cost += calculateSingleImprovementArmyCost(unitsMap[unitId], impId, regimentDefinition, commonImprovements);
+            stats.cost += calculateSingleImprovementArmyCost(unitsMap[unitId], impId, regimentDefinition, commonImprovements);
         });
     });
 
     if (configuredDivision && configuredDivision.supportUnits) {
         const allRegiments = [
             ...(configuredDivision.vanguard || []),
-            ...(configuredDivision.base || []), 
+            ...(configuredDivision.base || []),
             ...(configuredDivision.additional || [])
         ];
         const currentRegimentData = allRegiments.find(r => r.config === regimentConfig);
@@ -295,16 +291,16 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         if (currentRegimentData) {
             const positionKey = `${currentRegimentData.group}/${currentRegimentData.index}`;
             const improvementsMap = regimentConfig.improvements || {};
-            
+
             configuredDivision.supportUnits
                 .filter(su => su.assignedTo?.positionKey === positionKey)
                 .forEach(su => {
                     stats.cost += (unitsMap[su.id]?.cost || 0);
                     addUnitStats(su.id, null);
-                    
+
                     const supportUnitKey = `support/${su.id}-${positionKey}`;
                     (improvementsMap[supportUnitKey] || []).forEach(impId => {
-                         stats.cost += calculateSingleImprovementArmyCost(unitsMap[su.id], impId, regimentDefinition, commonImprovements);
+                        stats.cost += calculateSingleImprovementArmyCost(unitsMap[su.id], impId, regimentDefinition, commonImprovements);
                     });
                 });
         }
@@ -321,15 +317,12 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         }
     }
 
-    // Aplikowanie zasad pułkowych (modyfikacja statystyk)
     stats = applyRegimentRuleStats(stats, activeUnits, regimentDefinition);
 
-    // Aplikowanie zasad dywizyjnych (modyfikacja statystyk i kosztów PS)
     if (configuredDivision && configuredDivision.divisionDefinition?.rules) {
-         configuredDivision.divisionDefinition.rules.forEach(rule => {
+        configuredDivision.divisionDefinition.rules.forEach(rule => {
             const ruleImpl = DIVISION_RULES_REGISTRY[rule.id];
-            
-            // Bonusy do statystyk (np. Motywacja)
+
             if (ruleImpl && ruleImpl.getRegimentStatsBonus) {
                 const bonus = ruleImpl.getRegimentStatsBonus(configuredDivision, regimentId, rule);
                 if (bonus) {
@@ -337,7 +330,6 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
                 }
             }
 
-            // Bonusy do kosztu PS (Extra Regiment Cost)
             if (ruleImpl && ruleImpl.getRegimentCostModifier) {
                 const costMod = ruleImpl.getRegimentCostModifier(configuredDivision, regimentId, rule);
                 if (costMod && costMod.ps) {
@@ -350,42 +342,144 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     return stats;
 };
 
-// Oblicza zużycie Punktów Ulepszeń (PU) dla konkretnego pułku
-export const calculateRegimentImprovementPoints = (regimentConfig, regimentId, unitsMap, getRegimentDefinition, commonImprovements, assignedSupportUnits = []) => {
+export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition, targetUnitId, targetImpId, divisionDefinition = null) => {
+    if (!regimentDefinition) return false;
+
+    // 1. Sprawdź zasady Pułkowe
+    const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
+    const rulesUsageState = {};
+    if (regimentDefinition.special_rules) {
+        regimentDefinition.special_rules.forEach((ruleEntry, idx) => { rulesUsageState[idx] = { usedCount: 0 }; });
+    }
+
+    let isTargetFree = false;
+    activeUnits.forEach(u => {
+        const unitImps = regimentConfig.improvements?.[u.key] || [];
+        const impsToCheck = (u.unitId === targetUnitId) ? [...unitImps, targetImpId] : unitImps;
+        impsToCheck.forEach(impId => {
+            if (regimentDefinition.special_rules) {
+                regimentDefinition.special_rules.forEach((ruleEntry, ruleIdx) => {
+                    const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
+                    const params = typeof ruleEntry === 'object' ? ruleEntry : {};
+                    const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
+                    if (ruleImpl && ruleImpl.isImprovementFree) {
+                        const isFree = ruleImpl.isImprovementFree(u.unitId, impId, params, rulesUsageState[ruleIdx]);
+                        if (u.unitId === targetUnitId && impId === targetImpId && isFree) {
+                            isTargetFree = true;
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+    // 2. Sprawdź zasady Dywizyjne (NOWOŚĆ)
+    if (divisionDefinition?.rules) {
+        let isFreeByDivision = false;
+        divisionDefinition.rules.forEach(ruleConfig => {
+             const ruleId = ruleConfig.id;
+             const ruleImpl = DIVISION_RULES_REGISTRY[ruleId];
+             if (ruleImpl && ruleImpl.isImprovementFree) {
+                 // params = ruleConfig
+                 if (ruleImpl.isImprovementFree(targetUnitId, targetImpId, ruleConfig)) {
+                     isFreeByDivision = true;
+                 }
+             }
+        });
+        if (isFreeByDivision) return true;
+    }
+
+    return isTargetFree;
+};
+
+// --- NOWA FUNKCJA: Obliczanie "efektywnej" liczby ulepszeń (pomijając darmowe) ---
+export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefinition, improvementId, divisionDefinition = null) => {
+    if (!regimentDefinition) return 0;
+    const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
+    const rulesUsageState = {};
+    if (regimentDefinition.special_rules) {
+        regimentDefinition.special_rules.forEach((ruleEntry, idx) => {
+            rulesUsageState[idx] = { usedCount: 0 };
+        });
+    }
+    let count = 0;
+    activeUnits.forEach(u => {
+        const unitImps = regimentConfig.improvements?.[u.key] || [];
+        if (unitImps.includes(improvementId)) {
+            let isFree = false;
+            // 1. Sprawdź pułkowe
+            if (regimentDefinition.special_rules) {
+                regimentDefinition.special_rules.forEach((ruleEntry, ruleIdx) => {
+                    const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
+                    const params = typeof ruleEntry === 'object' ? ruleEntry : {};
+                    const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
+                    if (ruleImpl && ruleImpl.isImprovementFree) {
+                        if (ruleImpl.isImprovementFree(u.unitId, improvementId, params, rulesUsageState[ruleIdx])) {
+                            isFree = true;
+                        }
+                    }
+                });
+            }
+            // 2. Sprawdź dywizyjne (NOWOŚĆ)
+            if (!isFree && divisionDefinition?.rules) {
+                 divisionDefinition.rules.forEach(ruleConfig => {
+                     const ruleImpl = DIVISION_RULES_REGISTRY[ruleConfig.id];
+                     if (ruleImpl && ruleImpl.isImprovementFree) {
+                         if (ruleImpl.isImprovementFree(u.unitId, improvementId, ruleConfig)) {
+                             isFree = true;
+                         }
+                     }
+                 });
+            }
+
+            if (!isFree) count++;
+        }
+    });
+    return count;
+};
+
+export const calculateRegimentImprovementPoints = (
+    regimentConfig,
+    regimentId,
+    unitsMap,
+    getRegimentDefinition,
+    commonImprovements, // Nazwa poprawna
+    assignedSupportUnits = [],
+    divisionDefinition = null
+) => {
     if (!unitsMap || !regimentId || regimentId === IDS.NONE) return 0;
     const regimentDefinition = getRegimentDefinition(regimentId);
     if (!regimentDefinition) return 0;
 
     let totalImpCost = 0;
 
-    // 0. NOWE: Koszt własny pułku (PU)
     if (regimentDefinition.improvement_points_cost) {
-        totalImpCost += regimentDefinition.improvement_points_cost;
+        totalImpCost += Number(regimentDefinition.improvement_points_cost) || 0;
     }
 
     const getUnitPUCost = (unitId) => {
         if (!unitId || unitId === IDS.NONE) return 0;
         const u = unitsMap[unitId];
         if (!u) return 0;
-        return u.improvement_points_cost || u.pu_cost || 0;
+        return Number(u.improvement_points_cost || u.pu_cost || 0);
     };
 
-    // 1. Ulepszenia Pułku
     const regimentImprovementsDefinition = regimentDefinition.regiment_improvements || [];
     (regimentConfig.regimentImprovements || []).forEach(impId => {
         const regImpRef = regimentImprovementsDefinition.find(i => i.id === impId);
         const commonImpDef = commonImprovements?.[impId];
-        
+
+        let cost = 0;
         if (regImpRef?.cost_override !== undefined) {
-            totalImpCost += regImpRef.cost_override;
+            cost = regImpRef.cost_override;
         } else if (regImpRef?.cost !== undefined) {
-            totalImpCost += regImpRef.cost;
+            cost = regImpRef.cost;
         } else if (commonImpDef?.cost !== undefined) {
-            totalImpCost += commonImpDef.cost;
+            cost = commonImpDef.cost;
         }
+        totalImpCost += Number(cost) || 0;
     });
 
-    // 2. Jednostki wewnątrz pułku + ich ulepszenia
     const improvementsMap = regimentConfig.improvements || {};
     const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
 
@@ -393,15 +487,15 @@ export const calculateRegimentImprovementPoints = (regimentConfig, regimentId, u
         if (!unitId || unitId === IDS.NONE) return;
         const unitDef = unitsMap[unitId];
         if (!unitDef || unitDef.rank === RANK_TYPES.GROUP) return;
-        
+
         totalImpCost += getUnitPUCost(unitId);
 
         (improvementsMap[positionKey] || []).forEach(impId => {
-            totalImpCost += calculateSingleImprovementIMPCost(unitDef, impId, regimentDefinition, commonImprovements);
+            const cost = calculateSingleImprovementIMPCost(unitDef, impId, regimentDefinition, commonImprovements);
+            totalImpCost += Number(cost) || 0;
         });
     });
 
-    // 3. Jednostki Wsparcia
     if (assignedSupportUnits && assignedSupportUnits.length > 0) {
         assignedSupportUnits.forEach(su => {
             const supportUnitDef = unitsMap[su.id];
@@ -413,16 +507,64 @@ export const calculateRegimentImprovementPoints = (regimentConfig, regimentId, u
             if (regimentPosKey) {
                 const supportUnitKey = `support/${su.id}-${regimentPosKey}`;
                 (improvementsMap[supportUnitKey] || []).forEach(impId => {
-                    totalImpCost += calculateSingleImprovementIMPCost(supportUnitDef, impId, regimentDefinition, commonImprovements);
+                    const cost = calculateSingleImprovementIMPCost(supportUnitDef, impId, regimentDefinition, commonImprovements);
+                    totalImpCost += Number(cost) || 0;
                 });
             }
         });
     }
 
-    return totalImpCost;
+    // --- ZNIŻKI Z ZASAD PUŁKOWYCH ---
+    if (regimentDefinition.special_rules) {
+        regimentDefinition.special_rules.forEach(ruleEntry => {
+            const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
+            const params = typeof ruleEntry === 'object' ? ruleEntry : {};
+
+            const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
+            if (ruleImpl && ruleImpl.calculateImprovementDiscount) {
+                // Przekazujemy funkcję kosztu (Dependency Injection)
+                const discount = ruleImpl.calculateImprovementDiscount(
+                    activeUnits,
+                    regimentConfig,
+                    commonImprovements,
+                    params,
+                    unitsMap,
+                    regimentDefinition,
+                    calculateSingleImprovementIMPCost // <-- To pozwala obsłużyć "double"
+                );
+                totalImpCost -= (Number(discount) || 0);
+            }
+        });
+    }
+
+    // --- ZNIŻKI Z ZASAD DYWIZYJNYCH ---
+    if (divisionDefinition?.rules) {
+        const activeUnitsList = collectRegimentUnits(regimentConfig, regimentDefinition);
+
+        divisionDefinition.rules.forEach(ruleConfig => {
+            let ruleId = ruleConfig.id;
+            let params = ruleConfig;
+
+            if (ruleId === "czaty") {
+                ruleId = "free_improvement_for_specific_units";
+                params = {
+                    unit_ids: ["koz_moloytsy_s", "koz_registered_s", "koz_czer_m"],
+                    improvement_id: "partisans",
+                    max_per_regiment: 1
+                };
+            }
+
+            const ruleImpl = DIVISION_RULES_REGISTRY[ruleId];
+            if (ruleImpl && ruleImpl.calculateDiscount) {
+                const discount = ruleImpl.calculateDiscount(regimentConfig, activeUnitsList, commonImprovements, params);
+                totalImpCost -= (Number(discount) || 0);
+            }
+        });
+    }
+
+    return Math.max(0, totalImpCost);
 };
 
-// Oblicza globalne zużycie PU dla całej dywizji
 export const calculateImprovementPointsCost = (divisionConfig, unitsMap, getRegimentDefinition, commonImprovements) => {
     if (!unitsMap || !divisionConfig) return 0;
     let totalImpCost = 0;
@@ -431,7 +573,7 @@ export const calculateImprovementPointsCost = (divisionConfig, unitsMap, getRegi
         if (!unitId || unitId === IDS.NONE) return 0;
         const u = unitsMap[unitId];
         if (!u) return 0;
-        return u.improvement_points_cost || u.pu_cost || 0;
+        return Number(u.improvement_points_cost || u.pu_cost || 0);
     };
 
     if (divisionConfig.general) {
@@ -446,30 +588,29 @@ export const calculateImprovementPointsCost = (divisionConfig, unitsMap, getRegi
 
     allRegiments.forEach(regiment => {
         if (regiment.id === IDS.NONE) return;
-        
+
         const posKey = `${regiment.group}/${regiment.index}`;
-        
+
         const attachedSupport = (divisionConfig.supportUnits || [])
             .filter(su => su.assignedTo?.positionKey === posKey);
 
-        // Koszt z pułku (jednostki + ulepszenia + baza)
         totalImpCost += calculateRegimentImprovementPoints(
-            regiment.config, 
-            regiment.id, 
-            unitsMap, 
-            getRegimentDefinition, 
-            commonImprovements, 
-            attachedSupport
+            regiment.config,
+            regiment.id,
+            unitsMap,
+            getRegimentDefinition,
+            commonImprovements,
+            attachedSupport,
+            divisionConfig.divisionDefinition
         );
 
-        // NOWE: Koszt z zasad dywizji (extra_regiment_cost w PU)
         if (divisionConfig.divisionDefinition?.rules) {
-             divisionConfig.divisionDefinition.rules.forEach(rule => {
+            divisionConfig.divisionDefinition.rules.forEach(rule => {
                 const ruleImpl = DIVISION_RULES_REGISTRY[rule.id];
                 if (ruleImpl && ruleImpl.getRegimentCostModifier) {
                     const mod = ruleImpl.getRegimentCostModifier(divisionConfig, regiment.id, rule);
                     if (mod && mod.pu) {
-                        totalImpCost += mod.pu;
+                        totalImpCost += Number(mod.pu) || 0;
                     }
                 }
             });
@@ -537,10 +678,10 @@ export const calculateDivisionCost = (configuredDivision, unitsMap, getRegimentD
 
     const allRegiments = [
         ...(configuredDivision.vanguard || []),
-        ...(configuredDivision.base || []), 
+        ...(configuredDivision.base || []),
         ...(configuredDivision.additional || [])
     ];
-    
+
     allRegiments.forEach(regiment => {
         if (regiment.id !== IDS.NONE) {
             cost += calculateRegimentStats(regiment.config, regiment.id, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements).cost;
@@ -602,7 +743,7 @@ const isRegimentAllied = (regId, selectedFaction, getRegimentDefinition) => {
     if (!selectedFaction || !selectedFaction.regiments) return false;
     // 1. Jeśli jest na liście pułków frakcji -> Nie jest sojusznikiem (jest rodzimy)
     if (selectedFaction.regiments[regId]) return false;
-    
+
     // 2. Jeśli pochodzi z frakcji "mercenaries" -> Nie jest sojusznikiem
     const def = getRegimentDefinition(regId);
     if (def && def._sourceFaction === 'mercenaries') return false;
@@ -647,7 +788,7 @@ export const calculateMainForceKey = (configuredDivision, unitsMap, selectedFact
 
 export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
-    
+
     let mainForceCost = 0;
     if (mainForceKey) {
         const [group, idxStr] = mainForceKey.split('/');
@@ -655,7 +796,7 @@ export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, 
         let reg = null;
         if (group === GROUP_TYPES.BASE) reg = divisionConfig.base[idx];
         else if (group === GROUP_TYPES.ADDITIONAL) reg = divisionConfig.additional[idx];
-        
+
         if (reg) {
             mainForceCost = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements).cost;
         }
@@ -688,7 +829,7 @@ export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, 
 
 export const validateAlliedCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
-    
+
     let mainForceCost = 0;
     if (mainForceKey) {
         const [group, idxStr] = mainForceKey.split('/');
@@ -696,7 +837,7 @@ export const validateAlliedCost = (divisionConfig, unitsMap, selectedFaction, ge
         let reg = null;
         if (group === GROUP_TYPES.BASE) reg = divisionConfig.base[idx];
         else if (group === GROUP_TYPES.ADDITIONAL) reg = divisionConfig.additional[idx];
-        
+
         if (reg) {
             mainForceCost = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements).cost;
         }
@@ -713,11 +854,11 @@ export const validateAlliedCost = (divisionConfig, unitsMap, selectedFaction, ge
     for (const reg of allRegiments) {
         if (reg.id !== IDS.NONE && isAllied(reg.id)) {
             const stats = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements);
-            
+
             if (stats.cost > mainForceCost) {
                 const def = getRegimentDefinition(reg.id);
                 const name = def ? def.name : reg.id;
-                
+
                 return {
                     isValid: false,
                     message: `Niedozwolona konfiguracja!\n\nPułk sojuszniczy (${name}: ${stats.cost} PS) nie może mieć więcej punktów siły niż Siły Główne (${mainForceCost} PS).`
