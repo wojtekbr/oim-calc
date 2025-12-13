@@ -80,7 +80,7 @@
     }
   },
   "mrc_reiters": {
-    "name": "Regiment Rajtarów",
+    "name": "Regiment Rajtarów Najemnych",
     "base_cost": 0,
     "recon": 0,
     "awareness": 4,
@@ -129,6 +129,80 @@
                 "unit1": { 
                   "units": ["mrc_podpulkownik"],
                   "mandatory": true
+                }
+              }
+            ]
+          }
+        }
+      },
+      "brandenburg": {
+        "special_rules_add": ["roznorodne_wyposazenie"]
+      },
+      "danmark": {
+        "special_rules_add": ["krolewski_arsenal"]
+      }
+    }
+   },
+   "mrc_dragoons": {
+    "name": "Regiment Dragonów Najemnych",
+    "base_cost": 0,
+    "recon": 1,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      { "id": "veterans"},
+      { "id": "additional_pistol" }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mrc_pulkownik"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["mrc_dragoons_mercenary_s"] }, "unit2": { "units": ["mrc_dragoons_mercenary_m"] } }
+        ],
+        "base2": [
+          { "unit1": { "units": ["mrc_dragoons_mercenary_s"] }, "unit2": { "units": ["mrc_dragoons_mercenary_m"] } }
+        ]
+      },
+      "additional": {
+        "general": [
+          { 
+            "unit1": { 
+              "units": ["mrc_major"],
+              "extra_cost": 2  
+            }
+          }
+        ],
+        "additional1": [
+          { "unit1": { "units": ["mrc_dragoons_mercenary_s"] }, "unit2": { "units": ["mrc_dragoons_mercenary_m"] } }
+        ]
+      }
+    },
+    "faction_variants": {
+      "sweden": {
+        "special_rules_add": ["szwedzki_podpulkownik"],
+        "structure_overrides": {
+          "additional": {
+            "general": [
+              { 
+                "unit1": { 
+                  "units": ["mrc_podpulkownik"],
+                  "mandatory": true
+                }
+              }
+            ]
+          }
+        }
+      },
+      "hre": {
+        "special_rules_add": ["szwedzki_podpulkownik"],
+        "structure_overrides": {
+          "additional": {
+            "general": [
+              { 
+                "unit1": { 
+                  "units": ["mrc_podpulkownik"]
                 }
               }
             ]

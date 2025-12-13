@@ -104,62 +104,65 @@ export const useRegimentSelectorLogic = ({
 
     // --- Handlery ---
 
-    const handleBuySupportUnit = (unitId, definitionIndex, remainingPoints) => {
+    // ZMODYFIKOWANO: Obsługa pakietów (pole 'units' w definicji) i generowanie instanceId
+    const handleBuySupportUnit = (unitId, definitionIndex, currentPoints) => {
+        // Znajdujemy definicję, żeby sprawdzić koszt i czy to jest "pakiet"
+        let unitDef = augmentedUnitsMap[unitId]; // Używamy augmentedUnitsMap dla pewności
+        
+        // Fallback: szukanie w definicjach strukturalnych
+        if (!unitDef) {
+            const allDefs = [...(divisionDefinition.division_artillery || []), ...(divisionDefinition.additional_units || [])];
+            const groupDef = allDefs[definitionIndex];
+            if (groupDef && groupDef.options) {
+                const opt = groupDef.options.find(o => (typeof o === 'string' ? o : o.id) === unitId);
+                if (typeof opt === 'object') unitDef = opt;
+            } else if (groupDef && (groupDef.id === unitId || groupDef.name === unitId)) {
+                unitDef = groupDef;
+            }
+        }
+
+        if (!unitDef) return;
+
         setConfiguredDivision(prev => {
-            const existingUnitsInSlot = prev.supportUnits.filter(su => su.definitionIndex === definitionIndex);
+            const next = { ...prev };
+            const newUnits = [];
 
-            // Toggle Off logic
-            const isToggleOff = existingUnitsInSlot.length > 0 && (
-                existingUnitsInSlot[0].id === unitId ||
-                existingUnitsInSlot[0].sourcePackId === unitId
-            );
-
-            let newSupportUnits = prev.supportUnits.filter(su => su.definitionIndex !== definitionIndex);
-
-            if (isToggleOff) {
-                return { ...prev, supportUnits: newSupportUnits };
-            }
-
-            // Zakup
-            const unitDef = augmentedUnitsMap[unitId];
-            const cost = unitDef?.pu_cost || 0;
-
-            if (remainingPoints - cost < 0) {
-                // Opcjonalnie: walidacja kosztu (na razie soft check)
-            }
-
-            // Obsługa pakietów (pole "units" w definicji)
-            if (unitDef && unitDef.units && Array.isArray(unitDef.units)) {
-                const packUnits = unitDef.units.map(subUnitId => ({
-                    id: subUnitId,
-                    definitionIndex: definitionIndex,
-                    sourcePackId: unitId,
-                    assignedTo: null,
-                    instanceId: Math.random().toString(36).substr(2, 9)
-                }));
-                newSupportUnits = [...newSupportUnits, ...packUnits];
+            // --- LOGIKA ROZPAKOWYWANIA PAKIETU ---
+            if (unitDef.units && Array.isArray(unitDef.units)) {
+                // Jeśli to pakiet (np. 2x Działa), dodajemy każdą jednostkę z listy osobno
+                unitDef.units.forEach(subUnitId => {
+                    newUnits.push({
+                        id: subUnitId,
+                        definitionIndex, // Wszystkie mają ten sam slot index
+                        assignedTo: null,
+                        sourcePackId: unitId, // Zapamiętujemy, że pochodzą z tego pakietu
+                        instanceId: Math.random().toString(36).substr(2, 9) // Unikalne ID dla każdej sztuki
+                    });
+                });
             } else {
-                // Pojedyncza jednostka
-                newSupportUnits.push({
+                // Standardowy zakup pojedynczej jednostki
+                newUnits.push({
                     id: unitId,
-                    definitionIndex: definitionIndex,
-                    sourcePackId: null,
+                    definitionIndex,
                     assignedTo: null,
                     instanceId: Math.random().toString(36).substr(2, 9)
                 });
             }
 
-            return { ...prev, supportUnits: newSupportUnits };
+            next.supportUnits = [...next.supportUnits, ...newUnits];
+            return next;
         });
     };
 
     const handleRemoveSupportUnit = (definitionIndex) => {
         setConfiguredDivision(prev => {
+            // Usuwamy wszystko co jest w tym slocie (czyli cały pakiet, jeśli to był pakiet)
             const newSupportUnits = prev.supportUnits.filter(su => su.definitionIndex !== definitionIndex);
             return { ...prev, supportUnits: newSupportUnits };
         });
     };
 
+    // ZMODYFIKOWANO: Dodano obsługę specificInstanceId do precyzyjnego przypisywania
     const handleAssignSupportUnit = (definitionIndex, positionKey, specificInstanceId = null) => {
         let assignment = null;
         if (positionKey !== "") {
@@ -169,13 +172,15 @@ export const useRegimentSelectorLogic = ({
 
         setConfiguredDivision(prev => {
             const newSupportUnits = prev.supportUnits.map(su => {
+                // 1. Jeśli podano ID instancji (nowy system dla pakietów), szukamy dokładnie tej jednostki
                 if (specificInstanceId) {
                     if (su.instanceId === specificInstanceId) {
                         return { ...su, assignedTo: assignment };
                     }
                     return su;
                 }
-                // Fallback dla pojedynczych jednostek bez instanceId (kompatybilność wsteczna)
+                
+                // 2. Fallback (stary system): szukamy po indeksie slotu
                 if (su.definitionIndex === definitionIndex) {
                     return { ...su, assignedTo: assignment };
                 }
@@ -280,7 +285,7 @@ export const useRegimentSelectorLogic = ({
                 unitConfig = allSupportDefinitions.find(u => (typeof u === 'string' && u === su.id) || (u.name === su.id));
             }
             if (unitConfig) {
-                const check = checkSupportUnitRequirements(unitConfig, tempDivision, getRegimentDefinition, augmentedUnitsMap);
+                const check = checkSupportUnitRequirements(unitConfig, tempDivision, getRegimentDefinition, augmentedUnitsMap, 'validate');
                 if (!check.isAllowed) {
                     unitsToRemoveIndices.push(suIdx);
                     unitsToRemoveNames.push(unitsMap[su.id]?.name || su.id);
@@ -338,7 +343,6 @@ export const useRegimentSelectorLogic = ({
 
     const calcStatsWrapper = (config, id) => calculateRegimentStats(config, id, configuredDivision, unitsMap, getRegimentDefinition, improvements);
 
-    // !!! TO BYŁO BRAKUJĄCE OGNIWO !!!
     const isAllied = (regId) => {
         if (regId === IDS.NONE) return false;
         if (faction.regiments && faction.regiments[regId]) return false;
@@ -412,8 +416,6 @@ export const useRegimentSelectorLogic = ({
             playerName, setPlayerName,
             divisionCustomName, setDivisionCustomName,
             regimentsList, purchasedSlotsMap, unitsRulesMap, mainForceKey,
-
-            // WAŻNE: Eksportujemy funkcję isAllied, aby widok jej używał
             isAllied,
             currentAlliesCount,
             currentMainForceCost,

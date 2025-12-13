@@ -9,6 +9,13 @@
     "rank": "group",
     "orders": 2
   },
+  "swe_general": {
+    "id": "swe_general",
+    "name": "Generał",
+    "cost": 0,
+    "rank": "group",
+    "orders": 3
+  },
   "swe_major": {
     "id": "swe_major",
     "name": "Major",
@@ -70,5 +77,21 @@
     "is_cavalry": true,
     "rank": "silver",
     "improvement_cost": 3
+  },
+  "swe_light_artillery_s": {
+    "id": "swe_light_artillery_s",
+    "name": "Lekkie Działa S",
+    "cost": 3,
+    "is_artillery": true,
+    "rank": "bronze",
+    "improvement_cost": 2
+  },
+  "swe_medium_artillery_s": {
+    "id": "swe_medium_artillery_s",
+    "name": "Średnie Działa S",
+    "cost": 5,
+    "is_artillery": true,
+    "rank": "silver",
+    "improvement_cost": 2
   }
 }

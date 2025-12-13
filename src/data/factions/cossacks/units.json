@@ -49,13 +49,13 @@
     "name": "Wozy taborowe",
     "cost": 4,
     "rank": "group",
-    "additional_supply": 4
+    "additional_supply": 1
   },
   "koz_umocnienia_taborowe": {
     "id": "koz_umocnienia_taborowe",
     "name": "Umocnienia taborowe",
-    "cost": 4,
-    "additional_supply": 6,
+    "cost": 6,
+    "additional_supply": 2,
     "rank": "group"
   },
   "koz_molojcy_m": {

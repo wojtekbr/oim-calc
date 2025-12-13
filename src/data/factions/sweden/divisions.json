@@ -1,0 +1,142 @@
+{
+  "swe_polowa": {
+    "name": "Dywizja Polowa",
+    "improvement_points": 12,
+    "base_cost": 31,
+    "general": ["swe_general"],
+    "rules": [
+      { 
+        "id": "weterani"
+      },
+      {
+        "id": "bellum_se_ipse_alet"
+      },
+      {
+        "id": "umowa_kapitulacyjna"
+      },
+      {
+        "id": "rozbudowany_sztab"
+      },
+      {
+        "id": "dyscyplina"
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      }
+    ],
+    "division_artillery": [
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["swe_light_artillery_s"],
+        "requirements": [
+          {
+            "type": "division_contains_any_regiment",
+            "regiment_ids": ["mrc_dragoons"]
+          }
+        ]
+      }
+    ],
+    "vanguard": [
+      { "options": ["mrc_reiters","mrc_dragoons"]}
+    ],
+    "base": [
+      { "options": ["mrc_reiters"] },
+      { "options": ["mrc_reiters"] },
+      { "options": ["mrc_reiters","mrc_dragoons"] }
+    ],
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
+          "mrc_reiters",
+          "mrc_dragoons",
+          "swe_reg_jazdy_krajowej",
+          "swe_reg_jazdy_krajowej"
+        ]
+    }
+  },
+  "swe_garnizonowa": {
+    "name": "Dywizja Garnizonowa",
+    "improvement_points": 12,
+    "base_cost": 13,
+    "general": ["swe_general"],
+    "rules": [
+      { 
+        "id": "regimenty_garnizonowe"
+      },
+      {
+        "id": "bellum_se_ipse_alet"
+      },
+      {
+        "id": "krolewski_regiment_artylerii"
+      },
+      {
+        "id": "rozbudowany_sztab"
+      },
+      {
+        "id": "dyscyplina"
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      }
+    ],
+    "division_artillery": [
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["swe_light_artillery_s"]
+      },
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["swe_light_artillery_s"]
+      },
+      {
+        "type": "group",
+        "name": "Średnia Artyleria",
+        "options": ["swe_medium_artillery_s"]
+      }
+    ],
+    "vanguard": [
+      { "options": ["mrc_reiters","mrc_dragoons"]}
+    ],
+    "base": [
+      { "options": ["mrc_reiters"] },
+      { "options": ["mrc_infantry"] },
+      { "options": ["mrc_infantry","swe_reg_piechoty_krajowej","mrc_dragoons"] }
+    ],
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
+          "mrc_reiters",
+          "swe_reg_jazdy_krajowej",
+          "mrc_infantry",
+          "mrc_infantry",
+          "swe_reg_piechoty_krajowej",
+          "mrc_dragoons"
+        ]
+    }
+  }
+}

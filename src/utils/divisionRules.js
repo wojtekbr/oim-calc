@@ -243,7 +243,6 @@ export const DIVISION_RULES_REGISTRY = {
 
     "banned_units_in_vanguard": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
-            // FIX: Obsługa 'banned_unit_ids' z JSON użytkownika LUB 'unit_ids'
             const bannedUnitIds = params?.banned_unit_ids || params?.unit_ids || [];
 
             if (bannedUnitIds.length === 0) return [];
@@ -255,10 +254,8 @@ export const DIVISION_RULES_REGISTRY = {
                 if (reg.id !== IDS.NONE) {
                     const def = getRegimentDefinition(reg.id);
 
-                    // 1. Sprawdzamy jednostki wewnątrz pułku (options)
                     const internalUnits = collectRegimentUnits(reg.config || {}, def).map(u => u.unitId);
 
-                    // 2. Sprawdzamy przypisane wsparcie
                     const positionKey = `${GROUP_TYPES.VANGUARD}/${index}`;
                     const supportUnits = (divisionConfig.supportUnits || [])
                         .filter(su => su.assignedTo?.positionKey === positionKey)
@@ -266,7 +263,6 @@ export const DIVISION_RULES_REGISTRY = {
 
                     const allUnitIds = [...internalUnits, ...supportUnits];
 
-                    // Szukamy zakazanych
                     const foundBanned = allUnitIds.find(uid => bannedUnitIds.includes(uid));
 
                     if (foundBanned) {
@@ -454,7 +450,6 @@ export const DIVISION_RULES_DEFINITIONS = {
         }
     },
 
-    // --- NOWE: Opis zakazu w Vanguard ---
     "banned_units_in_vanguard": {
         title: "Ograniczenia Straży Przedniej",
         getDescription: (params, context) => {
@@ -649,7 +644,8 @@ export const getDivisionRulesDescriptions = (divisionDefinition, unitsMap, getRe
     }).filter(Boolean);
 };
 
-export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegimentDefinition, unitsMap = null) => {
+// ZMIANA: Dodano parametr 'mode'
+export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegimentDefinition, unitsMap = null, mode = 'purchase') => {
     // Umożliwiamy unitConfig bycie obiektem z requirements
     const requirements = unitConfig.requirements || [];
 
@@ -741,12 +737,65 @@ export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegi
             }
         }
 
-        // --- NOWE: has_any_additional_regiment ---
         if (req.type === "has_any_additional_regiment") {
-            // Sprawdzamy liczbę nie-pustych pułków w sekcji additional
             const count = divisionConfig.additional?.filter(r => r.id !== IDS.NONE).length || 0;
             if (count === 0) {
                 return { isAllowed: false, reason: "Wymagany min. 1 pułk dodatkowy" };
+            }
+        }
+
+        // --- NOWOŚĆ: Wykluczanie jednostek (Mutually Exclusive) ---
+        if (req.type === "division_excludes_unit") {
+            const { unit_ids } = req; // Tablica ID, których nie może być w dywizji
+            
+            // Sprawdzamy, czy w supportUnits jest już któraś z zakazanych jednostek
+            const currentSupportIds = (divisionConfig.supportUnits || []).map(su => su.id);
+            const conflict = unit_ids.find(id => currentSupportIds.includes(id));
+
+            if (conflict) {
+                let conflictName = conflict;
+                // Próbujemy pobrać ładną nazwę
+                if (unitsMap && unitsMap[conflict]) {
+                    conflictName = unitsMap[conflict].name;
+                }
+                return { isAllowed: false, reason: `Konflikt: Nie można łączyć z "${conflictName}"` };
+            }
+        }
+
+        // --- NOWOŚĆ: Limit zależny od liczby pułków (Z OBSŁUGĄ MODE) ---
+        if (req.type === "limit_per_regiment_count") {
+            const { regiment_ids, amount_per_regiment } = req;
+            
+            // Liczymy aktywne pułki z listy regiment_ids
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []),
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+            
+            // FIX: Używamy IDS.NONE zamiast stringa "none", jeśli taki jest importowany
+            const activeRegimentCount = allRegiments.filter(r => 
+                r.id !== IDS.NONE && regiment_ids.includes(r.id)
+            ).length;
+
+            const limit = activeRegimentCount * amount_per_regiment;
+
+            // Liczymy ile TYCH jednostek (lub ich wariantów) już mamy
+            const myUnitId = unitConfig.id || unitConfig.name;
+            const currentCount = (divisionConfig.supportUnits || []).filter(su => su.id === myUnitId).length;
+
+            if (mode === 'validate') {
+                // Przy walidacji (po fakcie) błąd tylko jeśli FAKTYCZNIE przekroczono limit (>).
+                // Jeśli mamy 4 wozy przy limicie 4, to jest OK.
+                if (currentCount > limit) {
+                    return { isAllowed: false, reason: `Przekroczono limit: ${currentCount}/${limit} (Max ${amount_per_regiment} na pułk)` };
+                }
+            } else {
+                // Przy zakupie (przed faktem) blokujemy jeśli osiągnięto limit (>=).
+                // Jeśli mamy 4 wozy przy limicie 4, nie możemy kupić piątego.
+                if (currentCount >= limit) {
+                    return { isAllowed: false, reason: `Limit: ${limit} (Max ${amount_per_regiment} na każdy wystawiony pułk)` };
+                }
             }
         }
     }
