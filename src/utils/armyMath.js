@@ -342,44 +342,28 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     return stats;
 };
 
-export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition, targetUnitId, targetImpId) => {
+export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition, targetUnitId, targetImpId, divisionDefinition = null) => {
     if (!regimentDefinition) return false;
 
+    // 1. Sprawdź zasady Pułkowe
     const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
-
-    // Inicjalizujemy stan zużycia zasad
     const rulesUsageState = {};
     if (regimentDefinition.special_rules) {
-        regimentDefinition.special_rules.forEach((ruleEntry, idx) => {
-            rulesUsageState[idx] = { usedCount: 0 };
-        });
+        regimentDefinition.special_rules.forEach((ruleEntry, idx) => { rulesUsageState[idx] = { usedCount: 0 }; });
     }
 
     let isTargetFree = false;
-
-    // Symulujemy przejście przez wszystkie jednostki
     activeUnits.forEach(u => {
         const unitImps = regimentConfig.improvements?.[u.key] || [];
-
-        // Budujemy listę ulepszeń do sprawdzenia dla tej jednostki.
-        // Jeśli to jest nasza docelowa jednostka (targetUnitId),
-        // to "udajemy", że ma już to ulepszenie (targetImpId), żeby sprawdzić czy zostanie uznane za darmowe.
-        const impsToCheck = (u.unitId === targetUnitId)
-            ? [...unitImps, targetImpId] // Dodajemy symulacyjnie
-            : unitImps; // Inne jednostki sprawdzamy bez zmian
-
+        const impsToCheck = (u.unitId === targetUnitId) ? [...unitImps, targetImpId] : unitImps;
         impsToCheck.forEach(impId => {
             if (regimentDefinition.special_rules) {
                 regimentDefinition.special_rules.forEach((ruleEntry, ruleIdx) => {
                     const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
                     const params = typeof ruleEntry === 'object' ? ruleEntry : {};
                     const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
-
                     if (ruleImpl && ruleImpl.isImprovementFree) {
-                        // Sprawdzamy czy zasada "pokrywa" to ulepszenie
                         const isFree = ruleImpl.isImprovementFree(u.unitId, impId, params, rulesUsageState[ruleIdx]);
-
-                        // Jeśli to jest TO ulepszenie, o które pytamy, i system uznał je za darmowe
                         if (u.unitId === targetUnitId && impId === targetImpId && isFree) {
                             isTargetFree = true;
                         }
@@ -389,52 +373,68 @@ export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition
         });
     });
 
+    // 2. Sprawdź zasady Dywizyjne (NOWOŚĆ)
+    if (divisionDefinition?.rules) {
+        let isFreeByDivision = false;
+        divisionDefinition.rules.forEach(ruleConfig => {
+             const ruleId = ruleConfig.id;
+             const ruleImpl = DIVISION_RULES_REGISTRY[ruleId];
+             if (ruleImpl && ruleImpl.isImprovementFree) {
+                 // params = ruleConfig
+                 if (ruleImpl.isImprovementFree(targetUnitId, targetImpId, ruleConfig)) {
+                     isFreeByDivision = true;
+                 }
+             }
+        });
+        if (isFreeByDivision) return true;
+    }
+
     return isTargetFree;
 };
 
 // --- NOWA FUNKCJA: Obliczanie "efektywnej" liczby ulepszeń (pomijając darmowe) ---
-export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefinition, improvementId) => {
+export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefinition, improvementId, divisionDefinition = null) => {
     if (!regimentDefinition) return 0;
-
     const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
-
-    // Inicjalizacja stanu dla zasad
     const rulesUsageState = {};
     if (regimentDefinition.special_rules) {
         regimentDefinition.special_rules.forEach((ruleEntry, idx) => {
             rulesUsageState[idx] = { usedCount: 0 };
         });
     }
-
     let count = 0;
-
     activeUnits.forEach(u => {
         const unitImps = regimentConfig.improvements?.[u.key] || [];
-
         if (unitImps.includes(improvementId)) {
             let isFree = false;
-
+            // 1. Sprawdź pułkowe
             if (regimentDefinition.special_rules) {
                 regimentDefinition.special_rules.forEach((ruleEntry, ruleIdx) => {
                     const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
                     const params = typeof ruleEntry === 'object' ? ruleEntry : {};
                     const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
-
                     if (ruleImpl && ruleImpl.isImprovementFree) {
-                        // Sprawdzamy czy zasada czyni to ulepszenie darmowym
                         if (ruleImpl.isImprovementFree(u.unitId, improvementId, params, rulesUsageState[ruleIdx])) {
                             isFree = true;
                         }
                     }
                 });
             }
-
-            if (!isFree) {
-                count++;
+            // 2. Sprawdź dywizyjne (NOWOŚĆ)
+            if (!isFree && divisionDefinition?.rules) {
+                 divisionDefinition.rules.forEach(ruleConfig => {
+                     const ruleImpl = DIVISION_RULES_REGISTRY[ruleConfig.id];
+                     if (ruleImpl && ruleImpl.isImprovementFree) {
+                         if (ruleImpl.isImprovementFree(u.unitId, improvementId, ruleConfig)) {
+                             isFree = true;
+                         }
+                     }
+                 });
             }
+
+            if (!isFree) count++;
         }
     });
-
     return count;
 };
 

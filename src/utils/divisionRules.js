@@ -362,6 +362,28 @@ export const DIVISION_RULES_REGISTRY = {
             return null;
         }
     },
+    "grant_improvement_to_all": {
+        // 1. Sprawia, że koszt jest zwracany (zniżka 100%)
+        calculateDiscount: (regimentConfig, activeUnits, improvementsMap, params) => {
+            const targetImpId = params?.improvement_id;
+            if (!targetImpId || !improvementsMap) return 0;
+
+            let discount = 0;
+            for (const unit of activeUnits) {
+                const unitImps = regimentConfig.improvements?.[unit.key] || [];
+                if (unitImps.includes(targetImpId)) {
+                    const impDef = improvementsMap[targetImpId];
+                    const cost = Number(impDef?.cost || 0);
+                    discount += cost;
+                }
+            }
+            return Number(discount) || 0;
+        },
+        // 2. Sprawia, że ulepszenie nie wlicza się do limitu (jest darmowe/bonusowe)
+        isImprovementFree: (unitId, impId, params) => {
+            return impId === params?.improvement_id;
+        }
+    },
 };
 
 // --- LOGIKA PREZENTACJI (DEFINITIONS) ---
@@ -377,6 +399,13 @@ export const DIVISION_RULES_DEFINITIONS = {
             const unitNames = unitIds.map(id => unitsMap[id]?.name || id).join(" lub ");
 
             return `Jeśli Twoja dywizja zawiera przynajmniej ${requiredAmount} jednostek typu "${unitNames}", otrzymasz dodatkowo ${bonusPoints} Punktów Ulepszeń.`;
+        }
+    },
+    "grant_improvement_to_all": {
+        title: "Darmowe ulepszenie",
+        getDescription: (params, context) => {
+             const impName = context.improvements ? (context.improvements[params?.improvement_id]?.name || params?.improvement_id) : params?.improvement_id;
+             return `Każda jednostka w armii otrzymuje darmowe ulepszenie: ${impName}.`;
         }
     },
 

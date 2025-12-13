@@ -7,6 +7,7 @@ import {
     calculateRegimentStats,
     collectRegimentUnits,
     calculateMainForceKey,
+    // Importujemy funkcję do liczenia efektywnych (płatnych) slotów
     calculateEffectiveImprovementCount
 } from "../utils/armyMath";
 import { calculateRuleBonuses, checkSupportUnitRequirements } from "../utils/divisionRules";
@@ -29,6 +30,7 @@ export const useRegimentLogic = ({
 }) => {
   const { improvements: commonImprovements } = useArmyData();
 
+  // Priorytet dla propsa z App.jsx
   const divisionDefinition = propDivisionDefinition || regiment.divisionDefinition || {};
   
   const structure = regiment.structure || {};
@@ -208,7 +210,6 @@ export const useRegimentLogic = ({
     return dynamicLimit - totalUsedWithLocalChanges;
   }, [currentLocalConfig, configuredDivision, calculateTotalSupplyBonus, calculateImprovementPointsCost, divisionDefinition, remainingImprovementPoints, regimentGroup, regimentIndex, unitsMap, getRegimentDefinition, commonImprovements]);
 
-  // --- POPRAWIONA FUNKCJA SELECT IN POD ---
   const handleSelectInPod = (type, groupKey, index, optionKey) => {
     let currentSelection = null;
     const isOptionalGroup = groupKey === GROUP_TYPES.OPTIONAL;
@@ -253,8 +254,6 @@ export const useRegimentLogic = ({
         const rivalType = type === GROUP_TYPES.BASE ? GROUP_TYPES.ADDITIONAL : GROUP_TYPES.BASE;
         const rivalKey = `${rivalType}/${groupKey}`;
 
-        // FIX: Włączamy jeśli wybrano cokolwiek (newValue !== null).
-        // Wyłączamy tylko jeśli newValue === null.
         const willEnable = newValue !== null;
 
         setOptionalEnabled(prev => {
@@ -267,11 +266,9 @@ export const useRegimentLogic = ({
             return next;
         });
 
-        // FIX: Musimy zaktualizować wybór (Selections) dla grupy opcjonalnej!
         setOptionalSelections(prev => {
             const next = { ...prev };
             let arr = next[mapKey] ? [...next[mapKey]] : [];
-            // Upewniamy się, że tablica jest wystarczająco długa
             if (arr.length <= index) {
                 const groupSize = (type === GROUP_TYPES.BASE ? base : additional).optional?.length || 0;
                 const newArr = Array(groupSize).fill(null);
@@ -354,7 +351,8 @@ export const useRegimentLogic = ({
                 improvements: nextImprovements
             };
 
-            const nextEffectiveCount = calculateEffectiveImprovementCount(nextConfig, regiment, impId);
+            // FIX: Przekazujemy divisionDefinition, aby uwzględnić zasady globalne (darmowe ulepszenia)
+            const nextEffectiveCount = calculateEffectiveImprovementCount(nextConfig, regiment, impId, divisionDefinition);
 
             if (nextEffectiveCount > regImpDef.max_amount) {
                 alert(`Osiągnięto limit ulepszeń "${impId}" w tym pułku (${regImpDef.max_amount}).`);
@@ -454,7 +452,8 @@ export const useRegimentLogic = ({
     for (const impId of usedImprovements) {
         const regImpDef = unitLevelImprovements.find(i => i.id === impId);
         if (regImpDef?.max_amount) {
-            const effectiveCount = calculateEffectiveImprovementCount(currentLocalConfig, regiment, impId);
+            // FIX: Przekazujemy divisionDefinition do walidacji limitów (obsługa zasad globalnych)
+            const effectiveCount = calculateEffectiveImprovementCount(currentLocalConfig, regiment, impId, divisionDefinition);
             
             if (effectiveCount > regImpDef.max_amount) {
                 const commonDef = commonImprovements[impId];
@@ -490,16 +489,16 @@ export const useRegimentLogic = ({
         }
 
         if (unitConfig) {
-            const check = checkSupportUnitRequirements(unitConfig, tempDivisionForCheck, getRegimentDefinition, unitsMap, 'validate');
-                if (check.isAllowed) {
-                    keptSupportUnits.push(su);
-                } else {
-                    const reasonMsg = check.reason ? ` (${check.reason})` : "";
-                    removedNames.push(`${getUnitName(su.id)}${reasonMsg}`);
-                }
-            } else {
+            const check = checkSupportUnitRequirements(unitConfig, tempDivisionForCheck, getRegimentDefinition);
+            if (check.isAllowed) {
                 keptSupportUnits.push(su);
+            } else {
+                const reasonMsg = check.reason ? ` (${check.reason})` : "";
+                removedNames.push(`${getUnitName(su.id)}${reasonMsg}`);
             }
+        } else {
+            keptSupportUnits.push(su);
+        }
     });
 
     if (removedNames.length > 0) {

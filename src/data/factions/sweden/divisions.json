@@ -6,7 +6,7 @@
     "general": ["swe_general"],
     "rules": [
       { 
-        "id": "weterani"
+        "id": "grant_improvement_to_all"
       },
       {
         "id": "bellum_se_ipse_alet"
