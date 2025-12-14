@@ -27,7 +27,7 @@
         "general": [
           {
             "unit1": {
-              "units": ["mrc_oberszter"]
+              "units": ["mrc_pulkownik"]
             }
           }
         ],
@@ -62,7 +62,8 @@
         "general": [
           {
             "unit1": {
-              "units": ["mrc_major"]
+              "units": ["mrc_major"],
+              "is_toggle": true
             }
           }
         ],
@@ -106,11 +107,7 @@
           { 
             "unit1": { 
               "units": ["mrc_major"],
-              "extra_cost": 2  
-            },
-            "unit2": { 
-              "units": ["mrc_podpulkownik"],
-              "extra_cost": 2
+              "is_toggle": true
             }
           }
         ],
@@ -170,7 +167,7 @@
           { 
             "unit1": { 
               "units": ["mrc_major"],
-              "extra_cost": 2  
+              "is_toggle": true
             }
           }
         ],

@@ -6,7 +6,8 @@ import {
     canUnitTakeImprovement, 
     calculateSingleImprovementIMPCost,
     calculateEffectiveImprovementCount,
-    checkIfImprovementWouldBeFree
+    checkIfImprovementWouldBeFree,
+    checkIfImprovementIsMandatory
 } from "../utils/armyMath";
 import { getRegimentRulesDescriptions } from "../utils/regimentRules";
 
@@ -173,7 +174,7 @@ const ActiveOptionConfigurationPanel = ({
     unitLevelImprovements,
     helpers,
     currentConfig,
-    divisionDefinition // Przekazujemy definicję dywizji (dla zasad globalnych)
+    divisionDefinition
 }) => {
     return (
         <div className={styles.activeConfigPanel}>
@@ -187,7 +188,7 @@ const ActiveOptionConfigurationPanel = ({
                 const isGroupRank = unitDef?.rank === 'group';
 
                 const validImprovements = unitLevelImprovements.filter(imp => {
-                    return canUnitTakeImprovement(unitDef, imp.id, regiment);
+                    return canUnitTakeImprovement(unitDef, imp.id, regiment, divisionDefinition, unitsMap);
                 });
 
                 return (
@@ -202,24 +203,28 @@ const ActiveOptionConfigurationPanel = ({
                                 {validImprovements.length > 0 ? validImprovements.map(imp => {
                                     const isSelected = state.improvements[positionKey]?.includes(imp.id);
                                     
-                                    // 1. Sprawdzamy czy to konkretne ulepszenie będzie darmowe (ZASADY PUŁKOWE + DYWIZYJNE)
+                                    // 1. Sprawdzamy czy to konkretne ulepszenie będzie darmowe
                                     const willBeFree = checkIfImprovementWouldBeFree(currentConfig, regiment, uid, imp.id, divisionDefinition);
+                                    
+                                    // 2. Sprawdzamy czy jest obowiązkowe
+                                    const isMandatory = checkIfImprovementIsMandatory(uid, imp.id, divisionDefinition, regiment.id);
 
-                                    // 2. Koszt i "stać nas"
+                                    // 3. Koszt i "stać nas"
                                     const cost = calculateSingleImprovementIMPCost(unitDef, imp.id, regiment, commonImprovements);
                                     const canAfford = isSelected || willBeFree || (state.newRemainingPointsAfterLocalChanges - cost >= 0);
 
-                                    // 3. Sprawdzamy limit ("płatny") (ZASADY PUŁKOWE + DYWIZYJNE)
+                                    // 4. Limity
                                     const effectiveCount = calculateEffectiveImprovementCount(currentConfig, regiment, imp.id, divisionDefinition);
                                     const isLimitReached = imp.max_amount && effectiveCount >= imp.max_amount;
 
-                                    const isDisabled = !isSelected && (
-                                        (isLimitReached && !willBeFree) || 
-                                        (!willBeFree && !canAfford)
+                                    const isDisabled = (
+                                        isMandatory || // Jeśli obowiązkowe - zablokowane (jako wybrane)
+                                        (!isSelected && ((isLimitReached && !willBeFree) || (!willBeFree && !canAfford)))
                                     );
 
                                     let tooltip = willBeFree ? "0 PU (Darmowe)" : `${cost} PU`;
-                                    if (!isSelected) {
+                                    if (isMandatory) tooltip = "0 PU (Obowiązkowe z zasad dywizji)";
+                                    else if (!isSelected) {
                                         if (isLimitReached && !willBeFree) tooltip += " (Limit osiągnięty)";
                                         else if (!willBeFree && !canAfford) tooltip += " (Brak punktów)";
                                     }
@@ -236,6 +241,7 @@ const ActiveOptionConfigurationPanel = ({
                                             title={tooltip}
                                         >
                                             {displayName} {willBeFree ? "(0 PU)" : `(${cost} PU)`}
+                                            {isMandatory && " 🔒"}
                                         </button>
                                     );
                                 }) : (
@@ -264,7 +270,7 @@ const GroupSection = ({
   regiment, 
   commonImprovements,
   currentConfig,
-  divisionDefinition // Przekazujemy definicję dywizji
+  divisionDefinition
 }) => {
   const isOptionalGroup = groupKey === GROUP_TYPES.OPTIONAL;
   const mapKey = `${type}/optional`;
@@ -380,7 +386,7 @@ const GroupSection = ({
                             unitLevelImprovements={unitLevelImprovements}
                             helpers={logicHelpers}
                             currentConfig={currentConfig}
-                            divisionDefinition={divisionDefinition} // Przekazujemy
+                            divisionDefinition={divisionDefinition}
                         />
                     )}
                 </div>
@@ -468,7 +474,7 @@ export default function RegimentEditor(props) {
                         regiment={regiment}
                         commonImprovements={commonImprovements}
                         currentConfig={tempConfig}
-                        divisionDefinition={divisionDefinition} // Przekazujemy
+                        divisionDefinition={divisionDefinition}
                     />
                 ))}
             </div>
@@ -495,7 +501,7 @@ export default function RegimentEditor(props) {
                                     unitLevelImprovements={definitions.unitLevelImprovements}
                                     helpers={helpers}
                                     currentConfig={tempConfig}
-                                    divisionDefinition={divisionDefinition} // Przekazujemy
+                                    divisionDefinition={divisionDefinition}
                                 />
                             ); 
                         })}
@@ -540,7 +546,7 @@ export default function RegimentEditor(props) {
                                 regiment={regiment}
                                 commonImprovements={commonImprovements}
                                 currentConfig={tempConfig}
-                                divisionDefinition={divisionDefinition} // Przekazujemy
+                                divisionDefinition={divisionDefinition}
                             />
                         );
                     })}
@@ -577,7 +583,7 @@ export default function RegimentEditor(props) {
                                                     unitLevelImprovements={definitions.unitLevelImprovements}
                                                     helpers={helpers}
                                                     currentConfig={tempConfig}
-                                                    divisionDefinition={divisionDefinition} // Przekazujemy
+                                                    divisionDefinition={divisionDefinition}
                                                 />
                                             )}
                                         </div>

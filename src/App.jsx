@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import FactionList from "./pages/FactionList";
 import RegimentSelector from "./pages/RegimentSelector";
 import RegimentEditor from "./pages/RegimentEditor";
@@ -61,13 +61,10 @@ const createDefaultRegiments = (divisionDefinition, getRegimentDefinition) => {
         createRegimentWithDefaults(GROUP_TYPES.BASE, index, group.options[0])
     );
 
-    // ZMIANA: Obsługa nowej struktury additional_regiments
     let additionalRegiments = [];
     if (divisionDefinition.additional_regiments) {
-        // Nowa logika: Startujemy z pustą listą (użytkownik dodaje z puli)
         additionalRegiments = [];
     } else if (divisionDefinition.additional) {
-        // Stara logika: Startujemy ze slotami "none"
         additionalRegiments = divisionDefinition.additional.map((group, index) => ({
             group: GROUP_TYPES.ADDITIONAL,
             index,
@@ -107,11 +104,19 @@ function AppContent() {
     
     const unitsMap = globalUnits;
 
+    // --- NAPRAWA: Contextual Get Definition ---
+    // Tworzymy funkcję, która automatycznie dokleja klucz frakcji do zapytań o definicję.
+    // Dzięki temu calculateRegimentStats otrzyma wersję ze 'structure_overrides'.
+    const boundGetRegimentDefinition = useCallback((id) => {
+        return getRegimentDefinition(id, selectedFactionKey);
+    }, [getRegimentDefinition, selectedFactionKey]);
+
     useEffect(() => {
         if (screen === SCREENS.SELECTOR && selectedDivisionDefinition && !configuredDivision) {
-            setConfiguredDivision(createDefaultRegiments(selectedDivisionDefinition, getRegimentDefinition));
+            // Tutaj używamy boundGetRegimentDefinition, aby domyślne wybory uwzględniały warianty
+            setConfiguredDivision(createDefaultRegiments(selectedDivisionDefinition, boundGetRegimentDefinition));
         }
-    }, [screen, selectedDivisionDefinition, configuredDivision, getRegimentDefinition]);
+    }, [screen, selectedDivisionDefinition, configuredDivision, boundGetRegimentDefinition]);
 
     const openRegimentSelector = (factionKey, divisionKey) => {
         setSelectedFactionKey(factionKey);
@@ -139,31 +144,35 @@ function AppContent() {
         setConfiguredDivision(null);
     };
 
+    // Używamy boundGetRegimentDefinition we wszystkich kalkulacjach
     const ruleBonuses = configuredDivision && selectedDivisionDefinition 
-        ? calculateRuleBonuses(configuredDivision, selectedDivisionDefinition, unitsMap, getRegimentDefinition)
+        ? calculateRuleBonuses(configuredDivision, selectedDivisionDefinition, unitsMap, boundGetRegimentDefinition)
         : { improvementPoints: 0, supply: 0 };
 
-    const supplyFromUnits = configuredDivision ? calculateTotalSupplyBonus(configuredDivision, unitsMap, getRegimentDefinition) : 0;
+    const supplyFromUnits = configuredDivision ? calculateTotalSupplyBonus(configuredDivision, unitsMap, boundGetRegimentDefinition) : 0;
     const supplyBonus = supplyFromUnits + ruleBonuses.supply;
 
-    const totalImprovementsUsed = configuredDivision ? calculateImprovementPointsCost(configuredDivision, unitsMap, getRegimentDefinition, improvements) : 0;
+    const totalImprovementsUsed = configuredDivision ? calculateImprovementPointsCost(configuredDivision, unitsMap, boundGetRegimentDefinition, improvements) : 0;
     const improvementPointsLimit = (selectedDivisionDefinition?.improvement_points || 0) + supplyBonus + ruleBonuses.improvementPoints;
     
     const remainingImprovementPoints = improvementPointsLimit - totalImprovementsUsed;
     
     const validationErrors = (configuredDivision && selectedDivisionDefinition)
-        ? validateDivisionRules(configuredDivision, selectedDivisionDefinition, unitsMap, getRegimentDefinition, improvements)
+        ? validateDivisionRules(configuredDivision, selectedDivisionDefinition, unitsMap, boundGetRegimentDefinition, improvements)
         : [];
 
+    // FIX: Usunięto nadmiarowy argument calculateRegimentStats (nowy costUtils go importuje sam)
+    // FIX: Użyto boundGetRegimentDefinition
     const totalDivisionCost = configuredDivision 
-        ? calculateDivisionCost(configuredDivision, unitsMap, getRegimentDefinition, calculateRegimentStats, improvements) 
+        ? calculateDivisionCost(configuredDivision, unitsMap, boundGetRegimentDefinition, improvements) 
         : (selectedDivisionDefinition?.base_cost || 0);
 
     const getEditingRegiment = () => {
         if (!configuredDivision || editingRegimentGroup === null || editingRegimentIndex === null) return null;
         const regimentStructure = configuredDivision[editingRegimentGroup][editingRegimentIndex];
         
-        const regDef = getRegimentDefinition(regimentStructure.id, selectedFactionKey);
+        // Tutaj też używamy bound, chociaż w tym miejscu to akurat działało (bo było jawnie przekazywane)
+        const regDef = boundGetRegimentDefinition(regimentStructure.id);
         if (!regDef) return null;
 
         return {
@@ -197,7 +206,7 @@ function AppContent() {
                     setConfiguredDivision={setConfiguredDivision}
                     onOpenRegimentEditor={openRegimentEditor}
                     onBack={backToList}
-                    getRegimentDefinition={getRegimentDefinition}
+                    getRegimentDefinition={boundGetRegimentDefinition} // PRZEKAZUJEMY BOUND
                     
                     divisionBaseCost={selectedDivisionDefinition.base_cost || 0}
                     remainingImprovementPoints={remainingImprovementPoints}
@@ -223,9 +232,10 @@ function AppContent() {
                     regimentGroup={editingRegimentGroup}
                     regimentIndex={editingRegimentIndex}
                     
-                    calculateImprovementPointsCost={(div) => calculateImprovementPointsCost(div, unitsMap, getRegimentDefinition, improvements)}
-                    calculateTotalSupplyBonus={(div) => calculateTotalSupplyBonus(div, unitsMap, getRegimentDefinition)}
-                    getRegimentDefinition={getRegimentDefinition}
+                    // Wszystkie helpery korzystają teraz z boundGetRegimentDefinition
+                    calculateImprovementPointsCost={(div) => calculateImprovementPointsCost(div, unitsMap, boundGetRegimentDefinition, improvements)}
+                    calculateTotalSupplyBonus={(div) => calculateTotalSupplyBonus(div, unitsMap, boundGetRegimentDefinition)}
+                    getRegimentDefinition={boundGetRegimentDefinition}
                     
                     remainingImprovementPoints={remainingImprovementPoints}
                     unitsMap={unitsMap}

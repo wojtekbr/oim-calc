@@ -64,5 +64,20 @@
     "name": "Śmigownice",
     "type": "unit",
     "cost": "+1"
+  },
+  "small_companies": {
+    "name": "Małe kompanie",
+    "type": "unit",
+    "cost": 0
+  },
+  "disciplined": {
+    "name": "Zdyscyplinowani",
+    "type": "unit",
+    "cost": 0
+  },
+  "veterans_presence": {
+    "name": "Obecność weteranów",
+    "type": "unit",
+    "cost": 0
   }
 }

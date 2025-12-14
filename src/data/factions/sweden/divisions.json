@@ -5,14 +5,19 @@
     "base_cost": 31,
     "general": ["swe_general"],
     "rules": [
-      { 
-        "id": "grant_improvement_to_all"
+      {
+        "id": "grant_improvement_to_all",
+        "improvement_id": "veterans",
+        "name_override": "Weterani"
       },
       {
-        "id": "bellum_se_ipse_alet"
+        "id": "bellum_se_ipsum_alet"
       },
       {
-        "id": "umowa_kapitulacyjna"
+        "id": "grant_improvement_to_all",
+        "improvement_ids": ["small_companies", "disciplined"],
+        "excluded_unit_ids": ["swe_jazda_krajowa_m", "swe_light_artillery_s", "swe_light_artillery_m"],
+        "name_override": "Umowa Kapitulacyjna"
       },
       {
         "id": "rozbudowany_sztab"
@@ -72,11 +77,8 @@
     "base_cost": 13,
     "general": ["swe_general"],
     "rules": [
-      { 
-        "id": "regimenty_garnizonowe"
-      },
       {
-        "id": "bellum_se_ipse_alet"
+        "id": "bellum_se_ipsum_alet"
       },
       {
         "id": "krolewski_regiment_artylerii"
@@ -86,6 +88,12 @@
       },
       {
         "id": "dyscyplina"
+      },
+      {
+        "id": "grant_improvements_to_specific_regiments",
+        "regiment_ids": ["swe_reg_jazdy_krajowej", "mrc_reiters"],
+        "improvement_ids": ["small_companies", "veterans_presence"],
+        "name_override": "Regimenty Garnizonowe"
       }
     ],
     "additional_units": [
