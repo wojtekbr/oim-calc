@@ -82,7 +82,7 @@
   "mrc_podpulkownik": {
     "id": "mrc_podpulkownik",
     "name": "Podpułkownik",
-    "cost": 200,
+    "cost": 2,
     "rank": "group",
     "orders": 1
   },

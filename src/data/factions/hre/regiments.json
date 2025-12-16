@@ -1,0 +1,124 @@
+{
+  "hre_stary_reg_kirasjerow": {
+    "name": "Stary regiment kirasjerów cesarskich",
+    "base_cost": 2,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "special_rules": ["swietni_wojownicy"],
+    "unit_improvements": [
+      {
+        "id": "additional_pistol",
+        "units_excluded": [
+          "hre_dragoni_vet_s",
+          "hre_dragoni_vet_m"
+        ]
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["hre_pulkownik"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["hre_kirasjerzy_s"] },
+            "unit2": { "units": ["hre_opanc_kirasjerzy_s"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["hre_kirasjerzy_vet_s"] },
+            "unit2": { "units": ["hre_kirasjerzy_vet_m"] },
+            "unit3": { "units": ["hre_opanc_kirasjerzy_vet_s"] },
+            "unit4": { "units": ["hre_opanc_kirasjerzy_vet_m"] },
+            "unit5": { "units": ["hre_dragoni_vet_s"] },
+            "unit6": { "units": ["hre_dragoni_vet_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": { "units": ["hre_podpulkownik_1"], "is_toggle": true },
+            "unit2": { "units": ["hre_podpulkownik_2"], "is_toggle": true }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["hre_kirasjerzy_s"] },
+            "unit2": { "units": ["hre_kirasjerzy_m"] },
+            "unit3": { "units": ["hre_opanc_kirasjerzy_s"] },
+            "unit4": { "units": ["hre_opanc_kirasjerzy_m"] }
+          }
+        ]
+      }
+    }
+  },
+  "hre_nowy_reg_kirasjerow": {
+    "name": "Nowy regiment kirasjerów cesarskich",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "additional_pistol",
+        "units_excluded": [
+          "hre_dragoni_s",
+          "hre_dragoni_m"
+        ]
+      },
+      {
+        "id": "veterans",
+        "max_amount": 2
+      },
+      {
+        "id": "dragoons_attachment",
+        "units_excluded": [
+          "hre_dragoni_s",
+          "hre_dragoni_m"
+        ]
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["hre_pulkownik"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["hre_kirasjerzy_s"] },
+            "unit2": { "units": ["hre_opanc_kirasjerzy_s"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["hre_kirasjerzy_vet_s"] },
+            "unit2": { "units": ["hre_kirasjerzy_vet_m"] },
+            "unit3": { "units": ["hre_opanc_kirasjerzy_vet_s"] },
+            "unit4": { "units": ["hre_opanc_kirasjerzy_vet_m"] },
+            "unit5": { "units": ["hre_dragoni_vet_s"] },
+            "unit6": { "units": ["hre_dragoni_vet_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": { "units": ["hre_podpulkownik_1"] },
+            "unit2": { "units": ["hre_podpulkownik_2"] }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["hre_kirasjerzy_s"] },
+            "unit2": { "units": ["hre_kirasjerzy_m"] },
+            "unit3": { "units": ["hre_opanc_kirasjerzy_s"] },
+            "unit4": { "units": ["hre_opanc_kirasjerzy_m"] }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,5 +1,4 @@
-import { IDS } from "../../constants";
-// --- WAŻNE: Importujemy brakujący helper ---
+import { IDS, GROUP_TYPES } from "../../constants"; // <--- TUTAJ BYŁ BRAK
 import { collectRegimentUnits, getArtilleryIds } from "../math/structureUtils";
 
 export const DIVISION_RULES_REGISTRY = {
@@ -13,7 +12,6 @@ export const DIVISION_RULES_REGISTRY = {
 
             const { divisionDefinition, calculateCostFn, unitsMap, regimentDefinition } = context || {};
             
-            // Używamy zaimportowanego helpera
             const artilleryIds = getArtilleryIds(divisionDefinition);
 
             let discount = 0;
@@ -396,6 +394,7 @@ export const DIVISION_RULES_REGISTRY = {
 
                     const internalUnits = collectRegimentUnits(reg.config || {}, def).map(u => u.unitId);
 
+                    // FIX: Tutaj używamy GROUP_TYPES
                     const positionKey = `${GROUP_TYPES.VANGUARD}/${index}`;
                     const supportUnits = (divisionConfig.supportUnits || [])
                         .filter(su => su.assignedTo?.positionKey === positionKey)

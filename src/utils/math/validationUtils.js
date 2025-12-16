@@ -8,6 +8,7 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
     if (!unitDef || !regimentDefinition) return false;
     if (unitDef.rank === RANK_TYPES.GROUP || unitDef.rank === 'group') return false;
 
+    // Bypass: Jeśli ulepszenie jest obowiązkowe z dywizji, to można (nawet jeśli są inne ograniczenia)
     if (divisionDefinition && unitsMap && regimentDefinition) {
         if (checkIfImprovementIsMandatory(unitDef.id, improvementId, divisionDefinition, regimentDefinition.id, unitsMap)) {
             return true;
@@ -16,14 +17,26 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
 
     const regImpDef = regimentDefinition.unit_improvements?.find(i => i.id === improvementId);
     if (!regImpDef) return false;
+
+    // 1. Sprawdzenie ograniczeń w samej jednostce (units.json)
     if (unitDef.improvement_limitations?.includes(improvementId)) return false;
+
+    // 2. Biała lista (units_allowed / limitations) - jeśli zdefiniowana, jednostka MUSI na niej być
     if (regImpDef.units_allowed && Array.isArray(regImpDef.units_allowed)) {
         if (!regImpDef.units_allowed.includes(unitDef.id)) return false;
     } else if (regImpDef.limitations && Array.isArray(regImpDef.limitations)) {
         if (!regImpDef.limitations.includes(unitDef.id)) return false;
     }
+
+    // 3. NOWOŚĆ: Czarna lista (units_excluded) - jeśli zdefiniowana, jednostka NIE MOŻE na niej być
+    if (regImpDef.units_excluded && Array.isArray(regImpDef.units_excluded)) {
+        if (regImpDef.units_excluded.includes(unitDef.id)) return false;
+    }
+
     return true;
 };
+
+// ... (reszta pliku bez zmian: checkIfImprovementIsMandatory, checkIfImprovementWouldBeFree itd.)
 
 export const checkIfImprovementIsMandatory = (unitId, impId, divisionDefinition = null, regimentId = null, unitsMap = null) => {
     if (!divisionDefinition?.rules) return false;
@@ -32,7 +45,6 @@ export const checkIfImprovementIsMandatory = (unitId, impId, divisionDefinition 
     divisionDefinition.rules.forEach(ruleConfig => {
         const ruleImpl = DIVISION_RULES_REGISTRY[ruleConfig.id];
         if (ruleImpl && ruleImpl.isMandatory) {
-            // FIX: Przekazujemy divisionDefinition jako 6. argument
             if (ruleImpl.isMandatory(unitId, impId, ruleConfig, regimentId, unitsMap, divisionDefinition)) {
                 isMandatory = true;
             }
@@ -84,7 +96,6 @@ export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition
         divisionDefinition.rules.forEach(ruleConfig => {
              const ruleImpl = DIVISION_RULES_REGISTRY[ruleConfig.id];
              if (ruleImpl && ruleImpl.isImprovementFree) {
-                 // FIX: Przekazujemy divisionDefinition jako 6. argument
                  if (ruleImpl.isImprovementFree(targetUnitId, targetImpId, ruleConfig, regimentDefinition.id, unitsMap, divisionDefinition)) {
                      isFreeByDivision = true;
                  }
@@ -134,7 +145,6 @@ export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefin
                  divisionDefinition.rules.forEach(ruleConfig => {
                      const ruleImpl = DIVISION_RULES_REGISTRY[ruleConfig.id];
                      if (ruleImpl && ruleImpl.isImprovementFree) {
-                         // FIX: Przekazujemy divisionDefinition jako 6. argument
                          if (ruleImpl.isImprovementFree(u.unitId, improvementId, ruleConfig, regimentDefinition.id, unitsMap, divisionDefinition)) {
                              isFree = true;
                          }
@@ -151,9 +161,9 @@ export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefin
     return count;
 };
 
-// ... reszta pliku bez zmian (validateVanguardCost, validateAlliedCost) ...
 export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
+
     let mainForceCost = 0;
     if (mainForceKey) {
         const [group, idxStr] = mainForceKey.split('/');
@@ -161,6 +171,7 @@ export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, 
         let reg = null;
         if (group === GROUP_TYPES.BASE) reg = divisionConfig.base[idx];
         else if (group === GROUP_TYPES.ADDITIONAL) reg = divisionConfig.additional[idx];
+
         if (reg) {
             mainForceCost = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements).cost;
         }
@@ -168,6 +179,7 @@ export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, 
 
     let maxVanguardCost = 0;
     let maxVanguardName = "";
+
     const vanguardRegiments = divisionConfig.vanguard || [];
     vanguardRegiments.forEach(reg => {
         if (reg.id !== IDS.NONE) {
@@ -181,13 +193,18 @@ export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, 
     });
 
     if (maxVanguardCost > mainForceCost) {
-        return { isValid: false, message: `Niedozwolona konfiguracja!\n\nStraż Przednia (${maxVanguardName}: ${maxVanguardCost} PS) nie może być droższa od Sił Głównych (${mainForceCost} PS).` };
+        return {
+            isValid: false,
+            message: `Niedozwolona konfiguracja!\n\nStraż Przednia (${maxVanguardName}: ${maxVanguardCost} PS) nie może być droższa od Sił Głównych (${mainForceCost} PS).`
+        };
     }
+
     return { isValid: true };
 };
 
 export const validateAlliedCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
+
     let mainForceCost = 0;
     if (mainForceKey) {
         const [group, idxStr] = mainForceKey.split('/');
@@ -195,21 +212,33 @@ export const validateAlliedCost = (divisionConfig, unitsMap, selectedFaction, ge
         let reg = null;
         if (group === GROUP_TYPES.BASE) reg = divisionConfig.base[idx];
         else if (group === GROUP_TYPES.ADDITIONAL) reg = divisionConfig.additional[idx];
+
         if (reg) {
             mainForceCost = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements).cost;
         }
     }
 
-    const allRegiments = [ ...(divisionConfig.vanguard || []), ...(divisionConfig.base || []), ...(divisionConfig.additional || []) ];
+    const allRegiments = [
+        ...(divisionConfig.vanguard || []),
+        ...(divisionConfig.base || []),
+        ...(divisionConfig.additional || [])
+    ];
+
     for (const reg of allRegiments) {
         if (reg.id !== IDS.NONE && isRegimentAllied(reg.id, selectedFaction, getRegimentDefinition)) {
             const stats = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements);
+
             if (stats.cost > mainForceCost) {
                 const def = getRegimentDefinition(reg.id);
                 const name = def ? def.name : reg.id;
-                return { isValid: false, message: `Niedozwolona konfiguracja!\n\nPułk sojuszniczy (${name}: ${stats.cost} PS) nie może mieć więcej punktów siły niż Siły Główne (${mainForceCost} PS).` };
+
+                return {
+                    isValid: false,
+                    message: `Niedozwolona konfiguracja!\n\nPułk sojuszniczy (${name}: ${stats.cost} PS) nie może mieć więcej punktów siły niż Siły Główne (${mainForceCost} PS).`
+                };
             }
         }
     }
+
     return { isValid: true };
 };

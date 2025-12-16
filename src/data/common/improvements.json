@@ -79,5 +79,10 @@
     "name": "Obecność weteranów",
     "type": "unit",
     "cost": 0
+  },
+  "dragoons_attachment": {
+    "name": "Przydzieleni dragoni",
+    "type": "unit",
+    "cost": "normal"
   }
 }
