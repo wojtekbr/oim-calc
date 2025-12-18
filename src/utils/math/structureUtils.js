@@ -1,6 +1,5 @@
 import { IDS, GROUP_TYPES } from "../../constants";
 
-// --- WAŻNE: Eksportujemy ten helper, aby używać go w zasadach ---
 export const getArtilleryIds = (divisionDefinition) => {
     if (!divisionDefinition?.division_artillery) return [];
     const ids = [];
@@ -48,6 +47,8 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
                         const unitIds = choiceDef.units || (choiceDef.id ? [choiceDef.id] : []);
                         const costOverride = choiceDef.cost_override;
                         const extraCost = choiceDef.extra_cost || 0;
+                        // NOWOŚĆ: Pobieramy obowiązkowe ulepszenia ze struktury
+                        const structureMandatory = choiceDef.mandatory_improvements || [];
 
                         unitIds.forEach((uid, uIdx) => {
                             if (uid && uid !== IDS.NONE) {
@@ -65,7 +66,8 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
                                     key: `${type}/optional/${idx}/${uIdx}`,
                                     unitId: uid,
                                     costOverride: appliedCostOverride,
-                                    extraCost: appliedExtraCost
+                                    extraCost: appliedExtraCost,
+                                    structureMandatory: structureMandatory // Przekazujemy dalej
                                 });
                             }
                         });
@@ -89,6 +91,8 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
                     const unitIds = choiceDef.units || (choiceDef.id ? [choiceDef.id] : []);
                     const costOverride = choiceDef.cost_override;
                     const extraCost = choiceDef.extra_cost || 0;
+                    // NOWOŚĆ: Pobieramy obowiązkowe ulepszenia ze struktury
+                    const structureMandatory = choiceDef.mandatory_improvements || [];
 
                     unitIds.forEach((uid, uIdx) => {
                         if (uid && uid !== IDS.NONE) {
@@ -106,7 +110,8 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
                                 key: `${type}/${groupKey}/${idx}/${uIdx}`,
                                 unitId: uid,
                                 costOverride: appliedCostOverride,
-                                extraCost: appliedExtraCost
+                                extraCost: appliedExtraCost,
+                                structureMandatory: structureMandatory // Przekazujemy dalej
                             });
                         }
                     });

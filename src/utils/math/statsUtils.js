@@ -3,6 +3,7 @@ import { DIVISION_RULES_REGISTRY } from "../divisionRules";
 import { applyRegimentRuleStats } from "../regimentRules";
 import { collectRegimentUnits } from "./structureUtils";
 import { calculateSingleImprovementArmyCost } from "./costUtils";
+import { getEffectiveUnitImprovements } from "./validationUtils"; // <--- NOWY IMPORT
 
 export const calculateRegimentStats = (regimentConfig, regimentId, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements) => {
     let stats = {
@@ -30,7 +31,9 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     let mountedCount = 0;
     let footCount = 0;
 
-    const addUnitStats = (unitId, positionKey) => {
+    const divisionDefinition = configuredDivision?.divisionDefinition;
+
+    const addUnitStats = (unitId, positionKey, unitSpecificImps = []) => {
         const unitDef = unitsMap[unitId];
         if (!unitDef) return;
         stats.unitNames.push(unitDef.name);
@@ -63,6 +66,18 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
             }
             stats.orders += ordersValue;
         }
+
+        // --- ZMIANA: Uwzględniamy statystyki z ulepszeń (np. Weterani mogą zmieniać staty) ---
+        // Tutaj zakładamy, że logika modyfikacji statystyk przez ulepszenia jest obsłużona
+        // albo w definicji jednostki (zmiana profilu) albo w applyRegimentRuleStats.
+        // Jeśli ulepszenia mają bezpośredni wpływ na koszt PS (Army Cost), doliczamy go tutaj:
+
+        // Pobieramy PEŁNĄ listę ulepszeń (kupione + obowiązkowe)
+        const effectiveImps = getEffectiveUnitImprovements(unitId, unitSpecificImps, divisionDefinition, regimentId, unitsMap);
+
+        effectiveImps.forEach(impId => {
+            stats.cost += calculateSingleImprovementArmyCost(unitDef, impId, regimentDefinition, commonImprovements);
+        });
     };
 
     activeUnits.forEach((entry) => {
@@ -77,12 +92,8 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         if (extraCost) { unitBaseCost += extraCost; }
         stats.cost += unitBaseCost;
 
-        addUnitStats(unitId, positionKey);
-
-        const improvementsMap = regimentConfig.improvements || {};
-        (improvementsMap[positionKey] || []).forEach(impId => {
-            stats.cost += calculateSingleImprovementArmyCost(unitsMap[unitId], impId, regimentDefinition, commonImprovements);
-        });
+        const currentImps = regimentConfig.improvements?.[positionKey] || [];
+        addUnitStats(unitId, positionKey, currentImps);
     });
 
     if (configuredDivision && configuredDivision.supportUnits) {
@@ -91,17 +102,32 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
 
         if (currentRegimentData) {
             const positionKey = `${currentRegimentData.group}/${currentRegimentData.index}`;
-            const improvementsMap = regimentConfig.improvements || {};
 
             configuredDivision.supportUnits
                 .filter(su => su.assignedTo?.positionKey === positionKey)
                 .forEach(su => {
                     stats.cost += (unitsMap[su.id]?.cost || 0);
-                    addUnitStats(su.id, null);
-                    const supportUnitKey = `support/${su.id}-${positionKey}`;
-                    (improvementsMap[supportUnitKey] || []).forEach(impId => {
-                        stats.cost += calculateSingleImprovementArmyCost(unitsMap[su.id], impId, regimentDefinition, commonImprovements);
-                    });
+                    // Dla wsparcia klucz ulepszeń to np. "support/ID-POZYCJA/0"
+                    // Ale w config.improvements zapisujemy to pod kluczem.
+                    // Musimy znaleźć właściwy klucz w mapie improvements.
+                    // Zazwyczaj to `support/${su.id}-${positionKey}/0` (zgodnie z poprawką w useRegimentLogic)
+                    // Ale tutaj uprościmy: sprawdzamy wszystkie klucze pasujące do patternu wsparcia
+
+                    let supportImps = [];
+                    // Szukamy ulepszeń dla tej konkretnej jednostki wsparcia
+                    // W useRegimentLogic zapisujemy: `support/${su.id}-${su.assignedTo.positionKey}/0`
+                    const specificKey = `support/${su.id}-${positionKey}/0`;
+                    if (regimentConfig.improvements?.[specificKey]) {
+                        supportImps = regimentConfig.improvements[specificKey];
+                    } else {
+                        // Fallback do starego klucza bez /0
+                        const oldKey = `support/${su.id}-${positionKey}`;
+                        if (regimentConfig.improvements?.[oldKey]) {
+                            supportImps = regimentConfig.improvements[oldKey];
+                        }
+                    }
+
+                    addUnitStats(su.id, null, supportImps);
                 });
         }
     }
@@ -132,20 +158,16 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     return stats;
 };
 
+// ... (reszta pliku calculateTotalSupplyBonus, calculateDivisionCost, calculateDivisionType, isRegimentAllied, calculateMainForceKey bez zmian)
 export const calculateTotalSupplyBonus = (divisionConfig, unitsMap, getRegimentDefinition) => {
     if (!unitsMap || !divisionConfig) return 0;
     let supplyBonus = 0;
-
     const checkUnit = (unitId) => {
         if (!unitId || unitId === IDS.NONE) return;
         const unitDef = unitsMap[unitId];
-        if (unitDef && typeof unitDef.additional_supply === 'number') {
-            supplyBonus += unitDef.additional_supply;
-        }
+        if (unitDef && typeof unitDef.additional_supply === 'number') { supplyBonus += unitDef.additional_supply; }
     };
-
     if (divisionConfig.general) checkUnit(divisionConfig.general);
-
     const allRegiments = [ ...(divisionConfig.vanguard || []), ...(divisionConfig.base || []), ...(divisionConfig.additional || []) ];
     allRegiments.forEach(regiment => {
         if (regiment.id === IDS.NONE) return;
@@ -153,11 +175,9 @@ export const calculateTotalSupplyBonus = (divisionConfig, unitsMap, getRegimentD
         const units = collectRegimentUnits(regiment.config || {}, def);
         units.forEach(u => checkUnit(u.unitId));
     });
-
     if (divisionConfig.supportUnits && Array.isArray(divisionConfig.supportUnits)) {
         divisionConfig.supportUnits.forEach(su => checkUnit(su.id));
     }
-
     return supplyBonus;
 };
 
@@ -165,25 +185,19 @@ export const calculateDivisionCost = (configuredDivision, unitsMap, getRegimentD
     if (!configuredDivision) return 0;
     const divisionDef = configuredDivision.divisionDefinition;
     let cost = divisionDef.base_cost || 0;
-
     if (configuredDivision.general) {
         const genDef = unitsMap[configuredDivision.general];
         if (genDef) cost += (genDef.cost || 0);
     }
-
     const allRegiments = [ ...(configuredDivision.vanguard || []), ...(configuredDivision.base || []), ...(configuredDivision.additional || []) ];
     allRegiments.forEach(regiment => {
         if (regiment.id !== IDS.NONE) {
             cost += calculateRegimentStats(regiment.config, regiment.id, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements).cost;
         }
     });
-
     (configuredDivision.supportUnits || [])
         .filter(su => su.assignedTo === null)
-        .forEach(su => {
-            cost += (unitsMap[su.id]?.cost || 0);
-        });
-
+        .forEach(su => { cost += (unitsMap[su.id]?.cost || 0); });
     return cost;
 };
 
@@ -191,28 +205,20 @@ export const calculateDivisionType = (configuredDivision, unitsMap, getRegimentD
     if (!configuredDivision || !unitsMap) return "-";
     const allRegiments = [ ...(configuredDivision.vanguard || []), ...(configuredDivision.base || []), ...(configuredDivision.additional || []) ].filter(r => r.id !== IDS.NONE);
     if (allRegiments.length === 0) return "-";
-
     let horseRegimentsCount = 0;
     let footRegimentsCount = 0;
-
     allRegiments.forEach(regiment => {
         const stats = calculateRegimentStats(regiment.config, regiment.id, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements);
         if (stats.regimentType === "Konny") horseRegimentsCount++;
         else if (stats.regimentType === "Pieszy" || stats.regimentType === "Mieszany") footRegimentsCount++;
     });
-
-    const hasUnassignedArtillery = (configuredDivision.supportUnits || [])
-        .filter(su => su.assignedTo === null)
-        .some(su => unitsMap[su.id]?.is_artillery);
-
+    const hasUnassignedArtillery = (configuredDivision.supportUnits || []).filter(su => su.assignedTo === null).some(su => unitsMap[su.id]?.is_artillery);
     if (hasUnassignedArtillery) footRegimentsCount++;
-
     if (footRegimentsCount <= 1) return "Dywizja Konna";
     if (footRegimentsCount > horseRegimentsCount) return "Dywizja Piesza";
     return "Dywizja Mieszana";
 };
 
-// Helper eksportowany dla validationUtils
 export const isRegimentAllied = (regId, selectedFaction, getRegimentDefinition) => {
     if (!selectedFaction || !selectedFaction.regiments) return false;
     if (selectedFaction.regiments[regId]) return false;
@@ -224,26 +230,20 @@ export const isRegimentAllied = (regId, selectedFaction, getRegimentDefinition) 
 export const calculateMainForceKey = (configuredDivision, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     if (!configuredDivision) return null;
     const isAllied = (regId) => isRegimentAllied(regId, selectedFaction, getRegimentDefinition);
-
     const eligibleRegiments = [
         ...(configuredDivision.base || []).map(r => ({ ...r, key: `${GROUP_TYPES.BASE}/${r.index}` })),
         ...(configuredDivision.additional || []).map(r => ({ ...r, key: `${GROUP_TYPES.ADDITIONAL}/${r.index}` }))
     ].filter(r => r.id !== IDS.NONE && !isAllied(r.id));
-
     if (eligibleRegiments.length === 0) return null;
-
     let maxCost = -1;
     const regimentCosts = {};
-
     eligibleRegiments.forEach(reg => {
         const stats = calculateRegimentStats(reg.config, reg.id, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements);
         regimentCosts[reg.key] = stats.cost;
         if (stats.cost > maxCost) maxCost = stats.cost;
     });
-
     const candidates = eligibleRegiments.filter(r => regimentCosts[r.key] === maxCost);
     const preferredKey = configuredDivision.preferredMainForceKey;
-
     if (preferredKey && candidates.some(r => r.key === preferredKey)) return preferredKey;
     return candidates.length > 0 ? candidates[0].key : null;
 };

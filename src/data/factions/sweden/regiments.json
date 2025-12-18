@@ -30,14 +30,15 @@
         ],
         "base1": [
           {
-            "unit1": {
-              "units": [
-                "swe_podragonieni_m"
-              ]
-            },
             "unit2": {
               "units": [
                 "swe_skwadron_muszkieterow_s"
+              ],
+              "mandatory_improvements": ["independent"]
+            },
+            "unit1": {
+              "units": [
+                "swe_podragonieni_m"
               ]
             }
           }
@@ -86,7 +87,7 @@
             },
             "unit3": {
               "units": [
-                "swe_podragonieni"
+                "swe_podragonieni_m"
               ]
             }
           }

@@ -8,27 +8,29 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
     if (!unitDef || !regimentDefinition) return false;
     if (unitDef.rank === RANK_TYPES.GROUP || unitDef.rank === 'group') return false;
 
-    // Bypass: Jeśli ulepszenie jest obowiązkowe z dywizji, to można (nawet jeśli są inne ograniczenia)
+    // Bypass 1: Jeśli ulepszenie jest obowiązkowe z dywizji
     if (divisionDefinition && unitsMap && regimentDefinition) {
         if (checkIfImprovementIsMandatory(unitDef.id, improvementId, divisionDefinition, regimentDefinition.id, unitsMap)) {
             return true;
         }
     }
 
+    // Bypass 2: Jeśli ulepszenie jest wrodzone dla jednostki
+    if (unitDef.mandatory_improvements && unitDef.mandatory_improvements.includes(improvementId)) {
+        return true;
+    }
+
     const regImpDef = regimentDefinition.unit_improvements?.find(i => i.id === improvementId);
     if (!regImpDef) return false;
 
-    // 1. Sprawdzenie ograniczeń w samej jednostce (units.json)
     if (unitDef.improvement_limitations?.includes(improvementId)) return false;
 
-    // 2. Biała lista (units_allowed / limitations) - jeśli zdefiniowana, jednostka MUSI na niej być
     if (regImpDef.units_allowed && Array.isArray(regImpDef.units_allowed)) {
         if (!regImpDef.units_allowed.includes(unitDef.id)) return false;
     } else if (regImpDef.limitations && Array.isArray(regImpDef.limitations)) {
         if (!regImpDef.limitations.includes(unitDef.id)) return false;
     }
 
-    // 3. NOWOŚĆ: Czarna lista (units_excluded) - jeśli zdefiniowana, jednostka NIE MOŻE na niej być
     if (regImpDef.units_excluded && Array.isArray(regImpDef.units_excluded)) {
         if (regImpDef.units_excluded.includes(unitDef.id)) return false;
     }
@@ -36,9 +38,16 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
     return true;
 };
 
-// ... (reszta pliku bez zmian: checkIfImprovementIsMandatory, checkIfImprovementWouldBeFree itd.)
-
 export const checkIfImprovementIsMandatory = (unitId, impId, divisionDefinition = null, regimentId = null, unitsMap = null) => {
+    // 1. Sprawdzamy, czy jednostka ma to ulepszenie wpisane na sztywno
+    if (unitsMap && unitId) {
+        const unitDef = unitsMap[unitId];
+        if (unitDef?.mandatory_improvements?.includes(impId)) {
+            return true;
+        }
+    }
+
+    // 2. Sprawdzamy zasady dywizyjne
     if (!divisionDefinition?.rules) return false;
 
     let isMandatory = false;
@@ -56,8 +65,22 @@ export const checkIfImprovementIsMandatory = (unitId, impId, divisionDefinition 
 export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition, targetUnitId, targetImpId, divisionDefinition = null, unitsMap = null) => {
     if (!regimentDefinition) return false;
 
+    // 1. Jeśli jednostka ma to w mandatory_improvements, jest darmowe
+    if (unitsMap && targetUnitId) {
+        const unitDef = unitsMap[targetUnitId];
+        if (unitDef?.mandatory_improvements?.includes(targetImpId)) {
+            return true;
+        }
+    }
+
     const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
-    
+
+    // 2. Jeśli struktura pułku wymusza to ulepszenie
+    const activeUnitObj = activeUnits.find(u => u.unitId === targetUnitId);
+    if (activeUnitObj?.structureMandatory?.includes(targetImpId)) {
+        return true;
+    }
+
     const rulesUsageState = {};
     if (regimentDefinition.special_rules) {
         regimentDefinition.special_rules.forEach((ruleEntry, idx) => {
@@ -94,12 +117,12 @@ export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition
     if (divisionDefinition?.rules) {
         let isFreeByDivision = false;
         divisionDefinition.rules.forEach(ruleConfig => {
-             const ruleImpl = DIVISION_RULES_REGISTRY[ruleConfig.id];
-             if (ruleImpl && ruleImpl.isImprovementFree) {
-                 if (ruleImpl.isImprovementFree(targetUnitId, targetImpId, ruleConfig, regimentDefinition.id, unitsMap, divisionDefinition)) {
-                     isFreeByDivision = true;
-                 }
-             }
+            const ruleImpl = DIVISION_RULES_REGISTRY[ruleConfig.id];
+            if (ruleImpl && ruleImpl.isImprovementFree) {
+                if (ruleImpl.isImprovementFree(targetUnitId, targetImpId, ruleConfig, regimentDefinition.id, unitsMap, divisionDefinition)) {
+                    isFreeByDivision = true;
+                }
+            }
         });
         if (isFreeByDivision) return true;
     }
@@ -111,7 +134,7 @@ export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefin
     if (!regimentDefinition) return 0;
 
     const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
-    
+
     const rulesUsageState = {};
     if (regimentDefinition.special_rules) {
         regimentDefinition.special_rules.forEach((ruleEntry, idx) => {
@@ -127,7 +150,18 @@ export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefin
         if (unitImps.includes(improvementId)) {
             let isFree = false;
 
-            if (regimentDefinition.special_rules) {
+            if (unitsMap) {
+                const unitDef = unitsMap[u.unitId];
+                if (unitDef?.mandatory_improvements?.includes(improvementId)) {
+                    isFree = true;
+                }
+            }
+
+            if (!isFree && u.structureMandatory?.includes(improvementId)) {
+                isFree = true;
+            }
+
+            if (!isFree && regimentDefinition.special_rules) {
                 regimentDefinition.special_rules.forEach((ruleEntry, ruleIdx) => {
                     const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
                     const params = typeof ruleEntry === 'object' ? ruleEntry : {};
@@ -142,14 +176,14 @@ export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefin
             }
 
             if (!isFree && divisionDefinition?.rules) {
-                 divisionDefinition.rules.forEach(ruleConfig => {
-                     const ruleImpl = DIVISION_RULES_REGISTRY[ruleConfig.id];
-                     if (ruleImpl && ruleImpl.isImprovementFree) {
-                         if (ruleImpl.isImprovementFree(u.unitId, improvementId, ruleConfig, regimentDefinition.id, unitsMap, divisionDefinition)) {
-                             isFree = true;
-                         }
-                     }
-                 });
+                divisionDefinition.rules.forEach(ruleConfig => {
+                    const ruleImpl = DIVISION_RULES_REGISTRY[ruleConfig.id];
+                    if (ruleImpl && ruleImpl.isImprovementFree) {
+                        if (ruleImpl.isImprovementFree(u.unitId, improvementId, ruleConfig, regimentDefinition.id, unitsMap, divisionDefinition)) {
+                            isFree = true;
+                        }
+                    }
+                });
             }
 
             if (!isFree) {
@@ -161,9 +195,52 @@ export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefin
     return count;
 };
 
+// --- NOWOŚĆ: Funkcja do pobierania PEŁNEJ listy ulepszeń dla jednostki (zakupione + obowiązkowe) ---
+// Użyj tej funkcji w komponentach podsumowania (kafelek pułku, lista wsparcia)
+export const getEffectiveUnitImprovements = (unitId, currentImprovements, divisionDefinition, regimentId, unitsMap) => {
+    const active = new Set(currentImprovements || []);
+
+    // 1. Z definicji jednostki (wrodzone)
+    const unitDef = unitsMap?.[unitId];
+    if (unitDef?.mandatory_improvements) {
+        unitDef.mandatory_improvements.forEach(id => active.add(id));
+    }
+
+    // 2. Z zasad dywizyjnych (dynamiczne)
+    if (divisionDefinition?.rules) {
+        divisionDefinition.rules.forEach(rule => {
+            const ruleImpl = DIVISION_RULES_REGISTRY[rule.id];
+            if (!ruleImpl) return;
+
+            // Zbieramy listę ulepszeń, które ta zasada może nadać
+            let candidates = [];
+
+            if (typeof ruleImpl.getInjectedImprovements === 'function') {
+                const injected = ruleImpl.getInjectedImprovements(rule, regimentId);
+                if (Array.isArray(injected)) candidates.push(...injected);
+            } else if (ruleImpl.injectedImprovements) {
+                candidates.push(...ruleImpl.injectedImprovements);
+            }
+
+            // Fallback dla prostszych zasad
+            if (rule.improvement_id) candidates.push(rule.improvement_id);
+            if (rule.improvement_ids) candidates.push(...rule.improvement_ids);
+
+            // Sprawdzamy, czy ulepszenie jest obowiązkowe dla tej konkretnej jednostki
+            candidates.forEach(impId => {
+                if (ruleImpl.isMandatory && ruleImpl.isMandatory(unitId, impId, rule, regimentId, unitsMap, divisionDefinition)) {
+                    active.add(impId);
+                }
+            });
+        });
+    }
+
+    return Array.from(active);
+};
+
+// ... (reszta pliku: validateVanguardCost, validateAlliedCost bez zmian)
 export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
-
     let mainForceCost = 0;
     if (mainForceKey) {
         const [group, idxStr] = mainForceKey.split('/');
@@ -171,7 +248,6 @@ export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, 
         let reg = null;
         if (group === GROUP_TYPES.BASE) reg = divisionConfig.base[idx];
         else if (group === GROUP_TYPES.ADDITIONAL) reg = divisionConfig.additional[idx];
-
         if (reg) {
             mainForceCost = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements).cost;
         }
@@ -179,7 +255,6 @@ export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, 
 
     let maxVanguardCost = 0;
     let maxVanguardName = "";
-
     const vanguardRegiments = divisionConfig.vanguard || [];
     vanguardRegiments.forEach(reg => {
         if (reg.id !== IDS.NONE) {
@@ -193,18 +268,13 @@ export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, 
     });
 
     if (maxVanguardCost > mainForceCost) {
-        return {
-            isValid: false,
-            message: `Niedozwolona konfiguracja!\n\nStraż Przednia (${maxVanguardName}: ${maxVanguardCost} PS) nie może być droższa od Sił Głównych (${mainForceCost} PS).`
-        };
+        return { isValid: false, message: `Niedozwolona konfiguracja!\n\nStraż Przednia (${maxVanguardName}: ${maxVanguardCost} PS) nie może być droższa od Sił Głównych (${mainForceCost} PS).` };
     }
-
     return { isValid: true };
 };
 
 export const validateAlliedCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
-
     let mainForceCost = 0;
     if (mainForceKey) {
         const [group, idxStr] = mainForceKey.split('/');
@@ -212,33 +282,21 @@ export const validateAlliedCost = (divisionConfig, unitsMap, selectedFaction, ge
         let reg = null;
         if (group === GROUP_TYPES.BASE) reg = divisionConfig.base[idx];
         else if (group === GROUP_TYPES.ADDITIONAL) reg = divisionConfig.additional[idx];
-
         if (reg) {
             mainForceCost = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements).cost;
         }
     }
 
-    const allRegiments = [
-        ...(divisionConfig.vanguard || []),
-        ...(divisionConfig.base || []),
-        ...(divisionConfig.additional || [])
-    ];
-
+    const allRegiments = [ ...(divisionConfig.vanguard || []), ...(divisionConfig.base || []), ...(divisionConfig.additional || []) ];
     for (const reg of allRegiments) {
         if (reg.id !== IDS.NONE && isRegimentAllied(reg.id, selectedFaction, getRegimentDefinition)) {
             const stats = calculateRegimentStats(reg.config, reg.id, divisionConfig, unitsMap, getRegimentDefinition, commonImprovements);
-
             if (stats.cost > mainForceCost) {
                 const def = getRegimentDefinition(reg.id);
                 const name = def ? def.name : reg.id;
-
-                return {
-                    isValid: false,
-                    message: `Niedozwolona konfiguracja!\n\nPułk sojuszniczy (${name}: ${stats.cost} PS) nie może mieć więcej punktów siły niż Siły Główne (${mainForceCost} PS).`
-                };
+                return { isValid: false, message: `Niedozwolona konfiguracja!\n\nPułk sojuszniczy (${name}: ${stats.cost} PS) nie może mieć więcej punktów siły niż Siły Główne (${mainForceCost} PS).` };
             }
         }
     }
-
     return { isValid: true };
 };

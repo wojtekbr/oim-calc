@@ -6,16 +6,16 @@
     "name": "Skwadron muszkieterów S",
     "cost": 5,
     "improvement_cost": 1,
-    "rank": "silver",
-    "is_infantry": true
+    "mandatory_improvements": ["independent"],
+     "pu_cost": 1,
+    "rank": "silver"
   },
   "mrc_musketeers_m": {
     "id": "mrc_musketeers_m",
     "name": "Skwadron muszkieterów M",
     "cost": 7,
     "improvement_cost": 2,
-    "rank": "bronze",
-    "is_infantry": true
+    "rank": "bronze"
   },
   "mrc_dragoons_mercenary_s": {
     "id": "mrc_dragoons_mercenary_s",
@@ -40,36 +40,33 @@
     "cost": 8,
     "improvement_cost": 3,
     "rank": "gold",
-    "is_infantry": true,
+
 	  "is_pike_and_shot": true
   },
-  "mrc_infantry_mercenary_L": {
-    "id": "mrc_infantry_mercenary_L",
+  "mrc_infantry_mercenary_l": {
+    "id": "mrc_infantry_mercenary_l",
     "name": "Piechota Najemna L",
     "cost": 11,
     "improvement_cost": 4,
     "rank": "gold",
-    "is_infantry": true,
 	  "is_pike_and_shot": true
   },
   "mrc_infantry_mercenary_armored_m": {
     "id": "mrc_infantry_mercenary_armored_m",
     "name": "Opancerzona Piechota Najemna M",
     "cost": 8,
-    "improvement_points_cost": -1,
+    "improvement_points_cost": 1,
     "improvement_cost": 3,
     "rank": "gold",
-    "is_infantry": true,
 	  "is_pike_and_shot": true
   },
   "mrc_infantry_mercenary_armored_L": {
-    "id": "mrc_infantry_mercenary_armored_L",
+    "id": "mrc_infantry_mercenary_armored_l",
     "name": "Opancerzona Piechota Najemna L",
-    "cost": 8,
-    "improvement_points_cost": -1,
+    "cost": 11,
+    "improvement_points_cost": 1,
     "improvement_cost": 4,
     "rank": "gold",
-    "is_infantry": true,
 	  "is_pike_and_shot": true
   },
   "mrc_pulkownik": {

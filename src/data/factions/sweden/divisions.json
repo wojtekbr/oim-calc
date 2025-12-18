@@ -16,7 +16,7 @@
       {
         "id": "grant_improvement_to_all",
         "improvement_ids": ["small_companies", "disciplined"],
-        "excluded_unit_ids": ["swe_jazda_krajowa_m", "swe_light_artillery_s", "swe_light_artillery_m"],
+        "excluded_unit_ids": ["swe_jazda_krajowa_m", "swe_light_artillery_s"],
         "name_override": "Umowa Kapitulacyjna"
       },
       {

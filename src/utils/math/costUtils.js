@@ -52,7 +52,7 @@ export const calculateRegimentImprovementPoints = (
     regimentId,
     unitsMap,
     getRegimentDefinition,
-    commonImprovements, 
+    commonImprovements,
     assignedSupportUnits = [],
     divisionDefinition = null
 ) => {
@@ -88,7 +88,11 @@ export const calculateRegimentImprovementPoints = (
     const improvementsMap = regimentConfig.improvements || {};
     const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
 
-    activeUnits.forEach(({ key: positionKey, unitId }) => {
+    // Iterujemy po jednostkach pułku
+    activeUnits.forEach((unitObj) => {
+        // structureMandatory to tablica ulepszeń wymuszonych przez strukturę (regiments.json)
+        const { key: positionKey, unitId, structureMandatory } = unitObj;
+
         if (!unitId || unitId === IDS.NONE) return;
         const unitDef = unitsMap[unitId];
         if (!unitDef || unitDef.rank === RANK_TYPES.GROUP) return;
@@ -96,11 +100,21 @@ export const calculateRegimentImprovementPoints = (
         totalImpCost += getUnitPUCost(unitId);
 
         (improvementsMap[positionKey] || []).forEach(impId => {
+            // FIX: Jeśli ulepszenie jest wrodzone (z units.json) -> koszt 0
+            if (unitDef.mandatory_improvements?.includes(impId)) {
+                return;
+            }
+            // FIX: Jeśli ulepszenie jest wymuszone przez strukturę (z regiments.json) -> koszt 0
+            if (structureMandatory?.includes(impId)) {
+                return;
+            }
+
             const cost = calculateSingleImprovementIMPCost(unitDef, impId, regimentDefinition, commonImprovements);
             totalImpCost += Number(cost) || 0;
         });
     });
 
+    // Iterujemy po jednostkach wsparcia
     if (assignedSupportUnits && assignedSupportUnits.length > 0) {
         assignedSupportUnits.forEach(su => {
             const supportUnitDef = unitsMap[su.id];
@@ -112,6 +126,11 @@ export const calculateRegimentImprovementPoints = (
             if (regimentPosKey) {
                 const supportUnitKey = `support/${su.id}-${regimentPosKey}`;
                 (improvementsMap[supportUnitKey] || []).forEach(impId => {
+                    // FIX: Jeśli ulepszenie jest wrodzone dla wsparcia -> koszt 0
+                    if (supportUnitDef.mandatory_improvements?.includes(impId)) {
+                        return;
+                    }
+
                     const cost = calculateSingleImprovementIMPCost(supportUnitDef, impId, regimentDefinition, commonImprovements);
                     totalImpCost += Number(cost) || 0;
                 });
@@ -151,16 +170,16 @@ export const calculateRegimentImprovementPoints = (
             const ruleImpl = DIVISION_RULES_REGISTRY[ruleId];
             if (ruleImpl && ruleImpl.calculateDiscount) {
                 const discount = ruleImpl.calculateDiscount(
-                    regimentConfig, 
-                    activeUnitsList, 
-                    commonImprovements, 
-                    params, 
+                    regimentConfig,
+                    activeUnitsList,
+                    commonImprovements,
+                    params,
                     regimentDefinition.id,
                     {
                         unitsMap,
                         regimentDefinition,
                         calculateCostFn: calculateSingleImprovementIMPCost,
-                        divisionDefinition // FIX: Dodano divisionDefinition do contextu
+                        divisionDefinition
                     }
                 );
                 totalImpCost -= (Number(discount) || 0);

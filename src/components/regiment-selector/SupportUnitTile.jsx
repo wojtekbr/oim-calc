@@ -3,32 +3,43 @@ import styles from "../../pages/RegimentSelector.module.css";
 import { getPlaceholderStyle, getInitials } from "../../utils/uiHelpers";
 import { GROUP_TYPES } from "../../constants";
 
-export const SupportUnitTile = ({ 
-    unitId, 
-    isPurchased, 
-    locked, 
-    onClick, 
-    onRemove, 
-    onAssign, 
-    unitDef, 
-    disabledReason, 
-    assignmentInfo, 
-    regimentsList, 
-    unitsRulesMap, 
-    supportUnits, 
-    calculateStats, 
-    getRegimentDefinition 
-}) => {
+export const SupportUnitTile = ({
+                                    unitId,
+                                    isPurchased,
+                                    locked,
+                                    onClick,
+                                    onRemove,
+                                    onAssign,
+                                    unitDef,
+                                    disabledReason,
+                                    assignmentInfo,
+                                    regimentsList,
+                                    unitsRulesMap,
+                                    supportUnits,
+                                    calculateStats,
+                                    getRegimentDefinition,
+                                    // --- NOWE PROPSY ---
+                                    getEffectiveUnitImprovements,
+                                    divisionDefinition,
+                                    improvementsMap,
+                                    unitsMap
+                                }) => {
     const puCost = unitDef?.improvement_points_cost || unitDef?.pu_cost || 0;
     const costPU = puCost ? ` + ${puCost} PU` : '';
     const tooltip = locked && disabledReason ? disabledReason : (unitDef?.name || unitId);
-    
+
     const initials = getInitials(unitDef?.name || unitId);
     const placeholderStyle = getPlaceholderStyle(unitId, unitDef?.name);
 
+    // --- OBLICZANIE ULEPSZEŃ ---
+    const effectiveImprovements = useMemo(() => {
+        if (!getEffectiveUnitImprovements || !divisionDefinition || !unitsMap) return [];
+        return getEffectiveUnitImprovements(unitId, [], divisionDefinition, null, unitsMap);
+    }, [unitId, getEffectiveUnitImprovements, divisionDefinition, unitsMap]);
+
     const availableRegiments = useMemo(() => {
         if (!isPurchased || !regimentsList) return [];
-        
+
         const rules = unitsRulesMap[unitId] || {};
         const canBeAssigned = rules.can_be_assigned !== false;
         if (!canBeAssigned) return [];
@@ -55,16 +66,16 @@ export const SupportUnitTile = ({
                     otherSu.assignedTo?.positionKey === r.positionKey
                 );
                 if (otherUnitInRegiment) {
-                     const otherRules = unitsRulesMap[otherUnitInRegiment.id] || {};
-                     if (otherRules.exclusion_tag === rules.exclusion_tag) isAllowed = false;
-                     if (otherUnitInRegiment.id === rules.exclusion_tag) isAllowed = false;
-                     if (otherRules.exclusion_tag === unitId) isAllowed = false;
+                    const otherRules = unitsRulesMap[otherUnitInRegiment.id] || {};
+                    if (otherRules.exclusion_tag === rules.exclusion_tag) isAllowed = false;
+                    if (otherUnitInRegiment.id === rules.exclusion_tag) isAllowed = false;
+                    if (otherRules.exclusion_tag === unitId) isAllowed = false;
                 }
             }
 
             if (isAllowed && !isDragoon) {
                 const stats = calculateStats(r.config, r.id);
-                const regType = stats.regimentType; 
+                const regType = stats.regimentType;
                 if (supportType === 'artillery' || supportType === 'infantry') {
                     if (regType !== 'Pieszy') isAllowed = false;
                 } else if (supportType === 'cavalry') {
@@ -86,7 +97,7 @@ export const SupportUnitTile = ({
     }, [isPurchased, unitId, regimentsList, supportUnits, unitsRulesMap, unitDef, calculateStats, getRegimentDefinition]);
 
     const handleAssignChange = (e) => {
-        e.stopPropagation(); 
+        e.stopPropagation();
         onAssign(e.target.value);
     };
 
@@ -107,14 +118,14 @@ export const SupportUnitTile = ({
             style={{cursor: locked ? 'not-allowed' : 'pointer'}}
         >
             {isPurchased && <div className={styles.checkBadge}>✔</div>}
-            
+
             <div className={styles.cardImagePlaceholder} style={placeholderStyle}>
                 {initials}
             </div>
 
             <div className={styles.cardContent}>
                 <div className={styles.cardTitle}>{unitDef?.name || unitId}</div>
-                
+
                 {locked && disabledReason && (
                     <div style={{fontSize: 10, color: '#d32f2f', marginBottom: 4, lineHeight: 1.2, fontStyle: 'italic'}}>
                         {disabledReason}
@@ -125,8 +136,25 @@ export const SupportUnitTile = ({
                     {unitDef?.cost || 0} PS{costPU}
                 </div>
 
+                {/* --- RENDEROWANIE BADGE'Y ULEPSZEŃ --- */}
+                {effectiveImprovements.length > 0 && (
+                    <div style={{marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 4}}>
+                        {effectiveImprovements.map(impId => {
+                            const name = improvementsMap?.[impId]?.name || impId;
+                            return (
+                                <span key={impId} style={{
+                                    fontSize: '10px', background: '#e8f5e9', color: '#2e7d32',
+                                    padding: '2px 4px', borderRadius: '4px', border: '1px solid #c8e6c9'
+                                }}>
+                                    {name} 🔒
+                                </span>
+                            );
+                        })}
+                    </div>
+                )}
+
                 {isPurchased && (
-                    <select 
+                    <select
                         className={styles.assignmentSelect}
                         value={assignmentInfo?.positionKey || ""}
                         onChange={handleAssignChange}

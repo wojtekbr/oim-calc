@@ -1,18 +1,42 @@
 export const DIVISION_RULES_DEFINITIONS = {
+    "krolewski_regiment_artylerii": {
+        title: "Królewski Regiment Artylerii",
+        getDescription: () => "Wszystkie Jednostki Artylerii dywizyjnej otrzymują darmowe ulepszenie Weterani."
+    },
     "grant_improvements_to_specific_regiments": {
         title: "Darmowe ulepszenia dla pułków",
         getDescription: (params, context) => {
-             const impNames = (params?.improvement_ids || []).map(id => 
-                 context.improvements ? (context.improvements[id]?.name || id) : id
-             ).join(", ");
-             return `Wybrane pułki otrzymują darmowe ulepszenia: ${impNames}.`;
+            const impNames = (params?.improvement_ids || []).map(id =>
+                context.improvements ? (context.improvements[id]?.name || id) : id
+            ).join(", ");
+            return `Wybrane pułki otrzymują darmowe ulepszenia: ${impNames}.`;
         }
     },
     "grant_improvement_to_all": {
         title: "Ulepszenie dla wszystkich",
         getDescription: (params, context) => {
-             const impName = context.improvements ? (context.improvements[params?.improvement_id]?.name || params?.improvement_id) : params?.improvement_id;
-             return `Każda jednostka w armii otrzymuje darmowe ulepszenie: ${impName}.`;
+            const { improvements, unitsMap } = context;
+
+            // 1. Pobieramy ID ulepszeń (obsługa pojedynczego i tablicy)
+            const ids = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []);
+
+            // 2. Mapujemy na nazwy
+            const impNames = ids.map(id =>
+                improvements ? (improvements[id]?.name || id) : id
+            ).join(", ");
+
+            // 3. Obsługa wykluczeń
+            const excludedIds = params?.excluded_unit_ids || [];
+            let excludedText = "";
+
+            if (excludedIds.length > 0) {
+                const excludedNames = excludedIds.map(id =>
+                    unitsMap ? (unitsMap[id]?.name || id) : id
+                ).join(", ");
+                excludedText = ` (z wyjątkiem: ${excludedNames})`;
+            }
+
+            return `Każda jednostka w Dywizji${excludedText} otrzymuje ulepszenie: ${impNames}.`;
         }
     },
     "additional_pu_points_for_units": {

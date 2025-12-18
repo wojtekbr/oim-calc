@@ -188,6 +188,7 @@
     "name": "Konni Mołojcy Weterani S",
     "cost": 6,
     "improvement_cost": 2,
+    "mandatory_improvements": ["veterans"],
     "is_cavalry": true,
     "rank": "gold"
   },

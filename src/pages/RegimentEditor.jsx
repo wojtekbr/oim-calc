@@ -2,12 +2,13 @@ import React from "react";
 import { useRegimentLogic } from "./useRegimentLogic";
 import styles from "./RegimentEditor.module.css";
 import { GROUP_TYPES } from "../constants";
-import { 
-    canUnitTakeImprovement, 
+import {
+    canUnitTakeImprovement,
     calculateSingleImprovementIMPCost,
     calculateEffectiveImprovementCount,
     checkIfImprovementWouldBeFree,
-    checkIfImprovementIsMandatory
+    checkIfImprovementIsMandatory,
+    collectRegimentUnits // <--- NOWY IMPORT
 } from "../utils/armyMath";
 import { getRegimentRulesDescriptions } from "../utils/regimentRules";
 
@@ -32,82 +33,82 @@ const getPlaceholderStyle = (id, name) => {
 
 // --- Sub-components (View Only) ---
 
-const SingleUnitOptionCard = ({ 
-  unitId, 
-  isActive, 
-  onClick, 
-  unitMap, 
-  logicHelpers, 
-  isLocked, 
-  customCosts 
-}) => {
-  const unitDef = unitMap[unitId];
-  if (!unitDef) return null;
+const SingleUnitOptionCard = ({
+                                  unitId,
+                                  isActive,
+                                  onClick,
+                                  unitMap,
+                                  logicHelpers,
+                                  isLocked,
+                                  customCosts
+                              }) => {
+    const unitDef = unitMap[unitId];
+    if (!unitDef) return null;
 
-  let displayCost = 0;
-  if (customCosts?.costOverride !== undefined) {
-      displayCost = customCosts.costOverride;
-  } else {
-      displayCost = logicHelpers.getFinalUnitCost(unitId, false);
-      if (customCosts?.extraCost) {
-          displayCost += customCosts.extraCost;
-      }
-  }
+    let displayCost = 0;
+    if (customCosts?.costOverride !== undefined) {
+        displayCost = customCosts.costOverride;
+    } else {
+        displayCost = logicHelpers.getFinalUnitCost(unitId, false);
+        if (customCosts?.extraCost) {
+            displayCost += customCosts.extraCost;
+        }
+    }
 
-  const unitPuCost = unitDef.improvement_points_cost || unitDef.pu_cost || 0;
-  
-  const costLabel = unitPuCost > 0 
-      ? `${displayCost} PS + ${unitPuCost} PU` 
-      : `${displayCost} PS`;
+    const unitPuCost = unitDef.improvement_points_cost || unitDef.pu_cost || 0;
 
-  const initials = unitDef.name 
-    ? unitDef.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-    : "??";
+    const costLabel = unitPuCost > 0
+        ? `${displayCost} PS + ${unitPuCost} PU`
+        : `${displayCost} PS`;
 
-  const placeholderStyle = getPlaceholderStyle(unitId, unitDef.name);
+    const initials = unitDef.name
+        ? unitDef.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+        : "??";
 
-  return (
-    <div 
-      className={`${styles.unitCard} ${isActive ? styles.active : ''} ${onClick && !isLocked ? styles.selectable : ''}`}
-      onClick={isLocked ? undefined : onClick}
-      style={isLocked ? { cursor: 'default', opacity: 0.6, filter: 'grayscale(1)' } : {}}
-      title={unitDef.name}
-    >
-      {isActive && <div className={styles.checkBadge}>✔</div>}
-      
-      <div className={styles.cardImagePlaceholder} style={placeholderStyle}>
-          {initials}
-      </div>
+    const placeholderStyle = getPlaceholderStyle(unitId, unitDef.name);
 
-      <div className={styles.cardContent}>
-          <div className={styles.unitName}>{unitDef.name || unitId}</div>
-          
-          {unitDef.orders > 0 && (
-              <div className={styles.unitOrders}>
-                  Rozkazy: {unitDef.orders}
-              </div>
-          )}
+    return (
+        <div
+            className={`${styles.unitCard} ${isActive ? styles.active : ''} ${onClick && !isLocked ? styles.selectable : ''}`}
+            onClick={isLocked ? undefined : onClick}
+            style={isLocked ? { cursor: 'default', opacity: 0.6, filter: 'grayscale(1)' } : {}}
+            title={unitDef.name}
+        >
+            {isActive && <div className={styles.checkBadge}>✔</div>}
 
-          <div className={styles.unitCost}>{costLabel}</div>
-      </div>
-    </div>
-  );
+            <div className={styles.cardImagePlaceholder} style={placeholderStyle}>
+                {initials}
+            </div>
+
+            <div className={styles.cardContent}>
+                <div className={styles.unitName}>{unitDef.name || unitId}</div>
+
+                {unitDef.orders > 0 && (
+                    <div className={styles.unitOrders}>
+                        Rozkazy: {unitDef.orders}
+                    </div>
+                )}
+
+                <div className={styles.unitCost}>{costLabel}</div>
+            </div>
+        </div>
+    );
 };
 
-const MultiUnitOptionCard = ({ 
-    optionKey, 
-    optionNameOverride, 
-    unitIds, 
-    isActive, 
-    onClick, 
-    unitsMap, 
-    logicHelpers, 
-    isLocked, 
-    customCosts 
-}) => {
+const MultiUnitOptionCard = ({
+                                 optionKey,
+                                 optionNameOverride,
+                                 unitIds,
+                                 isActive,
+                                 onClick,
+                                 unitsMap,
+                                 logicHelpers,
+                                 isLocked,
+                                 customCosts
+                             }) => {
     let totalCost = 0;
     let totalOrders = 0;
-    
+
     if (customCosts?.costOverride !== undefined) {
         totalCost = customCosts.costOverride;
     } else {
@@ -127,7 +128,7 @@ const MultiUnitOptionCard = ({
     const displayName = optionNameOverride || `Pakiet (${unitIds.length} jedn.)`;
 
     return (
-        <div 
+        <div
             className={`${styles.unitCard} ${styles.multiCard} ${isActive ? styles.active : ''} ${onClick && !isLocked ? styles.selectable : ''}`}
             onClick={isLocked ? undefined : onClick}
             style={isLocked ? { cursor: 'default' } : {}}
@@ -140,7 +141,7 @@ const MultiUnitOptionCard = ({
 
             <div className={styles.cardContent}>
                 <div className={styles.multiCardTitle}>{displayName}</div>
-                
+
                 <div className={styles.multiCardList}>
                     {unitIds.slice(0, 3).map((uid, idx) => (
                         <div key={idx} className={styles.multiCardItem}>
@@ -162,20 +163,20 @@ const MultiUnitOptionCard = ({
     );
 };
 
-// --- ZMODYFIKOWANY PANEL KONFIGURACJI ---
+// --- Panel Konfiguracji Jednostki ---
 const ActiveOptionConfigurationPanel = ({
-    unitIds,
-    basePositionKey,
-    unitsMap,
-    state,
-    handlers,
-    regiment,
-    commonImprovements,
-    unitLevelImprovements,
-    helpers,
-    currentConfig,
-    divisionDefinition
-}) => {
+                                            unitIds,
+                                            basePositionKey,
+                                            unitsMap,
+                                            state,
+                                            handlers,
+                                            regiment,
+                                            commonImprovements,
+                                            unitLevelImprovements,
+                                            helpers,
+                                            currentConfig,
+                                            divisionDefinition
+                                        }) => {
     return (
         <div className={styles.activeConfigPanel}>
             <div className={styles.activeConfigTitle}>
@@ -184,7 +185,7 @@ const ActiveOptionConfigurationPanel = ({
             {unitIds.map((uid, uIdx) => {
                 const positionKey = `${basePositionKey}/${uIdx}`;
                 const unitDef = unitsMap[uid];
-                
+
                 const isGroupRank = unitDef?.rank === 'group';
 
                 const validImprovements = unitLevelImprovements.filter(imp => {
@@ -202,23 +203,19 @@ const ActiveOptionConfigurationPanel = ({
                             <div className={styles.cleanImprovementsContainer}>
                                 {validImprovements.length > 0 ? validImprovements.map(imp => {
                                     const isSelected = state.improvements[positionKey]?.includes(imp.id);
-                                    
-                                    // 1. Sprawdzamy czy to konkretne ulepszenie będzie darmowe
-                                    const willBeFree = checkIfImprovementWouldBeFree(currentConfig, regiment, uid, imp.id, divisionDefinition);
-                                    
-                                    // 2. Sprawdzamy czy jest obowiązkowe
-                                    const isMandatory = checkIfImprovementIsMandatory(uid, imp.id, divisionDefinition, regiment.id);
 
-                                    // 3. Koszt i "stać nas"
+                                    const willBeFree = checkIfImprovementWouldBeFree(currentConfig, regiment, uid, imp.id, divisionDefinition, unitsMap);
+
+                                    const isMandatory = checkIfImprovementIsMandatory(uid, imp.id, divisionDefinition, regiment.id, unitsMap);
+
                                     const cost = calculateSingleImprovementIMPCost(unitDef, imp.id, regiment, commonImprovements);
                                     const canAfford = isSelected || willBeFree || (state.newRemainingPointsAfterLocalChanges - cost >= 0);
 
-                                    // 4. Limity
-                                    const effectiveCount = calculateEffectiveImprovementCount(currentConfig, regiment, imp.id, divisionDefinition);
+                                    const effectiveCount = calculateEffectiveImprovementCount(currentConfig, regiment, imp.id, divisionDefinition, unitsMap);
                                     const isLimitReached = imp.max_amount && effectiveCount >= imp.max_amount;
 
                                     const isDisabled = (
-                                        isMandatory || // Jeśli obowiązkowe - zablokowane (jako wybrane)
+                                        isMandatory ||
                                         (!isSelected && ((isLimitReached && !willBeFree) || (!willBeFree && !canAfford)))
                                     );
 
@@ -256,515 +253,548 @@ const ActiveOptionConfigurationPanel = ({
     );
 };
 
-const GroupSection = ({ 
-  type, 
-  groupKey, 
-  data, 
-  selections, 
-  handlers, 
-  logicHelpers, 
-  state, 
-  unitsMap, 
-  unitLevelImprovements, 
-  isLocked, 
-  regiment, 
-  commonImprovements,
-  currentConfig,
-  divisionDefinition
-}) => {
-  const isOptionalGroup = groupKey === GROUP_TYPES.OPTIONAL;
-  const mapKey = `${type}/optional`;
-  
-  let isEnabled = true;
-  if (type === GROUP_TYPES.ADDITIONAL && !state.additionalEnabled) isEnabled = false;
-  if (isOptionalGroup) {
-      if (!state.optionalEnabled[mapKey]) isEnabled = false;
-  }
-  if (isLocked) isEnabled = false;
+const GroupSection = ({
+                          type,
+                          groupKey,
+                          data,
+                          selections,
+                          handlers,
+                          logicHelpers,
+                          state,
+                          unitsMap,
+                          unitLevelImprovements,
+                          isLocked,
+                          regiment,
+                          commonImprovements,
+                          currentConfig,
+                          divisionDefinition
+                      }) => {
+    const isOptionalGroup = groupKey === GROUP_TYPES.OPTIONAL;
+    const mapKey = `${type}/optional`;
 
-  return (
-    <div className={styles.groupContainer}>
-      {isOptionalGroup && (
-          <div className={styles.groupLabelOptional}>
-             {!isLocked ? (
-                 <>
-                    <input 
-                        type="checkbox" 
-                        className={styles.checkboxInput}
-                        checked={!!state.optionalEnabled[mapKey]} 
-                        onChange={() => handlers.handleToggleOptionalGroup(type, groupKey)}
-                        disabled={type === GROUP_TYPES.ADDITIONAL && !state.additionalEnabled} 
-                    />
-                    <span 
-                        className={styles.clickableSpan}
-                        onClick={() => !(type === GROUP_TYPES.ADDITIONAL && !state.additionalEnabled) && handlers.handleToggleOptionalGroup(type, groupKey)}
-                    >
+    let isEnabled = true;
+    if (type === GROUP_TYPES.ADDITIONAL && !state.additionalEnabled) isEnabled = false;
+    if (isOptionalGroup) {
+        if (!state.optionalEnabled[mapKey]) isEnabled = false;
+    }
+    if (isLocked) isEnabled = false;
+
+    return (
+        <div className={styles.groupContainer}>
+            {isOptionalGroup && (
+                <div className={styles.groupLabelOptional}>
+                    {!isLocked ? (
+                        <>
+                            <input
+                                type="checkbox"
+                                className={styles.checkboxInput}
+                                checked={!!state.optionalEnabled[mapKey]}
+                                onChange={() => handlers.handleToggleOptionalGroup(type, groupKey)}
+                                disabled={type === GROUP_TYPES.ADDITIONAL && !state.additionalEnabled}
+                            />
+                            <span
+                                className={styles.clickableSpan}
+                                onClick={() => !(type === GROUP_TYPES.ADDITIONAL && !state.additionalEnabled) && handlers.handleToggleOptionalGroup(type, groupKey)}
+                            >
                         Jednostka dodatkowa (Opcjonalne)
                     </span>
-                 </>
-             ) : (
-                 <span>Jednostka dodatkowa (Wymagany zakup jednostki podstawowej)</span>
-             )}
-          </div>
-      )}
-
-      <div className={(!isEnabled || isLocked) ? styles.disabledContent : ''}>
-        {(data || []).map((pod, index) => {
-            const optionsEntries = Object.entries(pod || {});
-            if (optionsEntries.length === 0) return null;
-
-            let selectedKey = null;
-            if (isOptionalGroup) {
-                selectedKey = state.optionalSelections[mapKey]?.[index];
-            } else {
-                selectedKey = selections[groupKey]?.[index];
-            }
-            
-            if (!selectedKey && optionsEntries.length === 1 && type === GROUP_TYPES.BASE && !isOptionalGroup) {
-                selectedKey = optionsEntries[0][0];
-            }
-
-            return (
-                <div key={index} className={styles.podContainer}>
-                    {optionsEntries.length > 1 && (
-                        <div className={styles.podSelectionHint}>
-                            Wybierz wariant ({optionsEntries.length} opcje):
-                        </div>
-                    )}
-                    
-                    <div className={styles.unitsRow}>
-                        {optionsEntries.map(([optKey, optDef]) => {
-                            const unitIds = optDef.units || (optDef.id ? [optDef.id] : []);
-                            const isActive = selectedKey === optKey;
-                            
-                            const customCosts = {
-                                costOverride: optDef.cost_override,
-                                extraCost: optDef.extra_cost
-                            };
-
-                            if (unitIds.length > 1) {
-                                return (
-                                    <MultiUnitOptionCard
-                                        key={optKey}
-                                        optionKey={optKey}
-                                        optionNameOverride={optDef.name_override}
-                                        unitIds={unitIds}
-                                        isActive={isActive}
-                                        onClick={() => handlers.handleSelectInPod(type, groupKey, index, optKey)}
-                                        unitsMap={unitsMap}
-                                        logicHelpers={logicHelpers}
-                                        isLocked={isLocked}
-                                        customCosts={customCosts}
-                                    />
-                                );
-                            } else {
-                                return (
-                                    <SingleUnitOptionCard 
-                                        key={optKey}
-                                        unitId={unitIds[0]}
-                                        isActive={isActive}
-                                        onClick={() => handlers.handleSelectInPod(type, groupKey, index, optKey)}
-                                        unitMap={unitsMap}
-                                        logicHelpers={logicHelpers}
-                                        isLocked={isLocked}
-                                        customCosts={customCosts}
-                                    />
-                                );
-                            }
-                        })}
-                    </div>
-
-                    {selectedKey && pod[selectedKey] && (
-                        <ActiveOptionConfigurationPanel
-                            unitIds={pod[selectedKey].units || (pod[selectedKey].id ? [pod[selectedKey].id] : [])}
-                            basePositionKey={isOptionalGroup ? `${type}/optional/${index}` : `${type}/${groupKey}/${index}`}
-                            unitsMap={unitsMap}
-                            state={state}
-                            handlers={handlers}
-                            regiment={regiment}
-                            commonImprovements={commonImprovements}
-                            unitLevelImprovements={unitLevelImprovements}
-                            helpers={logicHelpers}
-                            currentConfig={currentConfig}
-                            divisionDefinition={divisionDefinition}
-                        />
+                        </>
+                    ) : (
+                        <span>Jednostka dodatkowa (Wymagany zakup jednostki podstawowej)</span>
                     )}
                 </div>
-            );
-        })}
-      </div>
-    </div>
-  );
+            )}
+
+            <div className={(!isEnabled || isLocked) ? styles.disabledContent : ''}>
+                {(data || []).map((pod, index) => {
+                    const optionsEntries = Object.entries(pod || {});
+                    if (optionsEntries.length === 0) return null;
+
+                    let selectedKey = null;
+                    if (isOptionalGroup) {
+                        selectedKey = state.optionalSelections[mapKey]?.[index];
+                    } else {
+                        selectedKey = selections[groupKey]?.[index];
+                    }
+
+                    if (!selectedKey && optionsEntries.length === 1 && type === GROUP_TYPES.BASE && !isOptionalGroup) {
+                        selectedKey = optionsEntries[0][0];
+                    }
+
+                    return (
+                        <div key={index} className={styles.podContainer}>
+                            {optionsEntries.length > 1 && (
+                                <div className={styles.podSelectionHint}>
+                                    Wybierz wariant ({optionsEntries.length} opcje):
+                                </div>
+                            )}
+
+                            <div className={styles.unitsRow}>
+                                {optionsEntries.map(([optKey, optDef]) => {
+                                    const unitIds = optDef.units || (optDef.id ? [optDef.id] : []);
+                                    const isActive = selectedKey === optKey;
+
+                                    const customCosts = {
+                                        costOverride: optDef.cost_override,
+                                        extraCost: optDef.extra_cost
+                                    };
+
+                                    if (unitIds.length > 1) {
+                                        return (
+                                            <MultiUnitOptionCard
+                                                key={optKey}
+                                                optionKey={optKey}
+                                                optionNameOverride={optDef.name_override}
+                                                unitIds={unitIds}
+                                                isActive={isActive}
+                                                onClick={() => handlers.handleSelectInPod(type, groupKey, index, optKey)}
+                                                unitsMap={unitsMap}
+                                                logicHelpers={logicHelpers}
+                                                isLocked={isLocked}
+                                                customCosts={customCosts}
+                                            />
+                                        );
+                                    } else {
+                                        return (
+                                            <SingleUnitOptionCard
+                                                key={optKey}
+                                                unitId={unitIds[0]}
+                                                isActive={isActive}
+                                                onClick={() => handlers.handleSelectInPod(type, groupKey, index, optKey)}
+                                                unitMap={unitsMap}
+                                                logicHelpers={logicHelpers}
+                                                isLocked={isLocked}
+                                                customCosts={customCosts}
+                                            />
+                                        );
+                                    }
+                                })}
+                            </div>
+
+                            {selectedKey && pod[selectedKey] && (
+                                <ActiveOptionConfigurationPanel
+                                    unitIds={pod[selectedKey].units || (pod[selectedKey].id ? [pod[selectedKey].id] : [])}
+                                    basePositionKey={isOptionalGroup ? `${type}/optional/${index}` : `${type}/${groupKey}/${index}`}
+                                    unitsMap={unitsMap}
+                                    state={state}
+                                    handlers={handlers}
+                                    regiment={regiment}
+                                    commonImprovements={commonImprovements}
+                                    unitLevelImprovements={unitLevelImprovements}
+                                    helpers={logicHelpers}
+                                    currentConfig={currentConfig}
+                                    divisionDefinition={divisionDefinition}
+                                />
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
 };
 
 
 // --- Main Component ---
 
 export default function RegimentEditor(props) {
-  const { state, definitions, handlers, helpers } = useRegimentLogic(props);
-  const { unitsMap, regiment, configuredDivision, regimentGroup, regimentIndex, divisionDefinition } = props;
-  const { base, additional, commonImprovements } = definitions;
-  
-  const currentRegimentConfig = configuredDivision?.[regimentGroup]?.[regimentIndex];
-  const customName = currentRegimentConfig?.customName;
+    const { state, definitions, handlers, helpers } = useRegimentLogic(props);
+    const { unitsMap, regiment, configuredDivision, regimentGroup, regimentIndex, divisionDefinition } = props;
+    const { base, additional, commonImprovements } = definitions;
 
-  const formatCost = (cost) => {
-      if (cost === 'normal') return 'x1';
-      if (cost === 'double') return 'x2';
-      if (cost === 'triple') return 'x3';
-      if (typeof cost === 'number') return `${cost} PU`;
-      return cost;
-  };
+    const currentRegimentConfig = configuredDivision?.[regimentGroup]?.[regimentIndex];
+    const customName = currentRegimentConfig?.customName;
 
-  const specialRules = regiment.special_rules || [];
-  const rulesDescriptions = getRegimentRulesDescriptions(regiment);
+    const formatCost = (cost) => {
+        if (cost === 'normal') return 'x1';
+        if (cost === 'double') return 'x2';
+        if (cost === 'triple') return 'x3';
+        if (typeof cost === 'number') return `${cost} PU`;
+        return cost;
+    };
 
-  const hasErrors = state.regimentRuleErrors && state.regimentRuleErrors.length > 0;
+    const specialRules = regiment.special_rules || [];
+    const rulesDescriptions = getRegimentRulesDescriptions(regiment);
 
-  // Przygotowujemy tymczasowy config do obliczeń w widoku
-  const tempConfig = {
-      baseSelections: state.baseSelections,
-      additionalSelections: state.additionalSelections,
-      additionalCustom: state.selectedAdditionalCustom,
-      additionalEnabled: state.additionalEnabled,
-      optionalEnabled: state.optionalEnabled,
-      optionalSelections: state.optionalSelections,
-      improvements: state.improvements,
-      regimentImprovements: state.regimentImprovements
-  };
+    const hasErrors = state.regimentRuleErrors && state.regimentRuleErrors.length > 0;
 
-  return (
-    <div className={styles.container}>
-      <div className={styles.topBar}>
-        <div className={styles.topBarTitle}>
-            Edycja Pułku
-        </div>
-        <div className={styles.actionButtons}>
-            <button className={styles.btnSecondary} onClick={handlers.onBack}>Anuluj</button>
-            <button 
-                className={styles.btnPrimary} 
-                onClick={handlers.saveAndGoBack}
-                disabled={hasErrors}
-            >
-                Zapisz Zmiany
-            </button>
-        </div>
-      </div>
+    const tempConfig = {
+        baseSelections: state.baseSelections,
+        additionalSelections: state.additionalSelections,
+        additionalCustom: state.selectedAdditionalCustom,
+        additionalEnabled: state.additionalEnabled,
+        optionalEnabled: state.optionalEnabled,
+        optionalSelections: state.optionalSelections,
+        improvements: state.improvements,
+        regimentImprovements: state.regimentImprovements
+    };
 
-      <div className={styles.contentGrid}>
-        {/* LEFT COLUMN */}
-        <div className={styles.mainColumn}>
-            
-            <div className={styles.sectionCard}>
-                <div className={styles.sectionHeader}>
-                    <h3 className={styles.sectionTitle}>Podstawa Pułku (Obowiązkowe)</h3>
+    // --- PRZYGOTOWANIE DO FILTROWANIA TABELI ---
+    // Pobieramy wszystkie aktywne jednostki (włącznie ze wsparciem), aby sprawdzić,
+    // czy KTOKOLWIEK może kupić dane ulepszenie.
+    const activeRegimentUnits = collectRegimentUnits(tempConfig, regiment);
+    const activeSupportUnits = state.assignedSupportUnits.map(su => ({
+        unitId: su.id,
+        structureMandatory: [] // Wsparcie nie ma nadpisań ze struktury pułku
+    }));
+    const allActiveUnits = [...activeRegimentUnits, ...activeSupportUnits];
+
+    return (
+        <div className={styles.container}>
+            <div className={styles.topBar}>
+                <div className={styles.topBarTitle}>
+                    Edycja Pułku
                 </div>
-                {helpers.groupKeys(base).map(gk => (
-                    <GroupSection 
-                        key={`base-${gk}`}
-                        type="base"
-                        groupKey={gk}
-                        data={base[gk]}
-                        selections={state.baseSelections}
-                        handlers={handlers}
-                        logicHelpers={helpers}
-                        state={state}
-                        unitsMap={unitsMap}
-                        unitLevelImprovements={definitions.unitLevelImprovements}
-                        regiment={regiment}
-                        commonImprovements={commonImprovements}
-                        currentConfig={tempConfig}
-                        divisionDefinition={divisionDefinition}
-                    />
-                ))}
+                <div className={styles.actionButtons}>
+                    <button className={styles.btnSecondary} onClick={handlers.onBack}>Anuluj</button>
+                    <button
+                        className={styles.btnPrimary}
+                        onClick={handlers.saveAndGoBack}
+                        disabled={hasErrors}
+                    >
+                        Zapisz Zmiany
+                    </button>
+                </div>
             </div>
 
-            {state.assignedSupportUnits.length > 0 && (
-                <div className={`${styles.sectionCard} ${styles.supportCard}`}>
-                    <div className={`${styles.sectionHeader} ${styles.supportHeader}`}>
-                        <h3 className={`${styles.sectionTitle} ${styles.supportTitle}`}>
-                            Przypisane Wsparcie (Support)
-                        </h3>
-                    </div>
-                    <div className={styles.groupContainer}>
-                         {state.assignedSupportUnits.map((su) => {
-                            return (
-                                <ActiveOptionConfigurationPanel
-                                    key={su.id}
-                                    unitIds={[su.id]}
-                                    basePositionKey={`support/${su.id}-${su.assignedTo.positionKey}`}
-                                    unitsMap={unitsMap}
-                                    state={state}
-                                    handlers={handlers}
-                                    regiment={regiment}
-                                    commonImprovements={commonImprovements}
-                                    unitLevelImprovements={definitions.unitLevelImprovements}
-                                    helpers={helpers}
-                                    currentConfig={tempConfig}
-                                    divisionDefinition={divisionDefinition}
-                                />
-                            ); 
-                        })}
-                    </div>
-                </div>
-            )}
+            <div className={styles.contentGrid}>
+                {/* LEFT COLUMN */}
+                <div className={styles.mainColumn}>
 
-            <div className={styles.sectionCard}>
-                <div className={styles.sectionHeader}>
-                    <h3 className={styles.sectionTitle} style={{display:'flex', alignItems:'center'}}>
-                        <input 
-                            type="checkbox" 
-                            checked={state.additionalEnabled} 
-                            onChange={handlers.handleToggleAdditional}
-                            style={{width: 20, height: 20, marginRight: 10, cursor: 'pointer'}}
-                        />
-                        <span 
-                            onClick={handlers.handleToggleAdditional} 
-                            style={{cursor: 'pointer'}}
-                        >
-                            Poziom I (Dodatkowe)
-                        </span>
-                    </h3>
-                </div>
-
-                <div className={!state.additionalEnabled ? styles.disabledContent : ''}>
-                    {helpers.groupKeys(additional).map(gk => {
-                        const isOptionalLocked = gk === GROUP_TYPES.OPTIONAL && !state.hasAdditionalBaseSelection;
-                        return (
-                            <GroupSection 
-                                key={`add-${gk}`}
-                                type="additional"
+                    <div className={styles.sectionCard}>
+                        <div className={styles.sectionHeader}>
+                            <h3 className={styles.sectionTitle}>Podstawa Pułku (Obowiązkowe)</h3>
+                        </div>
+                        {helpers.groupKeys(base).map(gk => (
+                            <GroupSection
+                                key={`base-${gk}`}
+                                type="base"
                                 groupKey={gk}
-                                data={additional[gk]}
-                                selections={state.additionalSelections}
+                                data={base[gk]}
+                                selections={state.baseSelections}
                                 handlers={handlers}
                                 logicHelpers={helpers}
                                 state={state}
                                 unitsMap={unitsMap}
                                 unitLevelImprovements={definitions.unitLevelImprovements}
-                                isLocked={isOptionalLocked}
                                 regiment={regiment}
                                 commonImprovements={commonImprovements}
                                 currentConfig={tempConfig}
                                 divisionDefinition={divisionDefinition}
                             />
-                        );
-                    })}
-                    
-                    {definitions.customCostDefinition && definitions.customCostSlotName && (
-                        <div 
-                            className={`${styles.groupContainer} ${styles.customSlotSeparator} ${!state.additionalEnabled ? styles.disabledContent : ''}`} 
-                        >
-                            <div className={styles.groupLabel}>Poziom II (Special)</div>
-                            <div className={styles.unitsRow}>
-                                {definitions.customCostDefinition.map(def => {
-                                    const uid = def.id;
-                                    const isActive = state.selectedAdditionalCustom === uid;
+                        ))}
+                    </div>
+
+                    {state.assignedSupportUnits.length > 0 && (
+                        <div className={`${styles.sectionCard} ${styles.supportCard}`}>
+                            <div className={`${styles.sectionHeader} ${styles.supportHeader}`}>
+                                <h3 className={`${styles.sectionTitle} ${styles.supportTitle}`}>
+                                    Przypisane Wsparcie (Support)
+                                </h3>
+                            </div>
+                            <div className={styles.groupContainer}>
+                                {state.assignedSupportUnits.map((su) => {
                                     return (
-                                        <div key={uid} style={{width: '100%'}}>
-                                            <SingleUnitOptionCard
-                                                unitId={uid}
-                                                isActive={isActive}
-                                                onClick={() => handlers.handleCustomSelect(uid)}
-                                                unitMap={unitsMap}
-                                                logicHelpers={helpers}
-                                                isLocked={!state.additionalEnabled}
-                                                customCosts={null} 
-                                            />
-                                            {isActive && (
-                                                <ActiveOptionConfigurationPanel
-                                                    unitIds={[uid]}
-                                                    basePositionKey={`additional/${definitions.customCostSlotName}_custom`} 
-                                                    unitsMap={unitsMap}
-                                                    state={state}
-                                                    handlers={handlers}
-                                                    regiment={regiment}
-                                                    commonImprovements={commonImprovements}
-                                                    unitLevelImprovements={definitions.unitLevelImprovements}
-                                                    helpers={helpers}
-                                                    currentConfig={tempConfig}
-                                                    divisionDefinition={divisionDefinition}
-                                                />
-                                            )}
-                                        </div>
+                                        <ActiveOptionConfigurationPanel
+                                            key={su.id}
+                                            unitIds={[su.id]}
+                                            basePositionKey={`support/${su.id}-${su.assignedTo.positionKey}`}
+                                            unitsMap={unitsMap}
+                                            state={state}
+                                            handlers={handlers}
+                                            regiment={regiment}
+                                            commonImprovements={commonImprovements}
+                                            unitLevelImprovements={definitions.unitLevelImprovements}
+                                            helpers={helpers}
+                                            currentConfig={tempConfig}
+                                            divisionDefinition={divisionDefinition}
+                                        />
                                     );
                                 })}
                             </div>
                         </div>
                     )}
+
+                    <div className={styles.sectionCard}>
+                        <div className={styles.sectionHeader}>
+                            <h3 className={styles.sectionTitle} style={{display:'flex', alignItems:'center'}}>
+                                <input
+                                    type="checkbox"
+                                    checked={state.additionalEnabled}
+                                    onChange={handlers.handleToggleAdditional}
+                                    style={{width: 20, height: 20, marginRight: 10, cursor: 'pointer'}}
+                                />
+                                <span
+                                    onClick={handlers.handleToggleAdditional}
+                                    style={{cursor: 'pointer'}}
+                                >
+                            Poziom I (Dodatkowe)
+                        </span>
+                            </h3>
+                        </div>
+
+                        <div className={!state.additionalEnabled ? styles.disabledContent : ''}>
+                            {helpers.groupKeys(additional).map(gk => {
+                                const isOptionalLocked = gk === GROUP_TYPES.OPTIONAL && !state.hasAdditionalBaseSelection;
+                                return (
+                                    <GroupSection
+                                        key={`add-${gk}`}
+                                        type="additional"
+                                        groupKey={gk}
+                                        data={additional[gk]}
+                                        selections={state.additionalSelections}
+                                        handlers={handlers}
+                                        logicHelpers={helpers}
+                                        state={state}
+                                        unitsMap={unitsMap}
+                                        unitLevelImprovements={definitions.unitLevelImprovements}
+                                        isLocked={isOptionalLocked}
+                                        regiment={regiment}
+                                        commonImprovements={commonImprovements}
+                                        currentConfig={tempConfig}
+                                        divisionDefinition={divisionDefinition}
+                                    />
+                                );
+                            })}
+
+                            {definitions.customCostDefinition && definitions.customCostSlotName && (
+                                <div
+                                    className={`${styles.groupContainer} ${styles.customSlotSeparator} ${!state.additionalEnabled ? styles.disabledContent : ''}`}
+                                >
+                                    <div className={styles.groupLabel}>Poziom II (Special)</div>
+                                    <div className={styles.unitsRow}>
+                                        {definitions.customCostDefinition.map(def => {
+                                            const uid = def.id;
+                                            const isActive = state.selectedAdditionalCustom === uid;
+                                            return (
+                                                <div key={uid} style={{width: '100%'}}>
+                                                    <SingleUnitOptionCard
+                                                        unitId={uid}
+                                                        isActive={isActive}
+                                                        onClick={() => handlers.handleCustomSelect(uid)}
+                                                        unitMap={unitsMap}
+                                                        logicHelpers={helpers}
+                                                        isLocked={!state.additionalEnabled}
+                                                        customCosts={null}
+                                                    />
+                                                    {isActive && (
+                                                        <ActiveOptionConfigurationPanel
+                                                            unitIds={[uid]}
+                                                            basePositionKey={`additional/${definitions.customCostSlotName}_custom`}
+                                                            unitsMap={unitsMap}
+                                                            state={state}
+                                                            handlers={handlers}
+                                                            regiment={regiment}
+                                                            commonImprovements={commonImprovements}
+                                                            unitLevelImprovements={definitions.unitLevelImprovements}
+                                                            helpers={helpers}
+                                                            currentConfig={tempConfig}
+                                                            divisionDefinition={divisionDefinition}
+                                                        />
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        {/* RIGHT COLUMN - SIDEBAR */}
-        <div className={styles.sidebar}>
-            <div className={styles.sectionCard}>
-                
-                <div className={styles.sidebarHeader}>
-                    <div style={{fontSize: 11, color: '#666', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px'}}>
-                        {divisionDefinition?.name || "Dywizja"}
+                {/* RIGHT COLUMN - SIDEBAR */}
+                <div className={styles.sidebar}>
+                    <div className={styles.sectionCard}>
+
+                        <div className={styles.sidebarHeader}>
+                            <div style={{fontSize: 11, color: '#666', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px'}}>
+                                {divisionDefinition?.name || "Dywizja"}
+                            </div>
+
+                            <div className={styles.sidebarTitle}>
+                                {regiment.name || "Nieznany Pułk"}
+                            </div>
+                            {customName && (
+                                <div className={styles.sidebarSubtitle}>
+                                    "{customName}"
+                                </div>
+                            )}
+                        </div>
+
+                        <div className={styles.pointsBox}>
+                            <span className={styles.pointsLabel}>Koszt Całkowity</span>
+                            <span className={styles.pointsBig}>{state.totalCost} PS</span>
+                        </div>
+
+                        <div className={styles.statRow} style={{borderBottom: 'none', marginBottom: 10}}>
+                            <span className={styles.statLabel}>Typ Pułku:</span>
+                            <span className={`${styles.statValue} ${styles.statValueType}`}>{state.stats.regimentType}</span>
+                        </div>
+
+                        {state.stats.isMainForce && (
+                            <div style={{
+                                marginTop: 0, marginBottom: 10, padding: '4px 8px',
+                                background: '#fff3e0', color: '#e65100',
+                                fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase',
+                                borderRadius: 4, textAlign: 'center', border: '1px solid #ffe0b2'
+                            }}>
+                                ★ Siły Główne
+                            </div>
+                        )}
+
+                        <div className={styles.statsSeparator}></div>
+
+                        <div className={styles.statRow}><span className={styles.statLabel}>Zwiad:</span><span className={styles.statValue}>{state.stats.totalRecon}</span></div>
+                        <div className={styles.statRow}><span className={styles.statLabel}>Motywacja:</span><span className={styles.statValue}>{state.stats.totalMotivation}</span></div>
+                        <div className={styles.statRow}><span className={styles.statLabel}>Znaczniki Aktywacji:</span><span className={styles.statValue}>{state.stats.totalActivations}</span></div>
+                        <div className={styles.statRow}><span className={styles.statLabel}>Rozkazy:</span><span className={styles.statValue}>{state.stats.totalOrders}</span></div>
+                        <div className={styles.statRow}><span className={styles.statLabel}>Czujność (Awareness):</span><span className={styles.statValue}>{state.stats.totalAwareness}</span></div>
                     </div>
 
-                    <div className={styles.sidebarTitle}>
-                        {regiment.name || "Nieznany Pułk"}
-                    </div>
-                    {customName && (
-                        <div className={styles.sidebarSubtitle}>
-                            "{customName}"
+                    {hasErrors && (
+                        <div className={styles.errorBox}>
+                            <strong>⚠️ Niespełnione zasady pułku:</strong>
+                            <ul className={styles.errorList}>
+                                {state.regimentRuleErrors.map((err, i) => (
+                                    <li key={i}>{err}</li>
+                                ))}
+                            </ul>
                         </div>
                     )}
-                </div>
 
-                <div className={styles.pointsBox}>
-                    <span className={styles.pointsLabel}>Koszt Całkowity</span>
-                    <span className={styles.pointsBig}>{state.totalCost} PS</span>
-                </div>
-                
-                <div className={styles.statRow} style={{borderBottom: 'none', marginBottom: 10}}>
-                    <span className={styles.statLabel}>Typ Pułku:</span>
-                    <span className={`${styles.statValue} ${styles.statValueType}`}>{state.stats.regimentType}</span>
-                </div>
-
-                {state.stats.isMainForce && (
-                    <div style={{
-                        marginTop: 0, marginBottom: 10, padding: '4px 8px', 
-                        background: '#fff3e0', color: '#e65100', 
-                        fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase',
-                        borderRadius: 4, textAlign: 'center', border: '1px solid #ffe0b2'
-                    }}>
-                        ★ Siły Główne
-                    </div>
-                )}
-
-                <div className={styles.statsSeparator}></div>
-
-                <div className={styles.statRow}><span className={styles.statLabel}>Zwiad:</span><span className={styles.statValue}>{state.stats.totalRecon}</span></div>
-                <div className={styles.statRow}><span className={styles.statLabel}>Motywacja:</span><span className={styles.statValue}>{state.stats.totalMotivation}</span></div>
-                <div className={styles.statRow}><span className={styles.statLabel}>Znaczniki Aktywacji:</span><span className={styles.statValue}>{state.stats.totalActivations}</span></div>
-                <div className={styles.statRow}><span className={styles.statLabel}>Rozkazy:</span><span className={styles.statValue}>{state.stats.totalOrders}</span></div>
-                <div className={styles.statRow}><span className={styles.statLabel}>Czujność (Awareness):</span><span className={styles.statValue}>{state.stats.totalAwareness}</span></div>
-            </div>
-
-            {hasErrors && (
-                <div className={styles.errorBox}>
-                    <strong>⚠️ Niespełnione zasady pułku:</strong>
-                    <ul className={styles.errorList}>
-                        {state.regimentRuleErrors.map((err, i) => (
-                            <li key={i}>{err}</li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-
-            {rulesDescriptions.length > 0 && (
-                <div className={styles.sectionCard}>
-                    <h4 className={styles.groupLabel}>Zasady Specjalne</h4>
-                    <div className={styles.regimentImprovementsList}>
-                        {rulesDescriptions.map(rule => (
-                            <div key={rule.id} className={styles.ruleEntry}>
-                                <div className={styles.ruleEntryTitle}>{rule.title}</div>
-                                {rule.description && <div className={styles.ruleEntryDesc}>{rule.description}</div>}
+                    {rulesDescriptions.length > 0 && (
+                        <div className={styles.sectionCard}>
+                            <h4 className={styles.groupLabel}>Zasady Specjalne</h4>
+                            <div className={styles.regimentImprovementsList}>
+                                {rulesDescriptions.map(rule => (
+                                    <div key={rule.id} className={styles.ruleEntry}>
+                                        <div className={styles.ruleEntryTitle}>{rule.title}</div>
+                                        {rule.description && <div className={styles.ruleEntryDesc}>{rule.description}</div>}
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+                        </div>
+                    )}
 
-            {definitions.regimentLevelImprovements.length > 0 && (
-                <div className={styles.sectionCard}>
-                    <h4 className={styles.groupLabel}>Ulepszenia Pułku</h4>
-                    <div className={styles.regimentImprovementsList}>
-                        {definitions.regimentLevelImprovements.map(imp => {
-                            const isActive = state.regimentImprovements.includes(imp.id);
-                            
-                            const commonDef = definitions.commonImprovements?.[imp.id];
-                            const displayName = commonDef?.name || imp.name || imp.id;
+                    {definitions.regimentLevelImprovements.length > 0 && (
+                        <div className={styles.sectionCard}>
+                            <h4 className={styles.groupLabel}>Ulepszenia Pułku</h4>
+                            <div className={styles.regimentImprovementsList}>
+                                {definitions.regimentLevelImprovements.map(imp => {
+                                    const isActive = state.regimentImprovements.includes(imp.id);
 
-                            let armyCost = 0;
-                            if (imp.army_cost_override !== undefined) armyCost = imp.army_cost_override;
-                            else if (imp.army_point_cost !== undefined) armyCost = imp.army_point_cost;
-                            else if (commonDef?.army_point_cost !== undefined) armyCost = commonDef.army_point_cost;
+                                    const commonDef = definitions.commonImprovements?.[imp.id];
+                                    const displayName = commonDef?.name || imp.name || imp.id;
 
-                            let puCost = 0;
-                            if (imp.cost_override !== undefined) puCost = imp.cost_override;
-                            else if (imp.cost !== undefined) puCost = imp.cost;
-                            else if (commonDef?.cost !== undefined) puCost = commonDef.cost;
-                            
-                            const costParts = [];
-                            if (armyCost > 0) costParts.push(`${armyCost} PS`);
-                            if (puCost > 0) costParts.push(`${puCost} PU`);
-                            
-                            const costString = costParts.length > 0 
-                                ? `(${costParts.join(" + ")})` 
-                                : "";
+                                    let armyCost = 0;
+                                    if (imp.army_cost_override !== undefined) armyCost = imp.army_cost_override;
+                                    else if (imp.army_point_cost !== undefined) armyCost = imp.army_point_cost;
+                                    else if (commonDef?.army_point_cost !== undefined) armyCost = commonDef.army_point_cost;
 
-                            return (
-                                <label key={imp.id} className={`${styles.toggleLabel} ${styles.regimentImprovementLabel}`}>
-                                    <input 
-                                        type="checkbox"
-                                        checked={isActive}
-                                        onChange={() => handlers.handleRegimentImprovementToggle(imp.id)}
-                                    />
-                                    {displayName} {costString}
-                                </label>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
+                                    let puCost = 0;
+                                    if (imp.cost_override !== undefined) puCost = imp.cost_override;
+                                    else if (imp.cost !== undefined) puCost = imp.cost;
+                                    else if (commonDef?.cost !== undefined) puCost = commonDef.cost;
 
-            {definitions.unitLevelImprovements.length > 0 && (
-                <div className={styles.sectionCard}>
-                    <div className={styles.tableContainer}>
-                        <div className={styles.tableHeader}>
-                            <h4 className={styles.groupLabel}>Dostępne Ulepszenia</h4>
-                            <div className={styles.pointsDisplay}>
-                                <span>Pozostałe punkty:</span>
-                                <span className={`${styles.impPoints} ${state.newRemainingPointsAfterLocalChanges < 0 ? styles.error : styles.ok}`}>
+                                    const costParts = [];
+                                    if (armyCost > 0) costParts.push(`${armyCost} PS`);
+                                    if (puCost > 0) costParts.push(`${puCost} PU`);
+
+                                    const costString = costParts.length > 0
+                                        ? `(${costParts.join(" + ")})`
+                                        : "";
+
+                                    return (
+                                        <label key={imp.id} className={`${styles.toggleLabel} ${styles.regimentImprovementLabel}`}>
+                                            <input
+                                                type="checkbox"
+                                                checked={isActive}
+                                                onChange={() => handlers.handleRegimentImprovementToggle(imp.id)}
+                                            />
+                                            {displayName} {costString}
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {definitions.unitLevelImprovements.length > 0 && (
+                        <div className={styles.sectionCard}>
+                            <div className={styles.tableContainer}>
+                                <div className={styles.tableHeader}>
+                                    <h4 className={styles.groupLabel}>Dostępne Ulepszenia</h4>
+                                    <div className={styles.pointsDisplay}>
+                                        <span>Pozostałe punkty:</span>
+                                        <span className={`${styles.impPoints} ${state.newRemainingPointsAfterLocalChanges < 0 ? styles.error : styles.ok}`}>
                                     {state.newRemainingPointsAfterLocalChanges}
                                 </span>
+                                    </div>
+                                </div>
+
+                                <table className={styles.impTable}>
+                                    <thead>
+                                    <tr className={styles.impTableHeadRow}>
+                                        <th className={styles.tableTh}>Nazwa</th>
+                                        <th className={styles.tableThCenter}>Koszt</th>
+                                        <th className={styles.tableThRight}>Ilość</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {definitions.unitLevelImprovements.map(imp => {
+                                        const commonDef = definitions.commonImprovements?.[imp.id];
+                                        const name = imp.name || commonDef?.name || imp.id;
+
+                                        // 1. Sprawdź, czy ulepszenie jest obowiązkowe dla CAŁEGO pułku (jeśli tak -> ukryj)
+                                        if (checkIfImprovementIsMandatory(null, imp.id, divisionDefinition, regiment.id, unitsMap)) {
+                                            return null;
+                                        }
+
+                                        // 2. NOWOŚĆ: Sprawdź, czy KTOKOLWIEK w pułku może to ulepszenie KUPIĆ (dobrowolnie)
+                                        // Jeśli ulepszenie jest obowiązkowe dla konkretnej jednostki (np. Weterani dla Muszkieterów),
+                                        // a nikt inny nie może go wziąć, to nie powinno być w tabeli "Dostępne".
+                                        const canBePurchasedBySomeone = allActiveUnits.some(u => {
+                                            const uDef = unitsMap[u.unitId];
+                                            if (!uDef) return false;
+
+                                            // Czy jednostka fizycznie może wziąć to ulepszenie?
+                                            if (!canUnitTakeImprovement(uDef, imp.id, regiment, divisionDefinition, unitsMap)) return false;
+
+                                            // Czy jest ono dla niej obowiązkowe? (Jeśli tak, to nie jest "do kupienia")
+                                            if (checkIfImprovementIsMandatory(u.unitId, imp.id, divisionDefinition, regiment.id, unitsMap)) return false;
+                                            if (uDef.mandatory_improvements?.includes(imp.id)) return false;
+                                            if (u.structureMandatory?.includes(imp.id)) return false;
+
+                                            return true; // Jest przynajmniej jedna jednostka, która może to kupić dobrowolnie
+                                        });
+
+                                        if (!canBePurchasedBySomeone) return null;
+
+                                        let rawCost = imp.cost_override !== undefined ? imp.cost_override : (imp.cost !== undefined ? imp.cost : commonDef?.cost);
+
+                                        const effectiveCount = calculateEffectiveImprovementCount(tempConfig, regiment, imp.id, divisionDefinition, unitsMap);
+
+                                        const limitLabel = imp.max_amount ? `${effectiveCount} / ${imp.max_amount}` : `${effectiveCount} / ∞`;
+                                        const isLimitReached = imp.max_amount && effectiveCount >= imp.max_amount;
+                                        const limitClass = isLimitReached ? styles.limitReached : styles.limitOk;
+
+                                        return (
+                                            <tr key={imp.id} className={styles.impTableRow}>
+                                                <td className={styles.tableTd}>{name}</td>
+                                                <td className={styles.tableTdCenter}>{formatCost(rawCost)}</td>
+                                                <td className={`${styles.tableTdRight} ${limitClass}`}>
+                                                    {limitLabel}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        
-                        <table className={styles.impTable}>
-                            <thead>
-                                <tr className={styles.impTableHeadRow}>
-                                    <th className={styles.tableTh}>Nazwa</th>
-                                    <th className={styles.tableThCenter}>Koszt</th>
-                                    <th className={styles.tableThRight}>Ilość</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {definitions.unitLevelImprovements.map(imp => {
-                                    const commonDef = definitions.commonImprovements?.[imp.id];
-                                    const name = imp.name || commonDef?.name || imp.id;
-                                    
-                                    let rawCost = imp.cost_override !== undefined ? imp.cost_override : (imp.cost !== undefined ? imp.cost : commonDef?.cost);
-                                    
-                                    // FIX: Przekazujemy divisionDefinition do kalkulatora limitów
-                                    const effectiveCount = calculateEffectiveImprovementCount(tempConfig, regiment, imp.id, divisionDefinition);
-
-                                    const limitLabel = imp.max_amount ? `${effectiveCount} / ${imp.max_amount}` : `${effectiveCount} / ∞`;
-                                    const isLimitReached = imp.max_amount && effectiveCount >= imp.max_amount;
-                                    const limitClass = isLimitReached ? styles.limitReached : styles.limitOk;
-
-                                    return (
-                                        <tr key={imp.id} className={styles.impTableRow}>
-                                            <td className={styles.tableTd}>{name}</td>
-                                            <td className={styles.tableTdCenter}>{formatCost(rawCost)}</td>
-                                            <td className={`${styles.tableTdRight} ${limitClass}`}>
-                                                {limitLabel}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
+                    )}
                 </div>
-            )}
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

@@ -39,12 +39,12 @@
     "improvement_cost": 2
   },
   "swe_skwadron_muszkieterow_s": {
-    "id": "swe_skwadron_muszkieterow",
-    "name": "Skwadron Muszkieterów",
+    "id": "swe_skwadron_muszkieterow_s",
+    "name": "Skwadron Muszkieterów S",
     "cost": 5,
-    "pu_cost": -1,
+    "pu_cost": 1,
     "improvement_cost": 2,
-    "special_rules": ["independent"],
+    "mandatory_improvements": ["independent"],
     "rank": "silver"
   },
   "swe_piechota_krajowa_m": {

@@ -6,7 +6,11 @@ import { collectRegimentUnits } from "../../utils/armyMath";
 export const SelectedRegimentRow = ({
                                         group, index, regiment, mainForceKey, getRegimentDefinition, calculateStats,
                                         onNameChange, onOpenEditor, onMainForceSelect, supportUnits, unitsMap,
-                                        currentMainForceCost, isAllied, calculateRegimentPU
+                                        currentMainForceCost, isAllied, calculateRegimentPU,
+                                        // --- NOWE PROPSY ---
+                                        getEffectiveUnitImprovements,
+                                        improvementsMap,
+                                        divisionDefinition
                                     }) => {
     const positionKey = `${group}/${index}`;
     const stats = calculateStats(regiment.config, regiment.id);
@@ -20,7 +24,6 @@ export const SelectedRegimentRow = ({
 
     const isRegimentAllied = isAllied(regiment.id);
 
-    // FIX: Dodano warunek group !== VANGUARD
     const isMainForceCandidate =
         group !== GROUP_TYPES.VANGUARD &&
         !isRegimentAllied &&
@@ -34,14 +37,16 @@ export const SelectedRegimentRow = ({
     const def = getRegimentDefinition(regiment.id);
     const defName = def ? def.name : regiment.id;
 
-    // Zbieramy listę wszystkich jednostek do wyświetlenia (jednostki pułku + wsparcie)
+    // Zbieramy listę wszystkich jednostek do wyświetlenia
     const internalUnits = collectRegimentUnits(regiment.config, def).map(u => ({
         id: u.unitId,
+        key: u.key,
         isSupport: false
     }));
 
     const supportUnitsList = mySupport.map(su => ({
         id: su.id,
+        key: `support/${su.id}-${positionKey}/0`, // Klucz umowny
         isSupport: true
     }));
 
@@ -61,14 +66,41 @@ export const SelectedRegimentRow = ({
                         />
                     </div>
 
-                    {/* Lista jednostek (Przywrócona) */}
+                    {/* Lista jednostek */}
                     <div className={styles.regimentUnitsPreview}>
                         {allUnits.map((u, i) => {
                             const unitName = unitsMap[u.id]?.name || u.id;
+
+                            // --- OBLICZANIE ULEPSZEŃ ---
+                            // Dla jednostek wewnętrznych pobieramy kupione ulepszenia z configu
+                            // Dla wsparcia - zależy jak jest zapisane, ale zazwyczaj jednostki wsparcia nie kupują ulepszeń w ten sposób,
+                            // tylko dostają je z zasad. Ale jeśli kupią (przyszłościowo), to będą w configu.
+                            // W tej wersji RegimentEditora wsparcie nie ma swoich zakupów w config.improvements, więc []
+                            const purchasedImps = !u.isSupport ? (regiment.config.improvements?.[u.key] || []) : [];
+
+                            const effectiveImps = getEffectiveUnitImprovements
+                                ? getEffectiveUnitImprovements(u.id, purchasedImps, divisionDefinition, regiment.id, unitsMap)
+                                : purchasedImps;
+
                             return (
                                 <div key={i} className={styles.previewUnitItem}>
-                                    • {unitName}
-                                    {u.isSupport && <span className={styles.previewSupportTag}> (Wsparcie)</span>}
+                                    <div>
+                                        • {unitName}
+                                        {u.isSupport && <span className={styles.previewSupportTag}> (Wsparcie)</span>}
+                                    </div>
+                                    {/* BADGE */}
+                                    {effectiveImps.length > 0 && (
+                                        <div style={{marginLeft: 10, display: 'inline-flex', gap: 4}}>
+                                            {effectiveImps.map(impId => {
+                                                const name = improvementsMap?.[impId]?.name || impId;
+                                                return (
+                                                    <span key={impId} style={{fontSize: 10, background: '#e0f2f1', color: '#00695c', padding: '1px 4px', borderRadius: 4}}>
+                                                        {name}
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}
@@ -88,7 +120,6 @@ export const SelectedRegimentRow = ({
                         {isMainForce && <div className={`${styles.statusLabel} ${styles.statusMainForce}`}>SIŁY GŁÓWNE</div>}
                         {isRegimentAllied && <div className={`${styles.statusLabel} ${styles.statusAlly}`}>PUŁK SOJUSZNICZY</div>}
 
-                        {/* Przycisk tylko dla kandydatów spoza Straży Przedniej */}
                         {isMainForceCandidate && (
                             <button
                                 onClick={() => onMainForceSelect(positionKey)}
@@ -104,8 +135,6 @@ export const SelectedRegimentRow = ({
                     </div>
                 </div>
             </div>
-
-            {/* Usunięto stary pasek "Wsparcie: ..." na rzecz listy powyżej */}
         </div>
     );
 };

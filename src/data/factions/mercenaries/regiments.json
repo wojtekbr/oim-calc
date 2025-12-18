@@ -5,21 +5,17 @@
     "recon": 0,
     "awareness": 3,
     "activations": 2,
-    "regiment_improvements": [
-      {
-        "id": "mercenary_dragoons",
-        "cost": 3,
-        "max_amount": 1
-      }
-    ],
     "unit_improvements": [
       {
-        "id": "additional_ammo",
-        "max_amount": 2
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1
       },
       {
         "id": "regimental_guns",
-        "max_amount": 1
+        "max_amount": 2
       }
     ],
     "structure": {
@@ -47,13 +43,10 @@
               "units": ["mrc_musketeers_m"]
             },
             "unit2": {
-              "units": ["mrc_dragoons_mercenary_s"]
+              "units": ["mrc_infantry_mercenary_m"]
             },
             "unit3": {
-              "units": ["mrc_dragoons_mercenary_m"]
-            },
-            "unit4": {
-              "units": ["mrc_infantry_mercenary"]
+              "units": ["mrc_infantry_mercenary_l"]
             }
           }
         ]
@@ -73,7 +66,13 @@
               "units": ["mrc_musketeers_m"]
             },
             "unit2": {
-              "units": ["mrc_infantry_mercenary_armored"]
+              "units": ["mrc_infantry_mercenary_m"]
+            },
+            "unit3": {
+              "units": ["mrc_infantry_mercenary_l"]
+            },
+            "unit4": {
+              "units": ["mrc_infantry_mercenary_armored_m"]
             }
           }
         ]
@@ -148,7 +147,7 @@
     "activations": 2,
     "unit_improvements": [
       { "id": "veterans"},
-      { "id": "additional_pistol" }
+      { "id": "additional_ammo" }
     ],
     "structure": {
       "base": {

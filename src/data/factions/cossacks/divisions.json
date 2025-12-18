@@ -64,6 +64,7 @@
           {
             "id": "koz_wozy_taborowe",
             "name": "Wozy Taborowe",
+            "cost": 4,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
               { 
@@ -76,7 +77,7 @@
           {
             "id": "koz_umocnienia_taborowe",
             "name": "Umocnienia Taborowe",
-            "cost": 4,
+            "cost": 6,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
                { 
@@ -95,6 +96,7 @@
           {
             "id": "koz_wozy_taborowe",
             "name": "Wozy Taborowe",
+            "cost": 4,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
               { 
@@ -107,7 +109,7 @@
           {
             "id": "koz_umocnienia_taborowe",
             "name": "Umocnienia Taborowe",
-            "cost": 4,
+            "cost": 6,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
                { 
@@ -126,6 +128,7 @@
           {
             "id": "koz_wozy_taborowe",
             "name": "Wozy Taborowe",
+            "cost": 4,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
               { 
@@ -138,7 +141,7 @@
           {
             "id": "koz_umocnienia_taborowe",
             "name": "Umocnienia Taborowe",
-            "cost": 4,
+            "cost": 6,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
                { 
@@ -157,6 +160,7 @@
           {
             "id": "koz_wozy_taborowe",
             "name": "Wozy Taborowe",
+            "cost": 4,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
               { 
@@ -169,7 +173,7 @@
           {
             "id": "koz_umocnienia_taborowe",
             "name": "Umocnienia Taborowe",
-            "cost": 4,
+            "cost": 6,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
                { 
@@ -188,6 +192,7 @@
           {
             "id": "koz_wozy_taborowe",
             "name": "Wozy Taborowe",
+            "cost": 4,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
               { 
@@ -200,7 +205,7 @@
           {
             "id": "koz_umocnienia_taborowe",
             "name": "Umocnienia Taborowe",
-            "cost": 4,
+            "cost": 6,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
                { 
@@ -219,6 +224,7 @@
           {
             "id": "koz_wozy_taborowe",
             "name": "Wozy Taborowe",
+            "cost": 4,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
               { 
@@ -231,7 +237,7 @@
           {
             "id": "koz_umocnienia_taborowe",
             "name": "Umocnienia Taborowe",
-            "cost": 4,
+            "cost": 6,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
                { 
@@ -250,6 +256,7 @@
           {
             "id": "koz_wozy_taborowe",
             "name": "Wozy Taborowe",
+            "cost": 4,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
               { 
@@ -262,7 +269,7 @@
           {
             "id": "koz_umocnienia_taborowe",
             "name": "Umocnienia Taborowe",
-            "cost": 4,
+            "cost": 6,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
                { 
@@ -281,6 +288,7 @@
           {
             "id": "koz_wozy_taborowe",
             "name": "Wozy Taborowe",
+            "cost": 4,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_umocnienia_taborowe"] },
               { 
@@ -293,7 +301,7 @@
           {
             "id": "koz_umocnienia_taborowe",
             "name": "Umocnienia Taborowe",
-            "cost": 4,
+            "cost": 6,
             "requirements": [
               { "type": "division_excludes_unit", "unit_ids": ["koz_wozy_taborowe"] },
                { 

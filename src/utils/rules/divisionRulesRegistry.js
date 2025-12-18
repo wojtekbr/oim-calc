@@ -1,4 +1,4 @@
-import { IDS, GROUP_TYPES } from "../../constants"; // <--- TUTAJ BYŁ BRAK
+import { IDS, GROUP_TYPES } from "../../constants";
 import { collectRegimentUnits, getArtilleryIds } from "../math/structureUtils";
 
 export const DIVISION_RULES_REGISTRY = {
@@ -11,7 +11,6 @@ export const DIVISION_RULES_REGISTRY = {
             if (!improvementsMap) return 0;
 
             const { divisionDefinition, calculateCostFn, unitsMap, regimentDefinition } = context || {};
-            
             const artilleryIds = getArtilleryIds(divisionDefinition);
 
             let discount = 0;
@@ -19,7 +18,7 @@ export const DIVISION_RULES_REGISTRY = {
                 if (!artilleryIds.includes(unit.unitId)) continue;
 
                 const unitImps = regimentConfig.improvements?.[unit.key] || [];
-                
+
                 if (unitImps.includes(targetImpId)) {
                     if (calculateCostFn && unitsMap && regimentDefinition) {
                         const cost = calculateCostFn(unitsMap[unit.unitId], targetImpId, regimentDefinition, improvementsMap);
@@ -33,15 +32,19 @@ export const DIVISION_RULES_REGISTRY = {
             }
             return Number(discount) || 0;
         },
-        
+
         isImprovementFree: (unitId, impId, params, regimentId, unitsMap, divisionDefinition) => {
             if (impId !== "veterans") return false;
+            // Dla tabeli (null) - zwracamy false, bo Weterani są płatni dla nie-artylerii
+            if (!unitId) return false;
             const artilleryIds = getArtilleryIds(divisionDefinition);
             return artilleryIds.includes(unitId);
         },
-        
+
         isMandatory: (unitId, impId, params, regimentId, unitsMap, divisionDefinition) => {
             if (impId !== "veterans") return false;
+            // Dla tabeli (null) - zwracamy false, żeby było widoczne w tabeli (bo można dokupić innym)
+            if (!unitId) return false;
             const artilleryIds = getArtilleryIds(divisionDefinition);
             return artilleryIds.includes(unitId);
         }
@@ -54,19 +57,28 @@ export const DIVISION_RULES_REGISTRY = {
     },
 
     "grant_improvements_to_specific_regiments": {
+        getInjectedImprovements: (params, regimentId) => {
+            const targetRegimentIds = params?.regiment_ids || [];
+            if (targetRegimentIds.includes(regimentId)) {
+                return params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
+            }
+            return [];
+        },
+
         calculateDiscount: (regimentConfig, activeUnits, improvementsMap, params, regimentId, context) => {
             const targetRegimentIds = params?.regiment_ids || [];
-            const targetImpIds = params?.improvement_ids || [];
+            // FIX: Obsługa singular/plural
+            const targetImpIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
 
             if (!targetRegimentIds.includes(regimentId) || !improvementsMap) return 0;
-            
+
             const { unitsMap, regimentDefinition, calculateCostFn } = context || {};
 
             let discount = 0;
             for (const unit of activeUnits) {
                 const unitImps = regimentConfig.improvements?.[unit.key] || [];
                 const impsToDiscount = unitImps.filter(imp => targetImpIds.includes(imp));
-                
+
                 impsToDiscount.forEach(impId => {
                     if (calculateCostFn && unitsMap && regimentDefinition) {
                         const cost = calculateCostFn(unitsMap[unit.unitId], impId, regimentDefinition, improvementsMap);
@@ -80,29 +92,49 @@ export const DIVISION_RULES_REGISTRY = {
             }
             return Number(discount) || 0;
         },
+
         isImprovementFree: (unitId, impId, params, regimentId) => {
             const targetRegimentIds = params?.regiment_ids || [];
-            const targetImpIds = params?.improvement_ids || [];
+            // FIX: Obsługa singular/plural
+            const targetImpIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
+
             if (targetRegimentIds.includes(regimentId) && targetImpIds.includes(impId)) {
                 return true;
             }
             return false;
         },
+
         isMandatory: (unitId, impId, params, regimentId) => {
             const targetRegimentIds = params?.regiment_ids || [];
-            const targetImpIds = params?.improvement_ids || [];
-            return targetRegimentIds.includes(regimentId) && targetImpIds.includes(impId);
+            // FIX: Obsługa singular/plural (to naprawia znikanie przycisków)
+            const targetImpIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
+
+            if (!targetRegimentIds.includes(regimentId)) return false;
+            if (!targetImpIds.includes(impId)) return false;
+
+            // FIX: Jeśli pytanie pochodzi z tabeli (unitId === null), a zasada dotyczy całego pułku
+            // to zwracamy true, aby ukryć to ulepszenie w tabeli zakupów (jest "wbudowane").
+            if (unitId === null) return true;
+
+            return true;
         }
     },
 
     "grant_improvement_to_all": {
+        getInjectedImprovements: (params, regimentId) => {
+            const excludedRegiments = params?.excluded_regiment_ids || [];
+            if (excludedRegiments.includes(regimentId)) return [];
+
+            return params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
+        },
+
         calculateDiscount: (regimentConfig, activeUnits, improvementsMap, params, regimentId, context) => {
             const targetImpIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []);
             const excludedRegiments = params?.excluded_regiment_ids || [];
             const excludedUnits = params?.excluded_unit_ids || [];
 
             if (targetImpIds.length === 0 || !improvementsMap) return 0;
-            
+
             if (excludedRegiments.includes(regimentId)) return 0;
 
             const { unitsMap, regimentDefinition, calculateCostFn } = context || {};
@@ -112,7 +144,7 @@ export const DIVISION_RULES_REGISTRY = {
                 if (excludedUnits.includes(unit.unitId)) continue;
 
                 const unitImps = regimentConfig.improvements?.[unit.key] || [];
-                
+
                 targetImpIds.forEach(targetImpId => {
                     if (unitImps.includes(targetImpId)) {
                         if (calculateCostFn && unitsMap && regimentDefinition) {
@@ -128,7 +160,7 @@ export const DIVISION_RULES_REGISTRY = {
             }
             return Number(discount) || 0;
         },
-        
+
         isImprovementFree: (unitId, impId, params, regimentId) => {
             const targetImpIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []);
             if (!targetImpIds.includes(impId)) return false;
@@ -137,17 +169,23 @@ export const DIVISION_RULES_REGISTRY = {
             if (excludedRegiments.includes(regimentId)) return false;
 
             const excludedUnits = params?.excluded_unit_ids || [];
-            if (excludedUnits.includes(unitId)) return false;
+            if (unitId && excludedUnits.includes(unitId)) return false;
 
             return true;
         },
-        
+
         isMandatory: (unitId, impId, params, regimentId) => {
             const targetImpIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []);
             if (!targetImpIds.includes(impId)) return false;
 
             const excludedRegiments = params?.excluded_regiment_ids || [];
             if (excludedRegiments.includes(regimentId)) return false;
+
+            // Dla tabeli (null) - jeśli są wykluczone jednostki, to technicznie nie jest to mandatory dla WSZYSTKICH,
+            // ale w kontekście "Umowy Kapitulacyjnej" chcemy to ukryć z tabeli, bo jest to "globalne" ulepszenie.
+            // Jeśli chcesz być super precyzyjny, można tu zwrócić false, wtedy pojawi się w tabeli.
+            // Ale zakładam, że chcesz ukryć.
+            if (unitId === null) return true;
 
             const excludedUnits = params?.excluded_unit_ids || [];
             if (excludedUnits.includes(unitId)) return false;
@@ -156,6 +194,7 @@ export const DIVISION_RULES_REGISTRY = {
         }
     },
 
+    // ... reszta pliku bez zmian (free_improvement_for_specific_units, has_any_additional_regiment, etc.)
     "free_improvement_for_specific_units": {
         calculateDiscount: (regimentConfig, activeUnits, improvementsMap, params) => {
             const targetUnitIds = params?.unit_ids || [];
@@ -394,7 +433,6 @@ export const DIVISION_RULES_REGISTRY = {
 
                     const internalUnits = collectRegimentUnits(reg.config || {}, def).map(u => u.unitId);
 
-                    // FIX: Tutaj używamy GROUP_TYPES
                     const positionKey = `${GROUP_TYPES.VANGUARD}/${index}`;
                     const supportUnits = (divisionConfig.supportUnits || [])
                         .filter(su => su.assignedTo?.positionKey === positionKey)
