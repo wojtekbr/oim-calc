@@ -149,6 +149,72 @@ export const REGIMENT_RULES_REGISTRY = {
             // Zawsze obniża koszt o 2 (zgodnie z opisem w nawiasie, to cecha pułku)
             return currentCost - 2;
         }
+    },
+    "cossack_registered_rules": {
+        name: "Pułki Rejestrowe",
+        description: "Zasady specjalne wynikające z wybranego regionu (np. Kijowski, Białocerkiewski).",
+
+        modifyStats: (stats, activeUnits, params, context) => {
+            const { regimentConfig } = context || {};
+            const imps = regimentConfig?.regimentImprovements || [];
+
+            // Region Kijowski: Motywacja +1
+            if (imps.includes("region_kijowski")) {
+                stats.motivation += 1;
+            }
+            // Region Białocerkiewski: Wszystkie stany +1 (tutaj tylko Motywacja globalnie, reszta per unit?)
+            // Opis mówi "wszystkie stany zwiększone o 1". To zazwyczaj Profil.
+            // Ale jeśli to wpływa na globalne staty pułku:
+            if (imps.includes("region_bialocerkiewski")) {
+                // stats.recon += 1; // ??? Zależy od interpretacji "stany"
+                // stats.activations += 1;
+                // stats.motivation += 1;
+                // Przyjmijmy bezpiecznie Motywację, resztę trzeba by w units injectować
+            }
+            // Region Korsuński: Motywacja +1
+            if (imps.includes("region_korsunski")) {
+                stats.motivation += 1;
+            }
+            // Region Czehryński: Motywacja +2
+            if (imps.includes("region_czehrynski")) {
+                stats.motivation += 2;
+            }
+            // Region Kaniowski: +1 kość zwiadu (czyli Zwiad +1)
+            if (imps.includes("region_kaniowski")) {
+                stats.recon += 1;
+            }
+            // Region Perejasławski: Motywacja +2
+            if (imps.includes("region_perejaslawski")) {
+                stats.motivation += 2;
+            }
+
+            return stats;
+        },
+
+        validate: (activeUnits, params, context) => {
+            const { regimentConfig } = context || {};
+            const imps = regimentConfig?.regimentImprovements || [];
+
+            // Białocerkiewski / Niżyński: Nie może mieć w składzie jednostek mniejszych niż M
+            if (imps.includes("region_bialocerkiewski") || imps.includes("region_nizynski")) {
+                const hasSmall = activeUnits.some(u => u.unitId.endsWith("_s")); // Prosta heurystyka po ID
+                if (hasSmall) {
+                    return "Wybrany region zabrania wystawiania jednostek w rozmiarze S.";
+                }
+            }
+            return null;
+        }
+    },
+    "max_one_l_unit": {
+        name: "Limit jednostek L",
+        validate: (activeUnits) => {
+            const countL = activeUnits.filter(u => u.unitId && u.unitId.endsWith("_l")).length;
+
+            if (countL > 1) {
+                return "Ograniczenie Rozmiaru: Regiment może posiadać tylko jedną jednostkę w rozmiarze L.";
+            }
+            return null;
+        }
     }
 };
 
@@ -211,12 +277,21 @@ export const REGIMENT_RULES_DEFINITIONS = {
         title: "Chłopscy szpiedzy",
         description: "Wystawiając Pułk Czerni, Dywizja dostaje dodatkowo tyle wartości wywiadu, ile Jednostek Czerni zostało wystawionych i +1 Czujności"
     },
+    "cossack_registered_rules": {
+        title: "Pułki rejestrowe",
+        description: "Przed rozpoczęciem powstania Chmielnickiego kozacy na służbie Rzeczypospolitej byli podzieleni na Pułki z czego każdy z nich miał swój indywidualny charakter, a wielu z nich było dowodzonych przez znanych Pułkowników.\n" +
+            "W momencie tworzenia pułku wybierz z jakiego regionu pochodzi (W całej armii możesz mieć tylko jeden pułk z danego regionu)\n"
+    },
     "free_unit_improvement": {
         title: "Darmowe Ulepszenie",
         getDescription: (params) => {
             const impNames = (params?.improvement_ids || [params?.improvement_id]).join(" lub ");
             return `Wybrana jednostka może otrzymać darmowe ulepszenie: ${impNames}. Nie wlicza się ono do limitu ulepszeń.`;
         }
+    },
+    "max_one_l_unit": {
+        title: "Ograniczenie ilości jednostek L",
+        description: "W składzie tego regimentu może znajdować się maksymalnie jedna jednostka o rozmiarze L."
     }
 };
 

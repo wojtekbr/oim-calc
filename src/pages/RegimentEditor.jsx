@@ -332,30 +332,34 @@ export default function RegimentEditor(props) {
                                     const isActive = state.regimentImprovements.includes(imp.id);
 
                                     const commonDef = definitions.commonImprovements?.[imp.id];
-                                    const displayName = commonDef?.name || imp.name || imp.id;
+                                    const fullDef = { ...commonDef, ...imp }; // Łączymy definicje
+                                    const displayName = fullDef.name || imp.id;
 
-                                    let armyCost = 0;
-                                    if (imp.army_cost_override !== undefined) armyCost = imp.army_cost_override;
-                                    else if (imp.army_point_cost !== undefined) armyCost = imp.army_point_cost;
-                                    else if (commonDef?.army_point_cost !== undefined) armyCost = commonDef.army_point_cost;
+                                    // 1. Sprawdź wymagania (Requirements)
+                                    if (fullDef.requirements) {
+                                        const reqsMet = fullDef.requirements.every(reqId => state.regimentImprovements.includes(reqId));
+                                        if (!reqsMet) return null; // Ukryj, jeśli nie spełnia wymagań
+                                    }
 
-                                    let puCost = 0;
-                                    if (imp.cost_override !== undefined) puCost = imp.cost_override;
-                                    else if (imp.cost !== undefined) puCost = imp.cost;
-                                    else if (commonDef?.cost !== undefined) puCost = commonDef.cost;
+                                    // 2. Koszty
+                                    let armyCost = fullDef.army_cost_override ?? fullDef.army_cost ?? fullDef.army_point_cost ?? 0;
+                                    let puCost = fullDef.cost_override ?? fullDef.cost ?? 0;
 
                                     const costParts = [];
                                     if (armyCost > 0) costParts.push(`${armyCost} PS`);
                                     if (puCost > 0) costParts.push(`${puCost} PU`);
 
-                                    const costString = costParts.length > 0
-                                        ? `(${costParts.join(" + ")})`
-                                        : "";
+                                    const costString = costParts.length > 0 ? `(${costParts.join(" + ")})` : "";
+
+                                    // 3. Radio vs Checkbox
+                                    const isRadio = !!fullDef.group;
+                                    const inputType = isRadio ? "radio" : "checkbox";
 
                                     return (
                                         <label key={imp.id} className={`${styles.toggleLabel} ${styles.regimentImprovementLabel}`}>
                                             <input
-                                                type="checkbox"
+                                                type={inputType}
+                                                name={isRadio ? fullDef.group : undefined} // Grupowanie dla radia
                                                 checked={isActive}
                                                 onChange={() => handlers.handleRegimentImprovementToggle(imp.id)}
                                             />

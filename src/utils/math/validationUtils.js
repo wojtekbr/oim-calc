@@ -6,16 +6,15 @@ import { calculateRegimentStats, calculateMainForceKey, isRegimentAllied } from 
 
 export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinition, divisionDefinition = null, unitsMap = null) => {
     if (!unitDef || !regimentDefinition) return false;
+    // Zabezpieczenie: Grupy nigdy nie biorą ulepszeń
     if (unitDef.rank === RANK_TYPES.GROUP || unitDef.rank === 'group') return false;
 
-    // Bypass 1: Jeśli ulepszenie jest obowiązkowe z dywizji
     if (divisionDefinition && unitsMap && regimentDefinition) {
         if (checkIfImprovementIsMandatory(unitDef.id, improvementId, divisionDefinition, regimentDefinition.id, unitsMap)) {
             return true;
         }
     }
 
-    // Bypass 2: Jeśli ulepszenie jest wrodzone dla jednostki
     if (unitDef.mandatory_improvements && unitDef.mandatory_improvements.includes(improvementId)) {
         return true;
     }
@@ -39,15 +38,16 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
 };
 
 export const checkIfImprovementIsMandatory = (unitId, impId, divisionDefinition = null, regimentId = null, unitsMap = null) => {
-    // 1. Sprawdzamy, czy jednostka ma to ulepszenie wpisane na sztywno
     if (unitsMap && unitId) {
         const unitDef = unitsMap[unitId];
+        // --- FIX: Blokada dla grup ---
+        if (unitDef?.rank === RANK_TYPES.GROUP || unitDef?.rank === 'group') return false;
+
         if (unitDef?.mandatory_improvements?.includes(impId)) {
             return true;
         }
     }
 
-    // 2. Sprawdzamy zasady dywizyjne
     if (!divisionDefinition?.rules) return false;
 
     let isMandatory = false;
@@ -65,9 +65,11 @@ export const checkIfImprovementIsMandatory = (unitId, impId, divisionDefinition 
 export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition, targetUnitId, targetImpId, divisionDefinition = null, unitsMap = null) => {
     if (!regimentDefinition) return false;
 
-    // 1. Jeśli jednostka ma to w mandatory_improvements, jest darmowe
     if (unitsMap && targetUnitId) {
         const unitDef = unitsMap[targetUnitId];
+        // --- FIX: Blokada dla grup ---
+        if (unitDef?.rank === RANK_TYPES.GROUP || unitDef?.rank === 'group') return false;
+
         if (unitDef?.mandatory_improvements?.includes(targetImpId)) {
             return true;
         }
@@ -75,7 +77,6 @@ export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition
 
     const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
 
-    // 2. Jeśli struktura pułku wymusza to ulepszenie
     const activeUnitObj = activeUnits.find(u => u.unitId === targetUnitId);
     if (activeUnitObj?.structureMandatory?.includes(targetImpId)) {
         return true;
@@ -195,38 +196,37 @@ export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefin
     return count;
 };
 
-// --- NOWOŚĆ: Funkcja do pobierania PEŁNEJ listy ulepszeń dla jednostki (zakupione + obowiązkowe) ---
-// Użyj tej funkcji w komponentach podsumowania (kafelek pułku, lista wsparcia)
+// --- Funkcja do pobierania PEŁNEJ listy ulepszeń (z uwzględnieniem Zasad Pułku) ---
 export const getEffectiveUnitImprovements = (unitId, currentImprovements, divisionDefinition, regimentId, unitsMap) => {
+    // --- FIX: Blokada dla grup ---
+    const unitDef = unitsMap?.[unitId];
+    if (unitDef?.rank === RANK_TYPES.GROUP || unitDef?.rank === 'group') {
+        return [];
+    }
+
     const active = new Set(currentImprovements || []);
 
     // 1. Z definicji jednostki (wrodzone)
-    const unitDef = unitsMap?.[unitId];
     if (unitDef?.mandatory_improvements) {
         unitDef.mandatory_improvements.forEach(id => active.add(id));
     }
 
-    // 2. Z zasad dywizyjnych (dynamiczne)
+    // 2. Z zasad dywizyjnych
     if (divisionDefinition?.rules) {
         divisionDefinition.rules.forEach(rule => {
             const ruleImpl = DIVISION_RULES_REGISTRY[rule.id];
             if (!ruleImpl) return;
 
-            // Zbieramy listę ulepszeń, które ta zasada może nadać
             let candidates = [];
-
             if (typeof ruleImpl.getInjectedImprovements === 'function') {
                 const injected = ruleImpl.getInjectedImprovements(rule, regimentId);
                 if (Array.isArray(injected)) candidates.push(...injected);
             } else if (ruleImpl.injectedImprovements) {
                 candidates.push(...ruleImpl.injectedImprovements);
             }
-
-            // Fallback dla prostszych zasad
             if (rule.improvement_id) candidates.push(rule.improvement_id);
             if (rule.improvement_ids) candidates.push(...rule.improvement_ids);
 
-            // Sprawdzamy, czy ulepszenie jest obowiązkowe dla tej konkretnej jednostki
             candidates.forEach(impId => {
                 if (ruleImpl.isMandatory && ruleImpl.isMandatory(unitId, impId, rule, regimentId, unitsMap, divisionDefinition)) {
                     active.add(impId);
@@ -238,7 +238,6 @@ export const getEffectiveUnitImprovements = (unitId, currentImprovements, divisi
     return Array.from(active);
 };
 
-// ... (reszta pliku: validateVanguardCost, validateAlliedCost bez zmian)
 export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
     let mainForceCost = 0;

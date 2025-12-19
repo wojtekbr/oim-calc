@@ -160,8 +160,11 @@ export const ArmyDataProvider = ({ children }) => {
         const variantDef = JSON.parse(JSON.stringify(baseDef));
         const variantRules = baseDef.faction_variants[factionKey];
 
-        // A. Dodawanie zasad specjalnych
-        if (variantRules.special_rules_add) {
+        if (variantRules.special_rules_replace) {
+            variantDef.special_rules = variantRules.special_rules_replace;
+        }
+        // A. Dodawanie zasad specjalnych (pozostaje jako opcja dla innych przypadków)
+        else if (variantRules.special_rules_add) {
             variantDef.special_rules = [
                 ...(variantDef.special_rules || []),
                 ...variantRules.special_rules_add

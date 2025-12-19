@@ -5,6 +5,9 @@
     "recon": 0,
     "awareness": 3,
     "activations": 2,
+    "special_rules": [
+      "max_one_l_unit"
+    ],
     "unit_improvements": [
       {
         "id": "additional_ammo"
@@ -76,6 +79,11 @@
             }
           }
         ]
+      }
+    },
+    "faction_variants": {
+      "brandenburg": {
+        "special_rules_replace": []
       }
     }
   },

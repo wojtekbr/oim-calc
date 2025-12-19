@@ -1,4 +1,3 @@
-// ... (importy bez zmian)
 import { useState, useEffect, useMemo } from "react";
 import { IDS, GROUP_TYPES } from "../constants";
 import { useArmyData } from "../context/ArmyDataContext";
@@ -52,7 +51,7 @@ export const useRegimentLogic = ({
             .filter(su => su.assignedTo?.positionKey === regimentPositionKey);
     }, [configuredDivision.supportUnits, regimentGroup, regimentIndex]);
 
-    // --- ZMIANA: effectiveUnitLevelImprovements ---
+    // --- effectiveUnitLevelImprovements ---
     const effectiveUnitLevelImprovements = useMemo(() => {
         const combined = [...unitLevelImprovements];
 
@@ -86,10 +85,8 @@ export const useRegimentLogic = ({
             });
         }
 
-        // 2. NOWOŚĆ: Z definicji jednostek (units.json) i struktury (regiments.json)
-        // Musimy "przeskanować" aktywne jednostki, aby zobaczyć, co wnoszą.
-        // Używamy tymczasowej konfiguracji, aby pobrać jednostki
-        const tempConfig = currentConfig; // Używamy aktualnej konfiguracji
+        // 2. Z definicji jednostek i struktury
+        const tempConfig = currentConfig;
         const activeUnits = collectRegimentUnits(tempConfig, regiment);
 
         const supportUnitsToCheck = assignedSupportUnits.map(su => ({
@@ -251,15 +248,12 @@ export const useRegimentLogic = ({
             effectiveUnitLevelImprovements.forEach(imp => {
                 let shouldAdd = false;
 
-                // 1. Sprawdź zasady dywizyjne (checkIfImprovementIsMandatory)
                 if (checkIfImprovementIsMandatory(u.unitId, imp.id, divisionDefinition, regiment.id, unitsMap)) {
                     shouldAdd = true;
                 }
-                // 2. Sprawdź mandatory_improvements w units.json
                 else if (unitDef.mandatory_improvements?.includes(imp.id)) {
                     shouldAdd = true;
                 }
-                // 3. Sprawdź structureMandatory (z regiments.json)
                 else if (u.structureMandatory?.includes(imp.id)) {
                     shouldAdd = true;
                 }
@@ -280,7 +274,6 @@ export const useRegimentLogic = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [baseSelections, additionalSelections, additionalEnabled, optionalSelections, optionalEnabled, selectedAdditionalCustom, regiment.id, divisionDefinition, effectiveUnitLevelImprovements, assignedSupportUnits]);
 
-    // ... (reszta pliku: hasAdditionalBaseSelection, currentLocalConfig, stats, handlers... bez zmian)
     const hasAdditionalBaseSelection = useMemo(() => {
         return Object.entries(additionalSelections).some(([key, arr]) => {
             if (key === GROUP_TYPES.OPTIONAL) return false;
@@ -343,7 +336,7 @@ export const useRegimentLogic = ({
 
     const regimentRuleErrors = useMemo(() => {
         const activeUnits = collectRegimentUnits(currentLocalConfig, regiment);
-        return validateRegimentRules(activeUnits, regiment);
+        return validateRegimentRules(activeUnits, regiment, { regimentConfig: currentLocalConfig });
     }, [currentLocalConfig, regiment]);
 
     const newRemainingPointsAfterLocalChanges = useMemo(() => {
@@ -354,13 +347,14 @@ export const useRegimentLogic = ({
         tmp[regimentGroup][regimentIndex].config = currentLocalConfig;
 
         const ruleBonuses = calculateRuleBonuses(tmp, divisionDefinition, unitsMap, getRegimentDefinition);
-        const dynamicSupplyBonus = calculateTotalSupplyBonus(tmp, unitsMap, getRegimentDefinition);
+        const dynamicSupplyBonus = calculateTotalSupplyBonus(tmp, unitsMap, getRegimentDefinition, commonImprovements);
         const dynamicLimit = totalDivisionLimit + dynamicSupplyBonus + ruleBonuses.improvementPoints;
         const totalUsedWithLocalChanges = calculateImprovementPointsCost(tmp, unitsMap, getRegimentDefinition, commonImprovements);
         return dynamicLimit - totalUsedWithLocalChanges;
     }, [currentLocalConfig, configuredDivision, calculateTotalSupplyBonus, calculateImprovementPointsCost, divisionDefinition, remainingImprovementPoints, regimentGroup, regimentIndex, unitsMap, getRegimentDefinition, commonImprovements]);
 
     const handleSelectInPod = (type, groupKey, index, optionKey) => {
+        // ... (logika handleSelectInPod - standardowa)
         let currentSelection = null;
         const isOptionalGroup = groupKey === GROUP_TYPES.OPTIONAL;
 
@@ -527,23 +521,67 @@ export const useRegimentLogic = ({
         });
     };
 
+    // --- ZMIANA: Obsługa Radio Buttonów (NAPRAWIONE) ---
     const handleRegimentImprovementToggle = (impId) => {
         setRegimentImprovements((prev) => {
+            // ZAWSZE pobieramy pełną definicję z commonImprovements, aby mieć dostęp do pola 'group'
+            const commonDef = commonImprovements[impId];
+            const groupName = commonDef?.group; // Jeśli istnieje, to jest to radio w tej grupie
+
+            // 1. Jeśli to jest część grupy (Radio)
+            if (groupName) {
+                // Jeśli klikamy w już zaznaczone radio -> nic nie rób (standard zachowania radio)
+                if (prev.includes(impId)) {
+                    return prev;
+                    // Ewentualnie, jeśli chcesz pozwolić na odznaczanie (toggle off) radia, użyj kodu z dołu.
+                    // Ale zazwyczaj radio buttona nie da się "odkliknąć" bez kliknięcia innego.
+                    // Jeśli chcesz toggle:
+                    /*
+                    const idx = prev.lastIndexOf(impId);
+                    return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
+                    */
+                }
+
+                // Sprawdzanie kosztu (jeśli dotyczy PU)
+                const cost = commonDef?.cost || 0;
+                const isArmyCost = commonDef?.army_cost || commonDef?.army_point_cost || commonDef?.army_cost_override;
+
+                if (!isArmyCost && typeof cost === 'number' && newRemainingPointsAfterLocalChanges - cost < 0) {
+                    alert("Brak punktów ulepszeń.");
+                    return prev;
+                }
+
+                // Usuń inne ulepszenia z tej samej grupy
+                const othersRemoved = prev.filter(existingId => {
+                    // Musimy sprawdzić grupę istniejących ID w bazie commonImprovements
+                    const existingDef = commonImprovements[existingId];
+                    return existingDef?.group !== groupName;
+                });
+
+                return [...othersRemoved, impId];
+            }
+
+            // 2. Jeśli to zwykły Checkbox (brak grupy)
             if (prev.includes(impId)) {
                 const idx = prev.lastIndexOf(impId);
                 return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
             }
-            const impDef = regimentLevelImprovements.find(i => i.id === impId) || commonImprovements[impId];
-            const cost = impDef?.cost || 0;
-            if (typeof cost === 'number' && newRemainingPointsAfterLocalChanges - cost < 0) {
+
+            // Sprawdzanie kosztu
+            const cost = commonDef?.cost || 0;
+            const isArmyCost = commonDef?.army_cost || commonDef?.army_point_cost || commonDef?.army_cost_override;
+
+            if (!isArmyCost && typeof cost === 'number' && newRemainingPointsAfterLocalChanges - cost < 0) {
                 alert("Brak punktów ulepszeń.");
                 return prev;
             }
+
             return [...prev, impId];
         });
     };
 
     const handleToggleOptionalGroup = (type, groupKey) => {
+        // ... (bez zmian)
         const targetKey = `${type}/${groupKey}`;
         const rivalType = type === GROUP_TYPES.BASE ? GROUP_TYPES.ADDITIONAL : GROUP_TYPES.BASE;
         const rivalKey = `${rivalType}/${groupKey}`;
@@ -577,6 +615,7 @@ export const useRegimentLogic = ({
     };
 
     const handleToggleAdditional = () => {
+        // ... (bez zmian)
         setAdditionalEnabled(prev => {
             const next = !prev;
             if (!next) {
@@ -595,6 +634,7 @@ export const useRegimentLogic = ({
     };
 
     const saveAndGoBack = () => {
+        // ... (bez zmian)
         if (regimentRuleErrors && regimentRuleErrors.length > 0) {
             alert("Popraw błędy w konfiguracji pułku przed zapisaniem.");
             return;

@@ -23,12 +23,6 @@
       {
         "id": "banned_units_in_vanguard",
         "banned_unit_ids": ["koz_wozy_taborowe", "koz_umocnienia_taborowe"]
-      },
-      {
-        "id": "free_improvement_for_specific_units",
-        "unit_ids": ["koz_molojcy_strzelcy_s", "koz_molojcy_rejestrowi_s", "koz_czern_m"],
-        "improvement_id": "partisans",
-        "max_per_regiment": 1
       }
     ],
     "additional_units": [

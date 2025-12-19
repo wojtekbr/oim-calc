@@ -580,6 +580,9 @@
     "recon": 0,
     "awareness": 4,
     "activations": 3,
+    "special_rules": [
+      "cossack_registered_rules"
+    ],
     "unit_improvements": [
       {
         "id": "additional_ammo",
@@ -607,6 +610,23 @@
           "koz_molojcy_rejestrowi_s", "koz_molojcy_strzelcy_s", "koz_czern_m"
         ]
       }
+    ],
+    "regiment_improvements": [
+      { "id": "region_kijowski" },
+      { "id": "region_bialocerkiewski" },
+      { "id": "region_nizynski" },
+      { "id": "region_korsunski" },
+      { "id": "region_czerkaski" },
+      { "id": "region_czehrynski" },
+      { "id": "region_prylucki" },
+      { "id": "region_kaniowski" },
+      { "id": "region_mirhorodzki" },
+      { "id": "region_perejaslawski" },
+      { "id": "cmdr_zdanowycz" },
+      { "id": "cmdr_neczaj" },
+      { "id": "cmdr_doroszenko" },
+      { "id": "cmdr_dyki" },
+      { "id": "cmdr_lisowskyj" }
     ],
     "structure": {
       "base": {
