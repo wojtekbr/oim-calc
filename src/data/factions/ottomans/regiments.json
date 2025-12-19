@@ -762,7 +762,8 @@
         "additional1": [
           {
             "unit1": {
-              "units": ["ott_gonullu_s"]
+              "units": ["ott_gonullu_s"],
+              "pu_cost_override": 1
             },
             "unit2": {
               "units": ["ott_gonullu_m"]

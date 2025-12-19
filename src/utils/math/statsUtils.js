@@ -1,11 +1,21 @@
 import { IDS, GROUP_TYPES, RANK_TYPES } from "../../constants";
 import { DIVISION_RULES_REGISTRY } from "../divisionRules";
-import { applyRegimentRuleStats } from "../regimentRules";
+import { applyRegimentRuleStats, applyRegimentRuleCosts } from "../regimentRules"; // <--- ZMIANA IMPORTU
 import { collectRegimentUnits } from "./structureUtils";
 import { calculateSingleImprovementArmyCost } from "./costUtils";
-import { getEffectiveUnitImprovements } from "./validationUtils"; // <--- NOWY IMPORT
+import { getEffectiveUnitImprovements } from "./validationUtils";
 
-export const calculateRegimentStats = (regimentConfig, regimentId, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements) => {
+// Helper isRegimentAllied (przeniesiony wyżej, by był dostępny wewnątrz pliku)
+export const isRegimentAllied = (regId, selectedFaction, getRegimentDefinition) => {
+    if (!selectedFaction || !selectedFaction.regiments) return false;
+    if (selectedFaction.regiments[regId]) return false;
+    const def = getRegimentDefinition(regId);
+    if (def && def._sourceFaction === 'mercenaries') return false;
+    return true;
+};
+
+// ZMIANA SYGNATURY: dodano 'faction' na końcu
+export const calculateRegimentStats = (regimentConfig, regimentId, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements, faction = null) => {
     let stats = {
         cost: 0, recon: 0, motivation: 0, activations: 0, orders: 0, awareness: 0, isVanguard: false, regimentType: "-", unitNames: []
     };
@@ -18,6 +28,14 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     stats.recon = regimentDefinition.recon || 0;
     stats.activations = regimentDefinition.activations || 0;
     stats.awareness = regimentDefinition.awareness || 0;
+
+    // --- ZMIANA: Obsługa kosztów z zasad pułku (np. -2 PS) ---
+    // Musimy wiedzieć czy jest sojuszniczy
+    const isAllied = faction ? isRegimentAllied(regimentId, faction, getRegimentDefinition) : false;
+    const ruleContext = { isAllied, unitsMap };
+
+    stats.cost = applyRegimentRuleCosts(stats.cost, regimentDefinition, ruleContext);
+    // -----------------------------------------------------------
 
     const customCostMap = (regimentDefinition.structure?.additional?.unit_custom_cost || [])
         .reduce((map, item) => { map[item.id] = item.cost; return map; }, {});
@@ -67,12 +85,6 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
             stats.orders += ordersValue;
         }
 
-        // --- ZMIANA: Uwzględniamy statystyki z ulepszeń (np. Weterani mogą zmieniać staty) ---
-        // Tutaj zakładamy, że logika modyfikacji statystyk przez ulepszenia jest obsłużona
-        // albo w definicji jednostki (zmiana profilu) albo w applyRegimentRuleStats.
-        // Jeśli ulepszenia mają bezpośredni wpływ na koszt PS (Army Cost), doliczamy go tutaj:
-
-        // Pobieramy PEŁNĄ listę ulepszeń (kupione + obowiązkowe)
         const effectiveImps = getEffectiveUnitImprovements(unitId, unitSpecificImps, divisionDefinition, regimentId, unitsMap);
 
         effectiveImps.forEach(impId => {
@@ -107,20 +119,12 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
                 .filter(su => su.assignedTo?.positionKey === positionKey)
                 .forEach(su => {
                     stats.cost += (unitsMap[su.id]?.cost || 0);
-                    // Dla wsparcia klucz ulepszeń to np. "support/ID-POZYCJA/0"
-                    // Ale w config.improvements zapisujemy to pod kluczem.
-                    // Musimy znaleźć właściwy klucz w mapie improvements.
-                    // Zazwyczaj to `support/${su.id}-${positionKey}/0` (zgodnie z poprawką w useRegimentLogic)
-                    // Ale tutaj uprościmy: sprawdzamy wszystkie klucze pasujące do patternu wsparcia
 
                     let supportImps = [];
-                    // Szukamy ulepszeń dla tej konkretnej jednostki wsparcia
-                    // W useRegimentLogic zapisujemy: `support/${su.id}-${su.assignedTo.positionKey}/0`
                     const specificKey = `support/${su.id}-${positionKey}/0`;
                     if (regimentConfig.improvements?.[specificKey]) {
                         supportImps = regimentConfig.improvements[specificKey];
                     } else {
-                        // Fallback do starego klucza bez /0
                         const oldKey = `support/${su.id}-${positionKey}`;
                         if (regimentConfig.improvements?.[oldKey]) {
                             supportImps = regimentConfig.improvements[oldKey];
@@ -139,7 +143,8 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         else { stats.regimentType = "Pieszy"; }
     }
 
-    stats = applyRegimentRuleStats(stats, activeUnits, regimentDefinition);
+    // --- ZMIANA: Przekazujemy context (isAllied, unitsMap) do zasad pułku ---
+    stats = applyRegimentRuleStats(stats, activeUnits, regimentDefinition, ruleContext);
 
     if (configuredDivision && configuredDivision.divisionDefinition?.rules) {
         configuredDivision.divisionDefinition.rules.forEach(rule => {
@@ -158,8 +163,9 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     return stats;
 };
 
-// ... (reszta pliku calculateTotalSupplyBonus, calculateDivisionCost, calculateDivisionType, isRegimentAllied, calculateMainForceKey bez zmian)
+// ... reszta pliku bez zmian ...
 export const calculateTotalSupplyBonus = (divisionConfig, unitsMap, getRegimentDefinition) => {
+    // ...
     if (!unitsMap || !divisionConfig) return 0;
     let supplyBonus = 0;
     const checkUnit = (unitId) => {
@@ -182,6 +188,10 @@ export const calculateTotalSupplyBonus = (divisionConfig, unitsMap, getRegimentD
 };
 
 export const calculateDivisionCost = (configuredDivision, unitsMap, getRegimentDefinition, commonImprovements) => {
+    // ... (tutaj nie musimy zmieniać, bo nie mamy faction pod ręką, ale to funkcja zbiorcza)
+    // UWAGA: Jeśli 'calculateDivisionCost' ma uwzględniać bonusy pułkowe zależne od frakcji,
+    // to też powinna dostać faction. Na razie zostawiamy bez zmian, bo zazwyczaj wywołujemy
+    // calculateRegimentStats bezpośrednio w Selectorze/Editorze.
     if (!configuredDivision) return 0;
     const divisionDef = configuredDivision.divisionDefinition;
     let cost = divisionDef.base_cost || 0;
@@ -202,6 +212,7 @@ export const calculateDivisionCost = (configuredDivision, unitsMap, getRegimentD
 };
 
 export const calculateDivisionType = (configuredDivision, unitsMap, getRegimentDefinition, commonImprovements) => {
+    // ... bez zmian
     if (!configuredDivision || !unitsMap) return "-";
     const allRegiments = [ ...(configuredDivision.vanguard || []), ...(configuredDivision.base || []), ...(configuredDivision.additional || []) ].filter(r => r.id !== IDS.NONE);
     if (allRegiments.length === 0) return "-";
@@ -219,14 +230,7 @@ export const calculateDivisionType = (configuredDivision, unitsMap, getRegimentD
     return "Dywizja Mieszana";
 };
 
-export const isRegimentAllied = (regId, selectedFaction, getRegimentDefinition) => {
-    if (!selectedFaction || !selectedFaction.regiments) return false;
-    if (selectedFaction.regiments[regId]) return false;
-    const def = getRegimentDefinition(regId);
-    if (def && def._sourceFaction === 'mercenaries') return false;
-    return true;
-};
-
+// ... reszta bez zmian ...
 export const calculateMainForceKey = (configuredDivision, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     if (!configuredDivision) return null;
     const isAllied = (regId) => isRegimentAllied(regId, selectedFaction, getRegimentDefinition);
@@ -238,7 +242,8 @@ export const calculateMainForceKey = (configuredDivision, unitsMap, selectedFact
     let maxCost = -1;
     const regimentCosts = {};
     eligibleRegiments.forEach(reg => {
-        const stats = calculateRegimentStats(reg.config, reg.id, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements);
+        // Tu warto by dodać faction, ale 'selectedFaction' już jest dostępne!
+        const stats = calculateRegimentStats(reg.config, reg.id, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements, selectedFaction);
         regimentCosts[reg.key] = stats.cost;
         if (stats.cost > maxCost) maxCost = stats.cost;
     });

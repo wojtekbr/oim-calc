@@ -198,6 +198,7 @@
     "cost": 8,
     "improvement_cost": 2,
     "is_cavalry": true,
+    "mandatory_improvements": ["veterans"],
     "rank": "gold"
   },
   "koz_artillery_s": {

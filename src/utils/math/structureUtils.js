@@ -45,21 +45,32 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
                     if (choiceKey && pod[choiceKey]) {
                         const choiceDef = pod[choiceKey];
                         const unitIds = choiceDef.units || (choiceDef.id ? [choiceDef.id] : []);
+
                         const costOverride = choiceDef.cost_override;
                         const extraCost = choiceDef.extra_cost || 0;
-                        // NOWOŚĆ: Pobieramy obowiązkowe ulepszenia ze struktury
                         const structureMandatory = choiceDef.mandatory_improvements || [];
+
+                        // NOWOŚĆ: Pobieramy override kosztu PU (obsługa obu nazw)
+                        const puCostOverride = choiceDef.pu_cost_override !== undefined
+                            ? choiceDef.pu_cost_override
+                            : choiceDef.improvement_points_cost_override;
 
                         unitIds.forEach((uid, uIdx) => {
                             if (uid && uid !== IDS.NONE) {
                                 let appliedCostOverride = undefined;
                                 let appliedExtraCost = 0;
+                                let appliedPuCostOverride = undefined;
 
+                                // Logika dla pakietów: koszt nadpisany aplikujemy tylko do pierwszej jednostki
                                 if (costOverride !== undefined) {
                                     appliedCostOverride = (uIdx === 0) ? costOverride : 0;
                                 }
                                 if (extraCost > 0 && uIdx === 0) {
                                     appliedExtraCost = extraCost;
+                                }
+                                // To samo dla PU
+                                if (puCostOverride !== undefined) {
+                                    appliedPuCostOverride = (uIdx === 0) ? puCostOverride : 0;
                                 }
 
                                 units.push({
@@ -67,7 +78,8 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
                                     unitId: uid,
                                     costOverride: appliedCostOverride,
                                     extraCost: appliedExtraCost,
-                                    structureMandatory: structureMandatory // Przekazujemy dalej
+                                    puCostOverride: appliedPuCostOverride, // Przekazujemy dalej
+                                    structureMandatory: structureMandatory
                                 });
                             }
                         });
@@ -89,15 +101,21 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
                 if (choiceKey && pod[choiceKey]) {
                     const choiceDef = pod[choiceKey];
                     const unitIds = choiceDef.units || (choiceDef.id ? [choiceDef.id] : []);
+
                     const costOverride = choiceDef.cost_override;
                     const extraCost = choiceDef.extra_cost || 0;
-                    // NOWOŚĆ: Pobieramy obowiązkowe ulepszenia ze struktury
                     const structureMandatory = choiceDef.mandatory_improvements || [];
+
+                    // NOWOŚĆ: Pobieramy override kosztu PU
+                    const puCostOverride = choiceDef.pu_cost_override !== undefined
+                        ? choiceDef.pu_cost_override
+                        : choiceDef.improvement_points_cost_override;
 
                     unitIds.forEach((uid, uIdx) => {
                         if (uid && uid !== IDS.NONE) {
                             let appliedCostOverride = undefined;
                             let appliedExtraCost = 0;
+                            let appliedPuCostOverride = undefined;
 
                             if (costOverride !== undefined) {
                                 appliedCostOverride = (uIdx === 0) ? costOverride : 0;
@@ -105,13 +123,17 @@ export const collectRegimentUnits = (regimentConfig, regimentDefinition) => {
                             if (extraCost > 0 && uIdx === 0) {
                                 appliedExtraCost = extraCost;
                             }
+                            if (puCostOverride !== undefined) {
+                                appliedPuCostOverride = (uIdx === 0) ? puCostOverride : 0;
+                            }
 
                             units.push({
                                 key: `${type}/${groupKey}/${idx}/${uIdx}`,
                                 unitId: uid,
                                 costOverride: appliedCostOverride,
                                 extraCost: appliedExtraCost,
-                                structureMandatory: structureMandatory // Przekazujemy dalej
+                                puCostOverride: appliedPuCostOverride, // Przekazujemy dalej
+                                structureMandatory: structureMandatory
                             });
                         }
                     });

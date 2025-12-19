@@ -91,13 +91,19 @@ export const calculateRegimentImprovementPoints = (
     // Iterujemy po jednostkach pułku
     activeUnits.forEach((unitObj) => {
         // structureMandatory to tablica ulepszeń wymuszonych przez strukturę (regiments.json)
-        const { key: positionKey, unitId, structureMandatory } = unitObj;
+        // puCostOverride to koszt PU nadpisany w strukturze
+        const { key: positionKey, unitId, structureMandatory, puCostOverride } = unitObj;
 
         if (!unitId || unitId === IDS.NONE) return;
         const unitDef = unitsMap[unitId];
         if (!unitDef || unitDef.rank === RANK_TYPES.GROUP) return;
 
-        totalImpCost += getUnitPUCost(unitId);
+        // FIX: Używamy nadpisanego kosztu PU jeśli istnieje
+        if (puCostOverride !== undefined) {
+            totalImpCost += Number(puCostOverride);
+        } else {
+            totalImpCost += getUnitPUCost(unitId);
+        }
 
         (improvementsMap[positionKey] || []).forEach(impId => {
             // FIX: Jeśli ulepszenie jest wrodzone (z units.json) -> koszt 0
@@ -190,6 +196,7 @@ export const calculateRegimentImprovementPoints = (
     return Math.max(0, totalImpCost);
 };
 
+// ... calculateImprovementPointsCost bez zmian ...
 export const calculateImprovementPointsCost = (divisionConfig, unitsMap, getRegimentDefinition, commonImprovements) => {
     if (!unitsMap || !divisionConfig) return 0;
     let totalImpCost = 0;

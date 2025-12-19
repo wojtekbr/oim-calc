@@ -312,7 +312,8 @@ export const useRegimentLogic = ({
             tmpDivision,
             unitsMap,
             getRegimentDefinition,
-            commonImprovements
+            commonImprovements,
+            faction
         );
 
         const mainForceKey = calculateMainForceKey(

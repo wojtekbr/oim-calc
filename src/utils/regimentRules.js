@@ -1,8 +1,9 @@
 // src/utils/regimentRules.js
+import { RANK_TYPES } from "../constants"; // Upewnij się, że masz ten import, jeśli korzystasz z RANK_TYPES w logice
 
 // --- REJESTR LOGIKI (Działanie zasad) ---
 export const REGIMENT_RULES_REGISTRY = {
-    
+
     // "Jeżeli wystawisz Piechotę łanową, pułk staje się Mieszany."
     "lanowa_makes_mixed": {
         modifyStats: (stats, activeUnits) => {
@@ -18,11 +19,11 @@ export const REGIMENT_RULES_REGISTRY = {
     "artillery_req_lanowa_m": {
         validate: (activeUnits) => {
             const hasArtillery = activeUnits.some(u => u.unitId.includes("light_art") || u.unitId.includes("medium_art"));
-            
+
             if (!hasArtillery) return null;
 
             const hasLanowaM = activeUnits.some(u => u.unitId === "cro_piechota_lanowa_m");
-            
+
             if (!hasLanowaM) {
                 return "Zasada 'Wymagania Artylerii': Aby wystawić Działa, musisz posiadać Piechotę Łanową (M).";
             }
@@ -33,29 +34,29 @@ export const REGIMENT_RULES_REGISTRY = {
     // "Żeby wystawić Pospolite Ruszenie po Husarsku nie można wystawić Piechoty Łanowej."
     "hus_no_lanowa": {
         validate: (activeUnits) => {
-             const hasHussars = activeUnits.some(u => u.unitId.includes("pospolite_hus"));
-             const hasLanowa = activeUnits.some(u => u.unitId.includes("piechota_lanowa"));
-             
-             if (hasHussars && hasLanowa) {
-                 return "Zasada 'Ograniczenie Husarskie': Nie można łączyć Pospolitego Ruszenia po Husarsku z Piechotą Łanową.";
-             }
-             return null;
+            const hasHussars = activeUnits.some(u => u.unitId.includes("pospolite_hus"));
+            const hasLanowa = activeUnits.some(u => u.unitId.includes("piechota_lanowa"));
+
+            if (hasHussars && hasLanowa) {
+                return "Zasada 'Ograniczenie Husarskie': Nie można łączyć Pospolitego Ruszenia po Husarsku z Piechotą Łanową.";
+            }
+            return null;
         }
     },
 
     // "Żeby wystawić Pospolite Ruszenie po Husarsku w rozmiarze M należy wystawić przynajmniej 2 jednostki Pospolitego Ruszenia w rozmiarze L (M)."
     "hus_m_req_pospolite_l_x2": {
-         validate: (activeUnits) => {
-             const hasHussarsM = activeUnits.some(u => u.unitId === "cro_pospolite_hus_m");
-             if (!hasHussarsM) return null;
-             
-             const pospoliteLCount = activeUnits.filter(u => u.unitId === "cro_pospolite_l").length;
-             
-             if (pospoliteLCount < 2) {
-                 return "Zasada 'Wymagania Husarskie M': Pospolite Ruszenie po Husarsku (M) wymaga przynajmniej 2 jednostek Pospolitego Ruszenia (L).";
-             }
-             return null;
-         }
+        validate: (activeUnits) => {
+            const hasHussarsM = activeUnits.some(u => u.unitId === "cro_pospolite_hus_m");
+            if (!hasHussarsM) return null;
+
+            const pospoliteLCount = activeUnits.filter(u => u.unitId === "cro_pospolite_l").length;
+
+            if (pospoliteLCount < 2) {
+                return "Zasada 'Wymagania Husarskie M': Pospolite Ruszenie po Husarsku (M) wymaga przynajmniej 2 jednostek Pospolitego Ruszenia (L).";
+            }
+            return null;
+        }
     },
 
     "chlopscy_szpiedzy": {
@@ -110,72 +111,98 @@ export const REGIMENT_RULES_REGISTRY = {
             let targetImpIds = params?.improvement_ids || [];
             if (params?.improvement_id) targetImpIds.push(params.improvement_id);
 
-            // Domyślny limit darmowych na pułk (zazwyczaj 1)
             const maxPerRegiment = params?.max_per_regiment || 1;
 
             if (targetUnitIds.includes(unitId) && targetImpIds.includes(impId)) {
-                // Jeśli nie wykorzystano jeszcze puli darmowych w tym pułku
                 if (usageState.usedCount < maxPerRegiment) {
-                    usageState.usedCount++; // Zużywamy "darmowy żeton"
-                    return true; // Jest darmowe -> nie wliczaj do limitu
+                    usageState.usedCount++;
+                    return true;
                 }
             }
             return false;
+        }
+    },
+    "za_mna_bracia_kozacy": {
+        name: "Za mną bracia kozacy!",
+        description: "Za każde trzy złote jednostki w pułku, motywacja pułku rośnie o 1. Pułk nie korzysta z zasady jeżeli jest sojuszniczy (Obniż PS pułku o 2).",
+        modifyStats: (stats, activeUnits, params, context) => {
+            const { isAllied, unitsMap } = context || {};
+
+            // Jeśli sojuszniczy -> brak bonusu do motywacji
+            if (isAllied) return stats;
+
+            let goldCount = 0;
+            activeUnits.forEach(u => {
+                const def = unitsMap?.[u.unitId];
+                if (def && def.rank === RANK_TYPES.GOLD) {
+                    goldCount++;
+                }
+            });
+
+            const bonus = Math.floor(goldCount / 3);
+            if (bonus > 0) {
+                return { ...stats, motivation: stats.motivation + bonus };
+            }
+            return stats;
+        },
+        modifyCost: (currentCost, params, context) => {
+            // Zawsze obniża koszt o 2 (zgodnie z opisem w nawiasie, to cecha pułku)
+            return currentCost - 2;
         }
     }
 };
 
 // --- DEFINICJE OPISÓW (Teksty dla gracza) ---
 export const REGIMENT_RULES_DEFINITIONS = {
-  "allah_allah": {
-    title: "Allah! Allah!",
-    description: "Zasada działania opisana w podręcznikach do gry Ogniem i Mieczem."
-  },
-  "z_calego_imperium": {
-    title: "Z całego Imperium zebrani (1)",
-    description: "Zasada działania opisana w podręcznikach do gry Ogniem i Mieczem."
-  },
-  "sipahi_better_equipment": {
-    title: "Ulepszenia sipahów",
-    description: "Sipahowie mają ulepszenie Lepsze uzbrojenie ochronne i Weterani"
-  },
-  "aga_is_dizbar": {
-    title: "Aga ma statystyki Dizbara",
-    description: "Dowódca tego pułku korzysta ze statystyk i zasad specjalnych Dizbara zamiast standardowego Agi."
-  },
-  "kethuda_is_aga": {
-    title: "Kethuda ma statystyki Agi",
-    description: "Kethuda w tym pułku posiada statystyki Agi (G1)."
-  },
-  "posluch_kor": {
-    title: "Posłuch",
-    description: "Każdy Pułkownik z Partii Wolontarskiej, raz podczas wydawania rozkazu jednostce Wolontarzy może pominąć zasadę Niesubordynacja. Gracz musi poinformować przeciwnika w momencie korzystania z tej zasady."
-  },
-  "pospolitacy": {
-    title: "Pospolitacy",
-    description: "Zasada specjalna opisana w podręczniku (1)."
-  },
-  "lanowa_makes_mixed": {
-    title: "Piechota Łanowa",
-    description: "Jeżeli wystawisz Piechotę łanową, pułk staje się Mieszany."
-  },
-  "artillery_req_lanowa_m": {
-    title: "Wymagania Artylerii",
-    description: "Żeby wystawić Lekkie działa należy wystawić przynajmniej jedną jednostkę Piechoty Łanowej w rozmiarze M."
-  },
-  "hus_no_lanowa": {
-    title: "Ograniczenie Husarskie",
-    description: "Żeby wystawić Pospolite Ruszenie po Husarsku nie można wystawić Piechoty Łanowej."
-  },
-  "hus_m_req_pospolite_l_x2": {
-    title: "Wymagania Husarskie M",
-    description: "Żeby wystawić Pospolite Ruszenie po Husarsku w rozmiarze M należy wystawić przynajmniej 2 jednostki Pospolitego Ruszenia w rozmiarze L (M)."
-  },
-  "roznorodne_wyposazenie": {
-    title: "Różnorodne wyposażenie",
-    description: "Zasada specjalna opisana w podręczniku (1)."
-  },
-  "posluch_cos": {
+    "allah_allah": {
+        title: "Allah! Allah!",
+        description: "Zasada działania opisana w podręcznikach do gry Ogniem i Mieczem."
+    },
+    "z_calego_imperium": {
+        title: "Z całego Imperium zebrani (1)",
+        description: "Zasada działania opisana w podręcznikach do gry Ogniem i Mieczem."
+    },
+    "sipahi_better_equipment": {
+        title: "Ulepszenia sipahów",
+        description: "Sipahowie mają ulepszenie Lepsze uzbrojenie ochronne i Weterani"
+    },
+    "aga_is_dizbar": {
+        title: "Aga ma statystyki Dizbara",
+        description: "Dowódca tego pułku korzysta ze statystyk i zasad specjalnych Dizbara zamiast standardowego Agi."
+    },
+    "kethuda_is_aga": {
+        title: "Kethuda ma statystyki Agi",
+        description: "Kethuda w tym pułku posiada statystyki Agi (G1)."
+    },
+    "posluch_kor": {
+        title: "Posłuch",
+        description: "Każdy Pułkownik z Partii Wolontarskiej, raz podczas wydawania rozkazu jednostce Wolontarzy może pominąć zasadę Niesubordynacja. Gracz musi poinformować przeciwnika w momencie korzystania z tej zasady."
+    },
+    "pospolitacy": {
+        title: "Pospolitacy",
+        description: "Zasada specjalna opisana w podręczniku (1)."
+    },
+    "lanowa_makes_mixed": {
+        title: "Piechota Łanowa",
+        description: "Jeżeli wystawisz Piechotę łanową, pułk staje się Mieszany."
+    },
+    "artillery_req_lanowa_m": {
+        title: "Wymagania Artylerii",
+        description: "Żeby wystawić Lekkie działa należy wystawić przynajmniej jedną jednostkę Piechoty Łanowej w rozmiarze M."
+    },
+    "hus_no_lanowa": {
+        title: "Ograniczenie Husarskie",
+        description: "Żeby wystawić Pospolite Ruszenie po Husarsku nie można wystawić Piechoty Łanowej."
+    },
+    "hus_m_req_pospolite_l_x2": {
+        title: "Wymagania Husarskie M",
+        description: "Żeby wystawić Pospolite Ruszenie po Husarsku w rozmiarze M należy wystawić przynajmniej 2 jednostki Pospolitego Ruszenia w rozmiarze L (M)."
+    },
+    "roznorodne_wyposazenie": {
+        title: "Różnorodne wyposażenie",
+        description: "Zasada specjalna opisana w podręczniku (1)."
+    },
+    "posluch_cos": {
         title: "Posłuch",
         description: "Raz podczas wydawania rozkazu jednostce można pominąć zasadę Niesubordynacja. Gracz musi poinformować przeciwnika w momencie korzystania z tej zasady."
     },
@@ -200,7 +227,6 @@ export const validateRegimentRules = (activeUnits, regimentDefinition) => {
     if (!regimentDefinition?.special_rules) return errors;
 
     regimentDefinition.special_rules.forEach(ruleEntry => {
-        // Obsługa: string LUB obiekt { id: "...", ...params }
         const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
         const params = typeof ruleEntry === 'object' ? ruleEntry : {};
 
@@ -213,7 +239,7 @@ export const validateRegimentRules = (activeUnits, regimentDefinition) => {
     return errors;
 };
 
-export const applyRegimentRuleStats = (baseStats, activeUnits, regimentDefinition) => {
+export const applyRegimentRuleStats = (baseStats, activeUnits, regimentDefinition, context) => {
     if (!regimentDefinition?.special_rules) return baseStats;
 
     let newStats = { ...baseStats };
@@ -224,7 +250,7 @@ export const applyRegimentRuleStats = (baseStats, activeUnits, regimentDefinitio
 
         const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
         if (ruleImpl && ruleImpl.modifyStats) {
-            const mods = ruleImpl.modifyStats(newStats, activeUnits, params);
+            const mods = ruleImpl.modifyStats(newStats, activeUnits, params, context);
             if (mods) {
                 newStats = { ...newStats, ...mods };
             }
@@ -233,6 +259,7 @@ export const applyRegimentRuleStats = (baseStats, activeUnits, regimentDefinitio
     return newStats;
 };
 
+// --- ZMODYFIKOWANA FUNKCJA: Pobiera opis z Definitions LUB z Registry ---
 export const getRegimentRulesDescriptions = (regimentDefinition) => {
     if (!regimentDefinition?.special_rules) return [];
 
@@ -240,7 +267,21 @@ export const getRegimentRulesDescriptions = (regimentDefinition) => {
         const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
         const params = typeof ruleEntry === 'object' ? ruleEntry : {};
 
-        const def = REGIMENT_RULES_DEFINITIONS[ruleId];
+        // 1. Najpierw szukamy w słowniku definicji (opisy tekstowe)
+        let def = REGIMENT_RULES_DEFINITIONS[ruleId];
+
+        // 2. Jeśli nie ma w definicjach, szukamy w rejestrze logiki (fallback)
+        if (!def) {
+            const registryItem = REGIMENT_RULES_REGISTRY[ruleId];
+            if (registryItem && registryItem.name) {
+                // Tworzymy tymczasową definicję na podstawie rejestru
+                def = {
+                    title: registryItem.name,
+                    description: registryItem.description
+                };
+            }
+        }
+
         if (!def) return null;
 
         // Obsługa override nazwy i dynamicznego opisu
@@ -251,4 +292,20 @@ export const getRegimentRulesDescriptions = (regimentDefinition) => {
 
         return { id: ruleId, title, description };
     }).filter(Boolean);
+};
+
+export const applyRegimentRuleCosts = (baseCost, regimentDefinition, context) => {
+    if (!regimentDefinition?.special_rules) return baseCost;
+
+    let newCost = baseCost;
+    regimentDefinition.special_rules.forEach(rule => {
+        const ruleId = typeof rule === 'string' ? rule : rule.id;
+        const params = typeof rule === 'object' ? rule : {};
+
+        const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
+        if (ruleImpl && ruleImpl.modifyCost) {
+            newCost = ruleImpl.modifyCost(newCost, params, context);
+        }
+    });
+    return newCost;
 };
