@@ -15,7 +15,6 @@ export const SummaryCard = ({
                                 generalDef,
                                 unassignedSupport,
                                 unitsMap,
-                                // Nowe propsy potrzebne do pełnego przeliczenia widoku
                                 configuredDivision,
                                 getRegimentDefinition,
                                 calculateStats,
@@ -25,9 +24,6 @@ export const SummaryCard = ({
                                 divisionDefinition
                             }) => {
 
-    // --- REKONSTRUKCJA LISTY PUŁKÓW ---
-    // Zamiast polegać na activeRegimentsList (która może nie mieć ID jednostek),
-    // budujemy listę bezpośrednio z konfiguracji, aby mieć pełną kontrolę nad danymi.
     const richRegimentsList = useMemo(() => {
         if (!configuredDivision || !getRegimentDefinition || !calculateStats) return [];
 
@@ -40,34 +36,27 @@ export const SummaryCard = ({
                     const def = getRegimentDefinition(reg.id);
                     const positionKey = `${groupName}/${index}`;
 
-                    // 1. Statystyki
                     const stats = calculateStats(reg.config, reg.id);
                     const isMain = mainForceKey === positionKey;
 
-                    // 2. Jednostki wewnętrzne
                     const internalUnits = collectRegimentUnits(reg.config, def).map(u => ({
                         unitId: u.unitId,
                         key: u.key,
                         isSupport: false,
-                        // Dla jednostek wewnętrznych bierzemy kupione ulepszenia z configu
                         purchasedImps: reg.config.improvements?.[u.key] || []
                     }));
 
-                    // 3. Jednostki wsparcia (przypisane do tego pułku)
                     const attachedSupport = (configuredDivision.supportUnits || [])
                         .filter(su => su.assignedTo?.positionKey === positionKey)
                         .map(su => ({
                             unitId: su.id,
                             key: `support/${su.id}-${positionKey}/0`,
                             isSupport: true,
-                            // Dla wsparcia w tym widoku zazwyczaj nie ma kupionych ulepszeń w configu pułku,
-                            // chyba że system na to pozwala. Dajemy pustą listę lub pobieramy jeśli istnieje.
                             purchasedImps: reg.config.improvements?.[`support/${su.id}-${positionKey}/0`] || []
                         }));
 
                     const allUnits = [...internalUnits, ...attachedSupport];
 
-                    // 4. Ulepszenia pułkowe
                     const regImpsNames = (reg.config.regimentImprovements || []).map(id => improvementsMap?.[id]?.name || id);
 
                     list.push({
@@ -95,8 +84,16 @@ export const SummaryCard = ({
         <div className={styles.summaryCard}>
             <div className={styles.summaryHeader}>
                 <div>
-                    <div className={styles.summaryTitle}>{divisionType} ({totalDivisionCost} PS)</div>
-                    <div className={styles.summarySubtitle}>Koszt bazowy dywizji: {divisionBaseCost} PS</div>
+                    {/* ZMIANA: Nazwa Dywizji na górze, duża */}
+                    <div className={styles.summaryTitle}>
+                        {divisionDefinition?.name || "Dywizja"} <span style={{fontSize: '0.8em', fontWeight: 'normal', color: '#555'}}>({totalDivisionCost} PS)</span>
+                    </div>
+
+                    {/* ZMIANA: Typ i koszt bazowy poniżej, mniejsze */}
+                    <div className={styles.summarySubtitle}>
+                        Typ: <strong>{divisionType}</strong> • Koszt bazowy: {divisionBaseCost} PS
+                    </div>
+
                     <button className={styles.rulesToggleBtn} onClick={() => setShowRules(!showRules)}>
                         {showRules ? "▼ Ukryj zasady specjalne" : "▶ Pokaż zasady specjalne"}
                     </button>
@@ -134,7 +131,6 @@ export const SummaryCard = ({
                         <div className={styles.summarySectionTitle}>Wsparcie Dywizyjne (Nieprzypisane)</div>
                         <div className={styles.unassignedList}>
                             {unassignedSupport.map((su, idx) => {
-                                // Obliczamy ulepszenia dla wsparcia nieprzypisanego
                                 const effectiveImps = getEffectiveUnitImprovements
                                     ? getEffectiveUnitImprovements(su.id, [], divisionDefinition, null, unitsMap)
                                     : [];
@@ -160,7 +156,6 @@ export const SummaryCard = ({
                 )}
             </div>
 
-            {/* Grid Sformowanych Pułków */}
             {richRegimentsList.length > 0 && (
                 <div className={styles.summarySection}>
                     <div className={styles.summarySectionTitle}>Sformowane Pułki</div>
@@ -187,7 +182,6 @@ export const SummaryCard = ({
                                         const unitDef = unitsMap[u.unitId];
                                         const unitName = unitDef?.name || u.unitId;
 
-                                        // Pobieramy wszystkie ulepszenia (kupione + obowiązkowe)
                                         const effectiveImps = getEffectiveUnitImprovements
                                             ? getEffectiveUnitImprovements(u.unitId, u.purchasedImps, divisionDefinition, reg.regId, unitsMap)
                                             : u.purchasedImps;
@@ -199,14 +193,11 @@ export const SummaryCard = ({
                                                     {u.isSupport && <span className={styles.previewSupportTag}> (Wsparcie)</span>}
                                                     {unitDef?.orders > 0 && (<span className={styles.commanderBadge}>DOW ({unitDef.orders})</span>)}
                                                 </div>
-                                                {/* WYŚWIETLANIE ULEPSZEŃ */}
                                                 {effectiveImps.length > 0 && (
                                                     <div className={styles.impsList}>
                                                         {effectiveImps.map((impId, i) => {
                                                             const name = improvementsMap?.[impId]?.name || impId;
-                                                            // Sprawdzamy czy to ulepszenie było "kupione" (czy jest na liście purchasedImps)
                                                             const isPurchased = u.purchasedImps.includes(impId);
-                                                            // Jeśli nie kupione -> kłódka
                                                             const suffix = !isPurchased ? " 🔒" : "";
 
                                                             return (
