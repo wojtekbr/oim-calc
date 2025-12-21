@@ -92,9 +92,6 @@
         "base2": [
           {
             "unit1": {
-              "units": ["ott_sipahi_lances_m"]
-            },
-            "unit2": {
               "units": ["ott_sipahi_m"]
             }
           }

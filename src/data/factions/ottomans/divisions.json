@@ -136,7 +136,7 @@
         "id": "limit_max_units",
         "constraints": [
           {
-            "unit_ids": ["ott_mamluks_s", "ott_mamluks_m"],
+            "unit_ids": ["ott_mamluk_s", "ott_mamluk_m"],
             "max_amount": 4,
             "custom_name": "Mamelucy (łącznie)"
           }

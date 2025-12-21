@@ -14,9 +14,9 @@
         "id": "bellum_se_ipsum_alet"
       },
       {
-        "id": "grant_improvement_to_all",
+        "id": "grant_improvements_to_specific_regiments",
+        "regiment_ids": ["swe_reg_jazdy_krajowej", "mrc_reiters", "mrc_armoured_reiters"],
         "improvement_ids": ["small_companies", "disciplined"],
-        "excluded_unit_ids": ["swe_jazda_krajowa_m", "swe_light_artillery_s"],
         "name_override": "Umowa Kapitulacyjna"
       },
       {
@@ -87,11 +87,8 @@
         "id": "rozbudowany_sztab"
       },
       {
-        "id": "dyscyplina"
-      },
-      {
         "id": "grant_improvements_to_specific_regiments",
-        "regiment_ids": ["swe_reg_jazdy_krajowej", "mrc_reiters"],
+        "regiment_ids": ["swe_reg_jazdy_krajowej", "mrc_reiters", "mrc_armoured_reiters"],
         "improvement_ids": ["small_companies", "veterans_presence"],
         "name_override": "Regimenty Garnizonowe"
       }
@@ -125,6 +122,9 @@
         "type": "group",
         "name": "Średnia Artyleria",
         "options": ["swe_medium_artillery_s"]
+      },
+      {
+        "unit1": ["swe_major"]
       }
     ],
     "vanguard": [
