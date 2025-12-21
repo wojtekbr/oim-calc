@@ -76,7 +76,7 @@ export const REGIMENT_RULES_REGISTRY = {
         }
     },
     "free_unit_improvement": {
-        // 1. Zniżka Kosztu (PU)
+        // 1. Zniżka Kosztu (PU) - Poprawione: Sumuje zniżkę tylko dla pierwszych N ulepszeń
         calculateImprovementDiscount: (activeUnits, config, improvementsMap, params, unitsMap, regimentDefinition, costCalculator) => {
             const targetUnitIds = params?.unit_ids || [];
             let targetImpIds = params?.improvement_ids || [];
@@ -84,37 +84,49 @@ export const REGIMENT_RULES_REGISTRY = {
 
             if (targetUnitIds.length === 0 || targetImpIds.length === 0 || !improvementsMap) return 0;
 
+            // Pobieramy limit darmowych ulepszeń (domyślnie 1)
+            const limit = params?.free_improvements_amount || params?.max_per_regiment || 1;
+            let totalDiscount = 0;
+            let usedCount = 0;
+
             for (const unit of activeUnits) {
                 if (targetUnitIds.includes(unit.unitId)) {
                     const unitImps = config.improvements?.[unit.key] || [];
-                    const foundImpId = unitImps.find(impId => targetImpIds.includes(impId));
 
-                    if (foundImpId) {
-                        const unitDef = unitsMap[unit.unitId];
-                        let realCost = 0;
-                        if (costCalculator && unitDef) {
-                            realCost = costCalculator(unitDef, foundImpId, regimentDefinition, improvementsMap);
-                        } else {
-                            const impDef = improvementsMap[foundImpId];
-                            realCost = Number(impDef?.cost || 0);
+                    // Znajdujemy wszystkie pasujące ulepszenia wykupione przez tę jednostkę
+                    const foundImpIds = unitImps.filter(impId => targetImpIds.includes(impId));
+
+                    for (const foundImpId of foundImpIds) {
+                        if (usedCount < limit) {
+                            const unitDef = unitsMap[unit.unitId];
+                            let realCost = 0;
+                            if (costCalculator && unitDef) {
+                                realCost = costCalculator(unitDef, foundImpId, regimentDefinition, improvementsMap);
+                            } else {
+                                const impDef = improvementsMap[foundImpId];
+                                realCost = Number(impDef?.cost || 0);
+                            }
+                            totalDiscount += (Number(realCost) || 0);
+                            usedCount++;
                         }
-                        return Number(realCost) || 0;
                     }
+
+                    if (usedCount >= limit) break; // Osiągnięto limit darmowych ulepszeń dla całego pułku
                 }
             }
-            return 0;
+            return totalDiscount;
         },
 
-        // 2. NOWOŚĆ: Darmowość Slotu (nie wlicza się do limitu)
+        // 2. Darmowość Slotu (nie wlicza się do limitu) - Poprawione: Respektuje limit ilościowy
         isImprovementFree: (unitId, impId, params, usageState) => {
             const targetUnitIds = params?.unit_ids || [];
             let targetImpIds = params?.improvement_ids || [];
             if (params?.improvement_id) targetImpIds.push(params.improvement_id);
 
-            const maxPerRegiment = params?.max_per_regiment || 1;
+            const limit = params?.free_improvements_amount || params?.max_per_regiment || 1;
 
             if (targetUnitIds.includes(unitId) && targetImpIds.includes(impId)) {
-                if (usageState.usedCount < maxPerRegiment) {
+                if (usageState.usedCount < limit) {
                     usageState.usedCount++;
                     return true;
                 }
@@ -208,6 +220,8 @@ export const REGIMENT_RULES_REGISTRY = {
     "max_one_l_unit": {
         name: "Limit jednostek L",
         validate: (activeUnits) => {
+            // Filtrujemy jednostki, których ID kończy się na "_l"
+            // (zakładamy konwencję nazewnictwa: nazwa_jednostki_l)
             const countL = activeUnits.filter(u => u.unitId && u.unitId.endsWith("_l")).length;
 
             if (countL > 1) {
@@ -282,22 +296,24 @@ export const REGIMENT_RULES_DEFINITIONS = {
         description: "Przed rozpoczęciem powstania Chmielnickiego kozacy na służbie Rzeczypospolitej byli podzieleni na Pułki z czego każdy z nich miał swój indywidualny charakter, a wielu z nich było dowodzonych przez znanych Pułkowników.\n" +
             "W momencie tworzenia pułku wybierz z jakiego regionu pochodzi (W całej armii możesz mieć tylko jeden pułk z danego regionu)\n"
     },
+    "max_one_l_unit": {
+        title: "Ograniczenie ciężkich jednostek",
+        description: "W składzie tego regimentu może znajdować się maksymalnie jedna jednostka o rozmiarze L."
+    },
     "free_unit_improvement": {
         title: "Darmowe Ulepszenie",
         getDescription: (params) => {
             const impNames = (params?.improvement_ids || [params?.improvement_id]).join(" lub ");
-            return `Wybrana jednostka może otrzymać darmowe ulepszenie: ${impNames}. Nie wlicza się ono do limitu ulepszeń.`;
+            const amount = params?.free_improvements_amount || params?.max_per_regiment || 1;
+            const amountText = amount > 1 ? `${amount} wybranych jednostek może` : "Wybrana jednostka może";
+            return `${amountText} otrzymać darmowe ulepszenie: ${impNames}. Nie wlicza się ono do limitu ulepszeń.`;
         }
-    },
-    "max_one_l_unit": {
-        title: "Ograniczenie ilości jednostek L",
-        description: "W składzie tego regimentu może znajdować się maksymalnie jedna jednostka o rozmiarze L."
     }
 };
 
 // --- HELPERS ---
 
-export const validateRegimentRules = (activeUnits, regimentDefinition) => {
+export const validateRegimentRules = (activeUnits, regimentDefinition, context) => {
     const errors = [];
     if (!regimentDefinition?.special_rules) return errors;
 
@@ -307,7 +323,7 @@ export const validateRegimentRules = (activeUnits, regimentDefinition) => {
 
         const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
         if (ruleImpl && ruleImpl.validate) {
-            const error = ruleImpl.validate(activeUnits, params);
+            const error = ruleImpl.validate(activeUnits, params, context);
             if (error) errors.push(error);
         }
     });

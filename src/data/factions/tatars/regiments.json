@@ -191,7 +191,8 @@
         "id": "free_unit_improvement",
         "name_override": "Wzrok ich bystry i bardziej przenikliwy",
         "unit_ids": ["tat_ordyncy_s"],
-        "improvement_ids": ["independent"]
+        "improvement_ids": ["independent"],
+        "free_improvements_amount": 1
       },
       "sojusznik_bez_dodatkowych"
     ],

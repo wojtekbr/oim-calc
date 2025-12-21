@@ -69,7 +69,7 @@
       { "options": ["tat_czambul_mirzy","tat_czambul_nogajow"]}
     ],
     "base": [
-      { "options": ["tat_czambul_nuradyna"] },
+      { "options": ["tat_czambul_beja"] },
       { "options": ["tat_czambul_mirzy"] },
       { "options": ["tat_czambul_mirzy", "tat_czambul_nogajow"] }
     ],

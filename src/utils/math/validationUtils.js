@@ -6,7 +6,6 @@ import { calculateRegimentStats, calculateMainForceKey, isRegimentAllied } from 
 
 export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinition, divisionDefinition = null, unitsMap = null) => {
     if (!unitDef || !regimentDefinition) return false;
-    // Zabezpieczenie: Grupy nigdy nie biorą ulepszeń
     if (unitDef.rank === RANK_TYPES.GROUP || unitDef.rank === 'group') return false;
 
     if (divisionDefinition && unitsMap && regimentDefinition) {
@@ -40,7 +39,6 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
 export const checkIfImprovementIsMandatory = (unitId, impId, divisionDefinition = null, regimentId = null, unitsMap = null) => {
     if (unitsMap && unitId) {
         const unitDef = unitsMap[unitId];
-        // --- FIX: Blokada dla grup ---
         if (unitDef?.rank === RANK_TYPES.GROUP || unitDef?.rank === 'group') return false;
 
         if (unitDef?.mandatory_improvements?.includes(impId)) {
@@ -62,12 +60,21 @@ export const checkIfImprovementIsMandatory = (unitId, impId, divisionDefinition 
     return isMandatory;
 };
 
-export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition, targetUnitId, targetImpId, divisionDefinition = null, unitsMap = null) => {
+// --- FIX: Zmiana targetUnitId na targetUnitKey dla precyzji ---
+export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition, targetUnitKey, targetImpId, divisionDefinition = null, unitsMap = null) => {
     if (!regimentDefinition) return false;
 
+    const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
+
+    // Znajdź jednostkę po kluczu pozycji, aby pobrać jej ID definicji
+    const targetUnitObj = activeUnits.find(u => u.key === targetUnitKey);
+    if (!targetUnitObj) return false;
+
+    const targetUnitId = targetUnitObj.unitId;
+
+    // Sprawdzenie wrodzonych (units.json)
     if (unitsMap && targetUnitId) {
         const unitDef = unitsMap[targetUnitId];
-        // --- FIX: Blokada dla grup ---
         if (unitDef?.rank === RANK_TYPES.GROUP || unitDef?.rank === 'group') return false;
 
         if (unitDef?.mandatory_improvements?.includes(targetImpId)) {
@@ -75,10 +82,8 @@ export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition
         }
     }
 
-    const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
-
-    const activeUnitObj = activeUnits.find(u => u.unitId === targetUnitId);
-    if (activeUnitObj?.structureMandatory?.includes(targetImpId)) {
+    // Sprawdzenie strukturalnych (regiments.json)
+    if (targetUnitObj.structureMandatory?.includes(targetImpId)) {
         return true;
     }
 
@@ -93,7 +98,10 @@ export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition
 
     activeUnits.forEach(u => {
         const unitImps = regimentConfig.improvements?.[u.key] || [];
-        const impsToCheck = (u.unitId === targetUnitId) ? [...unitImps, targetImpId] : unitImps;
+
+        // FIX: Sprawdzamy konkretny klucz (u.key), a nie typ jednostki (u.unitId)
+        // Symulujemy dodanie ulepszenia TYLKO do tej jednej, konkretnej jednostki
+        const impsToCheck = (u.key === targetUnitKey) ? [...unitImps, targetImpId] : unitImps;
 
         impsToCheck.forEach(impId => {
             if (regimentDefinition.special_rules) {
@@ -103,8 +111,11 @@ export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition
                     const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
 
                     if (ruleImpl && ruleImpl.isImprovementFree) {
+                        // Zasady nadal sprawdzają po ID typu (u.unitId), bo tak są zdefiniowane (np. "dla wszystkich ordyńców")
                         const isFree = ruleImpl.isImprovementFree(u.unitId, impId, params, rulesUsageState[ruleIdx]);
-                        if (u.unitId === targetUnitId && impId === targetImpId && isFree) {
+
+                        // Ale wynik przypisujemy tylko jeśli to jest ta konkretna instancja i to konkretne ulepszenie
+                        if (u.key === targetUnitKey && impId === targetImpId && isFree) {
                             isTargetFree = true;
                         }
                     }
@@ -196,9 +207,7 @@ export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefin
     return count;
 };
 
-// --- Funkcja do pobierania PEŁNEJ listy ulepszeń (z uwzględnieniem Zasad Pułku) ---
 export const getEffectiveUnitImprovements = (unitId, currentImprovements, divisionDefinition, regimentId, unitsMap) => {
-    // --- FIX: Blokada dla grup ---
     const unitDef = unitsMap?.[unitId];
     if (unitDef?.rank === RANK_TYPES.GROUP || unitDef?.rank === 'group') {
         return [];
@@ -206,12 +215,10 @@ export const getEffectiveUnitImprovements = (unitId, currentImprovements, divisi
 
     const active = new Set(currentImprovements || []);
 
-    // 1. Z definicji jednostki (wrodzone)
     if (unitDef?.mandatory_improvements) {
         unitDef.mandatory_improvements.forEach(id => active.add(id));
     }
 
-    // 2. Z zasad dywizyjnych
     if (divisionDefinition?.rules) {
         divisionDefinition.rules.forEach(rule => {
             const ruleImpl = DIVISION_RULES_REGISTRY[rule.id];
@@ -238,6 +245,7 @@ export const getEffectiveUnitImprovements = (unitId, currentImprovements, divisi
     return Array.from(active);
 };
 
+// ... (validateVanguardCost, validateAlliedCost bez zmian)
 export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
     let mainForceCost = 0;

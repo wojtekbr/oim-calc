@@ -47,7 +47,10 @@ export const ActiveOptionConfigurationPanel = ({
                             <div className={styles.cleanImprovementsContainer}>
                                 {validImprovements.length > 0 ? validImprovements.map(imp => {
                                     const isSelected = state.improvements[positionKey]?.includes(imp.id);
-                                    const willBeFree = checkIfImprovementWouldBeFree(currentConfig, regiment, uid, imp.id, divisionDefinition, unitsMap);
+
+                                    // FIX: Przekazujemy positionKey zamiast uid
+                                    const willBeFree = checkIfImprovementWouldBeFree(currentConfig, regiment, positionKey, imp.id, divisionDefinition, unitsMap);
+
                                     const isMandatory = checkIfImprovementIsMandatory(uid, imp.id, divisionDefinition, regiment.id, unitsMap);
 
                                     const cost = calculateSingleImprovementIMPCost(unitDef, imp.id, regiment, commonImprovements);
