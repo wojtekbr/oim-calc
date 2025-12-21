@@ -846,6 +846,71 @@
       }
     }
   },
+  "lit_pulk_jazdy_litewskiej_vanguard": {
+    "name": "Pułk Jazdy Litewskiej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 5,
+    "activations": 2,
+    "special_rules": [
+      "limit_petyhorcy_2",
+      "limit_petyhorcy_kopie_1"
+    ],
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["cro_colonel"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["cro_cossack_style_m"] } }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["cro_cossack_style_s"] },
+            "unit2": { "units": ["cro_cossack_style_m"] },
+            "unit3": { "units": ["lit_petyhorcy_s"] },
+            "unit4": { "units": ["lit_petyhorcy_m"] },
+            "unit5": { "units": ["cro_cossack_style_rohatyna_s"] },
+            "unit6": { "units": ["cro_cossack_style_rohatyna_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["cro_rotmistrz"] },
+            "is_toggle": true
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["cro_cossack_style_s"] },
+            "unit2": { "units": ["cro_cossack_style_m"] },
+            "unit3": { "units": ["cro_petyhorcy_s"] },
+            "unit4": { "units": ["cro_petyhorcy_m"] },
+            "unit5": { "units": ["cro_petyhorcy_kopie_s"] },
+            "unit6": { "units": ["cro_petyhorcy_kopie_m"] }
+          }
+        ]
+      }
+    }
+  },
   "lit_doborowy_pulk_jazdy_litewskiej": {
     "name": "Doborowy Pułk Jazdy Litewskiej",
     "base_cost": 4,

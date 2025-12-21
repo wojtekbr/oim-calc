@@ -53,16 +53,19 @@ export const DIVISION_RULES_DEFINITIONS = {
         }
     },
     "limit_max_same_regiments": {
-        title: "Maksymalna ilość pułków",
+        title: "Limit ilościowy pułków",
         getDescription: (params, context) => {
             const { getRegimentDefinition } = context;
-            const targetId = params?.regiment_id;
-            const max = params?.max_amount || 1;
 
-            const regDef = getRegimentDefinition(targetId);
-            const regName = regDef ? regDef.name : targetId;
+            const targetIds = params.regiment_ids || (params.regiment_id ? [params.regiment_id] : []);
+            const max = params.max_amount || 1;
 
-            return `Możesz posiadać maksymalnie ${max} pułk(i/ów) typu: "${regName}".`;
+            const regNames = targetIds.map(tid => {
+                const regDef = getRegimentDefinition ? getRegimentDefinition(tid) : null;
+                return regDef ? `"${regDef.name}"` : tid;
+            }).join(" lub ");
+
+            return `Możesz posiadać łącznie maksymalnie ${max} pułk(i/ów) z listy: ${regNames}.`;
         }
     },
     "min_regiments_present": {
@@ -225,5 +228,24 @@ export const DIVISION_RULES_DEFINITIONS = {
     "dyscyplina": {
         title: "Dyscyplina",
         getDescription: () => "Wszystkie pułki mają motywację zwiększoną o 1."
-    }
+    },
+    "limit_units_by_size_in_regiments": {
+        title: "Ograniczenie rozmiaru jednostek",
+        getDescription: (params, context) => {
+            const { getRegimentDefinition } = context;
+
+            let targetRegimentIds = params?.regiment_ids || [];
+            if (!Array.isArray(targetRegimentIds)) targetRegimentIds = [targetRegimentIds];
+
+            const size = (params?.unit_size || "?").toUpperCase();
+            const max = params?.max_amount || 0;
+
+            const regNames = targetRegimentIds.map(rid => {
+                const def = getRegimentDefinition ? getRegimentDefinition(rid) : null;
+                return def ? `"${def.name}"` : rid;
+            }).join(", ");
+
+            return `W pułkach: ${regNames} obowiązuje limit maksymalnie ${max} jednostek o rozmiarze ${size}.`;
+        }
+    },
 };

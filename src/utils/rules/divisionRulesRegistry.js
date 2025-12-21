@@ -35,7 +35,6 @@ export const DIVISION_RULES_REGISTRY = {
 
         isImprovementFree: (unitId, impId, params, regimentId, unitsMap, divisionDefinition) => {
             if (impId !== "veterans") return false;
-            // Dla tabeli (null) - zwracamy false, bo Weterani są płatni dla nie-artylerii
             if (!unitId) return false;
             const artilleryIds = getArtilleryIds(divisionDefinition);
             return artilleryIds.includes(unitId);
@@ -43,7 +42,6 @@ export const DIVISION_RULES_REGISTRY = {
 
         isMandatory: (unitId, impId, params, regimentId, unitsMap, divisionDefinition) => {
             if (impId !== "veterans") return false;
-            // Dla tabeli (null) - zwracamy false, żeby było widoczne w tabeli (bo można dokupić innym)
             if (!unitId) return false;
             const artilleryIds = getArtilleryIds(divisionDefinition);
             return artilleryIds.includes(unitId);
@@ -67,7 +65,6 @@ export const DIVISION_RULES_REGISTRY = {
 
         calculateDiscount: (regimentConfig, activeUnits, improvementsMap, params, regimentId, context) => {
             const targetRegimentIds = params?.regiment_ids || [];
-            // FIX: Obsługa singular/plural
             const targetImpIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
 
             if (!targetRegimentIds.includes(regimentId) || !improvementsMap) return 0;
@@ -95,7 +92,6 @@ export const DIVISION_RULES_REGISTRY = {
 
         isImprovementFree: (unitId, impId, params, regimentId) => {
             const targetRegimentIds = params?.regiment_ids || [];
-            // FIX: Obsługa singular/plural
             const targetImpIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
 
             if (targetRegimentIds.includes(regimentId) && targetImpIds.includes(impId)) {
@@ -106,14 +102,10 @@ export const DIVISION_RULES_REGISTRY = {
 
         isMandatory: (unitId, impId, params, regimentId) => {
             const targetRegimentIds = params?.regiment_ids || [];
-            // FIX: Obsługa singular/plural (to naprawia znikanie przycisków)
             const targetImpIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
 
             if (!targetRegimentIds.includes(regimentId)) return false;
             if (!targetImpIds.includes(impId)) return false;
-
-            // FIX: Jeśli pytanie pochodzi z tabeli (unitId === null), a zasada dotyczy całego pułku
-            // to zwracamy true, aby ukryć to ulepszenie w tabeli zakupów (jest "wbudowane").
             if (unitId === null) return true;
 
             return true;
@@ -181,10 +173,6 @@ export const DIVISION_RULES_REGISTRY = {
             const excludedRegiments = params?.excluded_regiment_ids || [];
             if (excludedRegiments.includes(regimentId)) return false;
 
-            // Dla tabeli (null) - jeśli są wykluczone jednostki, to technicznie nie jest to mandatory dla WSZYSTKICH,
-            // ale w kontekście "Umowy Kapitulacyjnej" chcemy to ukryć z tabeli, bo jest to "globalne" ulepszenie.
-            // Jeśli chcesz być super precyzyjny, można tu zwrócić false, wtedy pojawi się w tabeli.
-            // Ale zakładam, że chcesz ukryć.
             if (unitId === null) return true;
 
             const excludedUnits = params?.excluded_unit_ids || [];
@@ -194,7 +182,6 @@ export const DIVISION_RULES_REGISTRY = {
         }
     },
 
-    // ... reszta pliku bez zmian (free_improvement_for_specific_units, has_any_additional_regiment, etc.)
     "free_improvement_for_specific_units": {
         calculateDiscount: (regimentConfig, activeUnits, improvementsMap, params) => {
             const targetUnitIds = params?.unit_ids || [];
@@ -257,14 +244,28 @@ export const DIVISION_RULES_REGISTRY = {
             return null;
         }
     },
+
+    // --- POPRAWIONA WALIDACJA LIMITÓW ---
     "limit_max_same_regiments": {
-        validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
-            const errors = [];
-            const targetRegimentId = params?.regiment_id;
-            const maxLimit = (params?.max_amount !== undefined) ? params.max_amount : 1;
+        validate: (divisionConfig, unitsMap, getRegimentDefinition, ruleParams) => {
+            // 1. Poprawione pobieranie ID (obsługa stringa ORAZ tablicy)
+            let targetIds = [];
 
-            if (!targetRegimentId) return [];
+            if (ruleParams.regiment_ids) {
+                targetIds = Array.isArray(ruleParams.regiment_ids)
+                    ? ruleParams.regiment_ids
+                    : [ruleParams.regiment_ids];
+            } else if (ruleParams.regiment_id) {
+                targetIds = Array.isArray(ruleParams.regiment_id)
+                    ? ruleParams.regiment_id
+                    : [ruleParams.regiment_id];
+            }
 
+            const max = ruleParams.max_amount || 1;
+
+            if (targetIds.length === 0) return [];
+
+            // 2. Zbieranie pułków
             const allRegiments = [
                 ...(divisionConfig.vanguard || []),
                 ...(divisionConfig.base || []),
@@ -273,20 +274,20 @@ export const DIVISION_RULES_REGISTRY = {
 
             let count = 0;
             allRegiments.forEach(reg => {
-                if (reg.id === targetRegimentId) {
+                if (reg.id && reg.id !== IDS.NONE && targetIds.includes(reg.id)) {
                     count++;
                 }
             });
 
-            if (count > maxLimit) {
-                const def = getRegimentDefinition(targetRegimentId);
-                const name = def ? def.name : targetRegimentId;
-                errors.push(`Przekroczono limit: Możesz mieć maksymalnie ${maxLimit} pułk(i/ów) typu "${name}".`);
+            // 3. Walidacja (zwracamy tablicę stringów, nie obiekt!)
+            if (count > max) {
+                return [`Przekroczono limit (${max}) dla grupy pułków (obecnie: ${count}).`];
             }
 
-            return errors;
+            return [];
         }
     },
+
     "min_regiments_present": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             const requirements = params?.requirements || [];
@@ -535,5 +536,52 @@ export const DIVISION_RULES_REGISTRY = {
             }
             return null;
         }
-    }
+    },
+    "limit_units_by_size_in_regiments": {
+        validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
+            // 1. Pobieramy parametry
+            let targetRegimentIds = params?.regiment_ids || [];
+            if (!Array.isArray(targetRegimentIds)) targetRegimentIds = [targetRegimentIds];
+
+            const targetSize = params?.unit_size ? params.unit_size.toLowerCase() : null; // np. "s", "m", "l"
+            const maxAmount = params?.max_amount !== undefined ? params.max_amount : 99;
+
+            if (!targetSize || targetRegimentIds.length === 0) return [];
+
+            const suffix = `_${targetSize}`; // np. "_l"
+            const errors = [];
+
+            // 2. Zbieramy wszystkie pułki
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []),
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+
+            // 3. Iterujemy po pułkach
+            allRegiments.forEach(reg => {
+                // Sprawdzamy, czy ten pułk jest objęty zasadą
+                if (reg.id && reg.id !== 'none' && targetRegimentIds.includes(reg.id)) {
+                    const def = getRegimentDefinition(reg.id);
+                    if (!def) return;
+
+                    // Pobieramy jednostki z tego pułku
+                    const units = collectRegimentUnits(reg.config || {}, def);
+
+                    // Liczymy jednostki o danym rozmiarze
+                    const count = units.filter(u => u.unitId && u.unitId.toLowerCase().endsWith(suffix)).length;
+
+                    if (count > maxAmount) {
+                        const regName = def.name || reg.id;
+                        errors.push(
+                            `Przekroczono limit rozmiaru w pułku "${regName}".\n` +
+                            `Możesz mieć maksymalnie ${maxAmount} jednostek o rozmiarze "${targetSize.toUpperCase()}" (obecnie: ${count}).`
+                        );
+                    }
+                }
+            });
+
+            return errors;
+        }
+    },
 };

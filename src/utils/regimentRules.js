@@ -297,7 +297,7 @@ export const REGIMENT_RULES_DEFINITIONS = {
             "W momencie tworzenia pułku wybierz z jakiego regionu pochodzi (W całej armii możesz mieć tylko jeden pułk z danego regionu)\n"
     },
     "max_one_l_unit": {
-        title: "Ograniczenie ciężkich jednostek",
+        title: "Ograniczenie rozmiaru jednostek",
         description: "W składzie tego regimentu może znajdować się maksymalnie jedna jednostka o rozmiarze L."
     },
     "free_unit_improvement": {

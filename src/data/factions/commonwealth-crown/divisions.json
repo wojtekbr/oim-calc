@@ -72,10 +72,10 @@
         ]
     }
   },
-  "cro_koronna": {
-    "name": "Dywizja Koronna (1650-52)",
-    "improvement_points": 12,
-    "base_cost": 9,
+  "cro_litewska": {
+    "name": "Dywizja Litewska",
+    "improvement_points": 10,
+    "base_cost": 8,
     "general": ["cro_regimentarz"],
     "rules": [
       {
@@ -83,8 +83,7 @@
       },
       {
         "id": "panowie_bracia",
-        "counting_regiment_ids": ["cro_crown_cavalry","cro_light_cavalry_vanguard","cro_crown_cavalry_vanguard","cro_levy_of_nobility","cro_elite_crown_cavalry"],
-        "excluded_regiment_ids": ["cro_levy_of_nobility"]
+        "counting_regiment_ids": ["lit_light_cavalry","lit_pulk_jazdy_litewskiej", "lit_pulk_jazdy_litewskiej_vanguard","lit_doborowy_pulk_jazdy_litewskiej"]
       },
       {
         "id": "klopoty_skarbowe"
@@ -103,6 +102,11 @@
             "custom_name": "Husaria (w sile M)"
           }
         ]
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_ids": ["cro_polish_dragoons", "mrc_dragoons"],
+        "max_amount": 2
       }
     ],
     "additional_units": [
@@ -120,27 +124,27 @@
         "requirements": [
           {
             "type": "division_contains_any_regiment",
-            "regiment_ids": ["cro_polish_dragoons", "mrc_infantry"]
+            "regiment_ids": ["cro_polish_dragoons", "mrc_infantry", "mrc_dragoons"]
           }
         ]
       }
     ],
     "vanguard": [
-      { "options": ["cro_polish_dragoons","cro_light_cavalry_vanguard","cro_crown_cavalry_vanguard","cro_volunteers"]}
+      { "options": ["cro_polish_dragoons","lit_light_cavalry","lit_pulk_jazdy_litewskiej_vanguard","cro_volunteers"]}
     ],
     "base": [
-      { "options": ["cro_crown_cavalry"] },
-      { "options": ["cro_crown_cavalry","cro_elite_crown_cavalry"] }
+      { "options": ["lit_pulk_jazdy_litewskiej"] },
+      { "options": ["lit_pulk_jazdy_litewskiej", "cro_polish_dragoons","lit_doborowy_pulk_jazdy_litewskiej"] }
     ],
     "additional_regiments": {
       "max_amount": 2,
       "regiments_list": [
-        "cro_crown_cavalry",
+        "lit_pulk_jazdy_litewskiej",
         "cro_volunteers",
         "mrc_reiters",
-        "cro_levy_of_nobility",
-        "cro_crown_cavalry",
+        "lit_pulk_jazdy_litewskiej",
         "cro_polish_dragoons",
+        "mrc_dragoons",
         "mrc_infantry"
       ]
     }
