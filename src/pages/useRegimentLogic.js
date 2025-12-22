@@ -336,8 +336,11 @@ export const useRegimentLogic = ({
 
     const regimentRuleErrors = useMemo(() => {
         const activeUnits = collectRegimentUnits(currentLocalConfig, regiment);
-        return validateRegimentRules(activeUnits, regiment, { regimentConfig: currentLocalConfig });
-    }, [currentLocalConfig, regiment]);
+        return validateRegimentRules(activeUnits, regiment, {
+            regimentConfig: currentLocalConfig,
+            unitsMap
+        });
+    }, [currentLocalConfig, regiment, unitsMap]);
 
     const newRemainingPointsAfterLocalChanges = useMemo(() => {
         if (remainingImprovementPoints === undefined) return 0;

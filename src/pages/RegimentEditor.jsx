@@ -35,7 +35,7 @@ export default function RegimentEditor(props) {
     // --- LOGIKA ZASAD SPECJALNYCH ---
 
     // 1. Zasady wpisane w pułk (np. "za_mna_bracia_kozacy" z regiments.json)
-    const regimentRulesDescriptions = getRegimentRulesDescriptions(regiment);
+    const regimentRulesDescriptions = getRegimentRulesDescriptions(regiment, unitsMap);
 
     // 2. Zasady z poziomu Dywizji, które wpływają na TEN konkretny pułk
     const divisionRules = divisionDefinition?.rules || [];

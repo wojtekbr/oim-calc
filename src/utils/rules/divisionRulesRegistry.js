@@ -584,4 +584,43 @@ export const DIVISION_RULES_REGISTRY = {
             return errors;
         }
     },
+    "regiment_dependency": {
+        validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
+            const triggerId = params?.trigger_regiment_id;
+            let requiredIds = params?.required_regiment_id; // Może być string lub tablica
+
+            if (!triggerId || !requiredIds) return [];
+            if (!Array.isArray(requiredIds)) requiredIds = [requiredIds];
+
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []),
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+
+            // 1. Sprawdzamy, czy "Pułk Wyzwalacz" (np. Kopijnicy) jest w rozpisce
+            const isTriggerPresent = allRegiments.some(r => r.id === triggerId);
+
+            // Jeśli go nie ma, zasada nie obowiązuje
+            if (!isTriggerPresent) return [];
+
+            // 2. Sprawdzamy, czy "Pułk Wymagany" (np. Rajtarzy) jest w rozpisce
+            // (wystarczy jeden z listy requiredIds)
+            const isRequirementMet = allRegiments.some(r => r.id && r.id !== 'none' && requiredIds.includes(r.id));
+
+            if (!isRequirementMet) {
+                const triggerDef = getRegimentDefinition(triggerId);
+                const triggerName = triggerDef ? triggerDef.name : triggerId;
+
+                const reqNames = requiredIds.map(rid => {
+                    const def = getRegimentDefinition(rid);
+                    return def ? `"${def.name}"` : rid;
+                }).join(" lub ");
+
+                return [`Wymaganie strukturalne: Aby wystawić "${triggerName}", Twoja dywizja musi zawierać również: ${reqNames}.`];
+            }
+
+            return [];
+        }
+    }
 };

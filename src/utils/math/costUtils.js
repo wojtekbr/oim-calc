@@ -40,7 +40,10 @@ export const calculateSingleImprovementArmyCost = (unitDef, impId, regimentDefin
         let val = 0;
         if (regImpRef?.army_cost_override !== undefined) val = regImpRef.army_cost_override;
         else if (regImpRef?.army_point_cost !== undefined) val = regImpRef.army_point_cost;
+        else if (regImpRef?.army_cost !== undefined) val = regImpRef.army_cost;
+
         else if (commonImpDef?.army_point_cost !== undefined) val = commonImpDef.army_point_cost;
+        else if (commonImpDef?.army_cost !== undefined) val = commonImpDef.army_cost;
 
         return Number(val) || 0;
     }
@@ -62,7 +65,10 @@ export const calculateRegimentImprovementPoints = (
 
     let totalImpCost = 0;
 
-    if (regimentDefinition.improvement_points_cost) {
+    // --- ZMIANA: Obsługa pu_cost ---
+    if (regimentDefinition.pu_cost) {
+        totalImpCost += Number(regimentDefinition.pu_cost) || 0;
+    } else if (regimentDefinition.improvement_points_cost) {
         totalImpCost += Number(regimentDefinition.improvement_points_cost) || 0;
     }
 
@@ -82,23 +88,24 @@ export const calculateRegimentImprovementPoints = (
         if (regImpRef?.cost_override !== undefined) cost = regImpRef.cost_override;
         else if (regImpRef?.cost !== undefined) cost = regImpRef.cost;
         else if (commonImpDef?.cost !== undefined) cost = commonImpDef.cost;
-        totalImpCost += Number(cost) || 0;
+
+        // Ignorujemy koszty PS (są liczone gdzie indziej)
+        const isArmyCost = regImpRef?.army_cost || commonImpDef?.army_cost || commonImpDef?.army_point_cost;
+        if (!isArmyCost) {
+            totalImpCost += Number(cost) || 0;
+        }
     });
 
     const improvementsMap = regimentConfig.improvements || {};
     const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
 
-    // Iterujemy po jednostkach pułku
     activeUnits.forEach((unitObj) => {
-        // structureMandatory to tablica ulepszeń wymuszonych przez strukturę (regiments.json)
-        // puCostOverride to koszt PU nadpisany w strukturze
         const { key: positionKey, unitId, structureMandatory, puCostOverride } = unitObj;
 
         if (!unitId || unitId === IDS.NONE) return;
         const unitDef = unitsMap[unitId];
         if (!unitDef || unitDef.rank === RANK_TYPES.GROUP) return;
 
-        // FIX: Używamy nadpisanego kosztu PU jeśli istnieje
         if (puCostOverride !== undefined) {
             totalImpCost += Number(puCostOverride);
         } else {
@@ -106,11 +113,9 @@ export const calculateRegimentImprovementPoints = (
         }
 
         (improvementsMap[positionKey] || []).forEach(impId => {
-            // FIX: Jeśli ulepszenie jest wrodzone (z units.json) -> koszt 0
             if (unitDef.mandatory_improvements?.includes(impId)) {
                 return;
             }
-            // FIX: Jeśli ulepszenie jest wymuszone przez strukturę (z regiments.json) -> koszt 0
             if (structureMandatory?.includes(impId)) {
                 return;
             }
@@ -120,7 +125,6 @@ export const calculateRegimentImprovementPoints = (
         });
     });
 
-    // Iterujemy po jednostkach wsparcia
     if (assignedSupportUnits && assignedSupportUnits.length > 0) {
         assignedSupportUnits.forEach(su => {
             const supportUnitDef = unitsMap[su.id];
@@ -132,7 +136,6 @@ export const calculateRegimentImprovementPoints = (
             if (regimentPosKey) {
                 const supportUnitKey = `support/${su.id}-${regimentPosKey}`;
                 (improvementsMap[supportUnitKey] || []).forEach(impId => {
-                    // FIX: Jeśli ulepszenie jest wrodzone dla wsparcia -> koszt 0
                     if (supportUnitDef.mandatory_improvements?.includes(impId)) {
                         return;
                     }
@@ -196,7 +199,6 @@ export const calculateRegimentImprovementPoints = (
     return Math.max(0, totalImpCost);
 };
 
-// ... calculateImprovementPointsCost bez zmian ...
 export const calculateImprovementPointsCost = (divisionConfig, unitsMap, getRegimentDefinition, commonImprovements) => {
     if (!unitsMap || !divisionConfig) return 0;
     let totalImpCost = 0;

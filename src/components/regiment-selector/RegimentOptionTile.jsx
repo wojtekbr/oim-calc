@@ -7,8 +7,8 @@ export const RegimentOptionTile = ({ optId, isActive, onClick, getRegimentDefini
     const name = def?.name || optId;
     const cost = def?.base_cost || 0;
 
-    // 1. Bazowy koszt PU z definicji pułku
-    let puCost = def?.improvement_points_cost || 0;
+    // 1. Bazowy koszt PU z definicji pułku (TERAZ OBSŁUGUJE pu_cost)
+    let puCost = def?.pu_cost || def?.improvement_points_cost || 0;
 
     // 2. Dodatkowy koszt PU z zasad dywizji (np. "extra_regiment_cost")
     if (divisionDefinition?.rules) {

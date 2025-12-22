@@ -248,4 +248,23 @@ export const DIVISION_RULES_DEFINITIONS = {
             return `W pułkach: ${regNames} obowiązuje limit maksymalnie ${max} jednostek o rozmiarze ${size}.`;
         }
     },
+    "regiment_dependency": {
+        title: "Wymagane wsparcie pułkowe",
+        getDescription: (params, context) => {
+            const { getRegimentDefinition } = context;
+
+            const triggerId = params?.trigger_regiment_id;
+            let requiredIds = params?.required_regiment_id || [];
+            if (!Array.isArray(requiredIds)) requiredIds = [requiredIds];
+
+            const triggerName = getRegimentDefinition(triggerId)?.name || triggerId;
+
+            const reqNames = requiredIds.map(rid => {
+                const def = getRegimentDefinition(rid);
+                return def ? `"${def.name}"` : rid;
+            }).join(" lub ");
+
+            return `Pułk "${triggerName}" może zostać wystawiony tylko wtedy, gdy w dywizji znajduje się również: ${reqNames}.`;
+        }
+    },
 };

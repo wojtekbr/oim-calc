@@ -85,6 +85,12 @@
     "type": "unit",
     "cost": "normal"
   },
+  "mos_prikaz_wybornych": {
+    "name": "Prikaz strzelców Wybornych",
+    "type": "regiment",
+    "cost": 3,
+    "army_point_cost": 3
+  },
 
   "region_kijowski": {
     "name": "Pułk Kijowski",
