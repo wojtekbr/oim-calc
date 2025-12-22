@@ -832,10 +832,10 @@
           {
             "unit1": { "units": ["cro_cossack_style_s"] },
             "unit2": { "units": ["cro_cossack_style_m"] },
-            "unit3": { "units": ["cro_petyhorcy_s"] },
-            "unit4": { "units": ["cro_petyhorcy_m"] },
-            "unit5": { "units": ["cro_petyhorcy_kopie_s"] },
-            "unit6": { "units": ["cro_petyhorcy_kopie_m"] }
+            "unit3": { "units": ["lit_petyhorcy_s"] },
+            "unit4": { "units": ["lit_petyhorcy_m"] },
+            "unit5": { "units": ["lit_petyhorcy_kopie_s"] },
+            "unit6": { "units": ["lit_petyhorcy_kopie_m"] }
           }
         ]
       }
@@ -897,8 +897,8 @@
           {
             "unit1": { "units": ["cro_cossack_style_s"] },
             "unit2": { "units": ["cro_cossack_style_m"] },
-            "unit3": { "units": ["cro_petyhorcy_s"] },
-            "unit4": { "units": ["cro_petyhorcy_m"] }
+            "unit3": { "units": ["lit_petyhorcy_s"] },
+            "unit4": { "units": ["lit_petyhorcy_m"] }
           }
         ]
       }
@@ -958,16 +958,16 @@
           {
             "unit1": { "units": ["cro_cossack_style_vet_s"] },
             "unit2": { "units": ["cro_cossack_style_vet_m"] },
-            "unit3": { "units": ["cro_petyhorcy_vet_s"] },
-            "unit4": { "units": ["cro_petyhorcy_vet_m"] },
-            "unit5": { "units": ["cro_petyhorcy_kopie_vet_s"] },
-            "unit6": { "units": ["cro_petyhorcy_kopie_vet_m"] }
+            "unit3": { "units": ["lit_petyhorcy_vet_s"] },
+            "unit4": { "units": ["lit_petyhorcy_vet_m"] },
+            "unit5": { "units": ["lit_petyhorcy_kopie_vet_s"] },
+            "unit6": { "units": ["lit_petyhorcy_kopie_vet_m"] }
           }
         ],
         "optional": [
           {
             "unit1": { "units": ["cro_hussars_s"] },
-            "unit1": { "units": ["cro_hussars_m"] }
+            "unit2": { "units": ["cro_hussars_m"] }
 
           }
         ]
