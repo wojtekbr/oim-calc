@@ -35,8 +35,7 @@
     "name": "Oboźny",
     "cost": 0,
     "rank": "group",
-    "orders": 2,
-    "additional_supply": 4
+    "orders": 2
   },
   "koz_plastuni": {
     "id": "koz_plastuni",
@@ -80,7 +79,7 @@
     "cost": 4,
     "improvement_cost": 2,
     "is_infantry": true,
-    "rank": "silver"
+    "rank": "bronze"
   },
   "koz_molojcy_strzelcy_m": {
     "id": "koz_molojcy_strzelcy_m",
@@ -120,7 +119,7 @@
     "cost": 9,
     "improvement_cost": 2,
     "is_infantry": true,
-    "rank": "silver"
+    "rank": "gold"
   },
   "koz_czern_m": {
     "id": "koz_czern_m",
@@ -146,7 +145,7 @@
     "cost": 7,
     "improvement_cost": 0,
     "is_infantry": true,
-    "rank": "bronze",
+    "rank": "silver",
     "improvement_limitations": ["veterans", "additional_ammo", "swivel_guns"]
   },
   "koz_molojcy_vet_m": {
@@ -155,7 +154,7 @@
     "cost": 7,
     "improvement_cost": 2,
     "is_infantry": true,
-    "rank": "gold"
+    "rank": "silver"
   },
   "koz_molojcy_vet_l": {
     "id": "koz_molojcy_vet_l",
@@ -190,7 +189,7 @@
     "improvement_cost": 2,
     "mandatory_improvements": ["veterans"],
     "is_cavalry": true,
-    "rank": "gold"
+    "rank": "silver"
   },
   "koz_konni_molojcy_vet_m": {
     "id": "koz_konni_molojcy_vet_m",
@@ -199,7 +198,7 @@
     "improvement_cost": 2,
     "is_cavalry": true,
     "mandatory_improvements": ["veterans"],
-    "rank": "gold"
+    "rank": "silver"
   },
   "koz_artillery_s": {
     "id": "koz_artillery_s",
@@ -207,7 +206,7 @@
     "cost": 5,
     "improvement_cost": 2,
     "is_artillery": true,
-    "rank": "silver"
+    "rank": "bronze"
   },
   "koz_artillery_m": {
     "id": "koz_artillery_m",
