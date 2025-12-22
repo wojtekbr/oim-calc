@@ -585,13 +585,6 @@
     "recon": 1,
     "awareness": 5,
     "activations": 2,
-    "regiment_improvements": [
-      {
-        "id": "mercenary_dragoons",
-        "cost": 3,
-        "max_amount": 1
-      }
-    ],
     "unit_improvements": [
       {
         "id": "veterans",
@@ -740,9 +733,9 @@
             "unit2": { "units": ["cro_tatar_style_m"] }
           }
         ],
-        "additional_unit": [
+        "optional": [
           {
-            "unit1": { "units": ["cro_cosasck_style_rohatyna_s"],
+             "unit1": { "units": ["cro_cosasck_style_rohatyna_s"],
               "pu_cost_override": 1,
               "cost": 6
             }
@@ -763,7 +756,7 @@
             "unit4": { "units": ["cro_tatar_style_m"] }
           }
         ],
-        "additional_unit": [
+         "optional": [
           {
             "unit1": { "units": ["cro_cosasck_style_rohatyna_s"],
               "pu_cost_override": 1,
@@ -823,8 +816,10 @@
             "unit6": { "units": ["cro_cossack_style_rohatyna_m"] }
           }
         ],
-        "additional_unit": [
-          { "unit1": { "units": ["cro_hussars_s"] } }
+        "optional": [
+          { 
+            "unit1": { "units": ["cro_hussars_s"] }
+          }
         ]
       },
       "additional": {
@@ -903,9 +898,7 @@
             "unit1": { "units": ["cro_cossack_style_s"] },
             "unit2": { "units": ["cro_cossack_style_m"] },
             "unit3": { "units": ["cro_petyhorcy_s"] },
-            "unit4": { "units": ["cro_petyhorcy_m"] },
-            "unit5": { "units": ["cro_petyhorcy_kopie_s"] },
-            "unit6": { "units": ["cro_petyhorcy_kopie_m"] }
+            "unit4": { "units": ["cro_petyhorcy_m"] }
           }
         ]
       }
@@ -951,7 +944,7 @@
             "unit6": { "units": ["cro_cossack_style_rohatyna_m"] }
           }
         ],
-        "additional_unit": [
+        "optional": [
           { "unit1": { "units": ["cro_hussars_s"] } }
         ]
       },
@@ -971,7 +964,7 @@
             "unit6": { "units": ["cro_petyhorcy_kopie_vet_m"] }
           }
         ],
-        "additional_unit": [
+        "optional": [
           {
             "unit1": { "units": ["cro_hussars_s"] },
             "unit1": { "units": ["cro_hussars_m"] }
