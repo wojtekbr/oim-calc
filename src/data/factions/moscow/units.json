@@ -21,6 +21,14 @@
     "name": "Wojewoda (z koneksjami +8PU)",
     "cost": 0,
     "rank": "group",
+    "orders": 3,
+    "additional_supply": 8
+  },
+  "mos_pulkownik": {
+    "id": "mos_pulkownik",
+    "name": "Pułkownik",
+    "cost": 0,
+    "rank": "group",
     "orders": 2,
     "additional_supply": 8
   },
@@ -28,7 +36,7 @@
     "id": "mos_dzieci_bojarskie_m",
     "name": "Dzieci Bojarskie M",
     "cost": 7,
-    "improvement_cost": 3,
+    "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true
   },
@@ -36,7 +44,7 @@
     "id": "mos_dzieci_bojarskie_l",
     "name": "Dzieci Bojarskie L",
     "cost": 10,
-    "improvement_cost": 4,
+    "improvement_cost": 3,
     "rank": "silver",
     "is_cavalry": true
   },
@@ -62,7 +70,7 @@
     "name": "Dworianie M",
     "cost": 9,
     "improvement_cost": 3,
-    "rank": "silver",
+    "rank": "gold",
     "is_cavalry": true
   },
   "mos_dworianie_rohatyna_s": {
@@ -70,7 +78,7 @@
     "name": "Dworianie z rohatynami S",
     "cost": 7,
     "pu_cost": -1,
-    "improvement_cost": 3,
+    "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true
   },
@@ -79,15 +87,15 @@
     "name": "Dworianie z rohatynami M",
     "cost": 10,
     "pu_cost": -1,
-    "improvement_cost": 4,
-    "rank": "silver",
+    "improvement_cost": 3,
+    "rank": "gold",
     "is_cavalry": true
   },
   "mos_sotnia_podjazdowa_s": {
     "id": "mos_sotnia_podjazdowa_s",
     "name": "Sotnia Podjazdowa S",
     "cost": 7,
-    "improvement_cost": 3,
+    "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
     "are_scouts": true
@@ -96,8 +104,8 @@
     "id": "mos_kozacy_sluzebni_s",
     "name": "Kozacy Służebni S",
     "cost": 5,
-    "improvement_cost": 2,
-    "rank": "silver",
+    "improvement_cost": 1,
+    "rank": "bronze",
     "is_cavalry": true
   },
   "mos_kozacy_sluzebni_m": {
@@ -142,7 +150,7 @@
     "name": "Rajtarzy Moskiewscy M",
     "cost": 10,
     "improvement_cost": 4,
-    "rank": "silver",
+    "rank": "gold",
     "is_cavalry": true
   },
   "mos_kopijnicy_s": {
@@ -152,8 +160,7 @@
     "pu_cost": 1,
     "improvement_cost": 3,
     "rank": "silver",
-    "is_cavalry": true,
-    "has_lances": true
+    "is_cavalry": true
   },
   "mos_kopijnicy_m": {
     "id": "mos_kopijnicy_m",
@@ -161,16 +168,15 @@
     "cost": 10,
     "pu_cost": 1,
     "improvement_cost": 4,
-    "rank": "silver",
-    "is_cavalry": true,
-    "has_lances": true
+    "rank": "gold",
+    "is_cavalry": true
   },
   "mos_dragoni_polowi_s": {
     "id": "mos_dragoni_polowi_s",
     "name": "Dragoni Polowi S",
     "cost": 5,
-    "improvement_cost": 2,
-    "rank": "silver",
+    "improvement_cost": 1,
+    "rank": "bronze",
     "is_cavalry": true,
     "are_dragoons": true
   },
@@ -187,7 +193,7 @@
     "id": "mos_soldaci_m",
     "name": "Sołdaci M",
     "cost": 9,
-    "improvement_cost": 2,
+    "improvement_cost": 3,
     "rank": "silver",
     "is_infantry": true
   },
@@ -195,27 +201,25 @@
     "id": "mos_soldaci_l",
     "name": "Sołdaci L",
     "cost": 11,
-    "improvement_cost": 2,
-    "rank": "silver",
+    "improvement_cost": 4,
+    "rank": "gold",
     "is_infantry": true
   },
   "mos_dragoni_pograniczni_m": {
     "id": "mos_dragoni_pograniczni_m",
     "name": "Dragoni Pograniczni M",
     "cost": 5,
-    "improvement_cost": 1,
-    "rank": "silver",
-    "is_cavalry": true,
-    "are_dragoons": true
+    "improvement_cost": 2,
+    "rank": "bronse",
+    "is_infantry": true
   },
   "mos_dragoni_pograniczni_l": {
     "id": "mos_dragoni_pograniczni_l",
     "name": "Dragoni Pograniczni L",
     "cost": 6,
-    "improvement_cost": 1,
+    "improvement_cost": 3,
     "rank": "silver",
-    "is_cavalry": true,
-    "are_dragoons": true
+    "is_infantry": true
   },
   "mos_lekkie_dziala_s": {
     "id": "mos_lekkie_dziala_s",
