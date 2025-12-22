@@ -403,12 +403,12 @@
           { "unit1": { "units": ["mos_pulkownik"] } }
         ],
         "base1": [
-          { "unit1": { "units": ["mos_soldaci_s"] } }
+          { "unit1": { "units": ["mos_soldaci_m"] } }
         ],
         "base2": [
           {
-            "unit1": { "units": ["mos_soldaci_s"] },
-            "unit2": { "units": ["mos_soldaci_m"] }
+            "unit1": { "units": ["mos_soldaci_m"] },
+            "unit2": { "units": ["mos_soldaci_l"] }
           }
         ]
       },
@@ -423,8 +423,8 @@
         ],
         "additional1": [
           {
-            "unit1": { "units": ["mos_soldaci_s"] },
-            "unit2": { "units": ["mos_soldaci_m"] }
+            "unit1": { "units": ["mos_soldaci_m"] },
+            "unit2": { "units": ["mos_soldaci_l"] }
           }
         ]
       }
@@ -448,7 +448,7 @@
     "structure": {
       "base": {
         "general": [
-          { "unit1": { "units": ["mos_pulkownik"] } }
+          { "unit1": { "units": ["mos_golowa"] } }
         ],
         "base1": [
           {
