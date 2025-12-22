@@ -335,15 +335,15 @@
     "name": "Petyhorcy M",
     "cost": 11,
     "improvement_cost": 4,
-    "rank": "gold",
+    "rank": "silver",
     "is_cavalry": true
   },
   "cro_petyhorcy_kopie_s": {
     "id": "cro_petyhorcy_kopie_s",
     "name": "Petyhorcy z kopiami S",
     "cost": 8,
-    "improvement_cost": 4,
-    "rank": "gold",
+    "improvement_cost": 3,
+    "rank": "silver",
     "is_cavalry": true,
     "has_lances": true
   },
@@ -352,14 +352,14 @@
     "name": "Petyhorcy z kopiami M",
     "cost": 11,
     "improvement_cost": 4,
-    "rank": "gold",
+    "rank": "silver",
     "is_cavalry": true,
     "has_lances": true
   },
   "cro_petyhorcy_vet_s": {
     "id": "cro_petyhorcy_s",
     "name": "Petyhorcy S",
-    "cost": 8,
+    "cost": 9,
     "improvement_cost": 3,
     "rank": "silver",
     "is_cavalry": true,
@@ -368,18 +368,18 @@
   "cro_petyhorcy_vet_m": {
     "id": "cro_petyhorcy_m",
     "name": "Petyhorcy M",
-    "cost": 11,
+    "cost": 12,
     "improvement_cost": 4,
-    "rank": "gold",
+    "rank": "silver",
     "is_cavalry": true,
     "mandatory_improvements": ["veterans"]
   },
   "cro_petyhorcy_kopie_vet_s": {
     "id": "cro_petyhorcy_kopie_s",
     "name": "Petyhorcy z kopiami S",
-    "cost": 8,
-    "improvement_cost": 4,
-    "rank": "gold",
+    "cost": 9,
+    "improvement_cost": 3,
+    "rank": "silver",
     "is_cavalry": true,
     "has_lances": true,
     "mandatory_improvements": ["veterans"]
@@ -387,9 +387,9 @@
   "cro_petyhorcy_kopie_vet_m": {
     "id": "cro_petyhorcy_kopie_m",
     "name": "Petyhorcy z kopiami M",
-    "cost": 11,
+    "cost": 12,
     "improvement_cost": 4,
-    "rank": "gold",
+    "rank": "silver",
     "is_cavalry": true,
     "has_lances": true,
     "mandatory_improvements": ["veterans"]
