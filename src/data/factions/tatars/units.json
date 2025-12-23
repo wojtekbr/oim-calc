@@ -33,16 +33,14 @@
     "name": "Jasyr",
     "cost": 0,
     "improvement_cost": 0,
-    "rank": "group",
-    "orders": 3
+    "rank": "group"
   },
   "tat_zwiadowcy": {
     "id": "tat_zwiadowcy",
     "name": "Zwiadowcy",
     "cost": 3,
     "improvement_cost": 0,
-    "rank": "group",
-    "orders": 3
+    "rank": "group"
   },
   "tat_ordyncy_s": {
     "id": "tat_ordyncy_s",
@@ -111,7 +109,8 @@
     "pu_cost": 1,
     "improvement_cost": 3,
     "rank": "gold",
-    "is_cavalry": true
+    "is_cavalry": true,
+    "are_scouts": true
   },
   "tat_jazda_doborowa_m": {
     "id": "tat_jazda_doborowa_m",
@@ -120,7 +119,8 @@
     "pu_cost": 1,
     "improvement_cost": 4,
     "rank": "gold",
-    "is_cavalry": true
+    "is_cavalry": true,
+    "are_scouts": true
   },
   "tat_basza": {
     "id": "tat_basza",
@@ -133,14 +133,14 @@
     "id": "tat_kapykulu_s",
     "name": "Kapykułu S",
     "cost": 5,
-    "improvement_cost": 2,
+    "improvement_cost": 1,
     "rank": "silver"
   },
   "tat_kapykulu_m": {
     "id": "tat_kapykulu_m",
     "name": "Kapykułu M",
     "cost": 7,
-    "improvement_cost": 3,
-    "rank": "silver"
+    "improvement_cost": 2,
+    "rank": "gold"
   }
 }
