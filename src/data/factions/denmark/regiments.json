@@ -1,0 +1,236 @@
+{
+  "dan_kombinowany_reg_jazdy": {
+    "name": "Kombinowany Regiment Jazdy",
+    "base_cost": 2,
+    "recon": 4,
+    "awareness": 4,
+    "activations": 2,
+    "type": "cavalry",
+    "special_rules": ["dan_wydano_z_arsenalu"],
+    "unit_improvements": [
+      {
+        "id": "additional_pistol",
+        "name": "Dodatkowy Pistolet",
+        "cost": -1,
+        "min_amount": 1,
+        "units_allowed": ["dan_rajtarzy_dunscy_s", "dan_rajtarzy_dunscy_m"]
+      },
+      {
+        "id": "additional_ammo",
+        "cost": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["dan_pulkownik"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["dan_rajtarzy_dunscy_m"] } }
+        ],
+        "base2": [
+          { "unit1": { "units": ["dan_dragoni_dunscy_m"] } }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["dan_major"] } }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["dan_rajtarzy_dunscy_m"] },
+            "unit2": { "units": ["dan_dragoni_dunscy_m"] }
+          }
+        ]
+      }
+    }
+  },
+
+  "dan_reg_dragonow_krajowych": {
+    "name": "Regiment Dragonów Krajowych",
+    "base_cost": 0,
+    "recon": 5,
+    "awareness": 5,
+    "activations": 2,
+    "type": "cavalry",
+    "unit_improvements": [
+      {
+        "id": "additional_ammo",
+        "cost": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["dan_pulkownik"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["dan_dragoni_dunscy_m_light"] } }
+        ],
+        "base2": [
+          { "unit1": { "units": ["dan_dragoni_dunscy_m_light"] } }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["dan_major"] } }
+        ],
+        "additional1": [
+          { "unit1": { "units": ["dan_dragoni_dunscy_m_light"] } }
+        ]
+      }
+    }
+  },
+
+  "dan_reg_jazdy_krajowej": {
+    "name": "Regiment Jazdy Krajowej",
+    "base_cost": 3,
+    "recon": 4,
+    "awareness": 4,
+    "activations": 2,
+    "type": "cavalry",
+    "special_rules": ["dan_wydano_z_arsenalu"],
+    "unit_improvements": [
+      {
+        "id": "additional_pistol",
+        "name": "Dodatkowy Pistolet",
+        "cost": -1,
+        "min_amount": 1
+      },
+      {
+        "id": "additional_ammo",
+        "cost": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["dan_pulkownik"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["dan_rajtarzy_dunscy_m"] } }
+        ],
+        "base2": [
+          { "unit1": { "units": ["dan_rajtarzy_dunscy_m"] } }
+        ],
+        "base3": [
+          { "unit1": { "units": ["dan_rajtarzy_dunscy_m"] } }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["dan_major"] } }
+        ],
+        "additional1": [
+          { "unit1": { "units": ["dan_rajtarzy_dunscy_m"] } }
+        ]
+      }
+    }
+  },
+
+  "dan_reg_piechoty_krajowej": {
+    "name": "Regiment Piechoty Krajowej",
+    "base_cost": 1,
+    "recon": 3,
+    "awareness": 3,
+    "activations": 2,
+    "type": "infantry",
+    "special_rules": ["dan_wydano_z_arsenalu", "dan_dunscy_rekruci"],
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_ammo",
+        "cost": 1
+      },
+      {
+        "id": "regimental_guns",
+        "name": "Działa Regimentowe",
+        "cost": 1,
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["dan_pulkownik"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["dan_muszkieterzy_dunscy_s"] },
+            "unit2": { "units": ["dan_muszkieterzy_dunscy_kom"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["dan_muszkieterzy_dunscy_s"] },
+            "unit2": { "units": ["dan_piechota_dunska_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["dan_major"] } }
+        ],
+        "additional1": [
+          { "unit1": { "units": ["dan_piechota_dunska_m"] } }
+        ]
+      }
+    }
+  },
+
+  "dan_reg_norweskiej_piechoty": {
+    "name": "Regiment Norweskiej Piechoty Krajowej",
+    "base_cost": 0,
+    "recon": 3,
+    "awareness": 3,
+    "activations": 2,
+    "type": "infantry",
+    "special_rules": ["dan_nieustraszeni"],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo",
+        "cost": 1
+      },
+      {
+        "id": "regimental_guns",
+        "name": "Działa Regimentowe",
+        "cost": 1,
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["dan_pulkownik"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["dan_muszkieterzy_dunscy_nor_s"] },
+            "unit2": { "units": ["dan_muszkieterzy_dunscy_nor_kom"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["dan_piechota_dunska_nor_m"] },
+            "unit2": { "units": ["dan_muszkieterzy_dunscy_nor_s"] }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["dan_major"] } }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["dan_piechota_dunska_nor_m"] },
+            "unit2": { "units": ["dan_muszkieterzy_dunscy_nor_s"] }
+          }
+        ]
+      }
+    }
+  }
+}

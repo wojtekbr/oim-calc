@@ -16,18 +16,20 @@
           { "unit1": { "units": ["bra_podpulkownik"] } }
         ],
         "base1": [
-          { "unit1": { "units": ["bra_rajtarzy_obrony_krajowej_s"] } }
+          { "unit1": { "units": ["bra_rajtarzy_obrony_krajowej_m"] } }
         ],
         "base2": [
-          { "unit1": { "units": ["bra_rajtarzy_obrony_krajowej_s"] } }
+          { "unit1": { "units": ["bra_rajtarzy_obrony_krajowej_m"] } }
         ]
       },
       "additional": {
         "general": [
-          { "unit1": { "units": ["bra_kapitan"] } }
+          { "unit1": { "units": ["bra_kapitan"],
+            "is_toggle": true
+          } }
         ],
         "additional1": [
-          { "unit1": { "units": ["bra_rajtarzy_obrony_krajowej_s"] } }
+          { "unit1": { "units": ["bra_rajtarzy_obrony_krajowej_m"] } }
         ]
       }
     }
@@ -59,7 +61,9 @@
       },
       "additional": {
         "general": [
-          { "unit1": { "units": ["bra_major"] } }
+          { "unit1": { "units": ["bra_major"],
+            "is_toggle": true
+          } }
         ],
         "additional1": [
           {
@@ -92,18 +96,20 @@
           { "unit1": { "units": ["bra_pulkownik"] } }
         ],
         "base1": [
-          { "unit1": { "units": ["bra_muszkieterzy_pruscy_s"] } }
+          { "unit1": { "units": ["bra_muszkieterzy_pruscy_m"] } }
         ],
         "base2": [
-          { "unit1": { "units": ["bra_muszkieterzy_pruscy_s"] } }
+          { "unit1": { "units": ["bra_muszkieterzy_pruscy_m"] } }
         ]
       },
       "additional": {
         "general": [
-          { "unit1": { "units": ["bra_major"] } }
+          { "unit1": { "units": ["bra_major"],
+            "is_toggle": true
+          } }
         ],
         "additional1": [
-          { "unit1": { "units": ["bra_muszkieterzy_pruscy_s"] } }
+          { "unit1": { "units": ["bra_muszkieterzy_pruscy_m"] } }
         ]
       }
     }

@@ -35,6 +35,14 @@
             "unit5": { "units": ["hre_dragoni_vet_s"] },
             "unit6": { "units": ["hre_dragoni_vet_m"] }
           }
+        ],
+        "base3": [
+          {
+            "unit1": { "units": ["hre_kirasjerzy_s"] },
+            "unit2": { "units": ["hre_kirasjerzy_m"] },
+            "unit3": { "units": ["hre_opanc_kirasjerzy_s"] },
+            "unit4": { "units": ["hre_opanc_kirasjerzy_m"] }
+          }
         ]
       },
       "additional": {
@@ -42,14 +50,6 @@
           {
             "unit1": { "units": ["hre_podpulkownik_1"], "is_toggle": true },
             "unit2": { "units": ["hre_podpulkownik_2"], "is_toggle": true }
-          }
-        ],
-        "additional1": [
-          {
-            "unit1": { "units": ["hre_kirasjerzy_s"] },
-            "unit2": { "units": ["hre_kirasjerzy_m"] },
-            "unit3": { "units": ["hre_opanc_kirasjerzy_s"] },
-            "unit4": { "units": ["hre_opanc_kirasjerzy_m"] }
           }
         ]
       }
@@ -88,18 +88,21 @@
         ],
         "base1": [
           {
-            "unit1": { "units": ["hre_kirasjerzy_s"] },
-            "unit2": { "units": ["hre_opanc_kirasjerzy_s"] }
+            "unit1": { "units": ["hre_kirasjerzy_s"] }
           }
         ],
         "base2": [
           {
-            "unit1": { "units": ["hre_kirasjerzy_vet_s"] },
-            "unit2": { "units": ["hre_kirasjerzy_vet_m"] },
-            "unit3": { "units": ["hre_opanc_kirasjerzy_vet_s"] },
-            "unit4": { "units": ["hre_opanc_kirasjerzy_vet_m"] },
-            "unit5": { "units": ["hre_dragoni_vet_s"] },
-            "unit6": { "units": ["hre_dragoni_vet_m"] }
+            "unit1": { "units": ["hre_kirasjerzy_s"] },
+            "unit2": { "units": ["hre_kirasjerzy_m"] },
+            "unit3": { "units": ["hre_opanc_kirasjerzy_s"] },
+            "unit4": { "units": ["hre_opanc_kirasjerzy_m"] }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": { "units": ["hre_kirasjerzy_s"] },
+            "unit2": { "units": ["hre_kirasjerzy_m"] }
           }
         ]
       },
@@ -108,14 +111,6 @@
           {
             "unit1": { "units": ["hre_podpulkownik_1"] },
             "unit2": { "units": ["hre_podpulkownik_2"] }
-          }
-        ],
-        "additional1": [
-          {
-            "unit1": { "units": ["hre_kirasjerzy_s"] },
-            "unit2": { "units": ["hre_kirasjerzy_m"] },
-            "unit3": { "units": ["hre_opanc_kirasjerzy_s"] },
-            "unit4": { "units": ["hre_opanc_kirasjerzy_m"] }
           }
         ]
       }
@@ -179,12 +174,6 @@
           {
             "unit1": { "units": ["hre_major_1"], "is_toggle": true },
             "unit2": { "units": ["hre_major_2"], "is_toggle": true }
-          }
-        ],
-        "additional1": [
-          {
-            "unit1": { "units": ["hre_skwadron_muszkieterow_m"] },
-            "unit2": { "units": ["hre_piechota_cesarska_m"] }
           }
         ]
       }

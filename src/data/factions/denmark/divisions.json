@@ -1,0 +1,155 @@
+{
+  "dan_dywizja_w_holsztynie": {
+    "name": "Dywizja w Holsztynie w 1657",
+    "improvement_points": 10,
+    "base_cost": 12,
+    "general": ["dan_general"],
+    "rules": [
+      {
+        "id": "rada_wojenna"
+      },
+      {
+        "id": "generalkrigskommisarie"
+      },
+      {
+        "id": "wymiana_rajtarow_na_doborowy"
+      },
+      {
+        "id": "wydano_z_arsenalu_dla_najemnikow"
+      },
+      {
+        "id": "limit_max_l_units_in_mercenaries"
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name": "dan_komisarz"
+      }
+    ],
+    "division_artillery": [
+      {
+        "unit1": ["dan_major"]
+      },
+      {
+        "type": "group",
+        "name": "Lekkie Działa",
+        "options": ["dan_light_artillery_s"]
+      },
+      {
+        "type": "group",
+        "name": "Średnie Działa",
+        "options": ["dan_medium_artillery_s"]
+      }
+    ],
+    "vanguard": [
+      { "options": ["dan_reg_jazdy_krajowej", "mrc_dragoons"] }
+    ],
+    "base": [
+      { "options": ["dan_reg_jazdy_krajowej"] },
+      { "options": ["dan_reg_piechoty_krajowej"] },
+      { "options": ["mrc_infantry", "mrc_reiters"] }
+    ],
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
+        "mrc_dragoons",
+        "mrc_infantry",
+        "mrc_reiters",
+        "dan_reg_piechoty_krajowej"
+      ]
+    }
+  },
+
+  "dan_dywizja_w_skanii": {
+    "name": "Dywizja w Skanii w 1657",
+    "improvement_points": 10,
+    "base_cost": 11,
+    "general": ["dan_general"],
+    "rules": [
+      {
+        "id": "dzialania_partyzanckie"
+      },
+      {
+        "id": "pomoc_miejscowych"
+      },
+      {
+        "id": "rada_wojenna"
+      },
+      {
+        "id": "generalkrigskommisarie"
+      },
+      {
+        "id": "wymiana_rajtarow_na_doborowy"
+      },
+      {
+        "id": "wydano_z_arsenalu_dla_najemnikow"
+      },
+      {
+        "id": "limit_max_l_units_in_mercenaries"
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name": "dan_snaphannar",
+        "cost": 3
+      },
+      {
+        "name": "dan_komisarz"
+      },
+      {
+        "name": "dan_piechota_dunska_s",
+        "cost": 7,
+        "pu_cost": -4,
+        "special_rules": ["independent"],
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      }
+    ],
+    "division_artillery": [
+      {
+        "unit1": ["dan_major"]
+      },
+      {
+        "type": "group",
+        "name": "Lekkie Działa",
+        "options": ["dan_light_artillery_s"]
+      },
+      {
+        "type": "group",
+        "name": "Średnie Działa",
+        "options": ["dan_medium_artillery_s", "dan_light_artillery_s"]
+      }
+    ],
+    "vanguard": [
+      { "options": ["dan_reg_jazdy_krajowej", "mrc_dragoons", "dan_reg_dragonow_krajowych"] }
+    ],
+    "base": [
+      { "options": ["dan_reg_jazdy_krajowej"] },
+      { "options": ["dan_reg_piechoty_krajowej"] },
+      { "options": ["dan_reg_piechoty_krajowej", "dan_reg_dragonow_krajowych"] }
+    ],
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
+        "dan_reg_jazdy_krajowej",
+        "mrc_dragoons",
+        "mrc_infantry",
+        "mrc_reiters",
+        "dan_reg_piechoty_krajowej"
+      ]
+    }
+  }
+}

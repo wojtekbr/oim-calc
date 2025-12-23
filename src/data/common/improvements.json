@@ -85,6 +85,12 @@
     "type": "unit",
     "cost": "normal"
   },
+  "dragoons_attachment": {
+    "name": "Przeszkoleni",
+    "type": "unit",
+    "cost": "normal"
+  },
+
   "mos_prikaz_wybornych": {
     "name": "Prikaz strzelców Wybornych",
     "type": "regiment",

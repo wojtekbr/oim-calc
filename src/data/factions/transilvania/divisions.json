@@ -1,0 +1,118 @@
+{
+  "sie_polowa": {
+    "name": "Dywizja Polowa",
+    "improvement_points": 10,
+    "base_cost": 7,
+    "general": ["sie_general"],
+    "rules": [
+      {
+        "id": "zawsze_obsadzac_wzgorza"
+      },
+      {
+        "id": "poruszac_sie_tylko_dobrymi_traktami_4"
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name": "cro_pancerni_s",
+        "cost": 6,
+        "pu_cost": 1
+      }
+    ],
+    "division_artillery": [
+      {
+        "type": "group",
+        "name": "Bateria Dział Siedmiogrodzkich",
+        "options": ["sie_bateria_dzial_s"]
+      }
+    ],
+    "vanguard": [
+      { "options": ["sie_sereg_kurtanow"] }
+    ],
+    "base": [
+      { "options": ["sie_sereg_jazdy_zacieznej"] },
+      { "options": ["sie_sereg_jazdy_zacieznej", "sie_sereg_wojsk_komitackich", "sie_sereg_piechoty_szeklerskiej"] },
+      { "options": ["sie_sereg_wojsk_komitackich"] }
+    ],
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
+        "sie_sereg_wojsk_komitackich",
+        "sie_sereg_piechoty_szeklerskiej",
+        "sie_sereg_piechoty_miejskiej",
+        "sie_sereg_piechoty_saskiej",
+        "sie_sereg_jazdy_zacieznej",
+        "sie_sereg_semenow"
+      ]
+    }
+  },
+  "sie_obleznicza": {
+    "name": "Dywizja oblężnicza",
+    "improvement_points": 12,
+    "base_cost": 8,
+    "general": ["sie_general"],
+    "rules": [
+      {
+        "id": "zawsze_obsadzac_wzgorza"
+      },
+      {
+        "id": "poruszac_sie_tylko_dobrymi_traktami_4"
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name": "cro_pancerni_s",
+        "cost": 6,
+        "pu_cost": 1,
+        "requirements": [
+          {
+            "type": "division_contains_any_regiment",
+            "regiment_ids": ["sie_sereg_wojsk_komitackich"]
+          }
+        ]
+      }
+    ],
+    "division_artillery": [
+      {
+        "type": "group",
+        "name": "Bateria Dział Siedmiogrodzkich",
+        "options": ["sie_bateria_dzial_s"]
+      },
+      {
+        "type": "group",
+        "name": "Bateria Dział Siedmiogrodzkich",
+        "options": ["sie_bateria_dzial_s"]
+      }
+    ],
+    "vanguard": [
+      { "options": ["mrc_dragoons"] }
+    ],
+    "base": [
+      { "options": ["sie_sereg_piechoty_miejskiej"] },
+      { "options": ["sie_sereg_pieszych_hajdukow", "sie_sereg_wojsk_komitackich", "sie_sereg_piechoty_szeklerskiej"] },
+      { "options": ["sie_sereg_piechoty_szeklerskiej"] }
+    ],
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
+        "sie_sereg_semenow",
+        "mrc_infantry",
+        "sie_sereg_piechoty_miejskiej",
+        "sie_sereg_jazdy_zacieznej",
+        "sie_sereg_wojsk_komitackich"
+      ]
+    }
+  }
+}

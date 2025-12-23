@@ -30,9 +30,9 @@
     "rank": "group",
     "orders": 1
   },
-  "bra_rajtarzy_obrony_krajowej_s": {
-    "id": "bra_rajtarzy_obrony_krajowej_s",
-    "name": "Rajtarzy Obrony Krajowej S",
+  "bra_rajtarzy_obrony_krajowej_m": {
+    "id": "bra_rajtarzy_obrony_krajowej_m",
+    "name": "Rajtarzy Obrony Krajowej M",
     "cost": 6,
     "improvement_cost": 2,
     "rank": "silver",
@@ -47,12 +47,11 @@
     "is_cavalry": true,
     "are_dragoons": true
   },
-  "bra_muszkieterzy_pruscy_s": {
-    "id": "bra_muszkieterzy_pruscy_s",
-    "name": "Muszkieterzy Pruscy S",
+  "bra_muszkieterzy_pruscy_m": {
+    "id": "bra_muszkieterzy_pruscy_m",
+    "name": "Muszkieterzy Pruscy M",
     "cost": 6,
     "improvement_cost": 2,
-    "rank": "silver",
-    "is_infantry": true
+    "rank": "silver"
   }
 }

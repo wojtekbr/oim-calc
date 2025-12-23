@@ -1,0 +1,185 @@
+{
+  "bra_dywizja_polowa": {
+    "name": "Dywizja Polowa (1655-60)",
+    "improvement_points": 10,
+    "base_cost": 17,
+    "general": ["bra_general"],
+    "rules": [
+      {
+        "id": "wojska_stale"
+      },
+      {
+        "id": "elektor_przyslal_swoich_poslow"
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_ids": ["mrc_reiters"],
+        "max_amount": 2
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_ids": ["mrc_infantry"],
+        "max_amount": 2
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_ids": ["mrc_dragoons"],
+        "max_amount": 1
+      },
+      {
+        "id": "tylko_jeden_regiment_opancerzony"
+      },
+      {
+        "id": "darmowe_ulepszenie_dzial_lekkich"
+      },
+      {
+        "id": "darmowe_ulepszenie_dzial_srednich"
+      },
+      {
+        "id": "roznorodne_wyposazenie_2"
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      }
+    ],
+    "division_artillery": [
+      {
+        "unit1": ["bra_major"]
+      },
+      {
+        "type": "group",
+        "name": "Lekkie Działa",
+        "options": ["bra_light_artillery_s"]
+      },
+      {
+        "type": "group",
+        "name": "Średnie Działa",
+        "options": ["bra_medium_artillery_s"]
+      }
+    ],
+    "vanguard": [
+      { "options": ["mrc_reiters", "mrc_dragoons"] }
+    ],
+    "base": [
+      { "options": ["mrc_reiters"] },
+      { "options": ["mrc_infantry"] },
+      { "options": ["mrc_reiters", "mrc_infantry"] }
+    ],
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
+        "mrc_reiters",
+        "mrc_dragoons",
+        "mrc_armoured_reiters",
+        "mrc_infantry"
+      ]
+    }
+  },
+
+  "bra_obrona_terytorialna": {
+    "name": "Obrona terytorialna (1655-60)",
+    "improvement_points": 12,
+    "base_cost": 12,
+    "general": ["bra_general"],
+    "rules": [
+      {
+        "id": "na_wlasnej_ziemi_4"
+      },
+      {
+        "id": "wojska_stale"
+      },
+      {
+        "id": "elektor_przyslal_swoich_poslow"
+      },
+      {
+        "id": "obronic_prusy_za_wszelka_cene"
+      },
+      {
+        "id": "wiarolomny_sojusznik"
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_ids": ["mrc_reiters", "bra_reg_rajtarow_pruskich"],
+        "max_amount": 2
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_ids": ["mrc_infantry", "bra_reg_piechoty_pruskiej"],
+        "max_amount": 2
+      },
+      {
+        "id": "wymog_wystawienia_rajtarow_pruskich"
+      },
+      {
+        "id": "wymog_wystawienia_piechoty_pruskiej"
+      },
+      {
+        "id": "darmowe_ulepszenie_dzial_lekkich"
+      },
+      {
+        "id": "darmowe_ulepszenie_dzial_srednich"
+      },
+      {
+        "id": "roznorodne_wyposazenie_2"
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      }
+    ],
+    "division_artillery": [
+      {
+        "unit1": ["bra_major"]
+      },
+      {
+        "type": "group",
+        "name": "Lekkie Działa",
+        "options": ["bra_light_artillery_s"]
+      },
+      {
+        "type": "group",
+        "name": "Średnie Działa",
+        "options": ["bra_medium_artillery_s"]
+      }
+    ],
+    "vanguard": [
+      { "options": ["mrc_reiters", "mrc_dragoons", "bra_reg_dragonow_pruskich"] }
+    ],
+    "base": [
+      { "options": ["mrc_reiters", "bra_reg_rajtarow_pruskich"] },
+      { "options": ["mrc_infantry", "bra_reg_piechoty_pruskiej"] },
+      { "options": ["bra_reg_piechoty_pruskiej", "bra_reg_rajtarow_pruskich", "bra_reg_dragonow_pruskich"] }
+    ],
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
+        "bra_reg_rajtarow_pruskich",
+        "bra_reg_dragonow_pruskich",
+        "mrc_dragoons",
+        "mrc_infantry",
+        "bra_reg_piechoty_pruskiej"
+      ]
+    }
+  }
+}
