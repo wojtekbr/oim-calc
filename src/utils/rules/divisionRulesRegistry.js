@@ -245,10 +245,8 @@ export const DIVISION_RULES_REGISTRY = {
         }
     },
 
-    // --- POPRAWIONA WALIDACJA LIMITÓW ---
     "limit_max_same_regiments": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, ruleParams) => {
-            // 1. Poprawione pobieranie ID (obsługa stringa ORAZ tablicy)
             let targetIds = [];
 
             if (ruleParams.regiment_ids) {
@@ -265,7 +263,6 @@ export const DIVISION_RULES_REGISTRY = {
 
             if (targetIds.length === 0) return [];
 
-            // 2. Zbieranie pułków
             const allRegiments = [
                 ...(divisionConfig.vanguard || []),
                 ...(divisionConfig.base || []),
@@ -279,7 +276,6 @@ export const DIVISION_RULES_REGISTRY = {
                 }
             });
 
-            // 3. Walidacja (zwracamy tablicę stringów, nie obiekt!)
             if (count > max) {
                 return [`Przekroczono limit (${max}) dla grupy pułków (obecnie: ${count}).`];
             }
@@ -539,36 +535,29 @@ export const DIVISION_RULES_REGISTRY = {
     },
     "limit_units_by_size_in_regiments": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
-            // 1. Pobieramy parametry
             let targetRegimentIds = params?.regiment_ids || [];
             if (!Array.isArray(targetRegimentIds)) targetRegimentIds = [targetRegimentIds];
 
-            const targetSize = params?.unit_size ? params.unit_size.toLowerCase() : null; // np. "s", "m", "l"
+            const targetSize = params?.unit_size ? params.unit_size.toLowerCase() : null;
             const maxAmount = params?.max_amount !== undefined ? params.max_amount : 99;
 
             if (!targetSize || targetRegimentIds.length === 0) return [];
 
-            const suffix = `_${targetSize}`; // np. "_l"
+            const suffix = `_${targetSize}`;
             const errors = [];
 
-            // 2. Zbieramy wszystkie pułki
             const allRegiments = [
                 ...(divisionConfig.vanguard || []),
                 ...(divisionConfig.base || []),
                 ...(divisionConfig.additional || [])
             ];
 
-            // 3. Iterujemy po pułkach
             allRegiments.forEach(reg => {
-                // Sprawdzamy, czy ten pułk jest objęty zasadą
                 if (reg.id && reg.id !== 'none' && targetRegimentIds.includes(reg.id)) {
                     const def = getRegimentDefinition(reg.id);
                     if (!def) return;
 
-                    // Pobieramy jednostki z tego pułku
                     const units = collectRegimentUnits(reg.config || {}, def);
-
-                    // Liczymy jednostki o danym rozmiarze
                     const count = units.filter(u => u.unitId && u.unitId.toLowerCase().endsWith(suffix)).length;
 
                     if (count > maxAmount) {
@@ -587,7 +576,7 @@ export const DIVISION_RULES_REGISTRY = {
     "regiment_dependency": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             const triggerId = params?.trigger_regiment_id;
-            let requiredIds = params?.required_regiment_id; // Może być string lub tablica
+            let requiredIds = params?.required_regiment_id;
 
             if (!triggerId || !requiredIds) return [];
             if (!Array.isArray(requiredIds)) requiredIds = [requiredIds];
@@ -598,14 +587,9 @@ export const DIVISION_RULES_REGISTRY = {
                 ...(divisionConfig.additional || [])
             ];
 
-            // 1. Sprawdzamy, czy "Pułk Wyzwalacz" (np. Kopijnicy) jest w rozpisce
             const isTriggerPresent = allRegiments.some(r => r.id === triggerId);
-
-            // Jeśli go nie ma, zasada nie obowiązuje
             if (!isTriggerPresent) return [];
 
-            // 2. Sprawdzamy, czy "Pułk Wymagany" (np. Rajtarzy) jest w rozpisce
-            // (wystarczy jeden z listy requiredIds)
             const isRequirementMet = allRegiments.some(r => r.id && r.id !== 'none' && requiredIds.includes(r.id));
 
             if (!isRequirementMet) {
@@ -618,6 +602,69 @@ export const DIVISION_RULES_REGISTRY = {
                 }).join(" lub ");
 
                 return [`Wymaganie strukturalne: Aby wystawić "${triggerName}", Twoja dywizja musi zawierać również: ${reqNames}.`];
+            }
+
+            return [];
+        }
+    },
+
+    // --- POPRAWIONO: Sprawdza dolny ORAZ górny limit ilościowy ---
+    "mandatory_support_unit_per_regiment": {
+        validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
+            const regimentIds = params?.regiment_ids || [];
+            const supportUnitId = params?.support_unit_id;
+            const amountPerRegiment = params?.amount_per_regiment || 1;
+
+            // Obsługa flagi (boolean lub string "true")
+            const excludeVanguard = params?.exclude_vanguard === true || params?.exclude_vanguard === "true";
+
+            if (!supportUnitId || regimentIds.length === 0) return [];
+
+            // 1. Budujemy listę pułków do sprawdzenia
+            let allRegiments = [
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+
+            // Jeśli NIE wykluczamy straży, dodajemy ją do puli
+            if (!excludeVanguard) {
+                allRegiments = [
+                    ...(divisionConfig.vanguard || []),
+                    ...allRegiments
+                ];
+            }
+
+            // 2. Liczymy aktywne pułki z listy
+            let regimentCount = 0;
+            allRegiments.forEach(reg => {
+                if (reg.id && reg.id !== 'none' && regimentIds.includes(reg.id)) {
+                    regimentCount++;
+                }
+            });
+
+            if (regimentCount === 0) return [];
+
+            // 3. Liczymy posiadane jednostki wsparcia tego typu
+            const supportCount = (divisionConfig.supportUnits || [])
+                .filter(su => su.id === supportUnitId).length;
+
+            const requiredAmount = regimentCount * amountPerRegiment;
+
+            const unitName = unitsMap[supportUnitId]?.name || supportUnitId;
+            const regNames = regimentIds.map(rid => {
+                const def = getRegimentDefinition(rid);
+                return def ? `"${def.name}"` : rid;
+            }).join(" lub ");
+            const contextInfo = excludeVanguard ? " (poza Strażą Przednią)" : "";
+
+            // --- WALIDACJA: ZA MAŁO ---
+            if (supportCount < requiredAmount) {
+                return [`Wymagana jednostka wsparcia: Posiadasz ${regimentCount} pułk(i) typu ${regNames}${contextInfo}. Musisz dokupić jeszcze ${requiredAmount - supportCount}x "${unitName}".`];
+            }
+
+            // --- NOWE WALIDACJA: ZA DUŻO ---
+            if (supportCount > requiredAmount) {
+                return [`Nadmiarowa jednostka wsparcia: Posiadasz ${regimentCount} pułk(i) typu ${regNames}${contextInfo}. Limit wynosi ${requiredAmount}, a posiadasz ${supportCount}x "${unitName}". Usuń nadmiarowe jednostki.`];
             }
 
             return [];

@@ -12,7 +12,7 @@ import {
     getEffectiveUnitImprovements
 } from "../utils/armyMath";
 import { getDivisionRulesDescriptions, checkSupportUnitRequirements } from "../utils/divisionRules";
-import { GROUP_TYPES, IDS } from "../constants"; // Upewnij się, że IDS jest zaimportowane
+import { GROUP_TYPES, IDS } from "../constants";
 import { useArmyData } from "../context/ArmyDataContext";
 
 // --- IMPORTY KOMPONENTÓW ---
@@ -51,10 +51,9 @@ export default function RegimentSelector(props) {
     const vanguardCheck = validateVanguardCost(configuredDivision, unitsMap, faction, getRegimentDefinition, improvements);
     const alliedCheck = validateAlliedCost(configuredDivision, unitsMap, faction, getRegimentDefinition, improvements);
 
-    // --- NOWOŚĆ: Walidacja pustych slotów obowiązkowych (Straż i Podstawa) ---
+    // --- Walidacja pustych slotów obowiązkowych (Straż i Podstawa) ---
     const emptySlotsErrors = [];
 
-    // Sprawdzamy Straż Przednią
     if (configuredDivision.vanguard) {
         configuredDivision.vanguard.forEach((reg, idx) => {
             if (reg.id === IDS.NONE) {
@@ -63,7 +62,6 @@ export default function RegimentSelector(props) {
         });
     }
 
-    // Sprawdzamy Podstawę Dywizji
     if (configuredDivision.base) {
         configuredDivision.base.forEach((reg, idx) => {
             if (reg.id === IDS.NONE) {
@@ -104,7 +102,8 @@ export default function RegimentSelector(props) {
         }
 
         if (unitConfig) {
-            const check = checkSupportUnitRequirements(unitConfig, configuredDivision, getRegimentDefinition, unitsMap, 'validate');
+            // FIX: Przekazujemy divisionDefinition jako ostatni argument
+            const check = checkSupportUnitRequirements(unitConfig, configuredDivision, getRegimentDefinition, unitsMap, 'validate', divisionDefinition);
             if (!check.isAllowed) {
                 const unitName = unitConfig.name || unitsMap[su.id]?.name || su.id;
                 supportErrorsSet.add(`Błąd wsparcia (${unitName}): ${check.reason}`);
@@ -118,7 +117,7 @@ export default function RegimentSelector(props) {
         !vanguardCheck.isValid ? vanguardCheck.message : null,
         !alliedCheck.isValid ? alliedCheck.message : null,
         remainingImprovementPoints < 0 ? `Przekroczono limit Punktów Ulepszeń o ${Math.abs(remainingImprovementPoints)}.` : null,
-        ...emptySlotsErrors, // <--- Dodajemy błędy pustych slotów
+        ...emptySlotsErrors,
         ...Array.from(supportErrorsSet)
     ].filter(Boolean);
 
@@ -157,10 +156,12 @@ export default function RegimentSelector(props) {
 
             let reqCheck = { isAllowed: true, reason: null };
             if (specificUnitDef) {
-                reqCheck = checkSupportUnitRequirements(specificUnitDef, configuredDivision, getRegimentDefinition, state.unitsMap);
+                // FIX: Przekazujemy divisionDefinition jako ostatni argument
+                reqCheck = checkSupportUnitRequirements(specificUnitDef, configuredDivision, getRegimentDefinition, state.unitsMap, 'purchase', divisionDefinition);
             }
             if (reqCheck.isAllowed) {
-                const groupReqCheck = checkSupportUnitRequirements(item, configuredDivision, getRegimentDefinition, state.unitsMap);
+                // FIX: Przekazujemy divisionDefinition jako ostatni argument
+                const groupReqCheck = checkSupportUnitRequirements(item, configuredDivision, getRegimentDefinition, state.unitsMap, 'purchase', divisionDefinition);
                 if (!groupReqCheck.isAllowed) reqCheck = groupReqCheck;
             }
 

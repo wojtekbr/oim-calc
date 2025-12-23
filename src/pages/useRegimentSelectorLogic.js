@@ -11,7 +11,8 @@ export const useRegimentSelectorLogic = ({
                                              divisionArtilleryDefinitions,
                                              additionalUnitsDefinitions,
                                              unitsMap,
-                                             faction
+                                             faction,
+                                             divisionDefinition // <--- DODANO: Potrzebne do walidacji limitów
                                          }) => {
     const { improvements } = useArmyData();
     const [playerName, setPlayerName] = useState("");
@@ -104,12 +105,9 @@ export const useRegimentSelectorLogic = ({
 
     // --- Handlery ---
 
-    // ZMODYFIKOWANO: Obsługa pakietów (pole 'units' w definicji) i generowanie instanceId
     const handleBuySupportUnit = (unitId, definitionIndex, currentPoints) => {
-        // Znajdujemy definicję, żeby sprawdzić koszt i czy to jest "pakiet"
-        let unitDef = augmentedUnitsMap[unitId]; // Używamy augmentedUnitsMap dla pewności
-        
-        // Fallback: szukanie w definicjach strukturalnych
+        let unitDef = augmentedUnitsMap[unitId];
+
         if (!unitDef) {
             const allDefs = [...(divisionDefinition.division_artillery || []), ...(divisionDefinition.additional_units || [])];
             const groupDef = allDefs[definitionIndex];
@@ -127,20 +125,17 @@ export const useRegimentSelectorLogic = ({
             const next = { ...prev };
             const newUnits = [];
 
-            // --- LOGIKA ROZPAKOWYWANIA PAKIETU ---
             if (unitDef.units && Array.isArray(unitDef.units)) {
-                // Jeśli to pakiet (np. 2x Działa), dodajemy każdą jednostkę z listy osobno
                 unitDef.units.forEach(subUnitId => {
                     newUnits.push({
                         id: subUnitId,
-                        definitionIndex, // Wszystkie mają ten sam slot index
+                        definitionIndex,
                         assignedTo: null,
-                        sourcePackId: unitId, // Zapamiętujemy, że pochodzą z tego pakietu
-                        instanceId: Math.random().toString(36).substr(2, 9) // Unikalne ID dla każdej sztuki
+                        sourcePackId: unitId,
+                        instanceId: Math.random().toString(36).substr(2, 9)
                     });
                 });
             } else {
-                // Standardowy zakup pojedynczej jednostki
                 newUnits.push({
                     id: unitId,
                     definitionIndex,
@@ -156,13 +151,11 @@ export const useRegimentSelectorLogic = ({
 
     const handleRemoveSupportUnit = (definitionIndex) => {
         setConfiguredDivision(prev => {
-            // Usuwamy wszystko co jest w tym slocie (czyli cały pakiet, jeśli to był pakiet)
             const newSupportUnits = prev.supportUnits.filter(su => su.definitionIndex !== definitionIndex);
             return { ...prev, supportUnits: newSupportUnits };
         });
     };
 
-    // ZMODYFIKOWANO: Dodano obsługę specificInstanceId do precyzyjnego przypisywania
     const handleAssignSupportUnit = (definitionIndex, positionKey, specificInstanceId = null) => {
         let assignment = null;
         if (positionKey !== "") {
@@ -172,15 +165,13 @@ export const useRegimentSelectorLogic = ({
 
         setConfiguredDivision(prev => {
             const newSupportUnits = prev.supportUnits.map(su => {
-                // 1. Jeśli podano ID instancji (nowy system dla pakietów), szukamy dokładnie tej jednostki
                 if (specificInstanceId) {
                     if (su.instanceId === specificInstanceId) {
                         return { ...su, assignedTo: assignment };
                     }
                     return su;
                 }
-                
-                // 2. Fallback (stary system): szukamy po indeksie slotu
+
                 if (su.definitionIndex === definitionIndex) {
                     return { ...su, assignedTo: assignment };
                 }
@@ -199,7 +190,7 @@ export const useRegimentSelectorLogic = ({
                 // Usuwanie
                 currentAdditional.splice(existingIndex, 1);
                 const updatedAdditional = currentAdditional.map((r, idx) => ({ ...r, index: idx }));
-                // Czyścimy wsparcie przypisane do usuniętych slotów
+
                 const newSupportUnits = prev.supportUnits.map(su => {
                     if (su.assignedTo && su.assignedTo.group === GROUP_TYPES.ADDITIONAL) {
                         return { ...su, assignedTo: null };
@@ -284,8 +275,15 @@ export const useRegimentSelectorLogic = ({
             } else {
                 unitConfig = allSupportDefinitions.find(u => (typeof u === 'string' && u === su.id) || (u.name === su.id));
             }
+
+            // Fallback do mapy jednostek
+            if (!unitConfig && unitsMap[su.id]) {
+                unitConfig = unitsMap[su.id];
+            }
+
             if (unitConfig) {
-                const check = checkSupportUnitRequirements(unitConfig, tempDivision, getRegimentDefinition, augmentedUnitsMap, 'validate');
+                // FIX: Przekazujemy divisionDefinition do walidacji limitów
+                const check = checkSupportUnitRequirements(unitConfig, tempDivision, getRegimentDefinition, augmentedUnitsMap, 'validate', divisionDefinition);
                 if (!check.isAllowed) {
                     unitsToRemoveIndices.push(suIdx);
                     unitsToRemoveNames.push(unitsMap[su.id]?.name || su.id);

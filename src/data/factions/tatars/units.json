@@ -27,13 +27,18 @@
     "rank": "group",
     "orders": 3
   },
-
   "tat_jasyr": {
     "id": "tat_jasyr",
     "name": "Jasyr",
     "cost": 0,
-    "improvement_cost": 0,
-    "rank": "group"
+    "can_be_bought_independently": false,
+    "requirements": [
+      {
+        "type": "limit_per_regiment_count",
+        "regiment_ids": ["tat_czambul_mirzy", "tat_czambul_beja", "tat_czambul_nogajow"],
+        "amount_per_regiment": 1
+      }
+    ]
   },
   "tat_zwiadowcy": {
     "id": "tat_zwiadowcy",

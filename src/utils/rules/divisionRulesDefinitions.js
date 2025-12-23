@@ -267,4 +267,23 @@ export const DIVISION_RULES_DEFINITIONS = {
             return `Pułk "${triggerName}" może zostać wystawiony tylko wtedy, gdy w dywizji znajduje się również: ${reqNames}.`;
         }
     },
+    "mandatory_support_unit_per_regiment": {
+        title: "Obowiązkowe wsparcie",
+        getDescription: (params, context) => {
+            const { unitsMap, getRegimentDefinition } = context;
+
+            const unitName = unitsMap?.[params.support_unit_id]?.name || params.support_unit_id;
+            const amount = params.amount_per_regiment || 1;
+            const excludeVanguard = params.exclude_vanguard === true;
+
+            const regNames = (params.regiment_ids || []).map(rid => {
+                const def = getRegimentDefinition ? getRegimentDefinition(rid) : null;
+                return def ? `"${def.name}"` : rid;
+            }).join(", ");
+
+            const vanguardText = excludeVanguard ? " (z wyłączeniem Straży Przedniej)" : "";
+
+            return `Za każdy wystawiony pułk${vanguardText}: ${regNames}, musisz zakupić ${amount}x "${unitName}" z sekcji wsparcia.`;
+        }
+    },
 };

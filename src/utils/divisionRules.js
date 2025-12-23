@@ -3,107 +3,104 @@ import { collectRegimentUnits } from "./math/structureUtils";
 import { DIVISION_RULES_REGISTRY } from "./rules/divisionRulesRegistry";
 import { DIVISION_RULES_DEFINITIONS } from "./rules/divisionRulesDefinitions";
 
-// CZYSTY EXPORT - REJESTR JEST TERAZ KOMPLETNY W PLIKU ŹRÓDŁOWYM
 export { DIVISION_RULES_REGISTRY, DIVISION_RULES_DEFINITIONS };
 
-// --- HELPERS ---
+// --- ZMIANA: Dodano divisionDefinition jako ostatni argument ---
+export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegimentDefinition, unitsMap = null, mode = 'purchase', divisionDefinition = null) => {
 
-export const checkDivisionConstraints = (divisionConfig, divisionDefinition, candidateRegimentId) => {
-    if (!divisionConfig || !divisionDefinition || !candidateRegimentId || candidateRegimentId === IDS.NONE) {
-        return true;
-    }
-    if (!divisionDefinition.rules || !Array.isArray(divisionDefinition.rules)) {
-        return true;
-    }
-    for (const ruleConfig of divisionDefinition.rules) {
-        const { id, ...params } = ruleConfig;
+    const myUnitId = unitConfig.id || unitConfig.name;
 
-        if (id === "limit_max_same_regiments") {
-            const targetRegimentId = params?.regiment_id;
-            const maxLimit = (params?.max_amount !== undefined) ? params.max_amount : 1;
-            if (targetRegimentId === candidateRegimentId) {
-                const allRegiments = [
-                    ...(divisionConfig.vanguard || []),
-                    ...(divisionConfig.base || []),
-                    ...(divisionConfig.additional || [])
-                ];
-                let count = 0;
-                allRegiments.forEach(reg => {
-                    if (reg.id === targetRegimentId) {
-                        count++;
-                    }
-                });
-                if (count >= maxLimit) {
-                    return false;
+    // 1. NOWOŚĆ: Sprawdzanie limitu wynikającego z zasady "mandatory_support_unit_per_regiment"
+    // Jeśli zasada nakazuje mieć X jednostek, to traktujemy to też jako MAX X jednostek.
+    if (divisionDefinition?.rules) {
+        const mandatoryRule = divisionDefinition.rules.find(r =>
+            r.id === "mandatory_support_unit_per_regiment" &&
+            r.support_unit_id === myUnitId
+        );
+
+        if (mandatoryRule) {
+            const { regiment_ids, amount_per_regiment = 1, exclude_vanguard } = mandatoryRule;
+
+            let allRegiments = [
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+
+            // Jeśli NIE wykluczamy straży, dodajemy ją do puli
+            if (exclude_vanguard !== true && exclude_vanguard !== "true") {
+                allRegiments = [ ...(divisionConfig.vanguard || []), ...allRegiments ];
+            }
+
+            const activeRegimentCount = allRegiments.filter(r =>
+                r.id !== IDS.NONE && regiment_ids.includes(r.id)
+            ).length;
+
+            const limit = activeRegimentCount * amount_per_regiment;
+
+            const currentCount = (divisionConfig.supportUnits || []).filter(su => su.id === myUnitId).length;
+
+            if (mode === 'validate') {
+                if (currentCount > limit) {
+                    return { isAllowed: false, reason: `Przekroczono limit wynikający z pułków: ${currentCount}/${limit}` };
+                }
+            } else {
+                // Tryb zakupu
+                if (currentCount >= limit) {
+                    return { isAllowed: false, reason: `Limit: ${limit} (Zależny od liczby pułków)` };
                 }
             }
         }
     }
-    return true;
-};
 
-export const calculateRuleBonuses = (divisionConfig, divisionDefinition, unitsMap, getRegimentDefinition) => {
-    const totalBonus = { improvementPoints: 0, supply: 0, cost: 0 };
-    if (!divisionDefinition?.rules || !Array.isArray(divisionDefinition.rules)) return totalBonus;
+    // 2. Stara logika flagi niezależności (pozostaje bez zmian, ale działa równolegle)
+    if (unitConfig.can_be_bought_independently === false) {
+        const limitRule = (unitConfig.requirements || []).find(r => r.type === 'limit_per_regiment_count');
 
-    divisionDefinition.rules.forEach(ruleConfig => {
-        const { id, ...params } = ruleConfig;
-        const ruleImpl = DIVISION_RULES_REGISTRY[id];
-        if (ruleImpl && ruleImpl.getBonus) {
-            const bonus = ruleImpl.getBonus(divisionConfig, unitsMap, getRegimentDefinition, params);
-            if (bonus) {
-                if (bonus.improvementPoints) totalBonus.improvementPoints += bonus.improvementPoints;
-                if (bonus.supply) totalBonus.supply += bonus.supply;
-                if (bonus.cost) totalBonus.cost += bonus.cost;
+        if (!limitRule) {
+            // Jeśli nie ma limit_per_regiment_count w unit.requirements, a jest mandatory rule w division,
+            // to powyższy blok (pkt 1) już obsłużył limit.
+            // Jeśli jednak nie ma ani tu ani tam reguły wiążącej, blokujemy.
+
+            // Sprawdzamy czy mandatoryRule obsłużyło sprawę:
+            const coveredByMandatory = divisionDefinition?.rules?.some(r =>
+                r.id === "mandatory_support_unit_per_regiment" &&
+                r.support_unit_id === myUnitId
+            );
+
+            if (!coveredByMandatory) {
+                return { isAllowed: false, reason: "Jednostka nie może być kupiona samodzielnie." };
+            }
+        } else {
+            // Istnieje limit_per_regiment_count w definicji jednostki - sprawdzamy "czy w ogóle mam pułk"
+            const { regiment_ids, exclude_vanguard } = limitRule;
+            let allRegiments = [
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+            if (exclude_vanguard !== true) {
+                allRegiments = [ ...(divisionConfig.vanguard || []), ...allRegiments ];
+            }
+
+            const hasParentRegiment = allRegiments.some(r => r.id !== IDS.NONE && regiment_ids.includes(r.id));
+
+            if (!hasParentRegiment) {
+                const names = regiment_ids.map(rid => {
+                    const def = getRegimentDefinition(rid);
+                    return def ? def.name : rid;
+                }).join("\nLUB ");
+                return { isAllowed: false, reason: `Wymagany pułk:\n${names}` };
             }
         }
-    });
-    return totalBonus;
-};
+    }
 
-export const validateDivisionRules = (divisionConfig, divisionDefinition, unitsMap, getRegimentDefinition, improvements) => {
-    let allErrors = [];
-    if (!divisionDefinition?.rules || !Array.isArray(divisionDefinition.rules)) return allErrors;
-
-    divisionDefinition.rules.forEach(ruleConfig => {
-        const { id, ...params } = ruleConfig;
-        const ruleImpl = DIVISION_RULES_REGISTRY[id];
-        if (ruleImpl && ruleImpl.validate) {
-            const errors = ruleImpl.validate(divisionConfig, unitsMap, getRegimentDefinition, params, improvements);
-            if (errors && errors.length > 0) {
-                allErrors = allErrors.concat(errors);
-            }
-        }
-    });
-    return allErrors;
-};
-
-export const getDivisionRulesDescriptions = (divisionDefinition, unitsMap, getRegimentDefinition, improvements) => {
-    if (!divisionDefinition?.rules || !Array.isArray(divisionDefinition.rules)) return [];
-
-    return divisionDefinition.rules.map(ruleConfig => {
-        const { id, ...params } = ruleConfig;
-        const definition = DIVISION_RULES_DEFINITIONS[id];
-
-        if (!definition) return null;
-
-        const description = definition.getDescription(params, { unitsMap, getRegimentDefinition, improvements });
-
-        return {
-            id,
-            title: params.name_override || definition.title,
-            description
-        };
-    }).filter(Boolean);
-};
-
-export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegimentDefinition, unitsMap = null, mode = 'purchase') => {
+    // ... Reszta funkcji (pętle po requirements) bez zmian ...
     const requirements = unitConfig.requirements || [];
     if (requirements.length === 0) {
         return { isAllowed: true, reason: null };
     }
 
     for (const req of requirements) {
+        // ... (tutaj wklej resztę starej funkcji checkSupportUnitRequirements) ...
         if (req.type === "regiment_contains_unit") {
             const { regiment_id, unit_id, min_amount = 1 } = req;
             const targetRegiments = [
@@ -195,8 +192,8 @@ export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegi
         }
 
         if (req.type === "division_excludes_unit") {
-            const { unit_ids } = req; 
-            
+            const { unit_ids } = req;
+
             const currentSupportIds = (divisionConfig.supportUnits || []).map(su => su.id);
             const conflict = unit_ids.find(id => currentSupportIds.includes(id));
 
@@ -210,15 +207,18 @@ export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegi
         }
 
         if (req.type === "limit_per_regiment_count") {
-            const { regiment_ids, amount_per_regiment } = req;
-            
-            const allRegiments = [
-                ...(divisionConfig.vanguard || []),
+            const { regiment_ids, amount_per_regiment, exclude_vanguard } = req;
+
+            let allRegiments = [
                 ...(divisionConfig.base || []),
                 ...(divisionConfig.additional || [])
             ];
-            
-            const activeRegimentCount = allRegiments.filter(r => 
+
+            if (exclude_vanguard !== true) {
+                allRegiments = [ ...(divisionConfig.vanguard || []), ...allRegiments ];
+            }
+
+            const activeRegimentCount = allRegiments.filter(r =>
                 r.id !== IDS.NONE && regiment_ids.includes(r.id)
             ).length;
 
@@ -240,4 +240,98 @@ export const checkSupportUnitRequirements = (unitConfig, divisionConfig, getRegi
     }
 
     return { isAllowed: true, reason: null };
+};
+
+// ... reszta pliku bez zmian
+export const checkDivisionConstraints = (divisionConfig, divisionDefinition, candidateRegimentId) => {
+    // ... (bez zmian)
+    if (!divisionConfig || !divisionDefinition || !candidateRegimentId || candidateRegimentId === IDS.NONE) {
+        return true;
+    }
+    if (!divisionDefinition.rules || !Array.isArray(divisionDefinition.rules)) {
+        return true;
+    }
+    for (const ruleConfig of divisionDefinition.rules) {
+        const { id, ...params } = ruleConfig;
+
+        if (id === "limit_max_same_regiments") {
+            const targetRegimentId = params?.regiment_id;
+            const maxLimit = (params?.max_amount !== undefined) ? params.max_amount : 1;
+            if (targetRegimentId === candidateRegimentId) {
+                const allRegiments = [
+                    ...(divisionConfig.vanguard || []),
+                    ...(divisionConfig.base || []),
+                    ...(divisionConfig.additional || [])
+                ];
+                let count = 0;
+                allRegiments.forEach(reg => {
+                    if (reg.id === targetRegimentId) {
+                        count++;
+                    }
+                });
+                if (count >= maxLimit) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+};
+
+export const calculateRuleBonuses = (divisionConfig, divisionDefinition, unitsMap, getRegimentDefinition) => {
+    // ... (bez zmian)
+    const totalBonus = { improvementPoints: 0, supply: 0, cost: 0 };
+    if (!divisionDefinition?.rules || !Array.isArray(divisionDefinition.rules)) return totalBonus;
+
+    divisionDefinition.rules.forEach(ruleConfig => {
+        const { id, ...params } = ruleConfig;
+        const ruleImpl = DIVISION_RULES_REGISTRY[id];
+        if (ruleImpl && ruleImpl.getBonus) {
+            const bonus = ruleImpl.getBonus(divisionConfig, unitsMap, getRegimentDefinition, params);
+            if (bonus) {
+                if (bonus.improvementPoints) totalBonus.improvementPoints += bonus.improvementPoints;
+                if (bonus.supply) totalBonus.supply += bonus.supply;
+                if (bonus.cost) totalBonus.cost += bonus.cost;
+            }
+        }
+    });
+    return totalBonus;
+};
+
+export const validateDivisionRules = (divisionConfig, divisionDefinition, unitsMap, getRegimentDefinition, improvements) => {
+    // ... (bez zmian)
+    let allErrors = [];
+    if (!divisionDefinition?.rules || !Array.isArray(divisionDefinition.rules)) return allErrors;
+
+    divisionDefinition.rules.forEach(ruleConfig => {
+        const { id, ...params } = ruleConfig;
+        const ruleImpl = DIVISION_RULES_REGISTRY[id];
+        if (ruleImpl && ruleImpl.validate) {
+            const errors = ruleImpl.validate(divisionConfig, unitsMap, getRegimentDefinition, params, improvements);
+            if (errors && errors.length > 0) {
+                allErrors = allErrors.concat(errors);
+            }
+        }
+    });
+    return allErrors;
+};
+
+export const getDivisionRulesDescriptions = (divisionDefinition, unitsMap, getRegimentDefinition, improvements) => {
+    // ... (bez zmian)
+    if (!divisionDefinition?.rules || !Array.isArray(divisionDefinition.rules)) return [];
+
+    return divisionDefinition.rules.map(ruleConfig => {
+        const { id, ...params } = ruleConfig;
+        const definition = DIVISION_RULES_DEFINITIONS[id];
+
+        if (!definition) return null;
+
+        const description = definition.getDescription(params, { unitsMap, getRegimentDefinition, improvements });
+
+        return {
+            id,
+            title: params.name_override || definition.title,
+            description
+        };
+    }).filter(Boolean);
 };

@@ -13,10 +13,26 @@
         "id": "rozlaly_sie_zagony"
       },
       {
-        "id": "jasyr"
+        "id": "mandatory_support_unit_per_regiment",
+        "regiment_ids": ["tat_czambul_mirzy", "tat_czambul_beja", "tat_czambul_nogajow"],
+        "support_unit_id": "tat_jasyr",
+        "exclude_vanguard": true,
+        "amount_per_regiment": 1
       }
     ],
     "additional_units": [
+      {
+        "name": "tat_jasyr"
+      },
+      {
+        "name": "tat_jasyr"
+      },
+      {
+        "name": "tat_jasyr"
+      },
+      {
+        "name": "tat_jasyr"
+      },
       {
         "name": "tat_jasyr"
       },
@@ -57,9 +73,28 @@
       },
       {
         "id": "jasyr"
+      },
+      {
+        "id": "mandatory_support_unit_per_regiment",
+        "regiment_ids": ["tat_czambul_mirzy", "tat_czambul_beja", "tat_czambul_nogajow"],
+        "support_unit_id": "tat_jasyr",
+        "exclude_vanguard": true,
+        "amount_per_regiment": 1
       }
     ],
     "additional_units": [
+      {
+        "name": "tat_jasyr"
+      },
+      {
+        "name": "tat_jasyr"
+      },
+      {
+        "name": "tat_jasyr"
+      },
+      {
+        "name": "tat_jasyr"
+      },
       {
         "name": "tat_jasyr"
       }
