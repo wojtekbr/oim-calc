@@ -323,7 +323,7 @@
     "are_looters_insubordinate": true
   },
   "lit_petyhorcy_s": {
-    "id": "cro_petyhorcy_s",
+    "id": "lit_petyhorcy_s",
     "name": "Petyhorcy S",
     "cost": 8,
     "improvement_cost": 3,
@@ -331,7 +331,7 @@
     "is_cavalry": true
   },
   "lit_petyhorcy_m": {
-    "id": "cro_petyhorcy_m",
+    "id": "lit_petyhorcy_m",
     "name": "Petyhorcy M",
     "cost": 11,
     "improvement_cost": 4,
@@ -339,7 +339,7 @@
     "is_cavalry": true
   },
   "lit_petyhorcy_kopie_s": {
-    "id": "cro_petyhorcy_kopie_s",
+    "id": "lit_petyhorcy_kopie_s",
     "name": "Petyhorcy z kopiami S",
     "cost": 8,
     "improvement_cost": 3,
@@ -348,7 +348,7 @@
     "has_lances": true
   },
   "lit_petyhorcy_kopie_m": {
-    "id": "cro_petyhorcy_kopie_m",
+    "id": "lit_petyhorcy_kopie_m",
     "name": "Petyhorcy z kopiami M",
     "cost": 11,
     "improvement_cost": 4,
@@ -357,7 +357,7 @@
     "has_lances": true
   },
   "lit_petyhorcy_vet_s": {
-    "id": "cro_petyhorcy_s",
+    "id": "lit_petyhorcy_vet_s",
     "name": "Petyhorcy S",
     "cost": 9,
     "improvement_cost": 3,
@@ -366,7 +366,7 @@
     "mandatory_improvements": ["veterans"]
   },
   "lit_petyhorcy_vet_m": {
-    "id": "cro_petyhorcy_m",
+    "id": "lit_petyhorcy_vet_m",
     "name": "Petyhorcy M",
     "cost": 12,
     "improvement_cost": 4,
@@ -375,7 +375,7 @@
     "mandatory_improvements": ["veterans"]
   },
   "lit_petyhorcy_kopie_vet_s": {
-    "id": "cro_petyhorcy_kopie_s",
+    "id": "lit_petyhorcy_kopie_vet_s",
     "name": "Petyhorcy z kopiami S",
     "cost": 9,
     "improvement_cost": 3,
@@ -385,7 +385,7 @@
     "mandatory_improvements": ["veterans"]
   },
   "lit_petyhorcy_kopie_vet_m": {
-    "id": "cro_petyhorcy_kopie_m",
+    "id": "lit_petyhorcy_kopie_vet_m",
     "name": "Petyhorcy z kopiami M",
     "cost": 12,
     "improvement_cost": 4,
