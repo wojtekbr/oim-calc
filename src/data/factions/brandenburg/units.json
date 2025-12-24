@@ -2,6 +2,13 @@
   "_meta": {
     "name": "Brandenburgia"
   },
+  "bra_general": {
+    "id": "bra_general",
+    "name": "Generał",
+    "cost": 0,
+    "rank": "group",
+    "orders": 3
+  },
   "bra_pulkownik": {
     "id": "bra_pulkownik",
     "name": "Pułkownik",
@@ -42,7 +49,7 @@
     "id": "bra_dragoni_pruscy_s",
     "name": "Dragoni Pruscy S",
     "cost": 4,
-    "improvement_cost": 2,
+    "improvement_cost": 1,
     "rank": "bronze",
     "is_cavalry": true,
     "are_dragoons": true
