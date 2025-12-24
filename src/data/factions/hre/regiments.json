@@ -46,14 +46,11 @@
         ]
       },
       "additional": {
-        "general": [
+         "general": [
           {
-            "unit1": { "units": ["hre_podpulkownik_1"], "is_toggle": true },
-            "unit2": { "units": ["hre_podpulkownik_2"], "is_toggle": true }
+            "unit1": {"units": ["hre_podpulkownik_1"] },
+            "unit2": {"units": ["hre_podpulkownik_2"] }
           }
-        ]
-      }
-    }
   },
   "hre_nowy_reg_kirasjerow": {
     "name": "Nowy regiment kirasjerów cesarskich",
@@ -170,16 +167,20 @@
         ]
       },
       "additional": {
-        "general": [
+       "general": [
           {
-            "unit1": { "units": ["hre_major_1"], "is_toggle": true },
-            "unit2": { "units": ["hre_major_2"], "is_toggle": true }
-          }
-        ]
+            "unit1": {
+              "units": [
+                "hre_major_1"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_major_2"
+              ]
       }
     }
   },
-
   "hre_reg_chorwatow": {
     "name": "Regiment Chorwatów",
     "base_cost": 2,
