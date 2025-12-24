@@ -26,10 +26,16 @@
           { "unit1": { "units": ["dan_pulkownik"] } }
         ],
         "base1": [
-          { "unit1": { "units": ["dan_rajtarzy_dunscy_m"] } }
+          { 
+            "unit1": { "units": ["dan_rajtarzy_dunscy_s"] }, 
+            "unit2": { "units": ["dan_rajtarzy_dunscy_m"] }
+          }
         ],
         "base2": [
-          { "unit1": { "units": ["dan_dragoni_dunscy_m"] } }
+          { 
+            "unit1": { "units": ["dan_dragoni_dunscy_s"] }, 
+            "unit2": { "units": ["dan_dragoni_dunscy_m"] }
+          }
         ]
       },
       "additional": {
@@ -38,8 +44,10 @@
         ],
         "additional1": [
           {
-            "unit1": { "units": ["dan_rajtarzy_dunscy_m"] },
-            "unit2": { "units": ["dan_dragoni_dunscy_m"] }
+            "unit1": { "units": ["dan_dragoni_dunscy_s"] }, 
+            "unit2": { "units": ["dan_dragoni_dunscy_m"] },
+            "unit3": { "units": ["dan_rajtarzy_dunscy_s"] }, 
+            "unit4": { "units": ["dan_rajtarzy_dunscy_m"] }
           }
         ]
       }
@@ -65,10 +73,16 @@
           { "unit1": { "units": ["dan_pulkownik"] } }
         ],
         "base1": [
-          { "unit1": { "units": ["dan_dragoni_dunscy_m_light"] } }
+          {
+            "unit1": { "units": ["dan_dragoni_dunscy_s"] }, 
+            "unit2": { "units": ["dan_dragoni_dunscy_m"] }
+          }
         ],
         "base2": [
-          { "unit1": { "units": ["dan_dragoni_dunscy_m_light"] } }
+          { 
+            "unit1": { "units": ["dan_dragoni_dunscy_s"] }, 
+            "unit2": { "units": ["dan_dragoni_dunscy_m"] }
+          }
         ]
       },
       "additional": {
@@ -76,7 +90,10 @@
           { "unit1": { "units": ["dan_major"] } }
         ],
         "additional1": [
-          { "unit1": { "units": ["dan_dragoni_dunscy_m_light"] } }
+          { 
+            "unit1": { "units": ["dan_dragoni_dunscy_s"] }, 
+            "unit2": { "units": ["dan_dragoni_dunscy_m"] }
+          }
         ]
       }
     }
@@ -108,21 +125,35 @@
           { "unit1": { "units": ["dan_pulkownik"] } }
         ],
         "base1": [
-          { "unit1": { "units": ["dan_rajtarzy_dunscy_m"] } }
+          { 
+            "unit1": { "units": ["dan_rajtarzy_dunscy_s"] }, 
+            "unit2": { "units": ["dan_rajtarzy_dunscy_m"] }
+          }
         ],
         "base2": [
-          { "unit1": { "units": ["dan_rajtarzy_dunscy_m"] } }
+          { 
+            "unit1": { "units": ["dan_rajtarzy_dunscy_s"] }, 
+            "unit2": { "units": ["dan_rajtarzy_dunscy_m"] }
+          }
         ],
         "base3": [
-          { "unit1": { "units": ["dan_rajtarzy_dunscy_m"] } }
+          { 
+            "unit1": { "units": ["dan_rajtarzy_dunscy_s"] }, 
+            "unit2": { "units": ["dan_rajtarzy_dunscy_m"] }
+          }
         ]
       },
       "additional": {
         "general": [
-          { "unit1": { "units": ["dan_major"] } }
+          { 
+            "unit1": { "units": ["dan_major"] } 
+          }
         ],
         "additional1": [
-          { "unit1": { "units": ["dan_rajtarzy_dunscy_m"] } }
+          { 
+            "unit1": { "units": ["dan_rajtarzy_dunscy_s"] }, 
+            "unit2": { "units": ["dan_rajtarzy_dunscy_m"] }
+          }
         ]
       }
     }
@@ -161,13 +192,14 @@
         "base1": [
           {
             "unit1": { "units": ["dan_muszkieterzy_dunscy_s"] },
-            "unit2": { "units": ["dan_muszkieterzy_dunscy_kom"] }
+            "unit2": { "units": ["dan_muszkieterzy_dunscy_m"] }
           }
         ],
         "base2": [
           {
-            "unit1": { "units": ["dan_muszkieterzy_dunscy_s"] },
-            "unit2": { "units": ["dan_piechota_dunska_m"] }
+            "unit1": { "units": ["dan_muszkieterzy_dunscy_m"] },
+            "unit2": { "units": ["dan_piechota_dunska_m"] },
+            "unit3": { "units": ["dan_piechota_dunska_l"] }
           }
         ]
       },
@@ -176,7 +208,11 @@
           { "unit1": { "units": ["dan_major"] } }
         ],
         "additional1": [
-          { "unit1": { "units": ["dan_piechota_dunska_m"] } }
+          { 
+            "unit1": { "units": ["dan_piechota_dunska_m"] }, 
+            "unit3": { "units": ["dan_piechota_dunska_l"] }
+          
+          }
         ]
       }
     }
