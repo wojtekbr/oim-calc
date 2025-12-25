@@ -5,7 +5,9 @@
     "recon": 0,
     "awareness": 4,
     "activations": 3,
-    "special_rules": ["swietni_wojownicy"],
+    "special_rules": [
+      "swietni_wojownicy"
+    ],
     "unit_improvements": [
       {
         "id": "additional_pistol",
@@ -18,39 +20,104 @@
     "structure": {
       "base": {
         "general": [
-          { "unit1": { "units": ["hre_pulkownik"] } }
+          {
+            "unit1": {
+              "units": [
+                "hre_pulkownik"
+              ]
+            }
+          }
         ],
         "base1": [
           {
-            "unit1": { "units": ["hre_kirasjerzy_s"] },
-            "unit2": { "units": ["hre_opanc_kirasjerzy_s"] }
+            "unit1": {
+              "units": [
+                "hre_kirasjerzy_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_opanc_kirasjerzy_s"
+              ]
+            }
           }
         ],
         "base2": [
           {
-            "unit1": { "units": ["hre_kirasjerzy_vet_s"] },
-            "unit2": { "units": ["hre_kirasjerzy_vet_m"] },
-            "unit3": { "units": ["hre_opanc_kirasjerzy_vet_s"] },
-            "unit4": { "units": ["hre_opanc_kirasjerzy_vet_m"] },
-            "unit5": { "units": ["hre_dragoni_vet_s"] },
-            "unit6": { "units": ["hre_dragoni_vet_m"] }
+            "unit1": {
+              "units": [
+                "hre_kirasjerzy_vet_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_kirasjerzy_vet_m"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "hre_opanc_kirasjerzy_vet_s"
+              ]
+            },
+            "unit4": {
+              "units": [
+                "hre_opanc_kirasjerzy_vet_m"
+              ]
+            },
+            "unit5": {
+              "units": [
+                "hre_dragoni_vet_s"
+              ]
+            },
+            "unit6": {
+              "units": [
+                "hre_dragoni_vet_m"
+              ]
+            }
           }
         ],
         "base3": [
           {
-            "unit1": { "units": ["hre_kirasjerzy_s"] },
-            "unit2": { "units": ["hre_kirasjerzy_m"] },
-            "unit3": { "units": ["hre_opanc_kirasjerzy_s"] },
-            "unit4": { "units": ["hre_opanc_kirasjerzy_m"] }
+            "unit1": {
+              "units": [
+                "hre_kirasjerzy_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_kirasjerzy_m"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "hre_opanc_kirasjerzy_s"
+              ]
+            },
+            "unit4": {
+              "units": [
+                "hre_opanc_kirasjerzy_m"
+              ]
+            }
           }
         ]
       },
       "additional": {
-         "general": [
+        "general": [
           {
-            "unit1": {"units": ["hre_podpulkownik_1"] },
-            "unit2": {"units": ["hre_podpulkownik_2"] }
+            "unit1": {
+              "units": [
+                "hre_podpulkownik_1"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_podpulkownik_2"
+              ]
+            }
           }
+        ]
+      }
+    }
   },
   "hre_nowy_reg_kirasjerow": {
     "name": "Nowy regiment kirasjerów cesarskich",
@@ -81,33 +148,75 @@
     "structure": {
       "base": {
         "general": [
-          { "unit1": { "units": ["hre_pulkownik"] } }
+          {
+            "unit1": {
+              "units": [
+                "hre_pulkownik"
+              ]
+            }
+          }
         ],
         "base1": [
           {
-            "unit1": { "units": ["hre_kirasjerzy_s"] }
+            "unit1": {
+              "units": [
+                "hre_kirasjerzy_s"
+              ]
+            }
           }
         ],
         "base2": [
           {
-            "unit1": { "units": ["hre_kirasjerzy_s"] },
-            "unit2": { "units": ["hre_kirasjerzy_m"] },
-            "unit3": { "units": ["hre_opanc_kirasjerzy_s"] },
-            "unit4": { "units": ["hre_opanc_kirasjerzy_m"] }
+            "unit1": {
+              "units": [
+                "hre_kirasjerzy_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_kirasjerzy_m"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "hre_opanc_kirasjerzy_s"
+              ]
+            },
+            "unit4": {
+              "units": [
+                "hre_opanc_kirasjerzy_m"
+              ]
+            }
           }
         ],
         "base3": [
           {
-            "unit1": { "units": ["hre_kirasjerzy_s"] },
-            "unit2": { "units": ["hre_kirasjerzy_m"] }
+            "unit1": {
+              "units": [
+                "hre_kirasjerzy_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_kirasjerzy_m"
+              ]
+            }
           }
         ]
       },
       "additional": {
         "general": [
           {
-            "unit1": { "units": ["hre_podpulkownik_1"] },
-            "unit2": { "units": ["hre_podpulkownik_2"] }
+            "unit1": {
+              "units": [
+                "hre_podpulkownik_1"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_podpulkownik_2"
+              ]
+            }
           }
         ]
       }
@@ -119,7 +228,9 @@
     "recon": 0,
     "awareness": 3,
     "activations": 2,
-    "special_rules": ["restrykcja_dziala_lekkie"],
+    "special_rules": [
+      "restrykcja_dziala_lekkie"
+    ],
     "unit_improvements": [
       {
         "id": "veterans",
@@ -128,7 +239,9 @@
           "hre_piechota_cesarska_m",
           "hre_piechota_cesarska_l"
         ],
-        "units_excluded": ["hre_muszkieterzy_komenderowani_s"]
+        "units_excluded": [
+          "hre_muszkieterzy_komenderowani_s"
+        ]
       },
       {
         "id": "additional_ammo"
@@ -145,29 +258,63 @@
     "structure": {
       "base": {
         "general": [
-          { "unit1": { "units": ["hre_pulkownik"] } }
+          {
+            "unit1": {
+              "units": [
+                "hre_pulkownik"
+              ]
+            }
+          }
         ],
         "base1": [
-          { "unit1": { "units": ["hre_skwadron_muszkieterow_m"] } }
+          {
+            "unit1": {
+              "units": [
+                "hre_skwadron_muszkieterow_m"
+              ]
+            }
+          }
         ],
         "base2": [
           {
-            "unit1": { "units": ["hre_piechota_cesarska_m"] },
-            "unit2": { "units": ["hre_piechota_cesarska_l"] }
+            "unit1": {
+              "units": [
+                "hre_piechota_cesarska_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_piechota_cesarska_l"
+              ]
+            }
           }
         ],
         "base3": [
           {
-            "unit1": { "units": ["hre_skwadron_muszkieterow_m"] },
-            "unit2": { "units": ["hre_piechota_cesarska_m"] }
+            "unit1": {
+              "units": [
+                "hre_skwadron_muszkieterow_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_piechota_cesarska_m"
+              ]
+            }
           }
         ],
         "optional": [
-          { "unit1": { "units": ["hre_muszkieterzy_komenderowani_s"] } }
+          {
+            "unit1": {
+              "units": [
+                "hre_muszkieterzy_komenderowani_s"
+              ]
+            }
+          }
         ]
       },
       "additional": {
-       "general": [
+        "general": [
           {
             "unit1": {
               "units": [
@@ -178,6 +325,9 @@
               "units": [
                 "hre_major_2"
               ]
+            }
+          }
+        ]
       }
     }
   },
@@ -187,7 +337,9 @@
     "recon": 2,
     "awareness": 4,
     "activations": 2,
-    "special_rules": ["poslijcie_chorwatow"],
+    "special_rules": [
+      "poslijcie_chorwatow"
+    ],
     "unit_improvements": [
       {
         "id": "veterans"
@@ -203,26 +355,60 @@
     "structure": {
       "base": {
         "general": [
-          { "unit1": { "units": ["hre_pulkownik"] } }
+          {
+            "unit1": {
+              "units": [
+                "hre_pulkownik"
+              ]
+            }
+          }
         ],
         "base1": [
-          { "unit1": { "units": ["hre_jazda_chorwacka_s"] } }
+          {
+            "unit1": {
+              "units": [
+                "hre_jazda_chorwacka_s"
+              ]
+            }
+          }
         ],
         "base2": [
           {
-            "unit1": { "units": ["hre_jazda_chorwacka_s"] },
-            "unit2": { "units": ["hre_jazda_chorwacka_m"] }
+            "unit1": {
+              "units": [
+                "hre_jazda_chorwacka_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_jazda_chorwacka_m"
+              ]
+            }
           }
         ]
       },
       "additional": {
         "general": [
-          { "unit1": { "units": ["hre_podpulkownik_1"] } }
+          {
+            "unit1": {
+              "units": [
+                "hre_podpulkownik_1"
+              ]
+            }
+          }
         ],
         "additional1": [
           {
-            "unit1": { "units": ["hre_jazda_chorwacka_s"] },
-            "unit2": { "units": ["hre_jazda_chorwacka_m"] }
+            "unit1": {
+              "units": [
+                "hre_jazda_chorwacka_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_jazda_chorwacka_m"
+              ]
+            }
           }
         ]
       }
@@ -234,7 +420,9 @@
     "recon": 0,
     "awareness": 4,
     "activations": 3,
-    "special_rules": ["hre_kirasjerzy_limit_poziom"],
+    "special_rules": [
+      "hre_kirasjerzy_limit_poziom"
+    ],
     "unit_improvements": [
       {
         "id": "additional_pistol",
@@ -256,30 +444,72 @@
     "structure": {
       "base": {
         "general": [
-          { "unit1": { "units": ["hre_pulkownik"] } }
+          {
+            "unit1": {
+              "units": [
+                "hre_pulkownik"
+              ]
+            }
+          }
         ],
         "base1": [
           {
-            "unit1": { "units": ["hre_kirasjerzy_s"] },
-            "unit2": { "units": ["hre_kirasjerzy_m"] }
+            "unit1": {
+              "units": [
+                "hre_kirasjerzy_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_kirasjerzy_m"
+              ]
+            }
           }
         ],
         "base2": [
-          { "unit1": { "units": ["hre_piechota_cesarska_m"] } }
+          {
+            "unit1": {
+              "units": [
+                "hre_piechota_cesarska_m"
+              ]
+            }
+          }
         ],
         "base3": [
           {
-            "unit1": { "units": ["hre_kirasjerzy_s"] },
-            "unit2": { "units": ["hre_kirasjerzy_m"] },
-            "unit3": { "units": ["hre_piechota_cesarska_m"] }
+            "unit1": {
+              "units": [
+                "hre_kirasjerzy_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "hre_kirasjerzy_m"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "hre_piechota_cesarska_m"
+              ]
+            }
           }
         ]
       },
       "additional": {
         "general": [
           {
-            "unit1": { "units": ["hre_podpulkownik_1"], "is_toggle": true },
-            "unit2": { "units": ["hre_podpulkownik_2"], "is_toggle": true }
+            "unit1": {
+              "units": [
+                "hre_podpulkownik_1"
+              ],
+              "is_toggle": true
+            },
+            "unit2": {
+              "units": [
+                "hre_podpulkownik_2"
+              ],
+              "is_toggle": true
+            }
           }
         ]
       }
