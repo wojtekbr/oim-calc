@@ -30,6 +30,13 @@
     "rank": "group",
     "orders": 1
   },
+   "dan_snaphannar": {
+    "id": "dan_snaphannar",
+    "name": "Snaphannar",
+    "cost": 3,
+    "improvement_cost": 0,
+    "rank": "group"
+  },
   "dan_rajtarzy_dunscy_s": {
     "id": "dan_rajtarzy_dunscy_s",
     "name": "Rajtarzy Duńscy S",
