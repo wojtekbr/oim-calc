@@ -9,6 +9,13 @@
     "rank": "group",
     "orders": 3
   },
+  "dan_komisarz": {
+    "id": "dan_komisarz",
+    "name": "Komisarz",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
   "dan_pulkownik": {
     "id": "dan_pulkownik",
     "name": "Pułkownik",
@@ -125,5 +132,21 @@
     "improvement_cost": 4,
     "rank": "gold",
     "is_infantry": true
+  }
+  "dan_light_artillery_s": {
+    "id": "dan_light_artillery_s",
+    "name": "Lekkie Działa S",
+    "cost": 3,
+    "is_artillery": true,
+    "rank": "bronze",
+    "improvement_cost": 2
+  },
+  "dan_medium_artillery_s": {
+    "id": "dan_medium_artillery_s",
+    "name": "Średnie Działa S",
+    "cost": 5,
+    "is_artillery": true,
+    "rank": "silver",
+    "improvement_cost": 3
   }
 }
