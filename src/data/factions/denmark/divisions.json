@@ -60,6 +60,8 @@
       "regiments_list": [
         "mrc_dragoons",
         "mrc_infantry",
+        "mrc_infantry",
+        "mrc_reiters",
         "mrc_reiters",
         "dan_reg_piechoty_krajowej"
       ]
@@ -109,7 +111,7 @@
         "name": "dan_komisarz"
       },
       {
-        "name": "dan_piechota_dunska_s",
+        "name": "dan_piechota_dunska_m",
         "cost": 7,
         "pu_cost": -4,
         "special_rules": ["independent"],
@@ -130,7 +132,7 @@
       {
         "type": "group",
         "name": "Średnie Działa",
-        "options": ["dan_medium_artillery_s", "dan_light_artillery_s"]
+        "options": ["dan_medium_artillery_s"]
       }
     ],
     "vanguard": [
