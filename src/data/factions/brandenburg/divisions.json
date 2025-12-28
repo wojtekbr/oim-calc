@@ -81,6 +81,7 @@
       "regiments_list": [
         "mrc_reiters",
         "mrc_dragoons",
+        "mrc_dragoons",
         "mrc_armoured_reiters",
         "mrc_infantry"
       ]
