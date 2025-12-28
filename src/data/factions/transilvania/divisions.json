@@ -37,16 +37,14 @@
     ],
     "base": [
       { "options": ["sie_sereg_jazdy_zacieznej"] },
-      { "options": ["sie_sereg_jazdy_zacieznej", "sie_sereg_wojsk_komitackich", "sie_sereg_piechoty_szeklerskiej"] },
+      { "options": ["sie_sereg_jazdy_zacieznej", "sie_sereg_wojsk_komitackich"] },
       { "options": ["sie_sereg_wojsk_komitackich"] }
     ],
     "additional_regiments": {
       "max_amount": 2,
       "regiments_list": [
         "sie_sereg_wojsk_komitackich",
-        "sie_sereg_piechoty_szeklerskiej",
         "sie_sereg_piechoty_miejskiej",
-        "sie_sereg_piechoty_saskiej",
         "sie_sereg_jazdy_zacieznej",
         "sie_sereg_semenow"
       ]
@@ -88,12 +86,12 @@
       {
         "type": "group",
         "name": "Bateria Dział Siedmiogrodzkich",
-        "options": ["sie_bateria_dzial_s"]
+        "options": ["sie_bateria_dzial_s", "sie_bateria_dzial_m"]
       },
       {
         "type": "group",
         "name": "Bateria Dział Siedmiogrodzkich",
-        "options": ["sie_bateria_dzial_s"]
+        "options": ["sie_bateria_dzial_s", "sie_bateria_dzial_m"]
       }
     ],
     "vanguard": [
@@ -101,7 +99,7 @@
     ],
     "base": [
       { "options": ["sie_sereg_piechoty_miejskiej"] },
-      { "options": ["sie_sereg_pieszych_hajdukow", "sie_sereg_wojsk_komitackich", "sie_sereg_piechoty_szeklerskiej"] },
+      { "options": ["sie_sereg_pieszych_hajdukow", "sie_sereg_wojsk_komitackich"] },
       { "options": ["sie_sereg_piechoty_szeklerskiej"] }
     ],
     "additional_regiments": {
