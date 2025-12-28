@@ -60,8 +60,8 @@
     "cost": 6,
     "improvement_cost": 2,
     "rank": "silver"
-  }
-    "bra_light_artillery_s": {
+  },
+  "bra_light_artillery_s": {
     "id": "swe_light_artillery_s",
     "name": "Lekkie Działa S",
     "cost": 3,
