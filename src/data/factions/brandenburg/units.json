@@ -61,4 +61,20 @@
     "improvement_cost": 2,
     "rank": "silver"
   }
+    "bra_light_artillery_s": {
+    "id": "swe_light_artillery_s",
+    "name": "Lekkie Działa S",
+    "cost": 3,
+    "is_artillery": true,
+    "rank": "bronze",
+    "improvement_cost": 2
+  },
+  "bra_medium_artillery_s": {
+    "id": "swe_medium_artillery_s",
+    "name": "Średnie Działa S",
+    "cost": 5,
+    "is_artillery": true,
+    "rank": "silver",
+    "improvement_cost": 3
+  }
 }
