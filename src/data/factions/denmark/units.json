@@ -12,7 +12,7 @@
   "dan_komisarz": {
     "id": "dan_komisarz",
     "name": "Komisarz",
-    "cost": 0,
+    "cost": ,
     "rank": "group",
     "orders": 2
   },
