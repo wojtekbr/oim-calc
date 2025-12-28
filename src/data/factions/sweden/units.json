@@ -92,6 +92,6 @@
     "cost": 5,
     "is_artillery": true,
     "rank": "silver",
-    "improvement_cost": 2
+    "improvement_cost": 3
   }
 }
