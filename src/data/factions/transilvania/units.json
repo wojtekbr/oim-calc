@@ -247,8 +247,8 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_artillery": true
-  }
-    "sie_bateria_dzial_m": {
+  },
+  "sie_bateria_dzial_m": {
     "id": "sie_bateria_dzial_m",
     "name": "Bateria dział Siedmiogrodzkich M",
     "cost": 5,
