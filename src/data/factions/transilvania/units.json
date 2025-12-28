@@ -53,7 +53,7 @@
   "sie_jazda_dymowa_l": {
     "id": "sie_jazda_dymowa_l",
     "name": "Jazda Dymowa L",
-    "cost": 5,
+    "cost": 7,
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
@@ -63,7 +63,7 @@
   "sie_jazda_dymowa_m": {
     "id": "sie_jazda_dymowa_m",
     "name": "Jazda Dymowa M",
-    "cost": 7,
+    "cost": 5,
     "improvement_cost": 1,
     "rank": "bronze",
     "is_cavalry": true,
