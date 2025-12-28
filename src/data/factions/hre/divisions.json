@@ -84,12 +84,15 @@
       ]
     }
   },
-  "hre_dywizja_montecuccoliego": {
-    "name": "Dywizja Cesarstwa (Montecuccoli)",
+  "hre_dywizja_na_granicy_z_turcja": {
+    "name": "Dywizja na granicy z Turcją (1663-64)",
     "improvement_points": 10,
     "base_cost": 2,
     "general": ["hre_general"],
     "rules": [
+      { 
+        "id": "na_wlasnej_ziemi_3"
+      },
       {
         "id": "limit_max_same_regiments",
         "regiment_ids": ["mrc_dragoons"],
