@@ -1,0 +1,259 @@
+{
+  "_meta": {
+    "name": "Siedmiogród"
+  },
+  "sie_general": {
+    "id": "sie_general",
+    "name": "Generał",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "sie_zupan": {
+    "id": "sie_zupan",
+    "name": "Żupan",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "sie_porucznik": {
+    "id": "sie_porucznik",
+    "name": "Porucznik",
+    "cost": 2,
+    "rank": "group",
+    "orders": 1
+  },
+  "sie_kapitan": {
+    "id": "sie_kapitan",
+    "name": "Kapitan",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "sie_jazda_komitacka_m": {
+    "id": "sie_jazda_komitacka_m",
+    "name": "Jazda Komitacka M",
+    "cost": 7,
+    "improvement_cost": 1,
+    "rank": "silver",
+    "is_cavalry": true,
+    "are_looters_insubordinate": true,
+    "has_lances": true
+  },
+  "sie_jazda_komitacka_l": {
+    "id": "sie_jazda_komitacka_l",
+    "name": "Jazda Komitacka L",
+    "cost": 9,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "are_looters_insubordinate": true,
+    "has_lances": true
+  },
+  "sie_jazda_dymowa_l": {
+    "id": "sie_jazda_dymowa_l",
+    "name": "Jazda Dymowa L",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "are_looters_insubordinate": true,
+    "has_lances": true
+  },
+  "sie_jazda_dymowa_m": {
+    "id": "sie_jazda_dymowa_m",
+    "name": "Jazda Dymowa M",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "bronze",
+    "is_cavalry": true,
+    "are_looters_insubordinate": true,
+    "has_lances": true
+  },
+  "sie_piechota_bramowa_s": {
+    "id": "sie_piechota_bramowa_s",
+    "name": "Piechota Bramowa S",
+    "cost": 4,
+    "improvement_cost": 1,
+    "rank": "bronze"
+  },
+  "sie_piechota_bramowa_m": {
+    "id": "sie_piechota_bramowa_m",
+    "name": "Piechota Bramowa M",
+    "cost": 5,
+    "improvement_cost": 2,
+    "rank": "bronze"
+  },
+  "sie_piechota_szeklerska_m": {
+    "id": "sie_piechota_szeklerska_m",
+    "name": "Piechota Szeklerska M",
+    "cost": 5,
+    "improvement_cost": 2,
+    "rank": "bronze",
+    "are_looters_insubordinate": true
+  },
+  "sie_konni_strzelcy_szeklerscy_s": {
+    "id": "sie_konni_strzelcy_szeklerscy_s",
+    "name": "Konni Strzelcy Szeklerscy S",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "bronze",
+    "is_cavalry": true,
+    "are_scouts": true,
+    "are_dragoons": true
+  },
+  "sie_konni_strzelcy_szeklerscy_m": {
+    "id": "sie_konni_strzelcy_szeklerscy_m",
+    "name": "Konni Strzelcy Szeklerscy M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "are_scouts": true,
+    "are_dragoons": true
+  },
+  "sie_zaci_lekka_jazda_s": {
+    "id": "sie_zaci_lekka_jazda_s",
+    "name": "Zaciężna Lekka Jazda S",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "bronze",
+    "is_cavalry": true,
+    "are_looters_insubordinate": true,
+    "are_scouts": true
+  },
+  "sie_zaci_lekka_jazda_m": {
+    "id": "sie_zaci_lekka_jazda_m",
+    "name": "Zaciężna Lekka Jazda M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "are_looters_insubordinate": true,
+    "are_scouts": true
+  },
+  "sie_zaci_kopijnicy_s": {
+    "id": "sie_zaci_kopijnicy_s",
+    "name": "Zaciężni Kopijnicy S",
+    "cost": 7,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true,
+    "are_looters_insubordinate": true,
+    "has_lances": true
+  },
+  "sie_zaci_kopijnicy_m": {
+    "id": "sie_zaci_kopijnicy_m",
+    "name": "Zaciężni Kopijnicy M",
+    "cost": 10,
+    "improvement_cost": 4,
+    "rank": "silver",
+    "is_cavalry": true,
+    "are_looters_insubordinate": true,
+    "has_lances": true
+  },
+  "sie_konni_hajducy_s": {
+    "id": "sie_konni_hajducy_s",
+    "name": "Konni Hajducy S",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "bronze",
+    "is_cavalry": true,
+    "are_looters_insubordinate": true,
+    "are_dragoons": true,
+    "are_scouts": true
+  },
+  "sie_konni_hajducy_m": {
+    "id": "sie_konni_hajducy_m",
+    "name": "Konni Hajducy M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "are_looters_insubordinate": true,
+    "are_dragoons": true,
+    "are_scouts": true
+  },
+  "sie_kurtanie_s": {
+    "id": "sie_kurtanie_s",
+    "name": "Kurtanie S",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "bronze",
+    "is_cavalry": true,
+    "are_looters_insubordinate": true,
+    "are_scouts": true
+  },
+  "sie_kurtanie_m": {
+    "id": "sie_kurtanie_m",
+    "name": "Kurtanie M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "are_looters_insubordinate": true,
+    "are_scouts": true
+  },
+  "sie_piechota_miejska_s": {
+    "id": "sie_piechota_miejska_s",
+    "name": "Piechota Miejska S",
+    "cost": 5,
+    "improvement_cost": 2,
+    "rank": "silver"
+  },
+  "sie_piechota_miejska_m": {
+    "id": "sie_piechota_miejska_m",
+    "name": "Piechota Miejska M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver"
+  },
+  "sie_piesi_hajducy_s": {
+    "id": "sie_piesi_hajducy_s",
+    "name": "Piesi Hajducy S",
+    "cost": 4,
+    "improvement_cost": 2,
+    "rank": "bronze",
+    "are_looters_insubordinate": true
+  },
+  "sie_piesi_hajducy_m": {
+    "id": "sie_piesi_hajducy_m",
+    "name": "Piesi Hajducy M",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "are_looters_insubordinate": true
+  },
+  "sie_semeni_s": {
+    "id": "sie_semeni_s",
+    "name": "Semeni S",
+    "cost": 5,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "are_looters_insubordinate": true
+  },
+  "sie_semeni_m": {
+    "id": "sie_semeni_m",
+    "name": "Semeni M",
+    "cost": 7,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "are_looters_insubordinate": true
+  },
+  "sie_bateria_dzial_s": {
+    "id": "sie_bateria_dzial_s",
+    "name": "Bateria dział Siedmiogrodzkich S",
+    "cost": 5,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_artillery": true
+  },
+  "sie_bateria_dzial_m": {
+    "id": "sie_bateria_dzial_m",
+    "name": "Bateria dział Siedmiogrodzkich M",
+    "cost": 5,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_artillery": true
+  }
+}

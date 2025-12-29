@@ -1,0 +1,151 @@
+{
+  "_meta": { "name": "Chanat Krymski" },
+
+  "tat_mirza": {
+    "id": "tat_mirza",
+    "name": "Mirza",
+    "cost": 0,
+    "improvement_cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+
+  "tat_bej": {
+    "id": "tat_bej",
+    "name": "Bej",
+    "cost": 0,
+    "improvement_cost": 0,
+    "rank": "group",
+    "orders": 4
+  },
+
+  "tat_nuradyn": {
+    "id": "tat_nuradyn",
+    "name": "Nuradyn",
+    "cost": 0,
+    "improvement_cost": 0,
+    "rank": "group",
+    "orders": 3
+  },
+  "tat_jasyr": {
+    "id": "tat_jasyr",
+    "name": "Jasyr",
+    "cost": 0,
+    "can_be_bought_independently": false,
+    "requirements": [
+      {
+        "type": "limit_per_regiment_count",
+        "regiment_ids": ["tat_czambul_mirzy", "tat_czambul_beja", "tat_czambul_nogajow"],
+        "amount_per_regiment": 1
+      }
+    ]
+  },
+  "tat_zwiadowcy": {
+    "id": "tat_zwiadowcy",
+    "name": "Zwiadowcy",
+    "cost": 3,
+    "improvement_cost": 0,
+    "rank": "group"
+  },
+  "tat_ordyncy_s": {
+    "id": "tat_ordyncy_s",
+    "name": "Ordyńcy S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "open_order": true,
+    "are_scouts": true
+  },
+  "tat_ordyncy_m": {
+    "id": "tat_ordyncy_m",
+    "name": "Ordyńcy M",
+    "cost": 8,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true,
+    "open_order": true,
+    "are_scouts": true
+  },
+  "tat_ordyncy_dzidy_s": {
+    "id": "tat_ordyncy_dzidy_s",
+    "name": "Ordyńcy z dzidami S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "open_order": true,
+    "are_scouts": true
+  },
+  "tat_ordyncy_dzidy_m": {
+    "id": "tat_ordyncy_dzidy_m",
+    "name": "Ordyńcy z dzidami M",
+    "cost": 8,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true,
+    "open_order": true,
+    "are_scouts": true
+  },
+  "tat_kazindzi_s": {
+    "id": "tat_kazindzi_s",
+    "name": "Kazindzi S",
+    "cost": 6,
+    "improvement_cost": 1,
+    "rank": "bronze",
+    "is_cavalry": true,
+    "open_order": true,
+    "are_looters_insubordinate": true
+  },
+  "tat_kazindzi_m": {
+    "id": "tat_kazindzi_m",
+    "name": "Kazindzi M",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "open_order": true,
+    "are_looters_insubordinate": true
+  },
+  "tat_jazda_doborowa_s": {
+    "id": "tat_jazda_doborowa_s",
+    "name": "Jazda Doborowa S",
+    "cost": 8,
+    "pu_cost": 1,
+    "improvement_cost": 3,
+    "rank": "gold",
+    "is_cavalry": true,
+    "are_scouts": true
+  },
+  "tat_jazda_doborowa_m": {
+    "id": "tat_jazda_doborowa_m",
+    "name": "Jazda Doborowa M",
+    "cost": 11,
+    "pu_cost": 1,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_cavalry": true,
+    "are_scouts": true
+  },
+  "tat_basza": {
+    "id": "tat_basza",
+    "name": "Basza",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "tat_kapykulu_s": {
+    "id": "tat_kapykulu_s",
+    "name": "Kapykułu S",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "silver"
+  },
+  "tat_kapykulu_m": {
+    "id": "tat_kapykulu_m",
+    "name": "Kapykułu M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "gold"
+  }
+}

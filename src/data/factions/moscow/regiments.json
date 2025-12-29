@@ -1,0 +1,477 @@
+{
+  "mos_pulk_jazdy_pomiestnej": {
+    "name": "Pułk Jazdy Pomiestnej",
+    "base_cost": 3,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "special_rules": [
+      {
+        "id": "jazda_bojarska_1"
+      },
+      {
+        "id": "unit_dependency",
+        "dependent_unit_id": ["mos_dworianie_rohatyna_s","mos_dworianie_rohatyna_m"],
+        "required_unit_id": ["mos_dworianie_s","mos_dworianie_m"]
+      }
+    ],
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 2,
+        "units_excluded": ["mos_sotnia_podjazdowa_s"]
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol",
+        "units_excluded": [
+          "mos_dzieci_bojarskie_m",
+          "mos_dzieci_bojarskie_l",
+          "mos_dzieci_bojarskie_rohatyna_m"
+        ]
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mos_golowa"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["mos_dzieci_bojarskie_m"] },
+            "unit2": { "units": ["mos_dzieci_bojarskie_l"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["mos_dzieci_bojarskie_m"] },
+            "unit2": { "units": ["mos_dzieci_bojarskie_rohatyna_m"] }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": { "units": ["mos_dzieci_bojarskie_m"] },
+            "unit2": { "units": ["mos_dzieci_bojarskie_l"] },
+            "unit3": { "units": ["mos_dworianie_s"] },
+            "unit4": { "units": ["mos_dworianie_m"] }
+          }
+        ],
+        "optional": [
+          { "unit1": { "units": ["mos_sotnia_podjazdowa_s"] } }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": { "units": ["mos_dzieci_bojarskie_m"] },
+            "unit2": { "units": ["mos_dzieci_bojarskie_l"] },
+            "unit3": { "units": ["mos_dworianie_s"] },
+            "unit4": { "units": ["mos_dworianie_m"] },
+            "unit5": { "units": ["mos_dworianie_rohatyna_s"] },
+            "unit6": { "units": ["mos_dworianie_rohatyna_m"] }
+          }
+        ]
+      }
+    }
+  },
+  "mos_pulk_kozakow_sluzebnych": {
+    "name": "Pułk Kozaków Służebnych",
+    "base_cost": 1,
+    "recon": 1,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 1,
+        "units_excluded": ["mos_lekkie_dziala_s", "mos_lekkie_dziala_m"]
+      },
+      {
+        "id": "additional_ammo"
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mos_golowa"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["mos_kozacy_sluzebni_s"] },
+            "unit2": { "units": ["mos_kozacy_sluzebni_m"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["mos_kozacy_sluzebni_s"] },
+            "unit2": { "units": ["mos_kozacy_sluzebni_m"] }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": { "units": ["mos_kozacy_sluzebni_s"] },
+            "unit2": { "units": ["mos_kozacy_sluzebni_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": { "units": ["mos_kozacy_sluzebni_s"] },
+            "unit2": { "units": ["mos_kozacy_sluzebni_m"] }
+          }
+        ]
+      }
+    }
+  },
+  "mos_prikaz_strzelcow_grodowych": {
+    "name": "Prikaz Strzelców Grodowych",
+    "base_cost": 2,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "special_rules": ["mos_dobrze_sie_bronili"],
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 1,
+        "units_excluded": ["mos_lekkie_dziala_s", "mos_lekkie_dziala_m"]
+      },
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "regimental_guns",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mos_golowa"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["mos_strzelcy_grodowi_m"] } }
+        ],
+        "base2": [
+          { "unit1": { "units": ["mos_strzelcy_grodowi_m"] },
+          "unit2":  {
+            "units": ["mos_strzelcy_grodowi_l"]
+          }}
+        ]
+      },
+      "additional": {
+        "additional1": [
+          { "unit1": { "units": ["mos_strzelcy_grodowi_m"] },
+            "unit2":  {
+              "units": ["mos_strzelcy_grodowi_l"]
+            }}
+        ]
+      }
+    }
+  },
+  "mos_prikaz_strzelcow_wybornych": {
+    "name": "Prikaz Strzelców Wybornych",
+    "base_cost": 5,
+    "pu_cost": 3,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "special_rules": ["dobrze_sie_bronili","mos_prikaz_wybornych"],
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 1,
+        "units_excluded": ["mos_lekkie_dziala_s", "mos_lekkie_dziala_m"]
+      },
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "regimental_guns",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mos_golowa"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["mos_strzelcy_grodowi_m"] } }
+        ],
+        "base2": [
+          { "unit1": { "units": ["mos_strzelcy_grodowi_m"] }}
+        ]
+      },
+      "additional": {
+        "additional1": [
+          { "unit1": { "units": ["mos_strzelcy_grodowi_m"] }
+           }
+        ]
+      }
+    }
+  },
+  "mos_pulk_rajtarow": {
+    "name": "Pułk Rajtarów",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "additional_pistol"
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mos_pulkownik"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["mos_rajtarzy_moskiewscy_s"] },
+            "unit2": { "units": ["mos_rajtarzy_moskiewscy_m"] }}
+        ],
+        "base2": [
+          { "unit1": { "units": ["mos_rajtarzy_moskiewscy_s"] },
+            "unit2": { "units": ["mos_rajtarzy_moskiewscy_m"] }}
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["mos_kapitan"] },
+            "is_toggle": true
+          }
+        ],
+        "additional1": [
+          { "unit1": { "units": ["mos_rajtarzy_moskiewscy_s"] },
+            "unit2": { "units": ["mos_rajtarzy_moskiewscy_m"] },
+            "unit3": { "units": ["mos_kopijnicy_s"] },
+            "unit4": { "units": ["mos_kopijnicy_m"] }
+          }
+        ]
+      }
+    }
+  },
+  "mos_pulk_kopijnikow": {
+    "name": "Pułk Kopijników",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": 1,
+        "units_allowed": ["mos_kopijnicy_s", "mos_kopijnicy_m"]
+      },
+      {
+        "id": "additional_ammo",
+        "cost": 1,
+        "units_allowed": ["mos_kopijnicy_s", "mos_kopijnicy_m"]
+      },
+      {
+        "id": "additional_pistol",
+        "cost": -1,
+        "min_amount": 1,
+        "units_allowed": ["mos_kopijnicy_s", "mos_kopijnicy_m"]
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mos_pulkownik"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["mos_kopijnicy_s"] },
+            "unit2": { "units": ["mos_kopijnicy_m"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["mos_kopijnicy_s"] },
+            "unit2": { "units": ["mos_kopijnicy_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["mos_kapitan"] },
+            "is_toggle": true
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["mos_kopijnicy_s"] },
+            "unit2": { "units": ["mos_kopijnicy_m"] }
+          }
+        ]
+      }
+    }
+  },
+  "mos_pulk_dragonow_polowych": {
+    "name": "Pułk Dragonów Polowych",
+    "base_cost": 0,
+    "recon": 1,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 1,
+        "units_excluded": ["mos_lekkie_dziala_s", "mos_lekkie_dziala_m"]
+      },
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "regimental_guns",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mos_pulkownik"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["mos_dragoni_polowi_s"] },
+            "unit2": { "units": ["mos_dragoni_polowi_m"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["mos_dragoni_polowi_s"] },
+            "unit2": { "units": ["mos_dragoni_polowi_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["mos_kapitan"],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["mos_dragoni_polowi_s"] },
+            "unit2": { "units": ["mos_dragoni_polowi_m"] }
+          }
+        ]
+      }
+    }
+  },
+  "mos_pulk_soldacki": {
+    "name": "Pułk Sołdacki",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_ammo",
+        "cost": 1
+      },
+      {
+        "id": "regimental_guns",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mos_pulkownik"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["mos_soldaci_m"] } }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["mos_soldaci_m"] },
+            "unit2": { "units": ["mos_soldaci_l"] }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["mos_kapitan"],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["mos_soldaci_m"] },
+            "unit2": { "units": ["mos_soldaci_l"] }
+          }
+        ]
+      }
+    }
+  },
+  "mos_pulk_dragonow_pogranicznych": {
+    "name": "Pułk Dragonów Pogranicznych",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "regimental_guns",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mos_golowa"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["mos_dragoni_pograniczni_m"] },
+            "unit2": { "units": ["mos_dragoni_pograniczni_l"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["mos_dragoni_pograniczni_m"] },
+            "unit2": { "units": ["mos_dragoni_pograniczni_l"] }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": { "units": ["mos_dragoni_pograniczni_m"] },
+            "unit2": { "units": ["mos_dragoni_pograniczni_l"] }
+          }
+        ]
+      }
+    }
+  }
+}
+

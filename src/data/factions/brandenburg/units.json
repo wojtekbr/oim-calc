@@ -1,0 +1,80 @@
+{
+  "_meta": {
+    "name": "Brandenburgia"
+  },
+  "bra_general": {
+    "id": "bra_general",
+    "name": "Generał",
+    "cost": 0,
+    "rank": "group",
+    "orders": 3
+  },
+  "bra_pulkownik": {
+    "id": "bra_pulkownik",
+    "name": "Pułkownik",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "bra_podpulkownik": {
+    "id": "bra_podpulkownik",
+    "name": "Podpułkownik",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "bra_kapitan": {
+    "id": "bra_kapitan",
+    "name": "Kapitan #",
+    "cost": 2,
+    "rank": "group",
+    "orders": 1
+  },
+  "bra_major": {
+    "id": "bra_major",
+    "name": "Major #",
+    "cost": 2,
+    "rank": "group",
+    "orders": 1
+  },
+  "bra_rajtarzy_obrony_krajowej_m": {
+    "id": "bra_rajtarzy_obrony_krajowej_m",
+    "name": "Rajtarzy Obrony Krajowej M",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "bra_dragoni_pruscy_s": {
+    "id": "bra_dragoni_pruscy_s",
+    "name": "Dragoni Pruscy S",
+    "cost": 4,
+    "improvement_cost": 1,
+    "rank": "bronze",
+    "is_cavalry": true,
+    "are_dragoons": true
+  },
+  "bra_muszkieterzy_pruscy_m": {
+    "id": "bra_muszkieterzy_pruscy_m",
+    "name": "Muszkieterzy Pruscy M",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver"
+  },
+  "bra_light_artillery_s": {
+    "id": "swe_light_artillery_s",
+    "name": "Lekkie Działa S",
+    "cost": 3,
+    "is_artillery": true,
+    "rank": "bronze",
+    "improvement_cost": 2
+  },
+  "bra_medium_artillery_s": {
+    "id": "swe_medium_artillery_s",
+    "name": "Średnie Działa S",
+    "cost": 5,
+    "is_artillery": true,
+    "rank": "silver",
+    "improvement_cost": 3
+  }
+}

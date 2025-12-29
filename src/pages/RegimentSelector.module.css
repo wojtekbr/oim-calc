@@ -1,0 +1,371 @@
+/* src/pages/RegimentSelector.module.css */
+
+/* Layout Główny */
+.container {
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+
+  background-position: center;
+  background-repeat: repeat;
+  background-attachment: fixed;
+  transition: background-image 0.3s ease-in-out;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.inputsRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.inputField {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Dashboard Summary Card */
+.summaryCard {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e0e0e0;
+  border-left: 5px solid #0077ff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.summaryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.summaryTitle { font-size: 20px; font-weight: 800; color: #222; }
+.summarySubtitle { font-size: 14px; color: #666; margin-top: 4px; }
+.summaryPoints { font-size: 16px; font-weight: 600; text-align: right; }
+.pointsOk { color: #1b7e32; }
+.pointsError { color: #d32f2f; }
+
+.rulesToggleBtn {
+  background: none;
+  border: none;
+  color: #0077ff;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 8px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.rulesToggleBtn:hover { text-decoration: underline; }
+
+.rulesContainer {
+  margin-top: 0;
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  animation: fadeIn 0.3s ease;
+}
+
+.ruleLine {
+  font-size: 13px;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.summaryInfoRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .summaryInfoRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summarySection {
+  margin-top: 0;
+}
+
+.summarySectionTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.commanderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9fbff;
+  border: 1px solid #cce3f6;
+  padding: 10px 14px;
+  border-radius: 6px;
+  min-height: 42px;
+}
+.commanderName { font-weight: 700; color: #0056b3; font-size: 14px; }
+.commanderStats { font-size: 12px; font-weight: 600; color: #444; }
+.noCommanderMsg { font-size: 13px; color: #999; font-style: italic; }
+
+.regimentListSimple {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  border: none;
+  background: transparent;
+}
+
+.regListItem {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.regListItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.regListHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  border-bottom: 1px solid #f5f5f5;
+  padding-bottom: 6px;
+  margin-bottom: 2px;
+}
+
+.regInfoMain { display: flex; flex-direction: column; gap: 2px; }
+.regListName { font-weight: 700; color: #222; font-size: 13px; }
+.regListCustomName { font-style: italic; color: #666; font-size: 12px; }
+
+.regListTags { display: flex; gap: 4px; margin-top: 2px; }
+.tagBadge {
+  font-size: 9px; padding: 1px 4px; border-radius: 3px;
+  font-weight: 700; text-transform: uppercase;
+}
+.tagMain { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
+.tagVanguard { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+
+.regListStats {
+  text-align: right;
+  font-size: 11px;
+  color: #555;
+  line-height: 1.3;
+  min-width: 70px;
+}
+
+.regDetails { width: 100%; font-size: 11px; }
+.unitRow { display: flex; justify-content: space-between; margin-bottom: 2px; color: #333; }
+.unitNameCol { display: flex; align-items: center; gap: 4px; }
+.commanderBadge {
+  background: #e3f2fd; color: #0d47a1; font-size: 8px; padding: 0 3px;
+  border-radius: 3px; font-weight: 700; border: 1px solid #90caf9;
+}
+.impsList { color: #2e7d32; font-size: 10px; font-style: italic; margin-left: auto; padding-left: 8px; text-align: right; }
+.regImpsRow { margin-top: 4px; color: #6a1b9a; font-size: 10px; font-weight: 600; background: #f3e5f5; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+
+.unassignedList { display: flex; flex-wrap: wrap; gap: 6px; }
+.unassignedBadge {
+  background: #fff; border: 1px solid #ddd; padding: 4px 10px; border-radius: 12px;
+  font-size: 11px; color: #444; display: flex; align-items: center; gap: 6px; min-height: 30px;
+}
+
+.errorContainer {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 8px;
+  color: #c62828;
+}
+.errorHeader { margin-top: 0; margin-bottom: 8px; }
+.errorList { margin: 0; padding-left: 20px; }
+.errorItem { margin-bottom: 4px; white-space: pre-line; }
+
+/* --- UKŁAD DWUKOLUMNOWY (DOWÓDCA + WSPARCIE) --- */
+.twoColumnRow {
+  display: grid;
+  grid-template-columns: 500px 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+  align-items: stretch;
+}
+
+/* FIX: Dodano styl dla wrapperów kolumn */
+.columnWrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* FIX: Wewnątrz dwukolumnowego układu, sectionRow ma nie mieć marginesu i wypełniać wysokość */
+.twoColumnRow .sectionRow {
+  margin-bottom: 0;
+  height: 100%;
+}
+
+@media (max-width: 1400px) {
+  .twoColumnRow { grid-template-columns: 400px 1fr; }
+}
+
+@media (max-width: 1100px) {
+  .twoColumnRow { grid-template-columns: 1fr; }
+}
+
+/* --- LAYOUT SEKCYJNY (PIONOWY TYTUŁ) --- */
+.sectionRow {
+  display: flex;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  align-items: stretch;
+}
+
+/* Lewy pasek z tytułem */
+.sectionLabel {
+  width: 50px;
+  background: #f0f0f0;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+  flex-shrink: 0;
+}
+
+.sectionLabelText {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #555;
+  letter-spacing: 1px;
+}
+
+.sectionContent {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Support Columns */
+.supportColumns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 900px) { .supportColumns { grid-template-columns: 1fr; } }
+
+.supportGroupTitle {
+  font-size: 12px; font-weight: bold; color: #666; margin-bottom: 12px; text-transform: uppercase;
+}
+
+.supportGroupContainer { border: 1px dashed #ccc; padding: 8px; border-radius: 6px; background: #fafafa; }
+.supportGroupName { font-size: 11px; text-align: center; margin-bottom: 6px; color: #666; }
+.supportGroupFlex { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+
+/* Gridy */
+.regimentsGrid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media (min-width: 1100px) { .regimentsGrid { grid-template-columns: repeat(2, 1fr); align-items: start; } }
+
+.gridContainer, .supportGrid, .optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+/* Kafelki i reszta bez zmian */
+.card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 0; display: flex; flex-direction: column; transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; overflow: visible; cursor: pointer; height: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.05); min-height: 160px; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: #bbb; }
+.card.active { border: 2px solid #0077ff; background-color: #fff; box-shadow: 0 0 0 2px rgba(0, 119, 255, 0.2); }
+.card.locked, .card.disabledTile { opacity: 0.6; filter: grayscale(1); cursor: not-allowed; background: #f5f5f5; border-color: #eee; }
+.cardImagePlaceholder { width: 100%; height: 80px; background-color: #eee; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: rgba(0,0,0,0.2); text-transform: uppercase; border-bottom: 1px solid #eee; border-radius: 6px 6px 0 0; }
+.cardContent { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; }
+.cardTitle { font-weight: 700; font-size: 13px; margin-bottom: 4px; color: #222; line-height: 1.3; }
+.cardSubtitle { font-size: 11px; color: #666; margin-bottom: 6px; }
+.cardCost { font-size: 12px; color: #666; font-weight: 600; background: #f0f2f5; padding: 2px 6px; border-radius: 4px; align-self: flex-start; margin-top: auto; }
+.checkBadge { position: absolute; top: 6px; right: 6px; background: #0077ff; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 2; }
+.allyLabel { font-size: 10px; color: #d35400; margin-bottom: 4px; font-weight: bold; text-transform: uppercase; }
+.assignmentSelect { width: 100%; margin-top: 8px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 11px; background-color: #fff; cursor: pointer; }
+.assignmentSelect:focus { outline: none; border-color: #0077ff; }
+
+/* Regiment Rows */
+.regimentRow { display: flex; flex-direction: column; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 0; background: #fff; transition: all 0.2s; height: 100%; max-width: 100%; box-sizing: border-box; }
+.regimentRow.disabled { opacity: 0.6; pointer-events: none; background: #f9f9f9; }
+.regHeader { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; gap: 16px; }
+.regRightColumn { display: flex; flex-direction: column; align-items: flex-end; min-width: 140px; flex-shrink: 0; }
+.regTopRow { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-bottom: 8px; }
+.regTitle { font-weight: 700; font-size: 15px; color: #222; white-space: nowrap; }
+.regNameInput { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; flex: 1; max-width: 300px; }
+.regStats { font-size: 12px; color: #555; text-align: right; line-height: 1.4; display: flex; flex-direction: column; align-items: flex-end; }
+.regCost { font-size: 18px; font-weight: 700; color: #1b7e32; }
+
+.editBtn { padding: 6px 12px; background: #fff; color: #0077ff; border: 1px solid #0077ff; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 12px; margin-top: 8px; transition: all 0.2s; width: 100%; text-align: center; }
+.editBtn:hover { background: #0077ff; color: #fff; }
+.makeMainForceBtn { margin-top: 6px; font-size: 11px; padding: 4px 8px; cursor: pointer; background: #fff; border: 1px solid #ff9800; color: #ef6c00; border-radius: 4px; font-weight: 600; }
+.makeMainForceBtn:hover { background: #fff3e0; }
+
+.statusLabel { margin-top: 6px; font-weight: bold; padding-top: 4px; border-top: 1px solid #eee; width: 100%; text-align: right; }
+.statusMainForce { color: #e65100; }
+.statusAlly { color: #d35400; }
+.regSupportInfo { margin-top: auto; padding-top: 12px; font-size: 12px; color: #0056b3; font-style: italic; border-top: 1px dashed #eee; }
+
+.pdfBtn { text-decoration: none; padding: 10px 20px; color: #fff; background-color: #d32f2f; border-radius: 5px; font-weight: bold; display: inline-block; font-size: 14px; }
+.pdfBtn:hover { background-color: #b71c1c; }
+.disabledPdfBtn { padding: 10px 20px; background: #e0e0e0; color: #666; border-radius: 5px; font-weight: bold; font-size: 13px; cursor: not-allowed; }
+.backBtn { border: none; background: none; color: #0077ff; font-weight: 600; cursor: pointer; font-size: 14px; padding: 0; }
+.backBtn:hover { text-decoration: underline; }
+
+/* --- MOTYWY FRAKCYJNE --- */
+.themePoland { background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('/assets/bg_poland.jpg'); }
+.themeOttomans { background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('/assets/bg_ottomans.jpg'); }
+.themeHre { background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('/assets/bg_hre.jpg'); background-color: #e0d8b0; }
+.themeDefault { background-color: #f4f6f8; }

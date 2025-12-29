@@ -1,0 +1,699 @@
+{
+  "koz_pulk_kozacki": {
+    "name": "Pułk Kozacki",
+    "base_cost": 2,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "special_rules": [
+      "za_mna_bracia_kozacy"
+    ],
+    "unit_improvements": [
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "swivel_guns"
+      },
+      {
+        "id": "partisans",
+        "max_amount": 1,
+        "cost_override": 0,
+        "units_allowed": [
+          "koz_molojcy_rejestrowi_s", "koz_molojcy_strzelcy_s", "koz_czern_m"
+        ]
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_l"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "koz_molojcy_strzelcy_s"
+              ]
+            },
+            "unit4": {
+              "units": [
+                "koz_molojcy_strzelcy_m"
+              ]
+            },
+            "unit5": {
+              "units": [
+                "koz_konni_molojcy_s"
+              ]
+            },
+            "unit6": {
+              "units": [
+                "koz_konni_molojcy_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_l"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit4": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": [
+                "koz_czern_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_l"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "koz_molojcy_strzelcy_s"
+              ]
+            },
+            "unit4": {
+              "units": [
+                "koz_molojcy_strzelcy_m"
+              ]
+            },
+            "unit5": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit6": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": [
+                "koz_czern_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_czern_l"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_doborowy_pulk_kozacki": {
+    "name": "Doborowy Pułk Kozacki",
+    "base_cost": 7,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "special_rules": [
+      "za_mna_bracia_kozacy"
+    ],
+    "unit_improvements": [
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "swivel_guns"
+      },
+      {
+        "id": "partisans",
+        "max_amount": 1,
+        "units_allowed": [
+          "koz_molojcy_rejestrowi_s", "koz_molojcy_strzelcy_s", "koz_czern_m"
+        ]
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_vet_m"
+              ],
+              "mandatory_improvements": ["veterans"]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_vet_l"
+              ],
+              "mandatory_improvements": ["veterans"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "koz_molojcy_strzelcy_s"
+              ]
+            },
+            "unit4": {
+              "units": [
+                "koz_molojcy_strzelcy_m"
+              ]
+            }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_l"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit4": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": [
+                "koz_czern_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_czern_strzelcy_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_l"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "koz_konni_molojcy_s"
+              ]
+            },
+            "unit4": {
+              "units": [
+                "koz_konni_molojcy_m"
+              ]
+            },
+            "unit5": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit6": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": [
+                "koz_czern_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_czern_l"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "koz_czern_strzelcy_m"
+              ]
+            },
+            "unit4": {
+              "units": [
+                "koz_czern_strzelcy_l"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_pulk_czerni": {
+    "name": "Pułk Czerni",
+    "base_cost": 5,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "special_rules": [
+      "posluch",
+      "chlopscy_szpiedzy"
+    ],
+    "unit_improvements": [
+      {
+        "id": "partisans",
+        "max_amount": 1,
+        "units_allowed": [
+          "koz_czern_m"
+        ]
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_watazka"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_czern_l"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_czern_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_czern_l"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "koz_czern_xl"
+              ]
+            },
+            "unit4": {
+              "units": [
+                "koz_czern_strzelcy_m"
+              ]
+            },
+            "unit5": {
+              "units": [
+                "koz_czern_strzelcy_l"
+              ]
+            }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": {
+              "units": [
+                "koz_czern_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_czern_l"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_czern_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_czern_l"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "koz_czern_xl"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_pulk_konnych_kozakow": {
+    "name": "Pułk Konnych Kozaków",
+    "base_cost": 0,
+    "recon": 2,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_konni_molojcy_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_konni_molojcy_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_konni_molojcy_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_konni_molojcy_m"
+              ]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": [
+                "koz_konni_molojcy_vet_s"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_konni_molojcy_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_konni_molojcy_m"
+              ]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": [
+                "koz_konni_molojcy_vet_s"
+              ],
+              "mandatory_improvements": ["veterans"]
+            },
+            "unit2": {
+              "units": [
+                "koz_konni_molojcy_vet_m"
+              ],
+              "mandatory_improvements": ["veterans"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_piechota_rejestrowa": {
+    "name": "Pułk Piechoty Rejestrowej",
+    "base_cost": 4,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "special_rules": [
+      "cossack_registered_rules"
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo",
+        "cost": 1,
+        "units_allowed": [
+          "koz_molojcy_rejestrowi_s",
+          "koz_molojcy_rejestrowi_m",
+          "koz_konni_molojcy_s"
+        ]
+      },
+      {
+        "id": "smigownice",
+        "name": "Śmigownice",
+        "cost": 1,
+        "max_amount": 2,
+        "units_allowed": [
+          "koz_molojcy_rejestrowi_s",
+          "koz_molojcy_rejestrowi_m"
+        ]
+      },
+      {
+        "id": "partisans",
+        "max_amount": 1,
+        "units_allowed": [
+          "koz_molojcy_rejestrowi_s", "koz_molojcy_strzelcy_s", "koz_czern_m"
+        ]
+      }
+    ],
+    "regiment_improvements": [
+      { "id": "region_kijowski" },
+      { "id": "region_bialocerkiewski" },
+      { "id": "region_nizynski" },
+      { "id": "region_korsunski" },
+      { "id": "region_czerkaski" },
+      { "id": "region_czehrynski" },
+      { "id": "region_prylucki" },
+      { "id": "region_kaniowski" },
+      { "id": "region_mirhorodzki" },
+      { "id": "region_perejaslawski" },
+      { "id": "cmdr_zdanowycz" },
+      { "id": "cmdr_neczaj" },
+      { "id": "cmdr_doroszenko" },
+      { "id": "cmdr_dyki" },
+      { "id": "cmdr_lisowskyj" }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

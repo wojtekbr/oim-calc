@@ -1,0 +1,218 @@
+{
+  "veterans": {
+    "name": "Weterani",
+    "cost": "double",
+    "type": "unit"
+  },
+  "javelin": {
+    "name": "Dziryt",
+    "cost": -1,
+    "type": "unit"
+  },
+  "additional_pistol": {
+    "name": "Dodatkowe pistolety",
+    "cost": -1,
+    "type": "unit"
+  },
+  "additional_ammo": {
+    "name": "Dodatkowa amunicja",
+    "cost": "normal",
+    "type": "unit"
+  },
+  "kalkans": {
+    "name": "Kałkany",
+    "cost": "normal",
+    "type": "unit"
+  },
+  "serdengetci_contract": {
+    "name": "Kontrakt Serdengetci",
+    "cost": "normal",
+    "type": "unit"
+  },
+  "elite_janissaries": {
+    "name": "Elitarni Janczarzy",
+    "cost": 3,
+    "army_point_cost": 3,
+    "type": "regiment"
+  },
+  "nahajki_i_arkany": {
+    "name": "Nahajki i arkany",
+    "cost": -1,
+    "type": "unit"
+  },
+  "independent": {
+    "name": "Samodzielność",
+    "cost": "triple",
+    "type": "unit"
+  },
+  "regimental_guns": {
+    "name": "Działa Regimentowe",
+    "cost": "normal",
+    "type": "unit"
+  },
+  "mercenary_dragoons": {
+    "name": "Najemni Dragoni",
+    "type": "regiment",
+    "cost": 3
+  },
+  "partisans": {
+    "name": "Partyzanci",
+    "type": "unit",
+    "cost": "double"
+  },
+  "swivel_guns": {
+    "name": "Śmigownice",
+    "type": "unit",
+    "cost": "+1"
+  },
+  "small_companies": {
+    "name": "Małe kompanie",
+    "type": "unit",
+    "cost": 0
+  },
+  "disciplined": {
+    "name": "Zdyscyplinowani",
+    "type": "unit",
+    "cost": 0
+  },
+  "veterans_presence": {
+    "name": "Obecność weteranów",
+    "type": "unit",
+    "cost": 0
+  },
+  "dragoons_attachment": {
+    "name": "Przydzieleni dragoni",
+    "type": "unit",
+    "cost": "normal"
+  },
+  "dragoons_attachment": {
+    "name": "Przeszkoleni",
+    "type": "unit",
+    "cost": "normal"
+  },
+
+  "mos_prikaz_wybornych": {
+    "name": "Prikaz strzelców Wybornych",
+    "type": "regiment",
+    "cost": 3,
+    "army_point_cost": 3
+  },
+
+  "region_kijowski": {
+    "name": "Pułk Kijowski",
+    "type": "regiment",
+    "group": "registered_region",
+    "army_point_cost": 4,
+    "army_limit": 1,
+    "description": "Najbardziej prestiżowy pułk. Pułkownik ma 4 PD, Esauł 2PD. Motywacja pułku jest zwiększona o 1."
+  },
+  "region_bialocerkiewski": {
+    "name": "Pułk Białocerkiewski",
+    "type": "regiment",
+    "group": "registered_region",
+    "army_point_cost": 5,
+    "army_limit": 1,
+    "division_pu_bonus": 4,
+    "description": "Jedne z liczniejszych, z dużymi koneksjami. Daje dywizji +4PU, Wszystkie jednostki w pułku mają wszystkie stany zwiększone o 1. Nie może mieć w składzie jednostek mniejszych niż M."
+  },
+  "region_nizynski": {
+    "name": "Pułk Niżyński",
+    "type": "regiment",
+    "group": "registered_region",
+    "army_point_cost": 0,
+    "army_limit": 1,
+    "description": "Bardzo liczny z rozbudowanymi sotniami. Możesz wystawić dodatkową jednostkę Mołojców Rejestrowych. Nie może mieć w składzie jednostek mniejszych niż M."
+  },
+  "region_korsunski": {
+    "name": "Pułk Korsuński",
+    "type": "regiment",
+    "group": "registered_region",
+    "army_point_cost": 4,
+    "army_limit": 1,
+    "description": "Był bardzo narażony na ataki tatarów co czyniło ich bardzo doświadczonymi. Wszystkie jednostki w pułku otrzymują ulepszenie Świetni wojownicy. Motywacja pułku jest zwiększona o 1."
+  },
+  "region_czerkaski": {
+    "name": "Pułk Czerkaski",
+    "type": "regiment",
+    "group": "registered_region",
+    "army_point_cost": 3,
+    "army_limit": 1,
+    "description": "Z pułku pochodziło wiele ważnych przywódców kozackich, a jego ziemie były mocno zrusyfikowane. Wszystkie jednostki w pułku otrzymują ulepszenie: Nieustraszeni. Pułkownik ma 4 PD."
+  },
+  "region_czehrynski": {
+    "name": "Pułk Czehryński",
+    "type": "regiment",
+    "group": "registered_region",
+    "army_point_cost": 5,
+    "army_limit": 1,
+    "description": "Pułk którym przed powstaniem dowodził sam Chmielnicki. Najbardziej oddany pułk w powstaniu. Wszystkie jednostki w pułku otrzymują ulepszenie “Do ostatniego żołnierza”. Motywacja pułku jest zwiększona o 2."
+  },
+  "region_prylucki": {
+    "name": "Pułk Pryłucki",
+    "type": "regiment",
+    "group": "registered_region",
+    "army_point_cost": 4,
+    "army_limit": 1,
+    "description": "Wysoko zdyscyplinowany pułk. Wszystkie jednostki w pułku otrzymują zasadę “Dyscyplina (+1)”. Wszystkie jednostki mogą przerzucać nie zdane testy morale i wyszkolenia."
+  },
+  "region_kaniowski": {
+    "name": "Pułk Kaniowski",
+    "type": "regiment",
+    "group": "registered_region",
+    "army_point_cost": 5,
+    "army_limit": 1,
+    "description": "Znany z tradycji rzecznych i flisackich. Wszystkie jednostki w pułku otrzymują zasadę “Desant Wodny”. Pułk można wystawić jako dodatkowy w Straży przedniej (+1 kość Zwiadu)."
+  },
+  "region_mirhorodzki": {
+    "name": "Pułk Mirhorodzki",
+    "type": "regiment",
+    "group": "registered_region",
+    "army_point_cost": 0,
+    "army_limit": 1,
+    "description": "Znany z jednej z najlepszych sotni jazdy. Może wystawić dodatkową M konnych mołojców Weteranów za 7PS."
+  },
+  "region_perejaslawski": {
+    "name": "Pułk Perejasławski",
+    "type": "regiment",
+    "group": "registered_region",
+    "army_point_cost": 4,
+    "army_limit": 1,
+    "description": "Bardzo lojalny wobec Chmielnickiego. Wszystkie jednostki w pułku otrzymują ulepszenie: Nieustraszeni. Motywacja pułku jest zwiększona o 2."
+  },
+
+  "cmdr_zdanowycz": {
+    "name": "Antin Żdanowycz",
+    "type": "regiment",
+    "army_point_cost": 3,
+    "requirements": ["region_kijowski"],
+    "description": "Samodzielny i ambitny: +1PD. Jedna jednostka w jego pułku otrzymuje zasadę Samodzielność."
+  },
+  "cmdr_neczaj": {
+    "name": "Danyło Neczaj",
+    "type": "regiment",
+    "army_point_cost": 3,
+    "requirements": ["region_bialocerkiewski"],
+    "description": "Odważny i utalentowany: Ma morale zwiększone o 1. Dopóki dowodzi pułkiem, a pułk nie został zniesiony może za 1PD dodać jedną kość do inicjatywy."
+  },
+  "cmdr_doroszenko": {
+    "name": "Andrij Doroszenko",
+    "type": "regiment",
+    "army_point_cost": 3,
+    "requirements": ["region_kaniowski"],
+    "description": "Organizator: Może przydzielić 2 jednostkom z swojego pułku darmowe ulepszenie “Dodatkowa amunicja”."
+  },
+  "cmdr_dyki": {
+    "name": "Iwan Dyki",
+    "type": "regiment",
+    "army_point_cost": 3,
+    "requirements": ["region_czerkaski"],
+    "description": "Brawura: Jednostki w jego pułku mają Szybkość zwiększoną o 1."
+  },
+  "cmdr_lisowskyj": {
+    "name": "Fedor Lisowśkyj",
+    "type": "regiment",
+    "army_point_cost": 3,
+    "requirements": ["region_czehrynski"],
+    "description": "Wierny współpracownik Chmielnickiego: Dodaje +1ZA dla głównodowodzącego armii."
+  }
+}

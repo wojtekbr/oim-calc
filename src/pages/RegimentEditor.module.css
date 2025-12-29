@@ -1,0 +1,622 @@
+/* src/pages/RegimentEditor.module.css */
+
+/* Layout Główny */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
+  color: #333;
+}
+
+.topBar {
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  z-index: 10;
+}
+
+.topBarTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 12px;
+}
+
+.btnPrimary, .btnSecondary {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btnPrimary {
+  background-color: #0077ff;
+  color: white;
+}
+.btnPrimary:hover { background-color: #005ecb; }
+.btnPrimary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.btnSecondary {
+  background-color: #e0e0e0;
+  color: #333;
+}
+.btnSecondary:hover { background-color: #d0d0d0; }
+
+/* Grid Content */
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Kolumny */
+.mainColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: sticky;
+  top: 0;
+  height: fit-content;
+}
+
+/* Sekcje */
+.sectionCard {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+}
+
+.supportCard {
+  border-color: #0077ff;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.sectionHeaderCheckbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.sectionHeaderCheckbox input {
+  width: 20px; 
+  height: 20px; 
+  margin-right: 10px; 
+  cursor: pointer;
+}
+
+.supportHeader {
+  border-bottom-color: #cce3f6;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #444;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.supportTitle {
+  color: #0056b3;
+}
+
+.customSlotSeparator {
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.disabledContent {
+  opacity: 0.5;
+  filter: grayscale(1);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  user-select: none;
+}
+.disabledContent:hover {
+  opacity: 0.8;
+  filter: grayscale(0.5);
+}
+
+.groupContainer {
+  margin-bottom: 24px;
+}
+
+.groupLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.groupLabelOptional {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.checkboxInput {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.clickableSpan {
+  cursor: pointer;
+}
+
+.podContainer {
+  margin-bottom: 12px;
+}
+
+.podSelectionHint {
+  font-size: 11px;
+  margin-bottom: 4px;
+  color: #888;
+}
+
+/* --- ACTIVE CONFIG PANEL (Panel edycji wybranej jednostki) --- */
+.activeConfigPanel {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #0077ff;
+}
+
+.activeConfigTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.activeUnitRow {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #ccc;
+}
+.activeUnitRow:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.activeUnitHeader {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.activeUnitCostLabel {
+  font-weight: 400;
+  color: #888;
+  font-size: 11px;
+}
+
+.cleanImprovementsContainer {
+  margin-top: 0;
+  border: none;
+  padding-top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.emptyImprovements {
+  font-size: 11px;
+  color: #999;
+  font-style: italic;
+}
+
+/* --- MULTI CARD INTERNALS --- */
+.multiCardTitle {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: #222;
+  line-height: 1.3;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+}
+
+.multiCardList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.multiCardItem {
+  display: flex;
+  justify-content: space-between;
+}
+
+.multiCardTotalCost {
+  font-size: 12px;
+  color: #666;
+  margin-top: 8px;
+  font-weight: 700;
+  background: #f0f2f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+/* --- STYLE KART (GRID) --- */
+.unitsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.unitCard {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  height: 100%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.unitCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border-color: #bbb;
+}
+
+.unitCard.selectable:active {
+  transform: scale(0.98);
+}
+
+.unitCard.active {
+  border: 2px solid #0077ff;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(0, 119, 255, 0.2);
+}
+
+.unitCard.multiCard {
+  border-style: double;
+  border-width: 4px;
+}
+
+.cardImagePlaceholder {
+  width: 100%;
+  height: 90px;
+  background-color: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.2);
+  text-transform: uppercase;
+  border-bottom: 1px solid #eee;
+}
+
+.cardContent {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: space-between;
+}
+
+.unitName {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #222;
+  line-height: 1.3;
+}
+
+.unitOrders {
+  font-size: 11px;
+  color: #d35400;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.unitCost {
+  font-size: 12px;
+  color: #666;
+  margin-top: 6px;
+  font-weight: 600;
+  background: #f0f2f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+.checkBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #0077ff;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+
+/* Improvements Buttons */
+.impBadge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.impBadge:hover:not(:disabled) {
+  background: #e9e9e9;
+}
+
+.impBadge.active {
+  background: #e6ffe6;
+  border-color: #1b7e32;
+  color: #006400;
+}
+
+.impBadge:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --- SIDEBAR STYLES --- */
+
+.sidebarHeader {
+  margin-bottom: 16px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 12px;
+}
+
+.sidebarTitle {
+  font-size: 16px;
+  font-weight: 800;
+  color: #222;
+  line-height: 1.3;
+}
+
+.sidebarSubtitle {
+  font-size: 14px;
+  font-style: italic;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Sidebar Stats & Summary */
+.pointsBox {
+  background-color: #eef6fc;
+  border: 1px solid #cce3f6;
+  border-radius: 6px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.pointsBig {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0056b3;
+  display: block;
+}
+
+.pointsLabel {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #668;
+}
+
+.statsSeparator {
+  margin: 16px 0;
+  border-top: 1px solid #eee;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+.statRow:last-child {
+  border-bottom: none;
+}
+
+.statLabel { color: #555; }
+.statValue { font-weight: 700; color: #222; }
+.statValueType { text-transform: uppercase; color: #0077ff; }
+
+/* Error Box */
+.errorBox {
+  margin-bottom: 24px;
+  padding: 12px;
+  background-color: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 6px;
+  color: #c62828;
+  font-size: 13px;
+}
+.errorList {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+/* Rules */
+.regimentImprovementsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ruleEntry {
+  margin-bottom: 8px;
+}
+
+.ruleEntryTitle {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.ruleEntryDesc {
+  font-size: 11px;
+  color: #555;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.regimentImprovementLabel {
+  font-size: 13px;
+}
+
+/* Table */
+.tableContainer {
+  margin-bottom: 10px;
+}
+
+.tableHeader {
+  margin-bottom: 10px;
+}
+
+.tableHeader h4 {
+  margin-bottom: 4px;
+}
+
+.pointsDisplay {
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.impPoints {
+  font-weight: bold;
+}
+.impPoints.ok { color: #1b7e32; }
+.impPoints.error { color: #d32f2f; }
+
+.impTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.impTableHeadRow {
+  border-bottom: 2px solid #eee;
+  color: #666;
+}
+
+.tableTh {
+  text-align: left;
+  padding-bottom: 4px;
+}
+.tableThCenter {
+  text-align: center;
+  padding-bottom: 4px;
+}
+.tableThRight {
+  text-align: right;
+  padding-bottom: 4px;
+}
+
+.impTableRow {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tableTd {
+  padding: 6px 0;
+  color: #333;
+}
+.tableTdCenter {
+  padding: 6px 0;
+  text-align: center;
+  color: #666;
+}
+.tableTdRight {
+  padding: 6px 0;
+  text-align: right;
+  font-weight: bold;
+}
+
+.limitReached {
+  color: #d32f2f;
+}
+.limitOk {
+  color: #0056b3;
+}

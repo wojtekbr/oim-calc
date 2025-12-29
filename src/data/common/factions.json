@@ -1,0 +1,23 @@
+{
+  "turcja": {
+    "name": "Imperium Osmańskie",
+    "dir": "ottomans"
+  },
+  "ron": {
+    "name": "Rzeczpospolita Obojga Narodów",
+    "dir": "commonwealth-crown"
+  },
+  "cesarstwo": {
+    "name": "Święte Cesarstwo Rzymskie",
+    "dir": "hre"
+  },
+  "najemnicy": {
+    "name": "Wojska Najemne",
+    "dir": "mercenaries",
+    "hidden": true
+  },
+  "kozacy": {
+    "name": "Kozacy",
+    "dir": "cossacks"
+  }
+}

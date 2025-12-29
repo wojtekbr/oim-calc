@@ -1,0 +1,977 @@
+{
+  "cro_crown_cavalry": {
+    "name": "Pułk jazdy koronnej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol",
+        "cost": -1
+      },
+      {
+        "id": "independent",
+        "cost": "triple",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_m"]
+            },
+            "unit2": {
+              "units": ["cro_pancerni_s"]
+            },
+            "unit3": {
+              "units": ["cro_pancerni_m"]
+            },
+            "unit4": {
+              "units": ["cro_cosasck_style_rohatyna_s"]
+            },
+            "unit5": {
+              "units": ["cro_cosasck_style_rohatyna_m"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["cro_hussars_s"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_rotmistrz"],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_s"]
+            },
+            "unit2": {
+              "units": ["cro_cossack_style_m"]
+            },
+            "unit3": {
+              "units": ["cro_pancerni_rohatyna_s"]
+            },
+            "unit4": {
+              "units": ["cro_pancerni_rohatyna_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "cro_crown_cavalry_vanguard": {
+    "name": "Pułk jazdy koronnej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "cost": "double",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol",
+        "cost": -1
+      },
+      {
+        "id": "independent",
+        "cost": "triple",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_m"]
+            },
+            "unit2": {
+              "units": ["cro_pancerni_s"]
+            },
+            "unit3": {
+              "units": ["cro_pancerni_m"]
+            },
+            "unit4": {
+              "units": ["cro_cosasck_style_rohatyna_s"]
+            },
+            "unit5": {
+              "units": ["cro_cosasck_style_rohatyna_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_rotmistrz"],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_s"]
+            },
+            "unit2": {
+              "units": ["cro_cossack_style_m"]
+            },
+            "unit3": {
+              "units": ["cro_pancerni_rohatyna_s"]
+            },
+            "unit4": {
+              "units": ["cro_pancerni_rohatyna_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "cro_elite_crown_cavalry": {
+    "name": "Doborowy pułk jazdy koronnej",
+    "base_cost": 4,
+    "recon": 0,
+    "awareness": 5,
+    "activations": 3,
+    "commander_orders_bonus": 1,
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1,
+        "units_allowed": ["cro_cossack_style_s","cro_cossack_style_m","cro_pancerni_rohatyna_s","cro_pancerni_rohatyna_m"]
+      },
+      {
+        "id": "additional_pistol"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_vet_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_vet_m"]
+            },
+            "unit2": {
+              "units": ["cro_pancerni_vet_s"]
+            },
+            "unit3": {
+              "units": ["cro_pancerni_vet_m"]
+            },
+            "unit4": {
+              "units": ["cro_cosasck_style_rohatyna_vet_s"]
+            },
+            "unit5": {
+              "units": ["cro_cosasck_style_rohatyna_vet_m"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["cro_hussars_s"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_rotmistrz"],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_s"]
+            },
+            "unit2": {
+              "units": ["cro_cossack_style_m"]
+            },
+            "unit3": {
+              "units": ["cro_pancerni_rohatyna_s"]
+            },
+            "unit4": {
+              "units": ["cro_pancerni_rohatyna_m"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["cro_hussars_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "cro_light_cavalry": {
+    "name": "Pułk Jazdy Lekkiej Koronnej",
+    "base_cost": 0,
+    "recon": 2,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_wallachian_s"]
+            },
+            "unit2": {
+              "units": ["cro_wallachian_m"]
+            },
+            "unit3": {
+              "units": ["cro_tatar_style_s"]
+            },
+            "unit4": {
+              "units": ["cro_tatar_style_m"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["cro_pancerni_light_reg_s"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_rotmistrz"],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_s"]
+            },
+            "unit2": {
+              "units": ["cro_cossack_style_m"]
+            },
+            "unit3": {
+              "units": ["cro_wallachian_s"]
+            },
+            "unit4": {
+              "units": ["cro_wallachian_m"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["cro_pancerni_light_reg_s"]
+            },
+            "unit2": {
+              "units": ["cro_pancerni_light_reg_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "cro_light_cavalry_vanguard": {
+    "name": "Pułk Jazdy Lekkiej Koronnej",
+    "base_cost": 0,
+    "recon": 2,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_wallachian_s"]
+            },
+            "unit2": {
+              "units": ["cro_wallachian_m"]
+            },
+            "unit3": {
+              "units": ["cro_tatar_style_s"]
+            },
+            "unit4": {
+              "units": ["cro_tatar_style_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_rotmistrz"],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_cossack_style_s"]
+            },
+            "unit2": {
+              "units": ["cro_cossack_style_m"]
+            },
+            "unit3": {
+              "units": ["cro_wallachian_s"]
+            },
+            "unit4": {
+              "units": ["cro_wallachian_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "cro_levy_of_nobility": {
+    "name": "Pospolite Ruszenie Koronne",
+    "base_cost": 2,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "special_rules": [
+      "posluch_kor",
+      "pospolitacy",
+      "lanowa_makes_mixed",
+      "artillery_req_lanowa_m",
+      "hus_no_lanowa",
+      "hus_m_req_pospolite_l_x2"
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_pistol",
+        "improvement_limitations": ["cro_piechota_lanowa_s", "cro_piechota_lanowa_m", "cro_light_artillery"]
+      },
+      {
+        "id": "additional_ammo",
+        "max_amount": 1,
+        "units_allowed": ["cro_piechota_lanowa_s", "cro_piechota_lanowa_m", "cro_light_artillery"]
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_kasztelan"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_pospolite_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_pospolite_m"]
+            },
+            "unit2": {
+              "units": ["cro_pospolite_l"]
+            },
+            "unit3": {
+              "units": ["cro_piechota_lanowa_s"]
+            },
+            "unit4": {
+              "units": ["cro_piechota_lanowa_m"]
+            }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": {
+              "units": ["cro_pospolite_m"]
+            },
+            "unit2": {
+              "units": ["cro_pospolite_l"]
+            },
+            "unit3": {
+              "units": ["cro_piechota_lanowa_s"]
+            },
+            "unit4": {
+              "units": ["cro_piechota_lanowa_m"]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["cro_light_artillery_s"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_pospolite_m"]
+            },
+            "unit2": {
+              "units": ["cro_pospolite_l"]
+            },
+            "unit3": {
+              "units": ["cro_pospolite_hus_s"]
+            },
+            "unit4": {
+              "units": ["cro_pospolite_hus_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "cro_polish_dragoons": {
+    "name": "Regiment Polskich Dragonów",
+    "base_cost": 0,
+    "recon": 1,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_ammo",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_polish_dragoons_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_polish_dragoons_s"]
+            },
+            "unit2": {
+              "units": ["cro_polish_dragoons_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_polish_dragoons_s"]
+            },
+            "unit2": {
+              "units": ["cro_polish_dragoons_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "cro_volunteers": {
+    "name": "Partia Wolontarska",
+    "base_cost": 0,
+    "recon": 1,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["cro_colonel"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["cro_volunteers_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["cro_volunteers_s"]
+            },
+            "unit2": {
+              "units": ["cro_volunteers_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["cro_volunteers_s"]
+            },
+            "unit2": {
+              "units": ["cro_volunteers_m"]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "lit_light_cavalry": {
+    "name": "Pułk Jazdy Lekkiej Litewskiej",
+    "base_cost": 0,
+    "recon": 2,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["cro_colonel"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["cro_cossack_style_m"] } }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["cro_tatar_style_s"] },
+            "unit2": { "units": ["cro_tatar_style_m"] }
+          }
+        ],
+        "optional": [
+          {
+             "unit1": { "units": ["cro_cosasck_style_rohatyna_s"],
+              "pu_cost_override": 1,
+              "cost": 6
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["cro_rotmistrz"] },
+            "isToggle": true
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["cro_cossack_style_s"] },
+            "unit2": { "units": ["cro_cossack_style_m"] },
+            "unit3": { "units": ["cro_tatar_style_s"] },
+            "unit4": { "units": ["cro_tatar_style_m"] }
+          }
+        ],
+         "optional": [
+          {
+            "unit1": { "units": ["cro_cosasck_style_rohatyna_s"],
+              "pu_cost_override": 1,
+              "cost": 6
+            },
+            "unit2": { "units": ["cro_cosasck_style_rohatyna_m"],
+              "pu_cost_override": 1,
+              "cost": 10
+            }
+          }
+        ]
+      }
+    }
+  },
+  "lit_pulk_jazdy_litewskiej": {
+    "name": "Pułk Jazdy Litewskiej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 5,
+    "activations": 2,
+    "special_rules": [
+      "limit_petyhorcy_2",
+      "limit_petyhorcy_kopie_1"
+    ],
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["cro_colonel"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["cro_cossack_style_m"] } }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["cro_cossack_style_s"] },
+            "unit2": { "units": ["cro_cossack_style_m"] },
+            "unit3": { "units": ["lit_petyhorcy_s"] },
+            "unit4": { "units": ["lit_petyhorcy_m"] },
+            "unit5": { "units": ["cro_cossack_style_rohatyna_s"] },
+            "unit6": { "units": ["cro_cossack_style_rohatyna_m"] }
+          }
+        ],
+        "optional": [
+          { 
+            "unit1": { "units": ["cro_hussars_s"] }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["cro_rotmistrz"] },
+            "is_toggle": true
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["cro_cossack_style_s"] },
+            "unit2": { "units": ["cro_cossack_style_m"] },
+            "unit3": { "units": ["lit_petyhorcy_s"] },
+            "unit4": { "units": ["lit_petyhorcy_m"] },
+            "unit5": { "units": ["lit_petyhorcy_kopie_s"] },
+            "unit6": { "units": ["lit_petyhorcy_kopie_m"] }
+          }
+        ]
+      }
+    }
+  },
+  "lit_pulk_jazdy_litewskiej_vanguard": {
+    "name": "Pułk Jazdy Litewskiej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 5,
+    "activations": 2,
+    "special_rules": [
+      "limit_petyhorcy_2",
+      "limit_petyhorcy_kopie_1"
+    ],
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["cro_colonel"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["cro_cossack_style_m"] } }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["cro_cossack_style_s"] },
+            "unit2": { "units": ["cro_cossack_style_m"] },
+            "unit3": { "units": ["lit_petyhorcy_s"] },
+            "unit4": { "units": ["lit_petyhorcy_m"] },
+            "unit5": { "units": ["cro_cossack_style_rohatyna_s"] },
+            "unit6": { "units": ["cro_cossack_style_rohatyna_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["cro_rotmistrz"] },
+            "is_toggle": true
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["cro_cossack_style_s"] },
+            "unit2": { "units": ["cro_cossack_style_m"] },
+            "unit3": { "units": ["lit_petyhorcy_s"] },
+            "unit4": { "units": ["lit_petyhorcy_m"] }
+          }
+        ]
+      }
+    }
+  },
+  "lit_doborowy_pulk_jazdy_litewskiej": {
+    "name": "Doborowy Pułk Jazdy Litewskiej",
+    "base_cost": 4,
+    "recon": 0,
+    "awareness": 5,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "kalkans",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "additional_pistol"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["cro_colonel"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["cro_cossack_style_vet_m"] } }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["cro_cossack_style_s"] },
+            "unit2": { "units": ["cro_cossack_style_m"] },
+            "unit3": { "units": ["lit_petyhorcy_s"] },
+            "unit4": { "units": ["lit_petyhorcy_m"] },
+            "unit5": { "units": ["cro_cossack_style_rohatyna_s"] },
+            "unit6": { "units": ["cro_cossack_style_rohatyna_m"] }
+          }
+        ],
+        "optional": [
+          { "unit1": { "units": ["cro_hussars_s"] } }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["cro_rotmistrz"] },
+            "is_toggle": true
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["cro_cossack_style_vet_s"] },
+            "unit2": { "units": ["cro_cossack_style_vet_m"] },
+            "unit3": { "units": ["lit_petyhorcy_vet_s"] },
+            "unit4": { "units": ["lit_petyhorcy_vet_m"] },
+            "unit5": { "units": ["lit_petyhorcy_kopie_vet_s"] },
+            "unit6": { "units": ["lit_petyhorcy_kopie_vet_m"] }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": { "units": ["cro_hussars_s"] },
+            "unit2": { "units": ["cro_hussars_m"] }
+
+          }
+        ]
+      }
+    }
+  }
+}

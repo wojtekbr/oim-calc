@@ -1,0 +1,98 @@
+{
+  "mos_pulk_wojewodzinski": {
+    "name": "Pułk Wojewodziński",
+    "improvement_points": 10,
+    "base_cost": 9,
+    "general": ["mos_wojewoda_utalentowany", "mos_wojewoda_koneksje"],
+    "rules": [
+      {
+        "id": "limit_max_units",
+        "constraints": [
+          {
+            "unit_ids": ["mos_sotnia_podjazdowa_s"],
+            "max_amount": 4,
+            "custom_name": "Sotnia Podjazdowa (łącznie)"
+          }
+        ]
+      },
+      {
+        "id": "regiment_dependency",
+        "trigger_regiment_id": "mos_pulk_kopijnikow",
+        "required_regiment_id": "mos_pulk_rajtarow"
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      }
+    ],
+    "division_artillery": [
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["mos_lekkie_dziala_s", "mos_lekkie_dziala_m"],
+        "requirements": [
+          {
+            "type": "division_contains_any_regiment",
+            "regiment_ids": ["mos_pulk_kozakow_sluzebnych", "mos_pulk_dragonow_polowych", "mos_pulk_soldacki", "mos_prikaz_strzelcow_grodowych"]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "Lekka Artyleria",
+        "options": ["mos_lekkie_dziala_s", "mos_lekkie_dziala_m"],
+        "requirements": [
+          {
+            "type": "division_contains_any_regiment",
+            "regiment_ids": ["mos_pulk_kozakow_sluzebnych", "mos_pulk_dragonow_polowych", "mos_pulk_soldacki", "mos_prikaz_strzelcow_grodowych"]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "Średnia Artyleria",
+        "options": ["mos_srednie_dziala_s", "mos_srednie_dziala_m"],
+        "requirements": [
+          {
+            "type": "division_contains_any_regiment",
+            "regiment_ids": ["mos_pulk_kozakow_sluzebnych", "mos_pulk_dragonow_polowych", "mos_pulk_soldacki", "mos_prikaz_strzelcow_grodowych"]
+          }
+        ]
+      },
+      {
+        "unit1": ["mos_golowa"]
+      }
+    ],
+    "vanguard": [
+      { "options": ["mos_pulk_jazdy_pomiestnej", "mos_pulk_kozakow_sluzebnych", "mos_pulk_dragonow_polowych"]}
+    ],
+    "base": [
+      { "options": ["mos_pulk_jazdy_pomiestnej"] },
+      { "options": ["mos_pulk_jazdy_pomiestnej", "mos_prikaz_strzelcow_grodowych", "mos_pulk_dragonow_pogranicznych", "mos_pulk_soldacki", "mos_pulk_rajtarow", "mos_pulk_kopijnikow", "mos_pulk_dragonow_polowych"] }
+    ],
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
+        "mos_pulk_jazdy_pomiestnej",
+        "mos_pulk_jazdy_pomiestnej",
+        "mos_pulk_kozakow_sluzebnych",
+        "mos_prikaz_strzelcow_grodowych",
+        "mos_prikaz_strzelcow_wybornych",
+        "mos_pulk_soldacki",
+        "mos_pulk_rajtarow",
+        "mos_pulk_kopijnikow",
+        "mos_pulk_dragonow_polowych"
+      ]
+    }
+  }
+}

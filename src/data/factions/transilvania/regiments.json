@@ -1,0 +1,344 @@
+{
+  "sie_sereg_wojsk_komitackich": {
+    "name": "Sereg Wojsk Komitackich",
+    "base_cost": 3,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "special_rules": ["sie_pospolite_ruszenie", "sie_piechota_bramowa_mixed"],
+    "unit_improvements": [
+      {
+        "id": "additional_pistol",
+        "units_allowed": ["sie_jazda_komitacka_m", "sie_jazda_komitacka_l"]
+      },
+      {
+        "id": "przeszkoleni",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["sie_zupan"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["sie_jazda_komitacka_m"] } }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["sie_jazda_dymowa_m"] },
+            "unit2": { "units": ["sie_jazda_dymowa_l"] }
+          }
+        ],
+        "base3": [
+          {
+            "unit1": { "units": ["sie_jazda_dymowa_m"] },
+            "unit2": { "units": ["sie_jazda_dymowa_l"] }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["sie_porucznik"] } }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["sie_jazda_komitacka_m"] },
+            "unit2": { "units": ["sie_jazda_komitacka_l"] }
+          }
+        ]
+      }
+    }
+  },
+
+  "sie_sereg_piechoty_szeklerskiej": {
+    "name": "Sereg Piechoty Szeklerskiej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "przeszkoleni",
+        "max_amount": 1,
+        "units_allowed": ["sie_piechota_szeklerska_m"]
+      },
+      {
+        "id": "veterans",
+        "units_allowed": [
+          "sie_konni_strzelcy_szeklerscy_s",
+          "sie_konni_strzelcy_szeklerscy_m"
+        ]
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["sie_kapitan"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["sie_piechota_szeklerska_m"] } }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["sie_konni_strzelcy_szeklerscy_s"] },
+            "unit2": { "units": ["sie_konni_strzelcy_szeklerscy_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          { "unit1": { "units": ["sie_piechota_szeklerska_m"] } }
+        ]
+      }
+    }
+  },
+
+  "sie_sereg_jazdy_zacieznej": {
+    "name": "Sereg Jazdy Zaciężnej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_pistol",
+        "units_excluded": ["sie_konni_hajducy_s", "sie_konni_hajducy_m"]
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["sie_kapitan"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["sie_zaci_lekka_jazda_s"] },
+            "unit2": { "units": ["sie_zaci_lekka_jazda_m"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["sie_zaci_kopijnicy_s"] },
+            "unit2": { "units": ["sie_zaci_kopijnicy_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          { "unit1": { "units": ["sie_porucznik"] } }
+        ],
+        "additional1": [
+          {
+            "unit1": { "units": ["sie_zaci_kopijnicy_s"] },
+            "unit2": { "units": ["sie_zaci_kopijnicy_m"] },
+            "unit3": { "units": ["sie_konni_hajducy_s"] },
+            "unit4": { "units": ["sie_konni_hajducy_m"] }
+          }
+        ]
+      }
+    }
+  },
+
+  "sie_sereg_kurtanow": {
+    "name": "Sereg Kurtanów",
+    "base_cost": 0,
+    "recon": 2,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_ammo"
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["sie_kapitan"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["sie_kurtanie_s"] },
+            "unit2": { "units": ["sie_kurtanie_m"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["sie_kurtanie_s"] },
+            "unit2": { "units": ["sie_kurtanie_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": { "units": ["sie_kurtanie_s"] },
+            "unit2": { "units": ["sie_kurtanie_m"] }
+          }
+        ]
+      }
+    }
+  },
+
+  "sie_sereg_piechoty_miejskiej": {
+    "name": "Sereg Piechoty Miejskiej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "regimental_guns",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["sie_kapitan"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["sie_piechota_miejska_s"] },
+            "unit2": { "units": ["sie_piechota_miejska_m"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["sie_piechota_miejska_s"] },
+            "unit2": { "units": ["sie_piechota_miejska_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": { "units": ["sie_piechota_miejska_s"] },
+            "unit2": { "units": ["sie_piechota_miejska_m"] }
+          }
+        ]
+      }
+    }
+  },
+
+  "sie_sereg_pieszych_hajdukow": {
+    "name": "Sereg Pieszych Hajduków",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      },
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "additional_pistol"
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["sie_kapitan"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["sie_piesi_hajducy_s"] },
+            "unit2": { "units": ["sie_piesi_hajducy_m"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["sie_piesi_hajducy_s"] },
+            "unit2": { "units": ["sie_piesi_hajducy_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": { "units": ["sie_piesi_hajducy_s"] },
+            "unit2": { "units": ["sie_piesi_hajducy_m"] }
+          }
+        ]
+      }
+    }
+  },
+
+  "sie_sereg_semenow": {
+    "name": "Sereg Semenów",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["sie_kapitan"] } }
+        ],
+        "base1": [
+          {
+            "unit1": { "units": ["sie_semeni_s"] },
+            "unit2": { "units": ["sie_semeni_m"] }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": { "units": ["sie_semeni_s"] },
+            "unit2": { "units": ["sie_semeni_m"] }
+          }
+        ]
+      },
+      "additional": {
+        "additional1": [
+          {
+            "unit1": { "units": ["sie_semeni_s"] },
+            "unit2": { "units": ["sie_semeni_m"] }
+          }
+        ]
+      }
+    }
+  }
+}

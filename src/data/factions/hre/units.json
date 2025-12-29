@@ -1,0 +1,186 @@
+{
+  "_meta": {
+    "name": "Święte Cesarstwo Rzymskie"
+  },
+  "hre_general": {
+    "id": "hre_general",
+    "name": "Generał",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "hre_pulkownik": {
+    "id": "hre_pulkownik",
+    "name": "Pułkownik",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "hre_podpulkownik_1": {
+    "id": "hre_podpulkownik",
+    "name": "Podpułkownik #",
+    "cost": 2,
+    "rank": "group",
+    "orders": 1
+  },
+  "hre_podpulkownik_2": {
+    "id": "hre_podpulkownik",
+    "name": "Podpułkownik ##",
+    "cost": 4,
+    "rank": "group",
+    "orders": 2
+  },
+  "hre_major_1": {
+    "id": "hre_major_1",
+    "name": "Major #",
+    "cost": 2,
+    "rank": "group",
+    "orders": 1
+  },
+  "hre_major_2": {
+    "id": "hre_major_2",
+    "name": "Major ##",
+    "cost": 4,
+    "rank": "group",
+    "orders": 2
+  },
+  "hre_kirasjerzy_s": {
+    "id": "hre_kirasjerzy_s",
+    "name": "Kirasjerzy S",
+    "cost": 6,
+    "is_cavalry": true,
+    "rank": "silver",
+    "improvement_cost": 2
+  },
+  "hre_kirasjerzy_m": {
+    "id": "hre_kirasjerzy_m",
+    "name": "Kirasjerzy M",
+    "cost": 9,
+    "is_cavalry": true,
+    "rank": "gold",
+    "improvement_cost": 3
+  },
+  "hre_opanc_kirasjerzy_s": {
+    "id": "hre_opanc_kirasjerzy_s",
+    "name": "Opancerzeni Kirasjerzy S",
+    "cost": 7,
+    "pu_cost": 1,
+    "is_cavalry": true,
+    "rank": "silver",
+    "improvement_cost": 3
+  },
+  "hre_opanc_kirasjerzy_m": {
+    "id": "hre_opanc_kirasjerzy_m",
+    "name": "Opancerzeni Kirasjerzy M",
+    "cost": 10,
+    "pu_cost": 1,
+    "is_cavalry": true,
+    "rank": "gold",
+    "improvement_cost": 4
+  },
+  "hre_kirasjerzy_vet_s": {
+    "id": "hre_kirasjerzy_vet_s",
+    "name": "Kirasjerzy (Weterani) S",
+    "cost": 7,
+    "is_cavalry": true,
+    "rank": "silver",
+    "improvement_cost": 2
+  },
+  "hre_kirasjerzy_vet_m": {
+    "id": "hre_kirasjerzy_vet_m",
+    "name": "Kirasjerzy (Weterani) M",
+    "cost": 11,
+    "is_cavalry": true,
+    "rank": "gold",
+    "improvement_cost": 3
+  },
+  "hre_opanc_kirasjerzy_vet_s": {
+    "id": "hre_opanc_kirasjerzy_vet_s",
+    "name": "Opanc. Kirasjerzy (Weterani) S",
+    "cost": 8,
+    "pu_cost": 1,
+    "is_cavalry": true,
+    "rank": "silver",
+    "improvement_cost": 3
+  },
+  "hre_opanc_kirasjerzy_vet_m": {
+    "id": "hre_opanc_kirasjerzy_vet_m",
+    "name": "Opanc. Kirasjerzy (Weterani) M",
+    "cost": 11,
+    "pu_cost": 1,
+    "is_cavalry": true,
+    "rank": "gold",
+    "improvement_cost": 4
+  },
+  "hre_dragoni_vet_m": {
+    "id": "hre_dragoni_vet_m",
+    "name": "Dragoni (Weterani) M",
+    "cost": 8,
+    "is_cavalry": true,
+    "are_dragoons": true,
+    "rank": "silver",
+    "improvement_cost": 3
+  },
+  "hre_dragoni_vet_s": {
+    "id": "hre_dragoni_vet_s",
+    "name": "Dragoni (Weterani) S",
+    "cost": 6,
+    "is_cavalry": true,
+    "are_dragoons": true,
+    "rank": "silver",
+    "improvement_cost": 2
+  },
+  "hre_skwadron_muszkieterow_m": {
+    "id": "hre_skwadron_muszkieterow_m",
+    "name": "Skwadron Muszkieterów M",
+    "cost": 7,
+    "rank": "silver",
+    "improvement_cost": 3
+  },
+  "hre_piechota_cesarska_l": {
+    "id": "hre_piechota_cesarska_l",
+    "name": "Piechota CesarskaLS",
+    "cost": 11,
+    "is_pike_and_shot": true,
+    "rank": "gold",
+    "improvement_cost": 4
+  },
+  "hre_piechota_cesarska_m": {
+    "id": "hre_piechota_cesarska_m",
+    "name": "Piechota Cesarska M",
+    "cost": 8,
+    "rank": "gold",
+    "is_pike_and_shot": true,
+    "improvement_cost": 3
+  },
+  "hre_muszkieterzy_komenderowani_s": {
+    "id": "hre_muszkieterzy_komenderowani_s",
+    "name": "Muszkieterzy Komenderowani S",
+    "cost": 5,
+    "pu_cost": 1,
+    "rank": "bronze",
+    "improvement_cost": 2
+  },
+  "hre_jazda_chorwacka_s": {
+    "id": "hre_jazda_chorwacka_s",
+    "name": "Jazda Chorwacka S",
+    "cost": 5,
+    "is_cavalry": true,
+    "are_scouts": true,
+    "open_order": true,
+    "rank": "silver",
+    "improvement_cost": 1,
+    "are_looters_insubordinate": true
+  },
+  "hre_jazda_chorwacka_m": {
+    "id": "hre_jazda_chorwacka_m",
+    "name": "Jazda Chorwacka M",
+    "cost": 7,
+    "is_cavalry": true,
+    "are_scouts": true,
+    "open_order": true,
+    "rank": "silver",
+    "improvement_cost": 2,
+    "are_looters_insubordinate": true
+  }
+}

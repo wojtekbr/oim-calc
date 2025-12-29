@@ -1,0 +1,159 @@
+{
+  "_meta": {
+    "name": "Królestwo Danii"
+  },
+  "dan_general": {
+    "id": "dan_general",
+    "name": "Generał",
+    "cost": 0,
+    "rank": "group",
+    "orders": 3
+  },
+  "dan_komisarz": {
+    "id": "dan_komisarz",
+    "name": "Komisarz",
+    "cost": 3,
+    "rank": "group",
+    "orders": 2
+  },
+  "dan_pulkownik": {
+    "id": "dan_pulkownik",
+    "name": "Pułkownik",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "dan_major": {
+    "id": "dan_major",
+    "name": "Major #",
+    "cost": 2,
+    "rank": "group",
+    "orders": 1
+  },
+   "dan_snaphannar": {
+    "id": "dan_snaphannar",
+    "name": "Snaphannar",
+    "cost": 3,
+    "improvement_cost": 0,
+    "rank": "group"
+  },
+  "dan_rajtarzy_dunscy_s": {
+    "id": "dan_rajtarzy_dunscy_s",
+    "name": "Rajtarzy Duńscy S",
+    "cost": 4,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "dan_rajtarzy_dunscy_m": {
+    "id": "dan_rajtarzy_dunscy_m",
+    "name": "Rajtarzy Duńscy M",
+    "cost": 7,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true
+  },
+  "dan_dragoni_dunscy_s": {
+    "id": "dan_dragoni_dunscy_s",
+    "name": "Dragoni Duńscy S",
+    "cost": 4,
+    "improvement_cost": 1,
+    "rank": "silver",
+    "is_cavalry": true,
+    "are_scouts": true,
+    "are_dragoons": true
+  },
+  "dan_dragoni_dunscy_m": {
+    "id": "dan_dragoni_dunscy_m",
+    "name": "Dragoni Duńscy M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "are_dragoons": true
+  },
+  "dan_muszkieterzy_dunscy_s": {
+    "id": "dan_muszkieterzy_dunscy_s",
+    "name": "Muszkieterzy Duńscy S",
+    "cost": 4,
+    "pu_cost": -1,
+    "improvement_cost": 1,
+    "rank": "silver",
+    "is_infantry": true,
+    "special_rules": ["independent"]
+  },
+    "dan_muszkieterzy_dunscy_m": {
+    "id": "dan_muszkieterzy_dunscy_m",
+    "name": "Muszkieterzy Duńscy M",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_infantry": true
+  },
+  "dan_piechota_dunska_m": {
+    "id": "dan_piechota_dunska_m",
+    "name": "Piechota Duńska M",
+    "cost": 7,
+    "improvement_cost": 3,
+    "rank": "gold",
+    "is_infantry": true
+  },
+    "dan_piechota_dunska_l": {
+    "id": "dan_piechota_dunska_l",
+    "name": "Piechota Duńska L",
+    "cost": 9,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_infantry": true
+  },
+  "dan_muszkieterzy_dunscy_nor_s": {
+    "id": "dan_muszkieterzy_dunscy_nor_s",
+    "name": "Muszkieterzy Duńscy S (Nor)",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_infantry": true
+  },
+  "dan_muszkieterzy_dunscy_nor_kom": {
+    "id": "dan_muszkieterzy_dunscy_nor_kom",
+    "name": "Muszkieterzy Duńscy (Kom) (Nor)",
+    "cost": 5,
+    "pu_cost": -1,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_infantry": true,
+    "special_rules": ["independent"]
+  },
+  "dan_piechota_dunska_nor_s": {
+    "id": "dan_piechota_dunska_nor_s",
+    "name": "Piechota Duńska S (Nor)",
+    "cost": 8,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_infantry": true
+  },
+  "dan_piechota_dunska_nor_m": {
+    "id": "dan_piechota_dunska_nor_m",
+    "name": "Piechota Duńska M (Nor)",
+    "cost": 11,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_infantry": true
+  },
+  "dan_light_artillery_s": {
+    "id": "dan_light_artillery_s",
+    "name": "Lekkie Działa S",
+    "cost": 3,
+    "is_artillery": true,
+    "rank": "bronze",
+    "improvement_cost": 2
+  },
+  "dan_medium_artillery_s": {
+    "id": "dan_medium_artillery_s",
+    "name": "Średnie Działa S",
+    "cost": 5,
+    "is_artillery": true,
+    "rank": "silver",
+    "improvement_cost": 3
+  }
+}

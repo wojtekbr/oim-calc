@@ -1,0 +1,169 @@
+{
+  "swe_reg_piechoty_krajowej": {
+    "name": "Regiment Piechoty Krajowej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "regimental_guns",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "swe_pulkownik"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit2": {
+              "units": [
+                "swe_skwadron_muszkieterow_s"
+              ],
+              "mandatory_improvements": ["independent"]
+            },
+            "unit1": {
+              "units": [
+                "swe_podragonieni_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "swe_piechota_krajowa_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "swe_piechota_krajowa_l"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "swe_major"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "swe_major_2o"
+              ]
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "swe_piechota_krajowa_m"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "swe_piechota_krajowa_l_v1"
+              ]
+            },
+            "unit3": {
+              "units": [
+                "swe_podragonieni_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "swe_reg_jazdy_krajowej": {
+    "name": "Regiment Jazdy Krajowej",
+    "base_cost": 0,
+    "recon": 1,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "additional_pistol"
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "swe_pulkownik"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "swe_jazda_krajowa_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "swe_jazda_krajowa_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "swe_major"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "swe_major_2o"
+              ]
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "swe_jazda_krajowa_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

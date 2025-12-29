@@ -1,0 +1,160 @@
+{
+  "hre_cesarstwa_w_polsce": {
+    "name": "Dywizja Cesarstwa w Polsce i Danii (1657-60)",
+    "improvement_points": 10,
+    "base_cost": 2,
+    "general": ["hre_general"],
+    "rules": [
+      {
+        "id": "to_nie_nasza_wojna"
+      },
+      {
+        "id": "donnerweter"
+      },
+      {
+        "id": "nie_przystepuj_do_rozprawy"
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_ids": ["hre_reg_chorwatow"],
+        "max_amount": 1
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_ids": ["mrc_dragoons"],
+        "max_amount": 1
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      },
+      {
+        "name": "common_supply_wagon",
+        "assignment_rules": {
+          "can_be_assigned": false
+        }
+      }
+    ],
+    "division_artillery": [
+      {
+        "unit1": ["hre_major_1"]
+      },
+      {
+        "type": "group",
+        "name": "Lekkie Działa",
+        "options": ["hre_light_artillery_s"],
+        "requirements": [
+          {
+            "type": "division_contains_any_regiment",
+            "regiment_ids": ["hre_reg_piechoty_cesarskiej"]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "Średnie Działa",
+        "options": ["hre_medium_artillery_s"],
+        "requirements": [
+          {
+            "type": "division_contains_any_regiment",
+            "regiment_ids": ["hre_reg_piechoty_cesarskiej"]
+          }
+        ]
+      }
+    ],
+    "vanguard": [
+      { "options": ["hre_reg_chorwatow", "mrc_dragoons", "hre_nowy_reg_kirasjerow"] }
+    ],
+    "base": [
+      { "options": ["hre_nowy_reg_kirasjerow", "hre_stary_reg_kirasjerow"] },
+      { "options": ["hre_nowy_reg_kirasjerow", "mrc_dragoons", "hre_reg_piechoty_cesarskiej"] },
+      { "options": ["mrc_dragoons", "hre_reg_piechoty_cesarskiej"] }
+    ],
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
+        "hre_reg_chorwatow",
+        "hre_stary_reg_kirasjerow",
+        "hre_reg_piechoty_cesarskiej",
+        "hre_nowy_reg_kirasjerow"
+      ]
+    }
+  },
+  "hre_dywizja_na_granicy_z_turcja": {
+    "name": "Dywizja na granicy z Turcją (1663-64)",
+    "improvement_points": 10,
+    "base_cost": 2,
+    "general": ["hre_general"],
+    "rules": [
+      { 
+        "id": "na_wlasnej_ziemi_3"
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_ids": ["mrc_dragoons"],
+        "max_amount": 1
+      },
+      {
+        "id": "limit_max_same_regiments",
+        "regiment_ids": ["hre_reg_chorwatow"],
+        "max_amount": 1
+      }
+    ],
+    "additional_units": [
+      {
+        "name": "common_supply_wagon"
+      },
+      {
+        "name": "common_supply_wagon"
+      }
+    ],
+    "division_artillery": [
+      {
+        "unit1": ["hre_major_1"]
+      },
+      {
+        "type": "group",
+        "name": "Lekkie Działa",
+        "options": ["hre_light_artillery_s"],
+        "requirements": [
+          {
+            "type": "division_contains_any_regiment",
+            "regiment_ids": ["hre_reg_piechoty_cesarskiej"]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "Średnie Działa",
+        "options": ["hre_medium_artillery_s"],
+        "requirements": [
+          {
+            "type": "division_contains_any_regiment",
+            "regiment_ids": ["hre_reg_piechoty_cesarskiej"]
+          }
+        ]
+      }
+    ],
+    "vanguard": [
+      { "options": ["hre_reg_chorwatow", "mrc_dragoons", "hre_nowy_reg_kirasjerow"] }
+    ],
+    "base": [
+      { "options": ["hre_nowy_reg_kirasjerow", "hre_kombinowany_reg_montecuccoliego"] },
+      { "options": ["hre_nowy_reg_kirasjerow", "mrc_dragoons", "hre_kombinowany_reg_montecuccoliego"] },
+      { "options": ["hre_nowy_reg_kirasjerow", "hre_reg_piechoty_cesarskiej"] }
+    ],
+    "additional_regiments": {
+      "max_amount": 2,
+      "regiments_list": [
+        "hre_nowy_reg_kirasjerow",
+        "hre_reg_piechoty_cesarskiej",
+        "mrc_dragoons",
+        "hre_reg_chorwatow"
+      ]
+    }
+  }
+}

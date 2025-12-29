@@ -1,0 +1,219 @@
+{
+  "_meta": {
+    "name": "Kozacy Zaporoscy"
+  },
+  "koz_pulkownik": {
+    "id": "koz_pulkownik",
+    "name": "Pułkownik",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "koz_pulkownik_head": {
+    "id": "koz_pulkownik_head",
+    "name": "Pułkownik",
+    "cost": 0,
+    "rank": "group",
+    "orders": 3
+  },
+  "koz_esaul": {
+    "id": "koz_esaul",
+    "name": "Esauł Pułkowy",
+    "cost": 0,
+    "rank": "group",
+    "orders": 1
+  },
+  "koz_watazka": {
+    "id": "koz_watazka",
+    "name": "Watażka",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "koz_obozny": {
+    "id": "koz_obozny",
+    "name": "Oboźny",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "koz_plastuni": {
+    "id": "koz_plastuni",
+    "name": "Plastuni",
+    "cost": 2,
+    "rank": "group"
+  },
+  "koz_wozy_taborowe": {
+    "id": "koz_wozy_taborowe",
+    "name": "Wozy taborowe",
+    "cost": 4,
+    "rank": "group",
+    "additional_supply": 1
+  },
+  "koz_umocnienia_taborowe": {
+    "id": "koz_umocnienia_taborowe",
+    "name": "Umocnienia taborowe",
+    "cost": 6,
+    "additional_supply": 2,
+    "rank": "group"
+  },
+  "koz_molojcy_m": {
+    "id": "koz_molojcy_m",
+    "name": "Mołojcy M",
+    "cost": 6,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "silver"
+  },
+  "koz_molojcy_l": {
+    "id": "koz_molojcy_l",
+    "name": "Mołojcy L",
+    "cost": 8,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "gold"
+  },
+  "koz_molojcy_strzelcy_s": {
+    "id": "koz_molojcy_strzelcy_s",
+    "name": "Mołojcy Strzelcy S",
+    "cost": 4,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "bronze"
+  },
+  "koz_molojcy_strzelcy_m": {
+    "id": "koz_molojcy_strzelcy_m",
+    "name": "Mołojcy Strzelcy M",
+    "cost": 6,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "silver"
+  },
+  "koz_konni_molojcy_s": {
+    "id": "koz_konni_molojcy_s",
+    "name": "Konni Mołojcy S",
+    "cost": 5,
+    "improvement_cost": 2,
+    "is_cavalry": true,
+    "rank": "silver"
+  },
+  "koz_konni_molojcy_m": {
+    "id": "koz_konni_molojcy_m",
+    "name": "Konni Mołojcy M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "is_cavalry": true,
+    "rank": "silver"
+  },
+  "koz_molojcy_rejestrowi_s": {
+    "id": "koz_molojcy_rejestrowi_s",
+    "name": "Mołojcy Rejestrowi S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "silver"
+  },
+  "koz_molojcy_rejestrowi_m": {
+    "id": "koz_molojcy_rejestrowi_m",
+    "name": "Mołojcy Rejestrowi M",
+    "cost": 9,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "gold"
+  },
+  "koz_czern_m": {
+    "id": "koz_czern_m",
+    "name": "Czerń M",
+    "cost": 2,
+    "improvement_cost": 0,
+    "is_infantry": true,
+    "rank": "bronze",
+    "improvement_limitations": ["veterans", "additional_ammo", "swivel_guns"]
+  },
+  "koz_czern_l": {
+    "id": "koz_czern_l",
+    "name": "Czerń L",
+    "cost": 4,
+    "improvement_cost": 0,
+    "is_infantry": true,
+    "rank": "bronze",
+    "improvement_limitations": ["veterans", "additional_ammo", "swivel_guns"]
+  },
+  "koz_czern_xl": {
+    "id": "koz_czern_xl",
+    "name": "Czerń XL",
+    "cost": 7,
+    "improvement_cost": 0,
+    "is_infantry": true,
+    "rank": "silver",
+    "improvement_limitations": ["veterans", "additional_ammo", "swivel_guns"]
+  },
+  "koz_molojcy_vet_m": {
+    "id": "koz_molojcy_vet_m",
+    "name": "Mołojcy Weterani M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "silver"
+  },
+  "koz_molojcy_vet_l": {
+    "id": "koz_molojcy_vet_l",
+    "name": "Mołojcy Weterani L",
+    "cost": 9,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "gold"
+  },
+  "koz_czern_strzelcy_m": {
+    "id": "koz_czern_strzelcy_m",
+    "name": "Czerń z bronią strzelecką M",
+    "cost": 3,
+    "improvement_cost": 0,
+    "is_infantry": true,
+    "rank": "bronze",
+    "improvement_limitations": ["veterans", "additional_ammo", "swivel_guns"]
+  },
+  "koz_czern_strzelcy_l": {
+    "id": "koz_czern_strzelcy_l",
+    "name": "Czerń z bronią strzelecką L",
+    "cost": 5,
+    "improvement_cost": 0,
+    "is_infantry": true,
+    "rank": "bronze",
+    "improvement_limitations": ["veterans", "additional_ammo", "swivel_guns"]
+  },
+  "koz_konni_molojcy_vet_s": {
+    "id": "koz_konni_molojcy_vet_s",
+    "name": "Konni Mołojcy Weterani S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "mandatory_improvements": ["veterans"],
+    "is_cavalry": true,
+    "rank": "silver"
+  },
+  "koz_konni_molojcy_vet_m": {
+    "id": "koz_konni_molojcy_vet_m",
+    "name": "Konni Mołojcy Weterani M",
+    "cost": 8,
+    "improvement_cost": 2,
+    "is_cavalry": true,
+    "mandatory_improvements": ["veterans"],
+    "rank": "silver"
+  },
+  "koz_artillery_s": {
+    "id": "koz_artillery_s",
+    "name": "Bateria dział kozackich S",
+    "cost": 5,
+    "improvement_cost": 2,
+    "is_artillery": true,
+    "rank": "bronze"
+  },
+  "koz_artillery_m": {
+    "id": "koz_artillery_m",
+    "name": "Bateria dział kozackich M",
+    "cost": 7,
+    "improvement_cost": 3,
+    "is_artillery": true,
+    "rank": "silver"
+  }
+}

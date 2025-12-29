@@ -1,0 +1,200 @@
+/* Import czcionek historycznych */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+:root {
+    --bg-parchment: #f4e4bc;
+    --bg-paper: #fffdf5;
+    --color-ink: #2b2118;
+    --color-burgundy: #780000;
+    --color-burgundy-hover: #5a0000;
+    --color-gold: #c5a059;
+    --color-gold-dark: #8a6d3b;
+    --color-border: #8c7b65;
+    --color-success: #2e7d32;
+    --color-disabled: #a89f91;
+
+    --font-header: 'Cinzel', serif;
+    --font-body: 'Crimson Text', serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #2b2118; /* Ciemne tło pod pergaminem */
+    background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png"); /* Opcjonalna faktura drewna */
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* --- LAYOUT --- */
+
+.app-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: var(--bg-parchment);
+    background-image: url("https://www.transparenttextures.com/patterns/aged-paper.png"); /* Faktura papieru */
+    min-height: 90vh;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    border: 1px solid #5c4a35;
+    position: relative;
+}
+
+/* Efekt "podwójnej ramki" */
+.app-container::before {
+    content: "";
+    position: absolute;
+    top: 5px; left: 5px; right: 5px; bottom: 5px;
+    border: 2px solid var(--color-ink);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.app-content {
+    padding: 30px 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.app-header {
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--color-ink);
+    margin-bottom: 30px;
+}
+
+h1, h2, h3 {
+    font-family: var(--font-header);
+    color: var(--color-ink);
+    text-transform: uppercase;
+    margin-top: 0;
+}
+
+h1 { font-size: 2.5rem; letter-spacing: 2px; text-shadow: 1px 1px 0 var(--color-gold); }
+h2 { font-size: 1.8rem; border-bottom: 1px solid var(--color-border); padding-bottom: 10px; margin-bottom: 20px; color: var(--color-burgundy); }
+h3 { font-size: 1.4rem; margin-bottom: 15px; color: var(--color-ink); }
+
+/* --- KOMPONENTY --- */
+
+/* Buttony stylizowane na "szlacheckie" */
+button {
+    font-family: var(--font-header);
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border: 2px solid var(--color-gold-dark);
+    background: var(--color-burgundy);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+    font-size: 0.9rem;
+}
+
+button:hover:not(:disabled) {
+    background: var(--color-burgundy-hover);
+    transform: translateY(-1px);
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+}
+
+button:disabled {
+    background: var(--color-disabled);
+    border-color: #777;
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
+}
+
+/* Button "Anuluj" / Wstecz */
+button.btn-secondary {
+    background: #5c4a35;
+    border-color: #3e3223;
+}
+button.btn-secondary:hover { background: #463828; }
+
+/* Inputy i Selecty */
+input[type="text"], select {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    padding: 8px;
+    background: var(--bg-paper);
+    border: 1px solid var(--color-border);
+    border-radius: 0; /* Brak zaokrągleń - oldschool */
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
+    width: 100%;
+}
+
+input[type="text"]:focus, select:focus {
+    outline: 2px solid var(--color-gold);
+    background: #fff;
+}
+
+/* --- SPECYFICZNE ELEMENTY --- */
+
+/* Pasek podsumowania (zielony w oryginale, tu złoty/papierowy) */
+.summary-bar {
+    background: var(--bg-paper);
+    border: 2px solid var(--color-gold-dark);
+    padding: 15px;
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    box-shadow: 3px 3px 5px rgba(0,0,0,0.1);
+}
+.summary-total { font-size: 1.3rem; font-family: var(--font-header); color: var(--color-burgundy); }
+
+/* Sekcje */
+.section-box {
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid var(--color-border);
+    padding: 20px;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+/* Kafelki jednostek */
+.tile {
+    background: var(--bg-paper);
+    border: 1px solid var(--color-border);
+    padding: 10px;
+    transition: all 0.2s;
+    position: relative;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+.tile:hover {
+    border-color: var(--color-burgundy);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+}
+.tile.selected {
+    border: 2px solid var(--color-burgundy);
+    background: #fff0f0;
+}
+.tile.locked {
+    background: #e0dacd;
+    opacity: 0.6;
+    cursor: not-allowed;
+    border-style: dashed;
+}
+
+/* Dropdowny w kafelkach */
+.tile select {
+    margin-top: 8px;
+    font-size: 0.9rem;
+}
+
+/* Checkboxy */
+input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--color-burgundy);
+    cursor: pointer;
+}
+
+/* Tabela/Lista w editorze */
+.unit-list-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dashed #ccc;
+}

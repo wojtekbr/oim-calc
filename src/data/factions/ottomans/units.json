@@ -31,21 +31,48 @@
     "name": "Sandzakbej",
     "cost": 0,
     "improvement_cost": 0,
-    "rank": "group"
+    "rank": "group",
+    "orders": 2
   },
   "ott_aga": {
     "id": "ott_aga",
     "name": "Aga",
     "cost": 0,
     "improvement_cost": 0,
-    "rank": "group"
+    "rank": "group",
+    "orders": 2
+  },
+  "ott_grand_vezir": {
+    "id": "ott_grand_vezir",
+    "name": "Wielki Wezyr",
+    "cost": 0,
+    "rank": "group",
+    "orders": 4,
+    "activations": 4
+  },
+  "ott_bejlerbej": {
+    "id": "ott_bejlerbej",
+    "name": "Bejlerbej",
+    "cost": 0,
+    "rank": "group",
+    "orders": 3,
+    "activations": 3
+  },
+  "ott_czausz": {
+    "id": "ott_czausz",
+    "name": "Czausz",
+    "cost": 3,
+    "improvement_points_cost": 1,
+    "rank": "group",
+    "orders": 1
   },
   "ott_kethuda": {
     "id": "ott_kethuda",
     "name": "Kethuda",
     "cost": 2,
     "improvement_cost": 0,
-    "rank": "group"
+    "rank": "group",
+    "orders": 1
   },
   "ott_mehter": {
     "id": "ott_meher",
@@ -61,7 +88,7 @@
     "improvement_cost": 1,
     "rank": "bronze",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_scouts": true
   },
   "ott_beszli_m": {
@@ -71,7 +98,7 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_scouts": true
   },
   "ott_gonullu_s": {
@@ -81,7 +108,7 @@
     "improvement_cost": 1,
     "rank": "bronze",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_scouts": true,
     "are_looters_insubordinate": true
   },
@@ -92,19 +119,9 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
+    "open_order": true,
     "are_scouts": true,
     "are_looters_insubordinate": true
-  },
-  "ott_deli_s_double": {
-    "id": "ott_deli_s_double",
-    "name": "2x Deli S",
-    "cost": 8,
-    "improvement_cost": 2,
-    "rank": "silver",
-    "is_cavalry": true,
-    "is_light_cavalry": true,
-    "has_lances": true
   },
   "ott_segbani_m": {
     "id": "ott_segbani_m",
@@ -138,8 +155,10 @@
     "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
-    "is_light_cavalry": true,
-    "has_lances": true
+    "open_order": true,
+    "has_lances": true,
+    "improvement_points_cost": 1,
+    "improvement_limitations": ["javelin","kalkans", "veterans", "additional_ammo"]
   },
   "ott_deli_m": {
     "id": "ott_deli_m",
@@ -148,8 +167,10 @@
     "improvement_cost": 3,
     "rank": "gold",
     "is_cavalry": true,
-    "is_light_cavalry": true,
-    "has_lances": true
+    "open_order": true,
+    "has_lances": true,
+    "improvement_points_cost": 1,
+    "improvement_limitations": ["javelin","kalkans", "veterans", "additional_ammo"]
   },
   "ott_janissaries_s": {
     "id": "ott_janissaries_s",
@@ -183,16 +204,16 @@
   },
   "ott_medium_art_s": {
     "id": "ott_medium_art_s",
-    "name": "Lekkie Działa Tureckie S",
-    "cost": 3,
+    "name": "Średnie Działa Tureckie S",
+    "cost": 5,
     "improvement_cost": 2,
     "rank": "silver",
     "is_artillery": true
   },
   "ott_medium_art_m": {
     "id": "ott_medium_art_m",
-    "name": "Lekkie Działa Tureckie M",
-    "cost": 6,
+    "name": "Średnie Działa Tureckie M",
+    "cost": 8,
     "improvement_cost": 3,
     "rank": "gold",
     "is_artillery": true
@@ -211,8 +232,82 @@
     "name": "Silahdarowie M",
     "cost": 14,
     "improvement_cost": 4,
+    "improvement_points_cost": 1,
     "rank": "gold",
     "is_cavalry": true,
     "has_lances": true
+  },
+  "ott_janissaries_egypt_m": {
+    "id": "ott_janissaries_egypt_m",
+    "name": "Janczarzy Egipscy M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_infantry": true
+  },
+  "ott_janissaries_egypt_s": {
+    "id": "ott_janissaries_egypt_s",
+    "name": "Janczarzy Egipscy S",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "silver",
+    "is_infantry": true
+  },
+  "ott_janissaries_5": {
+    "id": "ott_janissaries_5",
+    "name": "Janczarzy S",
+    "cost": 5,
+    "improvement_cost": 1,
+    "rank": "silver",
+    "is_infantry": true
+  },
+  "ott_janissaries_7": {
+    "id": "ott_janissaries_7",
+    "name": "Janczarzy M",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_infantry": true
+  },
+  "ott_mamluk_s": {
+    "id": "ott_mamluk_s",
+    "name": "Mamelucy S",
+    "cost": 7,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "has_lances": true
+  },
+  "ott_mamluk_m": {
+    "id": "ott_mamluk_m",
+    "name": "Mamelucy M",
+    "cost": 11,
+    "improvement_cost": 3,
+    "rank": "gold",
+    "is_cavalry": true,
+    "has_lances": true
+  },
+  "ott_levends": {
+    "id": "ott_levends",
+    "name": "Lewendowie",
+    "cost": 2,
+    "improvement_points_cost": 1,
+    "rank": "group"
+  },
+  "ott_tufekczi_s": {
+    "id": "ott_tufekczi_s",
+    "name": "Tufekczi S",
+    "cost": 5,
+    "improvement_points_cost": 1,
+    "rank": "silver",
+    "are_proxy_dragoons": true
+  },
+  "ott_tufekczi_m": {
+    "id": "ott_tufekczi_m",
+    "name": "Tufekczi M",
+    "cost": 7,
+    "improvement_points_cost": 2,
+    "rank": "silver",
+    "are_proxy_dragoons": true
   }
 }

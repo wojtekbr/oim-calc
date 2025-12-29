@@ -1,0 +1,284 @@
+{
+    "mrc_infantry": {
+    "name": "Regiment Piechoty Najemnej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "special_rules": [
+      "max_one_l_unit"
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "regimental_guns",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["mrc_pulkownik"]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": ["mrc_musketeers_s"]
+            },
+            "unit2": {
+              "units": ["mrc_musketeers_m"]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": ["mrc_musketeers_m"]
+            },
+            "unit2": {
+              "units": ["mrc_infantry_mercenary_m"]
+            },
+            "unit3": {
+              "units": ["mrc_infantry_mercenary_l"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["mrc_major"],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": ["mrc_musketeers_m"]
+            },
+            "unit2": {
+              "units": ["mrc_infantry_mercenary_m"]
+            },
+            "unit3": {
+              "units": ["mrc_infantry_mercenary_l"]
+            },
+            "unit4": {
+              "units": ["mrc_infantry_mercenary_armored_m"]
+            }
+          }
+        ]
+      }
+    },
+    "faction_variants": {
+      "brandenburg": {
+        "special_rules_replace": []
+      }
+    }
+  },
+  "mrc_reiters": {
+    "name": "Regiment Rajtarów Najemnych",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      { "id": "veterans", "max_amount": 1 },
+      { "id": "additional_pistol" }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mrc_pulkownik"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["mrc_reiters_mercenary_s"] }, "unit2": { "units": ["mrc_reiters_mercenary_m"] } }
+        ],
+        "base2": [
+          { "unit1": { "units": ["mrc_reiters_mercenary_s"] }, "unit2": { "units": ["mrc_reiters_mercenary_m"] }, "unit3": { "units": ["mrc_reiters_mercenary_armored_s"] }, "unit4": { "units": ["mrc_reiters_mercenary_armored_m"] } }
+        ]
+      },
+      "additional": {
+        "general": [
+          { 
+            "unit1": { 
+              "units": ["mrc_major"],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          { "unit1": { "units": ["mrc_reiters_mercenary_s"] } }
+        ]
+      }
+    },
+    "faction_variants": {
+      "sweden": {
+        "special_rules_add": ["szwedzki_podpulkownik"],
+        "structure_overrides": {
+          "additional": {
+            "general": [
+              { 
+                "unit1": { 
+                  "units": ["mrc_podpulkownik"],
+                  "mandatory": true
+                }
+              }
+            ]
+          }
+        }
+      },
+      "brandenburg": {
+        "special_rules_add": ["roznorodne_wyposazenie"]
+      },
+      "danmark": {
+        "special_rules_add": ["krolewski_arsenal"]
+      }
+    }
+   },
+     "mrc_armoured_reiters": {
+    "name": "Regiment Opancerzonych Rajtarów Najemnych",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      { "id": "veterans", "max_amount": 1 },
+      { "id": "additional_pistol" }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mrc_pulkownik"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["mrc_reiters_mercenary_armored_s"] }, "unit2": { "units": ["mrc_reiters_mercenary_armored_m"] } }
+        ],
+        "base2": [
+          { "unit1": { "units": ["mrc_reiters_mercenary_armored_s"] }, "unit2": { "units": ["mrc_reiters_mercenary_armored_m"] } }
+        ]
+      },
+      "additional": {
+        "general": [
+          { 
+            "unit1": { 
+              "units": ["mrc_major"],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          { "unit1": { "units": ["mrc_reiters_mercenary_armored_s"] } }
+        ]
+      }
+    },
+    "faction_variants": {
+      "sweden": {
+        "special_rules_add": ["szwedzki_podpulkownik"],
+        "structure_overrides": {
+          "additional": {
+            "general": [
+              { 
+                "unit1": { 
+                  "units": ["mrc_podpulkownik"],
+                  "mandatory": true
+                }
+              }
+            ]
+          }
+        }
+      },
+      "brandenburg": {
+        "special_rules_add": ["roznorodne_wyposazenie"]
+      },
+      "danmark": {
+        "special_rules_add": ["krolewski_arsenal"]
+      }
+    }
+   },
+   "mrc_dragoons": {
+    "name": "Regiment Dragonów Najemnych",
+    "base_cost": 0,
+    "recon": 1,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      { "id": "veterans"},
+      { "id": "additional_ammo" }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mrc_pulkownik"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["mrc_dragoons_mercenary_s"] }, "unit2": { "units": ["mrc_dragoons_mercenary_m"] } }
+        ],
+        "base2": [
+          { "unit1": { "units": ["mrc_dragoons_mercenary_s"] }, "unit2": { "units": ["mrc_dragoons_mercenary_m"] } }
+        ]
+      },
+      "additional": {
+        "general": [
+          { 
+            "unit1": { 
+              "units": ["mrc_major"],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          { "unit1": { "units": ["mrc_dragoons_mercenary_s"] }, "unit2": { "units": ["mrc_dragoons_mercenary_m"] } }
+        ]
+      }
+    },
+    "faction_variants": {
+      "sweden": {
+        "special_rules_add": ["szwedzki_podpulkownik"],
+        "structure_overrides": {
+          "additional": {
+            "general": [
+              { 
+                "unit1": { 
+                  "units": ["mrc_podpulkownik"],
+                  "mandatory": true
+                }
+              }
+            ]
+          }
+        }
+      },
+      "hre": {
+        "special_rules_add": ["szwedzki_podpulkownik"],
+        "structure_overrides": {
+          "additional": {
+            "general": [
+              { 
+                "unit1": { 
+                  "units": ["mrc_podpulkownik"]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "brandenburg": {
+        "special_rules_add": ["roznorodne_wyposazenie"]
+      },
+      "danmark": {
+        "special_rules_add": ["krolewski_arsenal"]
+      }
+    }
+   }
+}
