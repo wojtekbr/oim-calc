@@ -3,9 +3,9 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches:
-      - master      # Wdrożenie po pushu do mastera
+      - '**'
     tags:
-      - 'v*'        # Wdrożenie po stworzeniu taga np. v1.0.0
+      - 'v*'
 
 jobs:
   deploy:
