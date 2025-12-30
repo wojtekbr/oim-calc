@@ -1,23 +1,52 @@
 {
-  "turcja": {
-    "name": "Imperium Osmańskie",
-    "dir": "ottomans"
+  "brandengurd": {
+    "name": "Elektorat Brandenburgii",
+    "dir": "brandenburg",
+    "hidden": true
   },
   "ron": {
     "name": "Rzeczpospolita Obojga Narodów",
     "dir": "commonwealth-crown"
   },
-  "cesarstwo": {
+  "cossacks": {
+    "name": "Kozacy",
+    "dir": "cossacks",
+    "hidden": true
+  },
+  "denmark": {
+    "name": "Królestwo Danii i Norwegii",
+    "dir": "denmark",
+    "hidden": true
+  },
+  "hre": {
     "name": "Święte Cesarstwo Rzymskie",
-    "dir": "hre"
+    "dir": "hre",
+    "hidden": true
+  },
+  "moscow": {
+    "name": "Carstwo Moskiewskie",
+    "dir": "moscow"
+  },
+  "turcja": {
+    "name": "Imperium Osmańskie",
+    "dir": "ottomans"
+  },
+  "sweden": {
+    "name": "Królestwo Szwecji",
+    "dir": "sweden"
+  },
+  "tatars": {
+    "name": "Chanat Krymski",
+    "dir": "tatars"
+  },
+  "transilvania": {
+    "name": "Siedmiogród",
+    "dir": "transilvania",
+    "hidden": true
   },
   "najemnicy": {
     "name": "Wojska Najemne",
     "dir": "mercenaries",
     "hidden": true
-  },
-  "kozacy": {
-    "name": "Kozacy",
-    "dir": "cossacks"
   }
 }
