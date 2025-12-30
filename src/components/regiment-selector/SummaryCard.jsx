@@ -1,7 +1,5 @@
-import React, { useMemo } from "react";
-import styles from "../../pages/RegimentSelector.module.css";
-import { IDS, GROUP_TYPES } from "../../constants";
-import { collectRegimentUnits } from "../../utils/armyMath";
+import React from 'react';
+import styles from '../../pages/RegimentSelector.module.css';
 
 export const SummaryCard = ({
                                 divisionType,
@@ -14,214 +12,210 @@ export const SummaryCard = ({
                                 rulesDescriptions,
                                 generalDef,
                                 unassignedSupport,
+                                unassignedArtillery = [],
+                                unassignedAdditional = [],
+                                activeRegimentsList,
                                 unitsMap,
-                                configuredDivision,
-                                getRegimentDefinition,
-                                calculateStats,
-                                mainForceKey,
+                                divisionDefinition,
+                                // Potrzebne do obliczania ulepszeń
                                 getEffectiveUnitImprovements,
-                                improvementsMap,
-                                divisionDefinition
+                                improvementsMap
                             }) => {
 
-    const richRegimentsList = useMemo(() => {
-        if (!configuredDivision || !getRegimentDefinition || !calculateStats) return [];
+    const hasUnassigned = unassignedSupport && unassignedSupport.length > 0;
+    const hasArtillery = unassignedArtillery && unassignedArtillery.length > 0;
+    const hasAdditional = unassignedAdditional && unassignedAdditional.length > 0;
 
-        const list = [];
+    // Funkcja renderująca grupę wsparcia jako "Pułk"
+    const renderSummaryGroup = (title, units, titleColor) => {
+        const totalCost = units.reduce((acc, u) => acc + (unitsMap[u.id]?.cost || 0), 0);
 
-        const processGroup = (groupName, groupArray) => {
-            if (!groupArray) return;
-            groupArray.forEach((reg, index) => {
-                if (reg.id && reg.id !== IDS.NONE) {
-                    const def = getRegimentDefinition(reg.id);
-                    const positionKey = `${groupName}/${index}`;
+        return (
+            <div className={styles.regimentRow} style={{ height: '100%', boxSizing: 'border-box', marginBottom: 0, backgroundColor: '#fff' }}>
+                <div className={styles.regHeader} style={{ paddingBottom: '5px', borderBottom: '1px solid #eee', marginBottom: '8px' }}>
+                    <div className={styles.regTopRow} style={{ flex: 1 }}>
+                        <div className={styles.regTitle} style={{ color: titleColor || '#222', fontSize: '13px' }}>{title}</div>
+                    </div>
+                    <div className={styles.regRightColumn} style={{ minWidth: 'auto' }}>
+                        <div className={styles.regCost} style={{ fontSize: '14px' }}>{totalCost} PS</div>
+                    </div>
+                </div>
 
-                    const stats = calculateStats(reg.config, reg.id);
-                    const isMain = mainForceKey === positionKey;
+                <div className={styles.regDetails}>
+                    {units.map((u, i) => {
+                        const uDef = unitsMap[u.id];
 
-                    const internalUnits = collectRegimentUnits(reg.config, def).map(u => ({
-                        unitId: u.unitId,
-                        key: u.key,
-                        isSupport: false,
-                        purchasedImps: reg.config.improvements?.[u.key] || []
-                    }));
+                        // --- NOWOŚĆ: Obliczanie ulepszeń dla nieprzypisanych jednostek ---
+                        let effectiveImps = [];
+                        if (getEffectiveUnitImprovements) {
+                            effectiveImps = getEffectiveUnitImprovements(
+                                u.id,
+                                u.improvements || [], // Ulepszenia zakupione (jeśli są)
+                                divisionDefinition,
+                                null, // regimentId = null, bo nieprzypisane (omija walidację struktury)
+                                unitsMap
+                            );
+                        }
 
-                    const attachedSupport = (configuredDivision.supportUnits || [])
-                        .filter(su => su.assignedTo?.positionKey === positionKey)
-                        .map(su => ({
-                            unitId: su.id,
-                            key: `support/${su.id}-${positionKey}/0`,
-                            isSupport: true,
-                            purchasedImps: reg.config.improvements?.[`support/${su.id}-${positionKey}/0`] || []
-                        }));
+                        // Mapowanie na nazwy
+                        const impNames = effectiveImps.map(impId => {
+                            return improvementsMap?.[impId]?.name || impId;
+                        }).join(", ");
 
-                    const allUnits = [...internalUnits, ...attachedSupport];
+                        return (
+                            <div key={i} className={styles.unitRow} style={{ marginBottom: '2px' }}>
+                                <div className={styles.unitNameCol}>
+                                    • {uDef?.name || u.id}
 
-                    const regImpsNames = (reg.config.regimentImprovements || []).map(id => improvementsMap?.[id]?.name || id);
-
-                    list.push({
-                        name: def.name || reg.id,
-                        customName: reg.customName,
-                        stats,
-                        isMain,
-                        isVanguard: groupName === GROUP_TYPES.VANGUARD,
-                        units: allUnits,
-                        regId: reg.id,
-                        regImpsNames
-                    });
-                }
-            });
-        };
-
-        processGroup(GROUP_TYPES.VANGUARD, configuredDivision.vanguard);
-        processGroup(GROUP_TYPES.BASE, configuredDivision.base);
-        processGroup(GROUP_TYPES.ADDITIONAL, configuredDivision.additional);
-
-        return list;
-    }, [configuredDivision, getRegimentDefinition, calculateStats, mainForceKey, improvementsMap]);
+                                    {/* Wyświetlanie ulepszeń */}
+                                    {impNames && (
+                                        <span className={styles.impsList}>{impNames}</span>
+                                    )}
+                                </div>
+                                <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#555' }}>
+                                    {uDef?.cost || 0} PS
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className={styles.summaryCard}>
+            {/* --- HEADER KARTY --- */}
             <div className={styles.summaryHeader}>
                 <div>
-                    {/* ZMIANA: Nazwa Dywizji na górze, duża */}
-                    <div className={styles.summaryTitle}>
-                        {divisionDefinition?.name || "Dywizja"} <span style={{fontSize: '0.8em', fontWeight: 'normal', color: '#555'}}>({totalDivisionCost} PS)</span>
-                    </div>
-
-                    {/* ZMIANA: Typ i koszt bazowy poniżej, mniejsze */}
+                    <div className={styles.summaryTitle}>{divisionDefinition?.name} ({totalDivisionCost} PS)</div>
                     <div className={styles.summarySubtitle}>
                         Typ: <strong>{divisionType}</strong> • Koszt bazowy: {divisionBaseCost} PS
                     </div>
-
-                    <button className={styles.rulesToggleBtn} onClick={() => setShowRules(!showRules)}>
-                        {showRules ? "▼ Ukryj zasady specjalne" : "▶ Pokaż zasady specjalne"}
-                    </button>
+                    {rulesDescriptions.length > 0 && (
+                        <button className={styles.rulesToggleBtn} onClick={() => setShowRules(!showRules)}>
+                            {showRules ? '▼ Ukryj zasady specjalne' : '▶ Pokaż zasady specjalne'}
+                        </button>
+                    )}
                 </div>
-                <div className={`${styles.summaryPoints} ${remainingImprovementPoints < 0 ? styles.pointsError : styles.pointsOk}`}>
+                <div className={styles.summaryPoints}>
                     <div>Punkty Ulepszeń:</div>
-                    <div style={{fontSize: 24}}>{remainingImprovementPoints} / {improvementPointsLimit}</div>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold' }} className={remainingImprovementPoints < 0 ? styles.pointsError : styles.pointsOk}>
+                        {remainingImprovementPoints} / {improvementPointsLimit}
+                    </div>
                 </div>
             </div>
 
-            {showRules && rulesDescriptions && rulesDescriptions.length > 0 && (
+            {showRules && rulesDescriptions.length > 0 && (
                 <div className={styles.rulesContainer}>
                     {rulesDescriptions.map(rule => (
                         <div key={rule.id} className={styles.ruleLine}>
-                            <strong>• {rule.title}: </strong> {rule.description}
+                            <strong>{rule.title}: </strong> {rule.description}
                         </div>
                     ))}
                 </div>
             )}
 
-            <div className={styles.summaryInfoRow}>
-                <div className={styles.summarySection} style={{marginTop: 0, borderTop: 'none'}}>
-                    <div className={styles.summarySectionTitle}>Dowódca Dywizji</div>
-                    {generalDef ? (
-                        <div className={styles.commanderRow}>
-                            <span className={styles.commanderName}>{generalDef.name}</span>
-                            <span className={styles.commanderStats}>{generalDef.orders} Rozkazy | {generalDef.activations} Akt.</span>
-                        </div>
-                    ) : (
-                        <div className={styles.noCommanderMsg}>Nie wybrano dowódcy</div>
-                    )}
-                </div>
-                {unassignedSupport.length > 0 && (
-                    <div className={styles.summarySection} style={{marginTop: 0, borderTop: 'none'}}>
-                        <div className={styles.summarySectionTitle}>Wsparcie Dywizyjne (Nieprzypisane)</div>
-                        <div className={styles.unassignedList}>
-                            {unassignedSupport.map((su, idx) => {
-                                const effectiveImps = getEffectiveUnitImprovements
-                                    ? getEffectiveUnitImprovements(su.id, [], divisionDefinition, null, unitsMap)
-                                    : [];
+            <div style={{ marginTop: '20px' }}>
 
-                                return (
-                                    <div key={idx} className={styles.unassignedBadge}>
-                                        <span>• {unitsMap[su.id]?.name || su.id}</span>
-                                        <span style={{fontWeight:'bold'}}>({unitsMap[su.id]?.cost || 0} pkt)</span>
-                                        {effectiveImps.length > 0 && (
-                                            <div style={{marginLeft: 6, display: 'inline-flex', gap: 2}}>
-                                                {effectiveImps.map(impId => (
-                                                    <span key={impId} style={{fontSize: 9, background: '#e0f2f1', color: '#00695c', padding: '0 3px', borderRadius: 3}}>
-                                                        {improvementsMap?.[impId]?.name || impId} 🔒
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
+                {/* --- GÓRNY WIERSZ: DOWÓDCA + WSPARCIE (GRID) --- */}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                    gap: '16px',
+                    marginBottom: '24px',
+                    alignItems: 'stretch'
+                }}>
+
+                    {/* 1. DOWÓDCA */}
+                    <div>
+                        <div className={styles.summarySectionTitle}>DOWÓDCA DYWIZJI</div>
+                        <div className={styles.commanderRow} style={{ backgroundColor: '#fff', height: '100%', boxSizing: 'border-box' }}>
+                            {generalDef ? (
+                                <div style={{width: '100%'}}>
+                                    <div className={styles.commanderName} style={{fontSize: '15px', marginBottom: '4px'}}>{generalDef.name}</div>
+                                    <div className={styles.commanderStats}>
+                                        {generalDef.orders} Rozkazy/Aktywacji
                                     </div>
-                                );
-                            })}
+                                </div>
+                            ) : (
+                                <div className={styles.noCommanderMsg}>Nie wybrano głównodowodzącego</div>
+                            )}
                         </div>
                     </div>
-                )}
-            </div>
 
-            {richRegimentsList.length > 0 && (
-                <div className={styles.summarySection}>
-                    <div className={styles.summarySectionTitle}>Sformowane Pułki</div>
+                    {/* 2. ARTYLERIA DYWIZYJNA */}
+                    {hasArtillery && (
+                        <div>
+                            <div className={styles.summarySectionTitle} style={{ color: '#546e7a' }}>WSPARCIE: ARTYLERIA</div>
+                            {renderSummaryGroup("Artyleria Dywizyjna", unassignedArtillery, '#546e7a')}
+                        </div>
+                    )}
+
+                    {/* 3. ELEMENTY DODATKOWE */}
+                    {hasAdditional && (
+                        <div>
+                            <div className={styles.summarySectionTitle} style={{ color: '#5d4037' }}>WSPARCIE: DODATKOWE</div>
+                            {renderSummaryGroup("Elementy Dodatkowe", unassignedAdditional, '#5d4037')}
+                        </div>
+                    )}
+                </div>
+
+                {/* --- DOLNY WIERSZ: SFORMOWANE PUŁKI --- */}
+                <div>
+                    <div className={styles.summarySectionTitle}>SFORMOWANE PUŁKI</div>
                     <div className={styles.regimentListSimple}>
-                        {richRegimentsList.map((reg, idx) => (
-                            <div key={idx} className={styles.regListItem}>
+                        {activeRegimentsList.map((reg, i) => (
+                            <div key={i} className={styles.regListItem}>
                                 <div className={styles.regListHeaderRow}>
                                     <div className={styles.regInfoMain}>
-                                        <div className={styles.regListName}>{reg.name}</div>
-                                        {reg.customName && <div className={styles.regListCustomName}>"{reg.customName}"</div>}
+                                        <div className={styles.regListName}>
+                                            {reg.customName || reg.name}
+                                        </div>
                                         <div className={styles.regListTags}>
-                                            {reg.isMain && <span className={`${styles.tagBadge} ${styles.tagMain}`}>Siły Główne</span>}
-                                            {reg.isVanguard && <span className={`${styles.tagBadge} ${styles.tagVanguard}`}>Straż Przednia</span>}
+                                            {reg.isMain && <span className={`${styles.tagBadge} ${styles.tagMain}`}>SIŁY GŁÓWNE</span>}
+                                            {reg.isVanguard && <span className={`${styles.tagBadge} ${styles.tagVanguard}`}>STRAŻ PRZEDNIA</span>}
                                         </div>
                                     </div>
                                     <div className={styles.regListStats}>
-                                        <div><strong>{reg.stats.cost} PS</strong></div>
-                                        <div>Akt: {reg.stats.activations + (reg.isMain?1:0)}</div>
-                                        <div>Mot: {reg.stats.motivation + (reg.isMain?1:0)}</div>
+                                        {reg.stats.cost} PS<br/>
+                                        Akt: {reg.stats.activations + (reg.isMain ? 1 : 0)}<br/>
+                                        Mot: {reg.stats.motivation + (reg.isMain ? 1 : 0)}
                                     </div>
                                 </div>
                                 <div className={styles.regDetails}>
-                                    {reg.units.map((u, uIdx) => {
-                                        const unitDef = unitsMap[u.unitId];
-                                        const unitName = unitDef?.name || u.unitId;
-
-                                        const effectiveImps = getEffectiveUnitImprovements
-                                            ? getEffectiveUnitImprovements(u.unitId, u.purchasedImps, divisionDefinition, reg.regId, unitsMap)
-                                            : u.purchasedImps;
-
-                                        return (
-                                            <div key={uIdx} className={styles.unitRow}>
-                                                <div className={styles.unitNameCol}>
-                                                    <span>• {unitName}</span>
-                                                    {u.isSupport && <span className={styles.previewSupportTag}> (Wsparcie)</span>}
-                                                    {unitDef?.orders > 0 && (<span className={styles.commanderBadge}>DOW ({unitDef.orders})</span>)}
-                                                </div>
-                                                {effectiveImps.length > 0 && (
-                                                    <div className={styles.impsList}>
-                                                        {effectiveImps.map((impId, i) => {
-                                                            const name = improvementsMap?.[impId]?.name || impId;
-                                                            const isPurchased = u.purchasedImps.includes(impId);
-                                                            const suffix = !isPurchased ? " 🔒" : "";
-
-                                                            return (
-                                                                <span key={i}>
-                                                                    {i > 0 && ", "}
-                                                                    {name}{suffix}
-                                                                </span>
-                                                            );
-                                                        })}
-                                                    </div>
+                                    {reg.isCommander && (
+                                        <div className={styles.unitRow}>
+                                            <div className={styles.unitNameCol}>
+                                                • Dowódca <span className={styles.commanderBadge}>DOW ({reg.orders})</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {reg.units.filter(u => !u.isCommander).map((u, ui) => (
+                                        <div key={ui} className={styles.unitRow}>
+                                            <div className={styles.unitNameCol}>
+                                                • {u.name}
+                                                {u.imps.length > 0 && (
+                                                    <span className={styles.impsList}>{u.imps.join(", ")}</span>
+                                                )}
+                                                {u.isSupport && (
+                                                    <span style={{color: '#d35400', fontSize: '9px', fontWeight: 'bold', marginLeft: '4px'}}>[Wsparcie]</span>
                                                 )}
                                             </div>
-                                        );
-                                    })}
-
-                                    {reg.regImpsNames.length > 0 && (
-                                        <div className={styles.regImpsRow}>Ulepszenia Pułku: {reg.regImpsNames.join(', ')}</div>
+                                        </div>
+                                    ))}
+                                    {reg.regImps && reg.regImps.length > 0 && (
+                                        <div className={styles.regImpsRow}>
+                                            Zasady: {reg.regImps.join(", ")}
+                                        </div>
                                     )}
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
-            )}
+
+            </div>
         </div>
     );
 };

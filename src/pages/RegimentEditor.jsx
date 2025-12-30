@@ -1,7 +1,7 @@
 import React from "react";
 import { useRegimentLogic } from "./useRegimentLogic";
 import styles from "./RegimentEditor.module.css";
-import { GROUP_TYPES } from "../constants"; // <--- NAPRAWIONY IMPORT
+import { GROUP_TYPES } from "../constants";
 import {
     calculateEffectiveImprovementCount,
     checkIfImprovementIsMandatory,
@@ -33,14 +33,10 @@ export default function RegimentEditor(props) {
     };
 
     // --- LOGIKA ZASAD SPECJALNYCH ---
-
-    // 1. Zasady wpisane w pułk (np. "za_mna_bracia_kozacy" z regiments.json)
     const regimentRulesDescriptions = getRegimentRulesDescriptions(regiment, unitsMap);
 
-    // 2. Zasady z poziomu Dywizji, które wpływają na TEN konkretny pułk
     const divisionRules = divisionDefinition?.rules || [];
     const applicableDivisionRules = divisionRules.filter(rule => {
-        // Sprawdzamy, czy zasada celuje w ten pułk po ID
         if (rule.regiment_ids && rule.regiment_ids.includes(regiment.id)) return true;
         if (rule.regiment_id === regiment.id) return true;
         return false;
@@ -48,7 +44,6 @@ export default function RegimentEditor(props) {
         const def = DIVISION_RULES_DEFINITIONS[rule.id];
         if (!def) return null;
 
-        // Generujemy opis dynamicznie
         const description = def.getDescription ? def.getDescription(rule, {
             improvements: commonImprovements,
             unitsMap,
@@ -62,11 +57,7 @@ export default function RegimentEditor(props) {
         };
     }).filter(Boolean);
 
-    // 3. Łączymy listy
     const allRulesDescriptions = [...regimentRulesDescriptions, ...applicableDivisionRules];
-
-    // --------------------------------
-
     const hasErrors = state.regimentRuleErrors && state.regimentRuleErrors.length > 0;
 
     const tempConfig = {
@@ -80,7 +71,6 @@ export default function RegimentEditor(props) {
         regimentImprovements: state.regimentImprovements
     };
 
-    // --- PRZYGOTOWANIE DO FILTROWANIA TABELI ---
     const activeRegimentUnits = collectRegimentUnits(tempConfig, regiment);
     const activeSupportUnits = state.assignedSupportUnits.map(su => ({
         unitId: su.id,
@@ -166,19 +156,19 @@ export default function RegimentEditor(props) {
 
                     <div className={styles.sectionCard}>
                         <div className={styles.sectionHeader}>
-                            <h3 className={styles.sectionTitle} style={{display:'flex', alignItems:'center'}}>
+                            <h3 className={`${styles.sectionTitle} ${styles.titleCheckboxWrapper}`}>
                                 <input
                                     type="checkbox"
                                     checked={state.additionalEnabled}
                                     onChange={handlers.handleToggleAdditional}
-                                    style={{width: 20, height: 20, marginRight: 10, cursor: 'pointer'}}
+                                    className={styles.titleCheckbox}
                                 />
                                 <span
                                     onClick={handlers.handleToggleAdditional}
-                                    style={{cursor: 'pointer'}}
+                                    className={styles.clickableSpan}
                                 >
-                            Poziom I (Dodatkowe)
-                        </span>
+                                    Poziom I (Dodatkowe)
+                                </span>
                             </h3>
                         </div>
 
@@ -216,7 +206,7 @@ export default function RegimentEditor(props) {
                                             const uid = def.id;
                                             const isActive = state.selectedAdditionalCustom === uid;
                                             return (
-                                                <div key={uid} style={{width: '100%'}}>
+                                                <div key={uid} className={styles.fullWidthWrapper}>
                                                     <SingleUnitOptionCard
                                                         unitId={uid}
                                                         isActive={isActive}
@@ -255,7 +245,7 @@ export default function RegimentEditor(props) {
                 <div className={styles.sidebar}>
                     <div className={styles.sectionCard}>
                         <div className={styles.sidebarHeader}>
-                            <div style={{fontSize: 11, color: '#666', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px'}}>
+                            <div className={styles.sidebarDivisionName}>
                                 {divisionDefinition?.name || "Dywizja"}
                             </div>
                             <div className={styles.sidebarTitle}>
@@ -273,18 +263,13 @@ export default function RegimentEditor(props) {
                             <span className={styles.pointsBig}>{state.totalCost} PS</span>
                         </div>
 
-                        <div className={styles.statRow} style={{borderBottom: 'none', marginBottom: 10}}>
+                        <div className={styles.statRowNoBorder}>
                             <span className={styles.statLabel}>Typ Pułku:</span>
                             <span className={`${styles.statValue} ${styles.statValueType}`}>{state.stats.regimentType}</span>
                         </div>
 
                         {state.stats.isMainForce && (
-                            <div style={{
-                                marginTop: 0, marginBottom: 10, padding: '4px 8px',
-                                background: '#fff3e0', color: '#e65100',
-                                fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase',
-                                borderRadius: 4, textAlign: 'center', border: '1px solid #ffe0b2'
-                            }}>
+                            <div className={styles.mainForceBadge}>
                                 ★ Siły Główne
                             </div>
                         )}
@@ -309,7 +294,7 @@ export default function RegimentEditor(props) {
                         </div>
                     )}
 
-                    {/* SPIS ZASAD - Łączy zasady pułku i dywizji */}
+                    {/* SPIS ZASAD */}
                     {allRulesDescriptions.length > 0 && (
                         <div className={styles.sectionCard}>
                             <h4 className={styles.groupLabel}>Zasady Specjalne</h4>
@@ -332,16 +317,14 @@ export default function RegimentEditor(props) {
                                     const isActive = state.regimentImprovements.includes(imp.id);
 
                                     const commonDef = definitions.commonImprovements?.[imp.id];
-                                    const fullDef = { ...commonDef, ...imp }; // Łączymy definicje
+                                    const fullDef = { ...commonDef, ...imp };
                                     const displayName = fullDef.name || imp.id;
 
-                                    // 1. Sprawdź wymagania (Requirements)
                                     if (fullDef.requirements) {
                                         const reqsMet = fullDef.requirements.every(reqId => state.regimentImprovements.includes(reqId));
-                                        if (!reqsMet) return null; // Ukryj, jeśli nie spełnia wymagań
+                                        if (!reqsMet) return null;
                                     }
 
-                                    // 2. Koszty
                                     let armyCost = fullDef.army_cost_override ?? fullDef.army_cost ?? fullDef.army_point_cost ?? 0;
                                     let puCost = fullDef.cost_override ?? fullDef.cost ?? 0;
 
@@ -351,7 +334,6 @@ export default function RegimentEditor(props) {
 
                                     const costString = costParts.length > 0 ? `(${costParts.join(" + ")})` : "";
 
-                                    // 3. Radio vs Checkbox
                                     const isRadio = !!fullDef.group;
                                     const inputType = isRadio ? "radio" : "checkbox";
 
@@ -359,7 +341,7 @@ export default function RegimentEditor(props) {
                                         <label key={imp.id} className={`${styles.toggleLabel} ${styles.regimentImprovementLabel}`}>
                                             <input
                                                 type={inputType}
-                                                name={isRadio ? fullDef.group : undefined} // Grupowanie dla radia
+                                                name={isRadio ? fullDef.group : undefined}
                                                 checked={isActive}
                                                 onChange={() => handlers.handleRegimentImprovementToggle(imp.id)}
                                             />

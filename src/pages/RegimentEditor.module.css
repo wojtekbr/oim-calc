@@ -121,9 +121,9 @@
   cursor: pointer;
 }
 .sectionHeaderCheckbox input {
-  width: 20px; 
-  height: 20px; 
-  margin-right: 10px; 
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
   cursor: pointer;
 }
 
@@ -619,4 +619,68 @@
 }
 .limitOk {
   color: #0056b3;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
+  color: #333;
+}
+
+/* ... (reszta pliku bez zmian aż do .limitOk) ... */
+
+.limitOk {
+  color: #0056b3;
+}
+
+/* NOWE STYLE (przeniesione z inline) */
+
+.titleCheckboxWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.titleCheckbox {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.fullWidthWrapper {
+  width: 100%;
+}
+
+.sidebarDivisionName {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statRowNoBorder {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: none;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.mainForceBadge {
+  margin-top: 0;
+  margin-bottom: 10px;
+  padding: 4px 8px;
+  background: #fff3e0;
+  color: #e65100;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 4px;
+  text-align: center;
+  border: 1px solid #ffe0b2;
 }
