@@ -226,6 +226,7 @@
     }
   },
   "ott_grand_vezir": {
+    "hidden": true,
     "name": "Armia Wielkiego Wezyra 1663-64",
     "improvement_points": 12,
     "base_cost": 18,

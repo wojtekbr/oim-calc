@@ -5,6 +5,11 @@
     "recon": 0,
     "awareness": 5,
     "activations": 2,
+    "special_rules": [
+      {
+        "id": "panowie_bracia"
+      }
+    ],
     "unit_improvements": [
       {
         "id": "kalkans",
@@ -103,6 +108,11 @@
     "recon": 0,
     "awareness": 5,
     "activations": 2,
+    "special_rules": [
+      {
+        "id": "panowie_bracia"
+      }
+    ],
     "unit_improvements": [
       {
         "id": "kalkans",
@@ -195,6 +205,11 @@
     "awareness": 5,
     "activations": 3,
     "commander_orders_bonus": 1,
+    "special_rules": [
+      {
+        "id": "panowie_bracia"
+      }
+    ],
     "unit_improvements": [
       {
         "id": "kalkans",
@@ -297,6 +312,11 @@
     "recon": 2,
     "awareness": 5,
     "activations": 2,
+    "special_rules": [
+      {
+        "id": "panowie_bracia"
+      }
+    ],
     "unit_improvements": [
       {
         "id": "kalkans",
@@ -399,6 +419,11 @@
     "recon": 2,
     "awareness": 5,
     "activations": 2,
+    "special_rules": [
+      {
+        "id": "panowie_bracia"
+      }
+    ],
     "unit_improvements": [
       {
         "id": "kalkans",
@@ -485,6 +510,7 @@
     "awareness": 3,
     "activations": 2,
     "special_rules": [
+      "panowie_bracia",
       "posluch_kor",
       "pospolitacy",
       "lanowa_makes_mixed",
@@ -702,6 +728,11 @@
     "recon": 2,
     "awareness": 5,
     "activations": 2,
+    "special_rules": [
+      {
+        "id": "panowie_bracia"
+      }
+    ],
     "unit_improvements": [
       {
         "id": "kalkans",
@@ -779,7 +810,8 @@
     "activations": 2,
     "special_rules": [
       "limit_petyhorcy_2",
-      "limit_petyhorcy_kopie_1"
+      "limit_petyhorcy_kopie_1",
+      "panowie_bracia"
     ],
     "unit_improvements": [
       {
@@ -849,7 +881,8 @@
     "activations": 2,
     "special_rules": [
       "limit_petyhorcy_2",
-      "limit_petyhorcy_kopie_1"
+      "limit_petyhorcy_kopie_1",
+      "panowie_bracia"
     ],
     "unit_improvements": [
       {
@@ -910,6 +943,11 @@
     "recon": 0,
     "awareness": 5,
     "activations": 2,
+    "special_rules": [
+      {
+        "id": "panowie_bracia"
+      }
+    ],
     "unit_improvements": [
       {
         "id": "kalkans",

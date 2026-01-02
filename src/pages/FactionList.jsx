@@ -3,10 +3,11 @@ import React, { useState } from "react";
 /*
 FactionList:
 - Wyświetla listę frakcji, ukrywając te oznaczone jako "hidden" w factions.json
+- Wyświetla listę dywizji, ukrywając te oznaczone jako "hidden" w pliku dywizji
 */
 
 export default function FactionList({ factions, onOpenDivision }) {
-    // FILTROWANIE: Pokazujemy tylko te, które nie mają hidden: true
+    // FILTROWANIE FRAKCJI: Pokazujemy tylko te, które nie mają hidden: true
     const keys = Object.keys(factions).filter(k => !factions[k].meta?.hidden);
     const [openKey, setOpenKey] = useState(null);
 
@@ -15,6 +16,12 @@ export default function FactionList({ factions, onOpenDivision }) {
             <div style={{ display: "grid", gap: 12 }}>
                 {keys.map((k) => {
                     const f = factions[k];
+
+                    // FILTROWANIE DYWIZJI: Pobieramy tylko te, które nie mają hidden: true
+                    const visibleDivisions = f.divisions
+                        ? Object.entries(f.divisions).filter(([_, dv]) => !dv.hidden)
+                        : [];
+
                     return (
                         <div key={k} style={{ border: "1px solid #ddd", borderRadius: 8, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
                             <div
@@ -37,9 +44,14 @@ export default function FactionList({ factions, onOpenDivision }) {
                             {openKey === k && (
                                 <div style={{ padding: 16, background: "#fff", borderTop: "1px solid #eee" }}>
                                     <h4 style={{ marginTop: 0, marginBottom: 12, color: '#555', textTransform: 'uppercase', fontSize: 12 }}>Dostępne dywizje</h4>
-                                    {(!f.divisions || Object.keys(f.divisions).length === 0) && <div style={{color: '#999', fontStyle: 'italic'}}>Brak zdefiniowanych dywizji</div>}
+
+                                    {/* Jeśli brak widocznych dywizji, wyświetlamy komunikat */}
+                                    {visibleDivisions.length === 0 && (
+                                        <div style={{color: '#999', fontStyle: 'italic'}}>Brak zdefiniowanych dywizji</div>
+                                    )}
+
                                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                                        {f.divisions && Object.entries(f.divisions).map(([dk, dv]) => (
+                                        {visibleDivisions.map(([dk, dv]) => (
                                             <div
                                                 key={dk}
                                                 onClick={() => onOpenDivision(k, dk)}
