@@ -157,17 +157,19 @@ export const DIVISION_RULES_DEFINITIONS = {
     },
     "panowie_bracia": {
         title: "Panowie Bracia!",
-        getDescription: () => "Za każde dwa pułki Jazdy (Koronnej, Litewskiej, Lekkiej, Hetmańskie, Skrzydłowe, Pospolite Ruszenie), każdy z tych pułków (z wyjątkiem Pospolitego Ruszenia) otrzymuje +1 do Motywacji."
+        getDescription: () => "Za każde dwa Pułki z tą zasadą, każdy z tych Pułków otrzymuje dodatkowy 1 punkt " +
+            "motywacji (wystawiając 4 takie Pułki motywacja wzrośnie o 2). " +
+            "Tracąc jeden z tych Pułków, motywacja każdego z nich spada o 2 a nie o 1."
     },
     "klopoty_skarbowe": {
         title: "Kłopoty Skarbowe",
         getDescription: () =>
             "Armia Rzeczpospolitej wiecznie borykała się z pustkami w skarbu, przez co często wojska były opłacane z prywatnych szkatuł magnatów, a nieopłacane wojsko zawiązywało konfederacje.\n\n" +
             "Przed fazą wystawienia wojsk, Rzuć k10:\n" +
-            "• 1-2: Wojsko zostało opłacone na czas z królewskiego skarbca: +1 motywacji dla każdego pułku jazdy: koronnej/litewskiej, lekkiej, Lewego/Prawego skrzydła.\n" +
+            "• 1-2: Wojsko zostało opłacone na czas z królewskiego skarbca: +1 motywacji dla każdego pułku z zasadą Panowie Bracia.\n" +
             "• 3-5: Wojsko zostało opłacone z prywatnej kiesy: Brak efektu.\n" +
-            "• 6-9: Została obiecana zapłata na następną kwartę: wylosuj po 1 jednostce w każdym pułku jazdy: koronnej/litewskiej, lekkiej, Lewego/Prawego skrzydła. Oddział dostaje 1D.\n" +
-            "• 10: Wojsko zawiązało Konfederację: -1 motywacji dla każdego pułku jazdy: koronnej/litewskiej, lekkiej, Lewego/Prawego skrzydła."
+            "• 6-9: Została obiecana zapłata na następną kwartę: wylosuj po 1 jednostce w każdym pułku z zasadą Panowie Bracia. Oddział dostaje 1 Czaszkę (Punkt straty)    \n" +
+            "• 10: Wojsko zawiązało Konfederację: -1 motywacji dla każdego pułku z zasadą Panowie Bracia."
     },
     "na_wlasnej_ziemi_3": {
         title: "Na własnej ziemi (3)",

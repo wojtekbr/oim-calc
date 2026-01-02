@@ -112,5 +112,11 @@ export const REGIMENT_RULES_DEFINITIONS = {
             "• Świetni wojownicy\n" +
             "• Dodatkowy pistolet\n" +
             "• Nieustraszeni"
-    }
+    },
+    "panowie_bracia": {
+        title: "Panowie Bracia",
+        description: "Za każde dwa Pułki z tą zasadą, każdy z tych Pułków otrzymuje dodatkowy 1 punkt " +
+            "motywacji (wystawiając 4 takie Pułki motywacja wzrośnie o 2). " +
+            "Tracąc jeden z tych Pułków, motywacja każdego z nich spada o 2 a nie o 1."
+    },
 };
