@@ -358,7 +358,7 @@
   },
   "lit_petyhorcy_vet_s": {
     "id": "lit_petyhorcy_vet_s",
-    "name": "Petyhorcy S",
+    "name": "Petyhorcy (weterani) S",
     "cost": 9,
     "improvement_cost": 3,
     "rank": "silver",
@@ -367,7 +367,7 @@
   },
   "lit_petyhorcy_vet_m": {
     "id": "lit_petyhorcy_vet_m",
-    "name": "Petyhorcy M",
+    "name": "Petyhorcy (weterani) M",
     "cost": 12,
     "improvement_cost": 4,
     "rank": "silver",
@@ -376,7 +376,7 @@
   },
   "lit_petyhorcy_kopie_vet_s": {
     "id": "lit_petyhorcy_kopie_vet_s",
-    "name": "Petyhorcy z kopiami S",
+    "name": "Petyhorcy z kopiami (weterani) S",
     "cost": 9,
     "improvement_cost": 3,
     "rank": "silver",
@@ -386,7 +386,7 @@
   },
   "lit_petyhorcy_kopie_vet_m": {
     "id": "lit_petyhorcy_kopie_vet_m",
-    "name": "Petyhorcy z kopiami M",
+    "name": "Petyhorcy z kopiami (weterani) M",
     "cost": 12,
     "improvement_cost": 4,
     "rank": "silver",
