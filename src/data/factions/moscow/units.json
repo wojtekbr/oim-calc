@@ -14,14 +14,14 @@
     "name": "Wojewoda (utalentowany)",
     "cost": 0,
     "rank": "group",
-    "orders": 4
+    "orders": 3
   },
   "mos_wojewoda_koneksje": {
     "id": "mos_wojewoda_koneksje",
     "name": "Wojewoda (z koneksjami +8PU)",
     "cost": 0,
     "rank": "group",
-    "orders": 3,
+    "orders": 2,
     "additional_supply": 8
   },
   "mos_pulkownik": {
