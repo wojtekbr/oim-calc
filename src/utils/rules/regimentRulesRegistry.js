@@ -197,20 +197,29 @@ export const REGIMENT_RULES_REGISTRY = {
             return null;
         }
     },
-    "restricted_unit_size": {
-        name: "Ograniczenie rozwoju jednostek",
+   "restricted_unit_size": {
+        name: "Ograniczenie rozmiaru jednostek",
         validate: (activeUnits, params, context) => {
             const { regimentConfig, unitsMap } = context || {};
 
             const targetSize = (params.target_size || "").toLowerCase(); // np. "l" lub "m"
             const suffix = `_${targetSize}`;
+            const specificUnits = params.unit_ids || []; 
+            
+            const hasTargetSizeUnit = activeUnits.some(u => {
+                if (!u.unitId || !u.unitId.toLowerCase().endsWith(suffix)) return false;
 
-            const hasTargetSizeUnit = activeUnits.some(u => u.unitId && u.unitId.toLowerCase().endsWith(suffix));
+                if (specificUnits.length > 0 && !specificUnits.includes(u.unitId)) {
+                    return false;
+                }
+                return true;
+            });
 
             if (!hasTargetSizeUnit) return null;
 
             if (params.requires_level_1 && !regimentConfig?.additionalEnabled) {
-                return `Ograniczenie Rozmiaru: Jednostki mogą zostać rozwinięte do rozmiaru ${targetSize.toUpperCase()} tylko jeżeli Regiment ma wykupiony Poziom I.`;
+                const subject = specificUnits.length > 0 ? "Wymienione jednostki" : "Jednostki";
+                return `Ograniczenie Rozmiaru: ${subject} mogą zostać rozwinięte do rozmiaru ${targetSize.toUpperCase()} tylko jeżeli Regiment ma wykupiony Poziom I.`;
             }
 
             if (params.forbidden_unit_ids && Array.isArray(params.forbidden_unit_ids)) {
@@ -218,7 +227,8 @@ export const REGIMENT_RULES_REGISTRY = {
 
                 if (foundForbidden) {
                     const forbiddenName = unitsMap?.[foundForbidden.unitId]?.name || foundForbidden.unitId;
-                    return `Ograniczenie Rozmiaru: Nie można wystawić jednostek w rozmiarze ${targetSize.toUpperCase()}, ponieważ w pułku znajdują się: "${forbiddenName}".`;
+                    const subject = specificUnits.length > 0 ? "Wymienionych jednostek" : "jednostek";
+                    return `Ograniczenie Rozmiaru: Nie można wystawić ${subject} w rozmiarze ${targetSize.toUpperCase()}, ponieważ w pułku znajdują się: "${forbiddenName}".`;
                 }
             }
 

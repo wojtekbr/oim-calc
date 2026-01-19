@@ -7,7 +7,7 @@
     "name": "Generał",
     "cost": 0,
     "rank": "group",
-    "orders": 2
+    "orders": 3
   },
   "hre_pulkownik": {
     "id": "hre_pulkownik",

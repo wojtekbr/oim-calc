@@ -723,4 +723,22 @@ export const DIVISION_RULES_REGISTRY = {
             return errors;
         }
     },
+    "position_based_cost_modifier": {
+        getRegimentCostModifier: (divisionConfig, targetRegimentId, params) => {
+            const targetIds = params?.regiment_ids || [];
+            const targetGroup = params?.group; // "vanguard", "base", "additional"
+            const extraPu = params?.pu_cost || 0;
+            const extraPs = params?.ps_cost || 0;
+
+            if (!targetGroup || !targetIds.includes(targetRegimentId)) return null;
+
+            const groupRegiments = divisionConfig?.[targetGroup] || [];
+            const isPresentInGroup = groupRegiments.some(r => r.id === targetRegimentId);
+
+            if (isPresentInGroup) {
+                return { pu: extraPu, ps: extraPs };
+            }
+            return null;
+        }
+    },
 };

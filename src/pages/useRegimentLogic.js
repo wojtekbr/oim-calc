@@ -281,17 +281,46 @@ export const useRegimentLogic = ({
 
     const totalCost = stats.cost;
 
+    // --- MODYFIKACJA: Dodanie walidacji blokad dywizyjnych do listy błędów regimentu ---
     const regimentRuleErrors = useMemo(() => {
         const activeUnits = collectRegimentUnits(currentLocalConfig, regiment);
-        return validateRegimentRules(activeUnits, regiment, {
+        
+        // 1. Walidacja standardowych reguł regimentu
+        const internalErrors = validateRegimentRules(activeUnits, regiment, {
             regimentConfig: currentLocalConfig,
             unitsMap,
             divisionDefinition,
             regimentDefinition: regiment,
             checkIfImprovementIsMandatory,
             improvements: commonImprovements
+        }) || [];
+
+        // 2. Walidacja reguł dywizyjnych (blokady jednostek)
+        const divisionBlockingErrors = [];
+        activeUnits.forEach(u => {
+            if (u.unitId && u.unitId !== IDS.NONE) {
+                const blockage = getDivisionUnitBlockage(
+                    u.unitId,
+                    regiment.id,
+                    configuredDivision,
+                    divisionDefinition,
+                    unitsMap,
+                    getRegimentDefinition
+                );
+                if (blockage && blockage.isBlocked) {
+                    divisionBlockingErrors.push(blockage.reason);
+                }
+            }
         });
-    }, [currentLocalConfig, regiment, unitsMap, divisionDefinition, commonImprovements]);
+
+        // Łączymy błędy
+        const allErrors = [...internalErrors, ...divisionBlockingErrors];
+        
+        // Usuwamy duplikaty (jeśli np. 3 jednostki generują ten sam komunikat o blokadzie)
+        return [...new Set(allErrors)];
+
+    }, [currentLocalConfig, regiment, unitsMap, divisionDefinition, commonImprovements, configuredDivision, getRegimentDefinition]);
+    // -----------------------------------------------------------------------------------
 
     // --- 4. Ręczne obliczanie kosztu ---
     const newRemainingPointsAfterLocalChanges = useMemo(() => {
@@ -380,36 +409,13 @@ export const useRegimentLogic = ({
 
         const isDeselecting = currentSelection === optionKey;
 
-        // --- FIX: Wyciągamy definicję opcji, aby znaleźć rzeczywiste ID jednostek ---
+        // USUWAMY BLOKADĘ ALERTEM - teraz błąd pokaże się w podsumowaniu
+        /* if (!isDeselecting && optionKey) { ... alert ... return } 
+        */
+
         const groupDef = type === GROUP_TYPES.BASE ? base : additional;
         const pod = groupDef[groupKey]?.[index];
         const optionDef = pod?.[optionKey];
-
-        // WALIDACJA BLOKADY: Nie pozwól wybrać jednostki, jeśli jest zablokowana przez inny pułk
-        if (!isDeselecting && optionKey) {
-            // Ustalamy jakie ID jednostek są w tej opcji
-            let unitsToCheck = [optionKey]; // Domyślnie klucz to ID
-
-            if (optionDef) {
-                if (Array.isArray(optionDef.units) && optionDef.units.length > 0) {
-                    unitsToCheck = optionDef.units;
-                } else if (optionDef.id) {
-                    unitsToCheck = [optionDef.id];
-                }
-            }
-
-            // Sprawdzamy blokadę dla każdego ID jednostki wchodzącej w skład opcji
-            for (const uid of unitsToCheck) {
-                if (uid && uid !== IDS.NONE) {
-                    const blockage = checkUnitBlockage(uid);
-                    if (blockage && blockage.isBlocked) {
-                        alert(blockage.reason);
-                        return; // Blokujemy zmianę
-                    }
-                }
-            }
-        }
-
         const isToggleable = !!optionDef?.is_toggle;
 
         if (isDeselecting && !isOptionalGroup && !isToggleable) return;
@@ -481,14 +487,10 @@ export const useRegimentLogic = ({
     const handleCustomSelect = (unitId) => {
         const isDeselecting = selectedAdditionalCustom === unitId;
 
-        // WALIDACJA BLOKADY dla custom unit
-        if (!isDeselecting && unitId) {
-            const blockage = checkUnitBlockage(unitId);
-            if (blockage && blockage.isBlocked) {
-                alert(blockage.reason);
-                return;
-            }
-        }
+        // USUWAMY BLOKADĘ ALERTEM
+        /*
+        if (!isDeselecting && unitId) { ... alert ... return }
+        */
 
         const next = isDeselecting ? null : unitId;
         setSelectedAdditionalCustom(next);
@@ -780,7 +782,7 @@ export const useRegimentLogic = ({
             getUnitName,
             getFinalUnitCost,
             groupKeys,
-            checkUnitBlockage // Eksportujemy funkcję dla UI
+            checkUnitBlockage
         }
     };
 };

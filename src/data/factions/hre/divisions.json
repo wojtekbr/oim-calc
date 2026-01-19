@@ -29,6 +29,12 @@
         "trigger_regiment_ids": ["mrc_dragoons"],
         "forbidden_unit_ids": ["hre_dragoni_vet_s", "hre_dragoni_vet_m"],
         "target_regiment_ids": ["hre_stary_reg_kirasjerow"]
+      },
+      {
+        "id": "position_based_cost_modifier",
+        "regiment_ids": ["hre_reg_chorwatow"],
+        "group": "vanguard",
+        "pu_cost": 1
       }
     ],
     "additional_units": [
@@ -92,8 +98,8 @@
   },
   "hre_dywizja_na_granicy_z_turcja": {
     "name": "Dywizja na granicy z Turcją (1663-64)",
-    "improvement_points": 10,
-    "base_cost": 2,
+    "improvement_points": 12,
+    "base_cost": 8,
     "general": ["hre_general"],
     "rules": [
       { 
@@ -105,9 +111,10 @@
         "max_amount": 1
       },
       {
-        "id": "limit_max_same_regiments",
+        "id": "position_based_cost_modifier",
         "regiment_ids": ["hre_reg_chorwatow"],
-        "max_amount": 1
+        "group": "vanguard",
+        "pu_cost": 1
       }
     ],
     "additional_units": [

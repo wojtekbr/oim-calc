@@ -120,10 +120,16 @@ export const REGIMENT_RULES_DEFINITIONS = {
             "Tracąc jeden z tych Pułków, motywacja każdego z nich spada o 2 a nie o 1."
     },
     "restricted_unit_size": {
-        title: "Ograniczenie rozwinięcia",
+        title: "Ograniczenie rozmiaru jednostek",
         getDescription: (params, context) => {
             const { unitsMap } = context || {};
             const size = (params?.target_size || "?").toUpperCase();
+            
+            let subject = "Jednostki";
+            if (params?.unit_ids && params.unit_ids.length > 0) {
+                const names = params.unit_ids.map(id => unitsMap?.[id]?.name || id).join(", ");
+                subject = `Jednostki: "${names}"`;
+            }
 
             const conditions = [];
 
@@ -138,7 +144,7 @@ export const REGIMENT_RULES_DEFINITIONS = {
 
             const conditionText = conditions.join(" ORAZ ");
 
-            return `Jednostki mogą zostać rozwinięte do rozmiaru ${size} tylko jeżeli: ${conditionText}.`;
+            return `${subject} mogą zostać rozwinięte do rozmiaru ${size} tylko jeżeli: ${conditionText}.`;
         }
     },
     "unit_blocks_improvements": {

@@ -2,20 +2,22 @@ import React from "react";
 import styles from "../../pages/RegimentSelector.module.css";
 import { getPlaceholderStyle, getInitials } from "../../utils/uiHelpers";
 
-export const RegimentOptionTile = ({ optId, isActive, onClick, getRegimentDefinition, disabled, isAllied, divisionDefinition }) => {
+export const RegimentOptionTile = ({ optId, group, isActive, onClick, getRegimentDefinition, disabled, isAllied, divisionDefinition }) => {
     const def = getRegimentDefinition(optId);
     const name = def?.name || optId;
     const cost = def?.base_cost || 0;
 
-    // 1. Bazowy koszt PU z definicji pułku (TERAZ OBSŁUGUJE pu_cost)
     let puCost = def?.pu_cost || def?.improvement_points_cost || 0;
 
-    // 2. Dodatkowy koszt PU z zasad dywizji (np. "extra_regiment_cost")
     if (divisionDefinition?.rules) {
         divisionDefinition.rules.forEach(rule => {
             if (rule.id === 'extra_regiment_cost' && rule.regiment_ids?.includes(optId)) {
-                if (rule.pu_cost) {
-                    puCost += rule.pu_cost;
+                if (rule.pu_cost) puCost += rule.pu_cost;
+            }
+
+            if (rule.id === 'position_based_cost_modifier' && rule.regiment_ids?.includes(optId)) {
+                if (rule.group === group) {
+                    if (rule.pu_cost) puCost += rule.pu_cost;
                 }
             }
         });

@@ -6,12 +6,11 @@ import { RegimentOptionTile } from "./RegimentOptionTile";
 import { SelectedRegimentRow } from "./SelectedRegimentRow";
 
 export const RegimentBlock = ({
-                                  group, regiments, definitionOptions, mainForceKey, getRegimentDefinition, calculateStats,
+                                  group, // <-- To pole przekazujemy teraz niżej do kafelków
+                                  regiments, definitionOptions, mainForceKey, getRegimentDefinition, calculateStats,
                                   onNameChange, onRegimentChange, onOpenEditor, onMainForceSelect, supportUnits, unitsMap,
-                                  configuredDivision, divisionDefinition, currentMainForceCost, isAllied, currentAlliesCount, calculateRegimentPU,
-                                  // --- NOWE PROPSY ---
-                                  getEffectiveUnitImprovements,
-                                  improvementsMap
+                                  configuredDivision, divisionDefinition, currentMainForceCost, isAllied, currentAlliesCount, calculateRegimentPU, 
+                                  getEffectiveUnitImprovements, improvementsMap
                               }) => {
     return regiments.map((regiment, index) => {
         const options = definitionOptions[index].options;
@@ -34,7 +33,19 @@ export const RegimentBlock = ({
                                 const isRuleBlocked = !isActive && !checkDivisionConstraints(configuredDivision, divisionDefinition, optId);
                                 const isOptionAlly = isAllied(optId);
                                 const isAllyBlocked = isOptionAlly && currentAlliesCount >= 1 && currentRegimentId !== optId;
-                                return (<RegimentOptionTile key={optId} optId={optId} isActive={isActive} disabled={isRuleBlocked || isAllyBlocked} isAllied={isOptionAlly} divisionDefinition={divisionDefinition} onClick={() => handleTileClick(optId, isRuleBlocked || isAllyBlocked)} getRegimentDefinition={getRegimentDefinition} />);
+                                return (
+                                    <RegimentOptionTile 
+                                        key={optId} 
+                                        optId={optId} 
+                                        group={group} /* <--- PRZEKAZUJEMY GRUPĘ (vanguard/base/additional) */
+                                        isActive={isActive} 
+                                        disabled={isRuleBlocked || isAllyBlocked} 
+                                        isAllied={isOptionAlly} 
+                                        divisionDefinition={divisionDefinition} 
+                                        onClick={() => handleTileClick(optId, isRuleBlocked || isAllyBlocked)} 
+                                        getRegimentDefinition={getRegimentDefinition} 
+                                    />
+                                );
                             })}
                         </div>
                     </div>
@@ -53,7 +64,6 @@ export const RegimentBlock = ({
                         currentMainForceCost={currentMainForceCost}
                         isAllied={isAllied}
                         calculateRegimentPU={calculateRegimentPU}
-                        // --- PRZEKAZYWANIE DALEJ ---
                         getEffectiveUnitImprovements={getEffectiveUnitImprovements}
                         improvementsMap={improvementsMap}
                         divisionDefinition={divisionDefinition}
@@ -69,7 +79,19 @@ export const RegimentBlock = ({
                             const isRuleBlocked = !checkDivisionConstraints(configuredDivision, divisionDefinition, optId);
                             const isOptionAlly = isAllied(optId);
                             const isAllyBlocked = isOptionAlly && currentAlliesCount >= 1;
-                            return (<RegimentOptionTile key={optId} optId={optId} isActive={false} disabled={isRuleBlocked || isAllyBlocked} isAllied={isOptionAlly} divisionDefinition={divisionDefinition} onClick={() => handleTileClick(optId, isRuleBlocked || isAllyBlocked)} getRegimentDefinition={getRegimentDefinition} />);
+                            return (
+                                <RegimentOptionTile 
+                                    key={optId} 
+                                    optId={optId} 
+                                    group={group} /* <--- PRZEKAZUJEMY GRUPĘ */
+                                    isActive={false} 
+                                    disabled={isRuleBlocked || isAllyBlocked} 
+                                    isAllied={isOptionAlly} 
+                                    divisionDefinition={divisionDefinition} 
+                                    onClick={() => handleTileClick(optId, isRuleBlocked || isAllyBlocked)} 
+                                    getRegimentDefinition={getRegimentDefinition} 
+                                />
+                            );
                         })}
                     </div>
                 </div>

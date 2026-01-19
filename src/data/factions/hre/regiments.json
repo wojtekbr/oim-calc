@@ -444,7 +444,12 @@
     "awareness": 4,
     "activations": 3,
     "special_rules": [
-      "hre_kirasjerzy_limit_poziom"
+      {
+        "id": "restricted_unit_size",
+        "target_size": "m",
+        "requires_level_1": true,
+        "unit_ids": ["hre_kirasjerzy_m"]
+      }
     ],
     "unit_improvements": [
       {
