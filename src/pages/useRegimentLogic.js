@@ -285,7 +285,7 @@ export const useRegimentLogic = ({
         return validateRegimentRules(activeUnits, regiment, { regimentConfig: currentLocalConfig, unitsMap });
     }, [currentLocalConfig, regiment, unitsMap]);
 
-    // --- 4. Ręczne obliczanie kosztu (FIXED: Poprawne argumenty funkcji) ---
+    // --- 4. Ręczne obliczanie kosztu ---
     const newRemainingPointsAfterLocalChanges = useMemo(() => {
         if (remainingImprovementPoints === undefined) return 0;
         const totalDivisionLimit = divisionDefinition.improvement_points || 0;
@@ -311,7 +311,7 @@ export const useRegimentLogic = ({
             const key = `support/${su.id}-${su.assignedTo.positionKey}/0`;
             const imps = improvements[key];
             if (Array.isArray(imps)) {
-                const unitDef = unitsMap[su.id]; // <--- POBIERAMY OBIEKT JEDNOSTKI
+                const unitDef = unitsMap[su.id];
 
                 imps.forEach(impId => {
                     const isMandatory = checkIfImprovementIsMandatory(
@@ -325,11 +325,10 @@ export const useRegimentLogic = ({
                     if (isMandatory) return; // Koszt 0
 
                     if (unitDef) {
-                        // FIX: Używamy poprawnych argumentów z costUtils.js: (unitDef, impId, regimentDefinition, commonImprovements)
                         const cost = calculateSingleImprovementIMPCost(
                             unitDef,
                             impId,
-                            regiment, // props.regiment działa tutaj jako regimentDefinition
+                            regiment,
                             commonImprovements
                         );
                         manualSupportCost += cost;
@@ -466,16 +465,34 @@ export const useRegimentLogic = ({
             const nextList = [...(nextImprovements[positionKey] || []), impId];
             nextImprovements[positionKey] = nextList;
 
-            const nextConfig = { ...currentLocalConfig, improvements: nextImprovements };
-
-            const countInRegiment = calculateEffectiveImprovementCount(nextConfig, regiment, impId, divisionDefinition, unitsMap);
+            const countInRegiment = calculateEffectiveImprovementCount(
+                { ...currentLocalConfig, improvements: nextImprovements },
+                regiment,
+                impId,
+                divisionDefinition,
+                unitsMap
+            );
 
             let countInSupport = 0;
             assignedSupportUnits.forEach(su => {
                 const key = `support/${su.id}-${su.assignedTo.positionKey}/0`;
                 const imps = nextImprovements[key] || [];
                 if (imps.includes(impId)) {
-                    countInSupport += 1;
+                    // FIX: Sprawdzenie czy ulepszenie wsparcia jest darmowe/obowiązkowe (nie wlicza się do limitu)
+                    const isMandatorySup = checkIfImprovementIsMandatory(su.id, impId, divisionDefinition, regiment.id, unitsMap);
+                    let isFreeSup = false;
+                    if (!isMandatorySup && divisionDefinition?.rules) {
+                        divisionDefinition.rules.forEach(rule => {
+                            const impl = DIVISION_RULES_REGISTRY[rule.id];
+                            if (impl?.isImprovementFree && impl.isImprovementFree(su.id, impId, rule, regiment.id, unitsMap, divisionDefinition)) {
+                                isFreeSup = true;
+                            }
+                        });
+                    }
+
+                    if (!isMandatorySup && !isFreeSup) {
+                        countInSupport += 1;
+                    }
                 }
             });
 
@@ -593,7 +610,23 @@ export const useRegimentLogic = ({
                 assignedSupportUnits.forEach(su => {
                     const key = `support/${su.id}-${su.assignedTo.positionKey}/0`;
                     const imps = improvements[key] || [];
-                    if (imps.includes(impId)) countInSupport++;
+                    if (imps.includes(impId)) {
+                        // FIX: Sprawdzenie czy ulepszenie wsparcia jest darmowe/obowiązkowe (nie wlicza się do limitu)
+                        const isMandatorySup = checkIfImprovementIsMandatory(su.id, impId, divisionDefinition, regiment.id, unitsMap);
+                        let isFreeSup = false;
+                        if (!isMandatorySup && divisionDefinition?.rules) {
+                            divisionDefinition.rules.forEach(rule => {
+                                const impl = DIVISION_RULES_REGISTRY[rule.id];
+                                if (impl?.isImprovementFree && impl.isImprovementFree(su.id, impId, rule, regiment.id, unitsMap, divisionDefinition)) {
+                                    isFreeSup = true;
+                                }
+                            });
+                        }
+
+                        if (!isMandatorySup && !isFreeSup) {
+                            countInSupport++;
+                        }
+                    }
                 });
 
                 const totalEffectiveCount = countInRegiment + countInSupport;

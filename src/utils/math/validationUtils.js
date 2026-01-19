@@ -8,21 +8,36 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
     if (!unitDef || !regimentDefinition) return false;
     if (unitDef.rank === RANK_TYPES.GROUP || unitDef.rank === 'group') return false;
 
+    // 1. Sprawdzenie ulepszeń WYMUSZONYCH (Mandatory) przez dywizję/zasady
     if (divisionDefinition && unitsMap && regimentDefinition) {
         if (checkIfImprovementIsMandatory(unitDef.id, improvementId, divisionDefinition, regimentDefinition.id, unitsMap)) {
             return true;
         }
     }
 
+    // 2. Sprawdzenie ulepszeń WYMUSZONYCH przez definicję jednostki
     if (unitDef.mandatory_improvements && unitDef.mandatory_improvements.includes(improvementId)) {
         return true;
     }
 
+    // --- NOWA LOGIKA: BIAŁA LISTA (ALLOWED_IMPROVEMENTS) ---
+    // Jeśli jednostka ma zdefiniowaną listę dozwolonych ulepszeń,
+    // to improvementId MUSI się na niej znajdować.
+    if (unitDef.allowed_improvements && Array.isArray(unitDef.allowed_improvements)) {
+        if (!unitDef.allowed_improvements.includes(improvementId)) {
+            return false;
+        }
+    }
+    // -------------------------------------------------------
+
+    // 3. Sprawdzenie czy ulepszenie w ogóle istnieje w pułku
     const regImpDef = regimentDefinition.unit_improvements?.find(i => i.id === improvementId);
     if (!regImpDef) return false;
 
+    // 4. Sprawdzenie Czarnej Listy (IMPROVEMENT_LIMITATIONS) w jednostce
     if (unitDef.improvement_limitations?.includes(improvementId)) return false;
 
+    // 5. Sprawdzenie ograniczeń w definicji ulepszenia (units_allowed / limitations / units_excluded)
     if (regImpDef.units_allowed && Array.isArray(regImpDef.units_allowed)) {
         if (!regImpDef.units_allowed.includes(unitDef.id)) return false;
     } else if (regImpDef.limitations && Array.isArray(regImpDef.limitations)) {

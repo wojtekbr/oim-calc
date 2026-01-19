@@ -6,10 +6,20 @@ export const DIVISION_RULES_DEFINITIONS = {
     "grant_improvements_to_specific_regiments": {
         title: "Darmowe ulepszenia dla pułków",
         getDescription: (params, context) => {
-            const impNames = (params?.improvement_ids || []).map(id =>
-                context.improvements ? (context.improvements[id]?.name || id) : id
+            const { getRegimentDefinition, improvements } = context;
+
+            const regIds = params?.regiment_ids || [];
+            const regNames = regIds.map(rid => {
+                const def = getRegimentDefinition ? getRegimentDefinition(rid) : null;
+                return def ? `"${def.name}"` : rid;
+            }).join(", ");
+
+            const impIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
+            const impNames = impIds.map(id =>
+                improvements ? (improvements[id]?.name || id) : id
             ).join(", ");
-            return `Wybrane pułki otrzymują darmowe ulepszenia: ${impNames}.`;
+
+            return `Pułki: ${regNames} otrzymują darmowe ulepszenia: ${impNames}.`;
         }
     },
     "grant_improvement_to_all": {
@@ -57,7 +67,15 @@ export const DIVISION_RULES_DEFINITIONS = {
         getDescription: (params, context) => {
             const { getRegimentDefinition } = context;
 
-            const targetIds = params.regiment_ids || (params.regiment_id ? [params.regiment_id] : []);
+            let rawInput = params.regiment_ids || params.regiment_id;
+            let targetIds = [];
+
+            if (Array.isArray(rawInput)) {
+                targetIds = rawInput;
+            } else if (rawInput) {
+                targetIds = [rawInput];
+            }
+
             const max = params.max_amount || 1;
 
             const regNames = targetIds.map(tid => {
@@ -210,7 +228,7 @@ export const DIVISION_RULES_DEFINITIONS = {
         title: "Tam dużo myłtyków",
         getDescription: () => "Zasada opisana w podręczniku OiM2"
     },
-    "rozlaly_sie_zagony tatarskie": {
+    "rozlaly_sie_zagony": {
         title: "Rozlały się zagony",
         getDescription: () => "Jeżeli Gracz dowodzący tą armią wygra przeciwstawny test Zwiadu i wybierze efekt Zwiadu: Flankowanie, to może zamienić go na Dalekie obejście.\n" +
             "Zamiast w strefie rozstawienia, można jeden pułk jazdy albo dragonów, albo piechoty z zasadą Podragonieni wystawić w kontakcie z boczną krawędzią pola bitwy, nie bliżej niż 12” od krawędzi należącej do przeciwnika lub dowolnej jego Jednostki."

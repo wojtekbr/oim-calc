@@ -247,16 +247,13 @@ export const DIVISION_RULES_REGISTRY = {
 
     "limit_max_same_regiments": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, ruleParams) => {
+            let rawInput = ruleParams.regiment_ids || ruleParams.regiment_id;
             let targetIds = [];
 
-            if (ruleParams.regiment_ids) {
-                targetIds = Array.isArray(ruleParams.regiment_ids)
-                    ? ruleParams.regiment_ids
-                    : [ruleParams.regiment_ids];
-            } else if (ruleParams.regiment_id) {
-                targetIds = Array.isArray(ruleParams.regiment_id)
-                    ? ruleParams.regiment_id
-                    : [ruleParams.regiment_id];
+            if (Array.isArray(rawInput)) {
+                targetIds = rawInput;
+            } else if (rawInput) {
+                targetIds = [rawInput];
             }
 
             const max = ruleParams.max_amount || 1;
@@ -271,13 +268,18 @@ export const DIVISION_RULES_REGISTRY = {
 
             let count = 0;
             allRegiments.forEach(reg => {
-                if (reg.id && reg.id !== IDS.NONE && targetIds.includes(reg.id)) {
+                if (reg.id && reg.id !== 'none' && targetIds.includes(reg.id)) {
                     count++;
                 }
             });
 
             if (count > max) {
-                return [`Przekroczono limit (${max}) dla grupy pułków (obecnie: ${count}).`];
+                const names = targetIds.map(tid => {
+                    const def = getRegimentDefinition(tid);
+                    return def ? `"${def.name}"` : tid;
+                }).join(", ");
+
+                return [`Przekroczono limit (${max}) dla grupy pułków: ${names} (obecnie: ${count}).`];
             }
 
             return [];
