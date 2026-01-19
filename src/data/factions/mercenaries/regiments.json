@@ -147,7 +147,7 @@
       }
     }
    },
-     "mrc_armoured_reiters": {
+  "mrc_armoured_reiters": {
     "name": "Regiment Opancerzonych Rajtarów Najemnych",
     "base_cost": 0,
     "recon": 0,
@@ -260,7 +260,7 @@
         }
       },
       "hre": {
-        "special_rules_add": ["szwedzki_podpulkownik"],
+        "special_rules_add": ["cesarski_podpulkownik"],
         "structure_overrides": {
           "additional": {
             "general": [

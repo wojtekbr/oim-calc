@@ -119,4 +119,42 @@ export const REGIMENT_RULES_DEFINITIONS = {
             "motywacji (wystawiając 4 takie Pułki motywacja wzrośnie o 2). " +
             "Tracąc jeden z tych Pułków, motywacja każdego z nich spada o 2 a nie o 1."
     },
+    "restricted_unit_size": {
+        title: "Ograniczenie rozwinięcia",
+        getDescription: (params, context) => {
+            const { unitsMap } = context || {};
+            const size = (params?.target_size || "?").toUpperCase();
+
+            const conditions = [];
+
+            if (params?.requires_level_1) {
+                conditions.push("Regiment ma wykupiony Poziom I");
+            }
+
+            if (params?.forbidden_unit_ids && params.forbidden_unit_ids.length > 0) {
+                const names = params.forbidden_unit_ids.map(id => unitsMap?.[id]?.name || id).join(" lub ");
+                conditions.push(`nie wybrano: "${names}"`);
+            }
+
+            const conditionText = conditions.join(" ORAZ ");
+
+            return `Jednostki mogą zostać rozwinięte do rozmiaru ${size} tylko jeżeli: ${conditionText}.`;
+        }
+    },
+    "unit_blocks_improvements": {
+        title: "Wykluczenie ulepszeń",
+        getDescription: (params, context) => {
+            const { unitsMap, improvements } = context || {};
+
+            const unitNames = (params.trigger_unit_ids || []).map(id =>
+                unitsMap?.[id]?.name || id
+            ).join(" lub ");
+
+            const impNames = (params.forbidden_improvement_ids || []).map(id =>
+                improvements ? (improvements[id]?.name || id) : id
+            ).join(", ");
+
+            return `Jeżeli wystawisz w pułku: "${unitNames}", nie możesz wykupić ulepszeń: "${impNames}".`;
+        }
+    },
 };

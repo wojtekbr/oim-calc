@@ -671,5 +671,56 @@ export const DIVISION_RULES_REGISTRY = {
 
             return [];
         }
-    }
+    },
+    "block_units_if_regiments_present": {
+        validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
+            const errors = [];
+            const triggerIds = params.trigger_regiment_ids || [];
+            const forbiddenUnitIds = params.forbidden_unit_ids || [];
+            const targetRegimentIds = params.target_regiment_ids || []; // Jeśli puste, dotyczy wszystkich pułków
+
+            if (triggerIds.length === 0 || forbiddenUnitIds.length === 0) return [];
+
+            // 1. Sprawdzamy, czy w dywizji jest "zapalnik" (np. regiment dragonów)
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []),
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+
+            const foundTrigger = allRegiments.find(r => r.id !== 'none' && triggerIds.includes(r.id));
+
+            if (!foundTrigger) return []; // Nie ma triggera, więc nie ma blokady
+
+            const triggerName = getRegimentDefinition(foundTrigger.id)?.name || foundTrigger.id;
+
+            // 2. Iterujemy po pułkach, żeby sprawdzić ich zawartość
+            allRegiments.forEach(reg => {
+                if (!reg.id || reg.id === 'none') return;
+
+                // Jeśli zdefiniowano konkretne pułki docelowe (target_regiment_ids), sprawdzamy tylko je
+                if (targetRegimentIds.length > 0 && !targetRegimentIds.includes(reg.id)) {
+                    return;
+                }
+
+                const regDef = getRegimentDefinition(reg.id);
+                // Używamy helpera, żeby wyciągnąć listę wszystkich jednostek wybranych w tym pułku
+                const activeUnits = collectRegimentUnits(reg.config || {}, regDef);
+
+                // Sprawdzamy czy którakolwiek z aktywnych jednostek jest na liście zakazanych
+                const illegalUnit = activeUnits.find(u => u.unitId && forbiddenUnitIds.includes(u.unitId));
+
+                if (illegalUnit) {
+                    const unitName = unitsMap[illegalUnit.unitId]?.name || illegalUnit.unitId;
+                    const regName = regDef?.name || reg.id;
+
+                    errors.push(
+                        `Błąd w pułku "${regName}": Nie możesz wystawić jednostki "${unitName}", ponieważ w dywizji znajduje się "${triggerName}".`
+                    );
+                }
+            });
+
+            return errors;
+        }
+    },
 };

@@ -23,6 +23,12 @@
         "id": "limit_max_same_regiments",
         "regiment_ids": ["mrc_dragoons"],
         "max_amount": 1
+      },
+      {
+        "id": "block_units_if_regiments_present",
+        "trigger_regiment_ids": ["mrc_dragoons"],
+        "forbidden_unit_ids": ["hre_dragoni_vet_s", "hre_dragoni_vet_m"],
+        "target_regiment_ids": ["hre_stary_reg_kirasjerow"]
       }
     ],
     "additional_units": [
@@ -95,7 +101,7 @@
       },
       {
         "id": "limit_max_same_regiments",
-        "regiment_ids": ["mrc_dragoons"],
+        "regiment_id": ["mrc_dragoons"],
         "max_amount": 1
       },
       {

@@ -85,7 +85,7 @@
     "type": "unit",
     "cost": "normal"
   },
-  "dragoons_attachment": {
+  "drilled": {
     "name": "Przeszkoleni",
     "type": "unit",
     "cost": "normal"

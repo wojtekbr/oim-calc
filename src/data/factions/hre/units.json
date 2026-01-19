@@ -84,7 +84,8 @@
     "cost": 7,
     "is_cavalry": true,
     "rank": "silver",
-    "improvement_cost": 2
+    "improvement_cost": 2,
+    "mandatory_improvements": ["veterans"]
   },
   "hre_kirasjerzy_vet_m": {
     "id": "hre_kirasjerzy_vet_m",
@@ -92,7 +93,8 @@
     "cost": 11,
     "is_cavalry": true,
     "rank": "gold",
-    "improvement_cost": 3
+    "improvement_cost": 3,
+    "mandatory_improvements": ["veterans"]
   },
   "hre_opanc_kirasjerzy_vet_s": {
     "id": "hre_opanc_kirasjerzy_vet_s",
@@ -101,7 +103,8 @@
     "pu_cost": 1,
     "is_cavalry": true,
     "rank": "silver",
-    "improvement_cost": 3
+    "improvement_cost": 3,
+    "mandatory_improvements": ["veterans"]
   },
   "hre_opanc_kirasjerzy_vet_m": {
     "id": "hre_opanc_kirasjerzy_vet_m",
@@ -110,7 +113,8 @@
     "pu_cost": 1,
     "is_cavalry": true,
     "rank": "gold",
-    "improvement_cost": 4
+    "improvement_cost": 4,
+    "mandatory_improvements": ["veterans"]
   },
   "hre_dragoni_vet_m": {
     "id": "hre_dragoni_vet_m",
@@ -119,7 +123,8 @@
     "is_cavalry": true,
     "are_dragoons": true,
     "rank": "silver",
-    "improvement_cost": 3
+    "improvement_cost": 3,
+    "mandatory_improvements": ["veterans"]
   },
   "hre_dragoni_vet_s": {
     "id": "hre_dragoni_vet_s",
@@ -135,11 +140,12 @@
     "name": "Skwadron Muszkieterów M",
     "cost": 7,
     "rank": "silver",
-    "improvement_cost": 3
+    "improvement_cost": 3,
+    "mandatory_improvements": ["veterans"]
   },
   "hre_piechota_cesarska_l": {
     "id": "hre_piechota_cesarska_l",
-    "name": "Piechota CesarskaLS",
+    "name": "Piechota Cesarska L",
     "cost": 11,
     "is_pike_and_shot": true,
     "rank": "gold",
@@ -182,5 +188,22 @@
     "rank": "silver",
     "improvement_cost": 2,
     "are_looters_insubordinate": true
+  },
+  "hre_light_artillery_s": {
+    "id": "hre_light_artillery_s",
+    "name": "Lekkie Działa S",
+    "cost": 2,
+    "is_artillery": true,
+    "rank": "bronze",
+    "improvement_cost": 2,
+    "allowed_improvements": ["veterans", "additional_ammo"]
+  },
+  "hre_medium_artillery_s": {
+    "id": "hre_medium_artillery_s",
+    "name": "Średnie Działa S",
+    "cost": 5,
+    "is_artillery": true,
+    "rank": "silver",
+    "improvement_cost": 2
   }
 }

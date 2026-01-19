@@ -306,4 +306,28 @@ export const DIVISION_RULES_DEFINITIONS = {
             return `Za każdy wystawiony pułk${vanguardText}: ${regNames}, musisz zakupić ${amount}x "${unitName}" z sekcji wsparcia.`;
         }
     },
+    "block_units_if_regiments_present": {
+        title: "Blokada jednostek",
+        getDescription: (params, context) => {
+            const { unitsMap, getRegimentDefinition } = context;
+
+            const triggerNames = (params.trigger_regiment_ids || []).map(rid => {
+                const def = getRegimentDefinition ? getRegimentDefinition(rid) : null;
+                return def ? `"${def.name}"` : rid;
+            }).join(" lub ");
+
+            const unitNames = (params.forbidden_unit_ids || []).map(uid =>
+                unitsMap?.[uid]?.name || uid
+            ).join(", ");
+
+            const targetInfo = params.target_regiment_ids
+                ? ` w pułkach: ${params.target_regiment_ids.map(rid => {
+                    const def = getRegimentDefinition ? getRegimentDefinition(rid) : null;
+                    return def ? `"${def.name}"` : rid;
+                }).join(", ")}`
+                : "";
+
+            return `Jeśli wystawisz: ${triggerNames}, nie możesz zakupić jednostek: ${unitNames}${targetInfo}.`;
+        }
+    },
 };

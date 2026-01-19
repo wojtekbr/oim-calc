@@ -126,7 +126,7 @@ export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition
                     const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
 
                     if (ruleImpl && ruleImpl.isImprovementFree) {
-                        // Zasady nadal sprawdzają po ID typu (u.unitId), bo tak są zdefiniowane (np. "dla wszystkich ordyńców")
+                        // Zasady nadal sprawdzają po ID typu (u.unitId)
                         const isFree = ruleImpl.isImprovementFree(u.unitId, impId, params, rulesUsageState[ruleIdx]);
 
                         // Ale wynik przypisujemy tylko jeśli to jest ta konkretna instancja i to konkretne ulepszenie
@@ -250,6 +250,7 @@ export const getEffectiveUnitImprovements = (unitId, currentImprovements, divisi
             if (rule.improvement_ids) candidates.push(...rule.improvement_ids);
 
             candidates.forEach(impId => {
+                // Jeśli funkcja isMandatory zwraca true, dodajemy ulepszenie
                 if (ruleImpl.isMandatory && ruleImpl.isMandatory(unitId, impId, rule, regimentId, unitsMap, divisionDefinition)) {
                     active.add(impId);
                 }
@@ -260,7 +261,6 @@ export const getEffectiveUnitImprovements = (unitId, currentImprovements, divisi
     return Array.from(active);
 };
 
-// ... (validateVanguardCost, validateAlliedCost bez zmian)
 export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
     let mainForceCost = 0;
@@ -321,4 +321,56 @@ export const validateAlliedCost = (divisionConfig, unitsMap, selectedFaction, ge
         }
     }
     return { isValid: true };
+};
+
+// --- NOWOŚĆ: Walidacja blokady jednostek przez inne pułki (block_units_if_regiments_present) ---
+export const getDivisionUnitBlockage = (unitId, regimentId, configuredDivision, divisionDefinition, unitsMap, getRegimentDefinition) => {
+    if (!divisionDefinition?.rules || !unitId || !configuredDivision) return null;
+
+    // 1. Zbieramy ID wszystkich aktywnych pułków w dywizji
+    const activeRegimentIds = new Set();
+    [
+        ...(configuredDivision.vanguard || []),
+        ...(configuredDivision.base || []),
+        ...(configuredDivision.additional || [])
+    ].forEach(r => {
+        if (r.id && r.id !== 'none') activeRegimentIds.add(r.id);
+    });
+
+    for (const rule of divisionDefinition.rules) {
+        if (rule.id === 'block_units_if_regiments_present') {
+            const {
+                trigger_regiment_ids = [],
+                forbidden_unit_ids = [],
+                target_regiment_ids = [] // Opcjonalne: jeśli puste, dotyczy wszystkich pułków
+            } = rule;
+
+            // Czy sprawdzana jednostka jest na liście zakazanych?
+            if (forbidden_unit_ids.includes(unitId)) {
+
+                // Czy jesteśmy w "targetowanym" regimencie? (Jeśli target_regiment_ids jest zdefiniowane)
+                if (target_regiment_ids.length > 0 && !target_regiment_ids.includes(regimentId)) {
+                    continue; // Ta zasada nie dotyczy tego pułku
+                }
+
+                // Czy trigger (np. regiment dragonów) jest obecny w dywizji?
+                const triggerPresent = trigger_regiment_ids.some(tid => activeRegimentIds.has(tid));
+
+                if (triggerPresent) {
+                    // Znajdź nazwę triggera dla ładnego komunikatu
+                    const triggerName = trigger_regiment_ids
+                        .filter(tid => activeRegimentIds.has(tid))
+                        .map(tid => getRegimentDefinition(tid)?.name || tid)
+                        .join(" / ");
+
+                    return {
+                        isBlocked: true,
+                        reason: `Zablokowane przez obecność pułku: ${triggerName}`
+                    };
+                }
+            }
+        }
+    }
+
+    return null;
 };
