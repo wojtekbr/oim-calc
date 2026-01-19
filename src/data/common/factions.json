@@ -20,8 +20,7 @@
   },
   "hre": {
     "name": "Święte Cesarstwo Rzymskie",
-    "dir": "hre",
-    "hidden": true
+    "dir": "hre"
   },
   "moscow": {
     "name": "Carstwo Moskiewskie",
