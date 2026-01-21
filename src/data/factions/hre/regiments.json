@@ -360,6 +360,7 @@
     "recon": 2,
     "awareness": 4,
     "activations": 2,
+    "pu_cost": 1,
     "special_rules": [
       "poslijcie_chorwatow"
     ],

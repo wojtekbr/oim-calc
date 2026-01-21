@@ -3,7 +3,7 @@ import {
     calculateRegimentStats,
     calculateMainForceKey,
     collectRegimentUnits,
-    getEffectiveUnitImprovements // <--- 1. DODANY IMPORT
+    getEffectiveUnitImprovements
 } from "../utils/armyMath";
 import { IDS, GROUP_TYPES } from "../constants";
 import { useArmyData } from "../context/ArmyDataContext";
@@ -27,19 +27,56 @@ export const useRegimentSelectorLogic = ({
         return [...(divisionArtilleryDefinitions || []), ...(additionalUnitsDefinitions || [])];
     }, [divisionArtilleryDefinitions, additionalUnitsDefinitions]);
 
-    // --- 1. Rozszerzona mapa jednostek ---
+    // --- 1. Rozszerzona mapa jednostek (NAPRAWIONA) ---
     const augmentedUnitsMap = useMemo(() => {
+        // Zaczynamy od oryginalnej mapy jednostek (z units.json)
         const newMap = { ...unitsMap };
+
         allSupportDefinitions.forEach(def => {
-            if (typeof def === 'object' && def.type === 'group' && Array.isArray(def.options)) {
+            if (!def || typeof def !== 'object') return;
+
+            // Logika wyciągania ID (identyczna jak w rulesMap)
+            let targetIds = [];
+
+            if (def.type === 'group' && def.options) {
                 def.options.forEach(opt => {
-                    if (typeof opt === 'object' && opt.id) {
-                        newMap[opt.id] = { ...opt, cost: opt.cost || opt.cost_override || 0 };
-                    }
+                    const optId = typeof opt === 'object' ? opt.id : opt;
+                    if (optId) targetIds.push({ id: optId, override: opt });
                 });
-            } else if (typeof def === 'object' && def.id && !def.type) {
-                newMap[def.id] = { ...def, cost: def.cost || def.cost_override || 0 };
+            } else {
+                let id = def.id || def.name;
+
+                // Obsługa struktury { unit1: ["id"] }
+                if (!id) {
+                    const keys = Object.keys(def);
+                    const unitArrayKey = keys.find(k => Array.isArray(def[k]) && def[k].length > 0 && typeof def[k][0] === 'string');
+                    if (unitArrayKey) {
+                        id = def[unitArrayKey][0];
+                    }
+                }
+
+                if (id) targetIds.push({ id, override: def });
             }
+
+            // Aktualizacja mapy (BEZ NADPISYWANIA ISTNIEJĄCYCH DANYCH PUSTYMI OBIEKTAMI)
+            targetIds.forEach(({ id, override }) => {
+                const originalUnit = newMap[id];
+
+                if (originalUnit) {
+                    // SCENARIUSZ A: Jednostka istnieje w units.json.
+                    // Sprawdzamy tylko, czy w divisions.json jest nadpisany koszt (cost_override)
+                    const costOverride = override.cost || override.cost_override;
+
+                    if (costOverride !== undefined) {
+                        newMap[id] = { ...originalUnit, cost: costOverride };
+                    }
+                    // W przeciwnym razie ZOSTAWIAMY ORYGINAŁ (nie nadpisujemy go strukturą slotu!)
+                } else {
+                    // SCENARIUSZ B: Jednostki nie ma w units.json (rzadki przypadek, np. generyczny wóz)
+                    // Wtedy używamy definicji z dywizji jako jedynej dostępnej
+                    newMap[id] = { ...override, id: id, name: override.name || id, cost: override.cost || 0 };
+                }
+            });
         });
         return newMap;
     }, [unitsMap, allSupportDefinitions]);
@@ -73,30 +110,52 @@ export const useRegimentSelectorLogic = ({
         return map;
     }, [configuredDivision]);
 
+    // --- 2. Mapa Zasad (Ta część działała dobrze, ale musi być spójna) ---
     const unitsRulesMap = useMemo(() => {
         const map = {};
-        allSupportDefinitions.forEach(item => {
-            if (typeof item === 'object' && (item.name || item.id) && !item.type) {
-                const key = item.name || item.id;
-                map[key] = item.assignment_rules || {};
-            } else if (typeof item === 'string') {
-                map[item] = {};
-            }
-            if (typeof item === 'object' && item.type === 'group' && Array.isArray(item.options)) {
-                item.options.forEach(opt => {
-                    if (typeof opt === 'object' && opt.id) {
-                        map[opt.id] = opt.assignment_rules || {};
-                    } else if (typeof opt === 'string') {
-                        map[opt] = {};
+        allSupportDefinitions.forEach(def => {
+            if (!def) return;
+
+            // 1. Obsługa GRUP
+            if (typeof def === 'object' && def.type === 'group' && Array.isArray(def.options)) {
+                def.options.forEach(opt => {
+                    const optId = typeof opt === 'object' ? opt.id : opt;
+                    if (optId) {
+                        const rules = (typeof opt === 'object' ? opt.assignment_rules : null) || {};
+                        map[optId] = rules;
                     }
                 });
+                return;
+            }
+
+            // 2. Obsługa prostych stringów
+            if (typeof def === 'string') {
+                map[def] = {};
+                return;
+            }
+
+            // 3. Obsługa Obiektów (Standardowe i "pułkowe")
+            if (typeof def === 'object') {
+                let targetId = def.id || def.name;
+
+                // Wyciąganie ID z formatu { unit1: ["id"] }
+                if (!targetId) {
+                    const keys = Object.keys(def);
+                    const unitArrayKey = keys.find(k => Array.isArray(def[k]) && def[k].length > 0 && typeof def[k][0] === 'string');
+                    if (unitArrayKey) {
+                        targetId = def[unitArrayKey][0];
+                    }
+                }
+
+                if (targetId) {
+                    map[targetId] = def.assignment_rules || {};
+                }
             }
         });
         return map;
     }, [allSupportDefinitions]);
 
     // --- HELPER: Czyszczenie konfiguracji pułku ze starych wpisów ---
-    // (Ta funkcja jest kluczowa dla Twojego fixu z odpinaniem jednostek)
     const cleanUpRegimentConfig = (divisionState, unitId, assignedTo) => {
         if (!assignedTo || !divisionState[assignedTo.group]) return divisionState;
 
@@ -104,7 +163,6 @@ export const useRegimentSelectorLogic = ({
         const index = assignedTo.index;
         const positionKey = assignedTo.positionKey;
 
-        // Kopia głęboka struktury pułku
         const newGroup = [...divisionState[groupKey]];
         const targetRegiment = { ...newGroup[index] };
 
@@ -140,17 +198,27 @@ export const useRegimentSelectorLogic = ({
     // --- Handlery ---
 
     const handleBuySupportUnit = (unitId, definitionIndex, currentPoints) => {
+        // Używamy augmentedUnitsMap, która teraz powinna mieć poprawne dane
         let unitDef = augmentedUnitsMap[unitId];
+
+        // Fallback (zabezpieczenie)
         if (!unitDef) {
-            const allDefs = [...(divisionDefinition.division_artillery || []), ...(divisionDefinition.additional_units || [])];
-            const groupDef = allDefs[definitionIndex];
-            if (groupDef && groupDef.options) {
-                const opt = groupDef.options.find(o => (typeof o === 'string' ? o : o.id) === unitId);
-                if (typeof opt === 'object') unitDef = opt;
-            } else if (groupDef && (groupDef.id === unitId || groupDef.name === unitId)) {
-                unitDef = groupDef;
+            const groupDef = allSupportDefinitions[definitionIndex];
+            if (groupDef) {
+                // ... (istniejąca logika fallbackowa) ...
+                if (groupDef.options) {
+                    const opt = groupDef.options.find(o => (typeof o === 'string' ? o : o.id) === unitId);
+                    if (typeof opt === 'object') unitDef = opt;
+                } else if (!groupDef.id && !groupDef.name) {
+                    const keys = Object.keys(groupDef);
+                    const unitArrayKey = keys.find(k => Array.isArray(groupDef[k]) && groupDef[k].includes(unitId));
+                    if (unitArrayKey) unitDef = groupDef;
+                } else if (groupDef.id === unitId || groupDef.name === unitId) {
+                    unitDef = groupDef;
+                }
             }
         }
+
         if (!unitDef) return;
 
         setConfiguredDivision(prev => {
@@ -187,7 +255,6 @@ export const useRegimentSelectorLogic = ({
         setConfiguredDivision(prev => {
             let nextState = { ...prev };
 
-            // Znajdź jednostki do usunięcia i wyczyść config
             const unitsToRemove = prev.supportUnits.filter(su => su.definitionIndex === definitionIndex);
             unitsToRemove.forEach(su => {
                 if (su.assignedTo) {
@@ -416,7 +483,6 @@ export const useRegimentSelectorLogic = ({
         return 0;
     }, [mainForceKey, configuredDivision]);
 
-    // --- 2. ZMODYFIKOWANA activeRegimentsList (Wyświetlanie ulepszeń) ---
     const activeRegimentsList = useMemo(() => {
         const all = [
             ...(configuredDivision.vanguard || []).map(r => ({ ...r, group: GROUP_TYPES.VANGUARD })),
@@ -435,16 +501,12 @@ export const useRegimentSelectorLogic = ({
                 const unitDef = unitsMap[unitId];
                 if (!unitDef) return;
 
-                // 2a. Pobieramy surowe ID ulepszeń (z configu lub z obiektu wsparcia)
                 const rawImps = explicitImps || (r.config.improvements || {})[key] || [];
 
-                // 2b. UŻYWAMY getEffectiveUnitImprovements, żeby połączyć zakupione z obowiązkowymi
                 const effectiveImps = getEffectiveUnitImprovements(
                     unitId,
                     rawImps,
                     divisionDefinition,
-                    // Dla wsparcia dajemy null jako regimentId, żeby pominąć walidację struktury pułku
-                    // (bo jednostki wsparcia nie są w strukturze pułku, a getEffective... może je wyciąć)
                     isSupport ? null : r.id,
                     unitsMap
                 );
@@ -465,7 +527,6 @@ export const useRegimentSelectorLogic = ({
             const assignedSupport = configuredDivision.supportUnits.filter(su => su.assignedTo?.positionKey === regimentPosKey);
             assignedSupport.forEach(su => {
                 const key = `support/${su.id}-${regimentPosKey}`;
-                // Przekazujemy su.improvements jako explicitImps
                 addUnitToList(su.id, key, true, su.improvements);
             });
 

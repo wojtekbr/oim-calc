@@ -90,6 +90,11 @@
     "type": "unit",
     "cost": "normal"
   },
+  "great_warriors": {
+    "name": "Świetni wojownicy",
+    "type": "unit",
+    "cost": "normal"
+  },
 
   "mos_prikaz_wybornych": {
     "name": "Prikaz strzelców Wybornych",

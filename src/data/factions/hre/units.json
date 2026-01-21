@@ -140,6 +140,13 @@
     "name": "Skwadron Muszkieterów M",
     "cost": 7,
     "rank": "silver",
+    "improvement_cost": 3
+  },
+  "hre_skwadron_muszkieterow_vet_m": {
+    "id": "hre_skwadron_muszkieterow_vet_m",
+    "name": "Skwadron Muszkieterów (weterani) M",
+    "cost": 7,
+    "rank": "silver",
     "improvement_cost": 3,
     "mandatory_improvements": ["veterans"]
   },

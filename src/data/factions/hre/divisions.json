@@ -31,10 +31,9 @@
         "target_regiment_ids": ["hre_stary_reg_kirasjerow"]
       },
       {
-        "id": "position_based_cost_modifier",
-        "regiment_ids": ["hre_reg_chorwatow"],
-        "group": "vanguard",
-        "pu_cost": 1
+        "id": "grant_improvements_to_specific_regiments",
+        "regiment_ids": ["hre_stary_reg_kirasjerow"],
+        "improvement_ids": ["great_warriors"]
       }
     ],
     "additional_units": [
@@ -53,7 +52,17 @@
     ],
     "division_artillery": [
       {
-        "unit1": ["hre_major_1"]
+        "unit1": ["hre_major_1"],
+        "assignment_rules": {
+          "can_be_assigned": false
+        },
+        "requirements": [
+          {
+            "type": "division_contains_any_unit",
+            "unit_ids": ["hre_light_artillery_s", "hre_medium_artillery_s"],
+            "message": "Wymagane jest posiadanie Artylerii Dywizyjnej."
+          }
+        ]
       },
       {
         "type": "group",
@@ -127,7 +136,17 @@
     ],
     "division_artillery": [
       {
-        "unit1": ["hre_major_1"]
+        "unit1": ["hre_major_1"],
+        "assignment_rules": {
+          "can_be_assigned": false
+        },
+        "requirements": [
+          {
+            "type": "division_contains_any_unit",
+            "unit_ids": ["hre_light_artillery_s", "hre_medium_artillery_s"],
+            "message": "Wymagane jest posiadanie Artylerii Dywizyjnej."
+          }
+        ]
       },
       {
         "type": "group",

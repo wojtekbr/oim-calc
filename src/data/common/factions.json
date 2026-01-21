@@ -40,8 +40,7 @@
   },
   "transilvania": {
     "name": "Siedmiogród",
-    "dir": "transilvania",
-    "hidden": true
+    "dir": "transilvania"
   },
   "najemnicy": {
     "name": "Wojska Najemne",
