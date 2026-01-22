@@ -85,7 +85,7 @@
     "type": "unit",
     "cost": "normal"
   },
-  "drilled": {
+  "well_trained": {
     "name": "Przeszkoleni",
     "type": "unit",
     "cost": "normal"
