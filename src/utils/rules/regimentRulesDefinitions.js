@@ -163,4 +163,10 @@ export const REGIMENT_RULES_DEFINITIONS = {
             return `Jeżeli wystawisz w pułku: "${unitNames}", nie możesz wykupić ulepszeń: "${impNames}".`;
         }
     },
+    "pospolite_ruszenie_1": {
+        title: "Pospolite ruszenie (1)",
+        description: "Po wystawieniu wszystkich jednostek w Pułku, należy wylosować:\n\n" +
+            "Dla wszystkich jednostek Jazdy Komitackiej w Pułku:\n• Nieustraszeni\n• Dobre Konie\n• Świetni Wojownicy\n• Dodatkowy Pistolet\n\n" +
+            "Dla wszystkich jednostek Jazdy Dymowej w Pułku:\n• Nieustraszeni\n• Dobre Konie\n• Świetni Wojownicy\n• Lepsze uzbrojenie ochronne"
+    },
 };
