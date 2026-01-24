@@ -7,7 +7,7 @@
     "name": "Generał",
     "cost": 0,
     "rank": "group",
-    "orders": 2
+    "orders": 3
   },
   "sie_zupan": {
     "id": "sie_zupan",
@@ -136,7 +136,7 @@
     "id": "sie_zaci_kopijnicy_s",
     "name": "Zaciężni Kopijnicy S",
     "cost": 7,
-    "improvement_cost": 3,
+    "improvement_cost": 2,
     "rank": "silver",
     "is_cavalry": true,
     "are_looters_insubordinate": true,
@@ -146,7 +146,7 @@
     "id": "sie_zaci_kopijnicy_m",
     "name": "Zaciężni Kopijnicy M",
     "cost": 10,
-    "improvement_cost": 4,
+    "improvement_cost": 3,
     "rank": "silver",
     "is_cavalry": true,
     "are_looters_insubordinate": true,
@@ -251,7 +251,7 @@
   "sie_bateria_dzial_m": {
     "id": "sie_bateria_dzial_m",
     "name": "Bateria dział Siedmiogrodzkich M",
-    "cost": 5,
+    "cost": 8,
     "improvement_cost": 3,
     "rank": "silver",
     "is_artillery": true
