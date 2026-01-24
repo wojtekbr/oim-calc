@@ -12,12 +12,6 @@
         "id": "generalkrigskommisarie"
       },
       {
-        "id": "wymiana_rajtarow_na_doborowy"
-      },
-      {
-        "id": "wydano_z_arsenalu_dla_najemnikow"
-      },
-      {
         "id": "limit_max_l_units_in_mercenaries"
       }
     ],
@@ -63,7 +57,8 @@
         "mrc_infantry",
         "mrc_reiters",
         "mrc_reiters",
-        "dan_reg_piechoty_krajowej"
+        "dan_reg_piechoty_krajowej",
+        "mrc_reiters_vet"
       ]
     }
   },
@@ -85,15 +80,6 @@
       },
       {
         "id": "generalkrigskommisarie"
-      },
-      {
-        "id": "wymiana_rajtarow_na_doborowy"
-      },
-      {
-        "id": "wydano_z_arsenalu_dla_najemnikow"
-      },
-      {
-        "id": "limit_max_l_units_in_mercenaries"
       }
     ],
     "additional_units": [
@@ -104,17 +90,13 @@
         }
       },
       {
-        "name": "dan_snaphannar",
-        "cost": 3
+        "name": "dan_snaphannar"
       },
       {
         "name": "dan_komisarz"
       },
       {
         "name": "dan_piechota_dunska_m",
-        "cost": 7,
-        "pu_cost": -4,
-        "special_rules": ["independent"],
         "assignment_rules": {
           "can_be_assigned": false
         }
@@ -150,7 +132,8 @@
         "mrc_dragoons",
         "mrc_infantry",
         "mrc_reiters",
-        "dan_reg_piechoty_krajowej"
+        "dan_reg_piechoty_krajowej",
+        "mrc_reiters_vet"
       ]
     }
   }

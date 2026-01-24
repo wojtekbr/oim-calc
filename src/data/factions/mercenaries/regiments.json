@@ -82,8 +82,8 @@
       }
     },
     "faction_variants": {
-      "brandenburg": {
-        "special_rules_replace": []
+      "denmark": {
+        "special_rules_replace": ["max_one_l_unit", "wydano_z_krolewskiego_arsenalu_1"]
       }
     }
   },
@@ -142,11 +142,72 @@
       "brandenburg": {
         "special_rules_add": ["roznorodne_wyposazenie"]
       },
-      "danmark": {
-        "special_rules_add": ["krolewski_arsenal"]
+      "denmark": {
+        "special_rules_add": ["wydano_z_krolewskiego_arsenalu_1"]
       }
     }
    },
+
+  "mrc_reiters_vet": {
+    "name": "Doboryowy Regiment Rajtarów Najemnych",
+    "base_cost": 5,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      { "id": "additional_pistol" }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          { "unit1": { "units": ["mrc_pulkownik"] } }
+        ],
+        "base1": [
+          { "unit1": { "units": ["mrc_reiters_mercenary_vet_s"] }, "unit2": { "units": ["mrc_reiters_mercenary_vet_m"] } }
+        ],
+        "base2": [
+          { "unit1": { "units": ["mrc_reiters_mercenary_vet_s"] }, "unit2": { "units": ["mrc_reiters_mercenary_vet_m"] }, "unit3": { "units": ["mrc_reiters_mercenary_armored_vet_s"] }, "unit4": { "units": ["mrc_reiters_mercenary_armored_vet_m"] } }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": ["mrc_major"],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          { "unit1": { "units": ["mrc_reiters_mercenary_vet_s"] } }
+        ]
+      }
+    },
+    "faction_variants": {
+      "sweden": {
+        "special_rules_add": ["szwedzki_podpulkownik"],
+        "structure_overrides": {
+          "additional": {
+            "general": [
+              {
+                "unit1": {
+                  "units": ["mrc_podpulkownik"],
+                  "mandatory": true
+                }
+              }
+            ]
+          }
+        }
+      },
+      "brandenburg": {
+        "special_rules_add": ["roznorodne_wyposazenie"]
+      },
+      "denmark": {
+        "special_rules_add": ["wydano_z_krolewskiego_arsenalu_1"]
+      }
+    }
+  },
+
   "mrc_armoured_reiters": {
     "name": "Regiment Opancerzonych Rajtarów Najemnych",
     "base_cost": 0,
@@ -202,8 +263,8 @@
       "brandenburg": {
         "special_rules_add": ["roznorodne_wyposazenie"]
       },
-      "danmark": {
-        "special_rules_add": ["krolewski_arsenal"]
+      "denmark": {
+        "special_rules_add": ["wydano_z_krolewskiego_arsenalu_1"]
       }
     }
    },
@@ -276,8 +337,8 @@
       "brandenburg": {
         "special_rules_add": ["roznorodne_wyposazenie"]
       },
-      "danmark": {
-        "special_rules_add": ["krolewski_arsenal"]
+      "denmark": {
+        "special_rules_add": ["wydano_z_krolewskiego_arsenalu_1"]
       }
     }
    }

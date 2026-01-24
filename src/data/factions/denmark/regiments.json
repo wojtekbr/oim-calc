@@ -248,7 +248,8 @@
       },
       "additional": {
         "general": [
-          { "unit1": { "units": ["dan_major"] } }
+          { "unit1": { "units": ["dan_major"],
+            "is_toggle": true } }
         ],
         "additional1": [
           {

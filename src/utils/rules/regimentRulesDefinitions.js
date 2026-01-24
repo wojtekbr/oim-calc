@@ -88,7 +88,7 @@ export const REGIMENT_RULES_DEFINITIONS = {
         }
     },
     "max_one_l_unit": {
-        title: "Ograniczenie ciężkich jednostek",
+        title: "Ograniczenie ilości jednostek L",
         description: "W składzie tego regimentu może znajdować się maksymalnie jedna jednostka o rozmiarze L."
     },
     "mos_prikaz_wybornych": {
@@ -168,5 +168,9 @@ export const REGIMENT_RULES_DEFINITIONS = {
         description: "Po wystawieniu wszystkich jednostek w Pułku, należy wylosować:\n\n" +
             "Dla wszystkich jednostek Jazdy Komitackiej w Pułku:\n• Nieustraszeni\n• Dobre Konie\n• Świetni Wojownicy\n• Dodatkowy Pistolet\n\n" +
             "Dla wszystkich jednostek Jazdy Dymowej w Pułku:\n• Nieustraszeni\n• Dobre Konie\n• Świetni Wojownicy\n• Lepsze uzbrojenie ochronne"
+    },
+    "wydano_z_krolewskiego_arsenalu_1": {
+        title: "Wydano z królewskiego arsenału (1)",
+        description: "Przed wystawieniem pułku należy wylosować jedno z darmowych Ulepszeń, które otrzymają wszystkie jednostki w tym pułku: Lepsze uzbrojenie ochronne, Broń palna dobrej jakości, Dodatkowa amunicja, Broń biała dobrej jakości."
     },
 };
