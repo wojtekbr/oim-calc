@@ -129,6 +129,10 @@ export const DIVISION_RULES_DEFINITIONS = {
     },
     "limit_max_l_units_in_mercenaries": {
         title: "Ograniczenie ilości jednostek L",
-        getDescription: () => "*W regimentach piechoty najemnej możesz wystawić max jedną Jednostkę w rozmiarze L."
+        getDescription: () => "W regimentach piechoty najemnej możesz wystawić max jedną Jednostkę w rozmiarze L."
+    },
+    "pomoc_miejscowych": {
+        title: "Pomoc miejscowych",
+        getDescription: () => "Zasada opisana w podręczniku OiM."
     }
 };
