@@ -15,8 +15,7 @@
   },
   "denmark": {
     "name": "Królestwo Danii i Norwegii",
-    "dir": "denmark",
-    "hidden": true
+    "dir": "denmark"
   },
   "hre": {
     "name": "Święte Cesarstwo Rzymskie",

@@ -9,7 +9,7 @@
         "id": "zawsze_obsadzac_wzgorza"
       },
       {
-        "id": "poruszac_sie_tylko_dobrymi_traktami_4"
+        "id": "poruszac_sie_tylko_dobrymi_traktami"
       }
     ],
     "additional_units": [
@@ -83,7 +83,7 @@
         "requirements": [
           {
             "type": "division_contains_any_regiment",
-            "regiment_ids": ["sie_sereg_wojsk_komitackich"]
+            "regiment_ids": ["sie_sereg_wojsk_komitackich", "sie_sereg_jazdy_zacieznej"]
           }
         ]
       }

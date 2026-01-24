@@ -5,19 +5,14 @@
     "recon": 4,
     "awareness": 4,
     "activations": 2,
-    "type": "cavalry",
-    "special_rules": ["dan_wydano_z_arsenalu"],
+    "special_rules": ["wydano_z_krolewskieg_arsenalu"],
     "unit_improvements": [
       {
         "id": "additional_pistol",
-        "name": "Dodatkowy Pistolet",
-        "cost": -1,
-        "min_amount": 1,
         "units_allowed": ["dan_rajtarzy_dunscy_s", "dan_rajtarzy_dunscy_m"]
       },
       {
-        "id": "additional_ammo",
-        "cost": 1
+        "id": "additional_ammo"
       }
     ],
     "structure": {
@@ -40,7 +35,9 @@
       },
       "additional": {
         "general": [
-          { "unit1": { "units": ["dan_major"] } }
+          { "unit1": { "units": ["dan_major"],
+            "is_toggle": true
+          } }
         ],
         "additional1": [
           {
@@ -60,11 +57,9 @@
     "recon": 5,
     "awareness": 5,
     "activations": 2,
-    "type": "cavalry",
     "unit_improvements": [
       {
-        "id": "additional_ammo",
-        "cost": 1
+        "id": "additional_ammo"
       }
     ],
     "structure": {
@@ -87,7 +82,8 @@
       },
       "additional": {
         "general": [
-          { "unit1": { "units": ["dan_major"] } }
+          { "unit1": { "units": ["dan_major"],
+            "is_toggle": true } }
         ],
         "additional1": [
           { 
@@ -105,18 +101,13 @@
     "recon": 4,
     "awareness": 4,
     "activations": 2,
-    "type": "cavalry",
-    "special_rules": ["dan_wydano_z_arsenalu"],
+    "special_rules": ["wydano_z_krolewskieg_arsenalu"],
     "unit_improvements": [
       {
-        "id": "additional_pistol",
-        "name": "Dodatkowy Pistolet",
-        "cost": -1,
-        "min_amount": 1
+        "id": "additional_pistol"
       },
       {
-        "id": "additional_ammo",
-        "cost": 1
+        "id": "additional_ammo"
       }
     ],
     "structure": {
@@ -146,7 +137,8 @@
       "additional": {
         "general": [
           { 
-            "unit1": { "units": ["dan_major"] } 
+            "unit1": { "units": ["dan_major"],
+              "is_toggle": true }
           }
         ],
         "additional1": [
@@ -165,22 +157,17 @@
     "recon": 3,
     "awareness": 3,
     "activations": 2,
-    "type": "infantry",
-    "special_rules": ["dan_wydano_z_arsenalu", "dan_dunscy_rekruci"],
+    "special_rules": ["wydano_z_krolewskieg_arsenalu", "dunscy_rekruci"],
     "unit_improvements": [
       {
         "id": "veterans",
-        "cost": "double",
         "max_amount": 1
       },
       {
-        "id": "additional_ammo",
-        "cost": 1
+        "id": "additional_ammo"
       },
       {
         "id": "regimental_guns",
-        "name": "Działa Regimentowe",
-        "cost": 1,
         "max_amount": 2
       }
     ],
@@ -205,7 +192,8 @@
       },
       "additional": {
         "general": [
-          { "unit1": { "units": ["dan_major"] } }
+          { "unit1": { "units": ["dan_major"],
+            "is_toggle": true } }
         ],
         "additional1": [
           { 
@@ -224,17 +212,19 @@
     "recon": 3,
     "awareness": 3,
     "activations": 2,
-    "type": "infantry",
-    "special_rules": ["dan_nieustraszeni"],
+    "special_rules": [
+      {
+        "id": "free_unit_improvement",
+        "name_override": "Nieustraszeni",
+        "improvement_ids": ["fearless"]
+      }
+    ],
     "unit_improvements": [
       {
-        "id": "additional_ammo",
-        "cost": 1
+        "id": "additional_ammo"
       },
       {
         "id": "regimental_guns",
-        "name": "Działa Regimentowe",
-        "cost": 1,
         "max_amount": 2
       }
     ],

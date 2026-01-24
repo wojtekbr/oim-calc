@@ -335,7 +335,7 @@ export const DIVISION_RULES_DEFINITIONS = {
         getDescription: () => "Efekt zwiadu Flankowanie zostaje zamienione na Obsadzanie wzgórz. Efekt działa, jeżeli w 8 calach od dowolnej podstrefy gracza znajduje się przynajmniej jedno wzgórze (wzgórze musi być w całości w 8 calach). Podczas wystawienia armii, jeden z pułków przydzielonych do podstrefy „Rezerwa” gracz może wystawić na wzgórzu. Gracz wystawia dowolną ilość grup oraz Jednostek Jazdy i Dragonów z tego pułku na wzgórzu, ale tak aby grupy i jednostki mieściły się w obrębie wzgórza. Pozostałe jednostki z tego pułku zostają wystawione w podstrefie „Rezerwa”. Jeżeli w obrębie 8 cali znajduje się więcej niż jedno wzgórze, gracz może wystawić grupy oraz Jednostek Jazdy i Dragonów z wybranego pułku też na kolejnych wzgórzach."
     },
     "poruszac_sie_tylko_dobrymi_traktami": {
-        title: "Poruszać się tylko dobrymi traktami",
+        title: "Poruszać się tylko dobrymi traktami (4)",
         getDescription: () => "Za każde D lub punkt strat (czaszka) otrzymane jako Efekt Zwiadu (ale nie w związku z Testem Ryzyka), Efekt Losowy lub Przewagę należy rzucić kostką k10. Przy każdym wyniku mniejszym/równym 5 należy odrzucić ten punkt strat/D."
     },
     "ograniczenie_dragonow_najemnych": {
@@ -345,5 +345,9 @@ export const DIVISION_RULES_DEFINITIONS = {
     "ograniczenie_piechoty_najemnej": {
         title: "Regiment Piechoty Najemnej",
         getDescription: () => "Nie może wystawić innych Jednostek niż Skwadron muszkieterów."
+    },
+    "wydano_z_krolewskieg_arsenalu": {
+        title: "Wydano z królewskiego arsenału (1)",
+        getDescription: () => "Przed wystawieniem pułku należy wylosować jedno z darmowych Ulepszeń, które otrzymają wszystkie jednostki w tym pułku: Lepsze uzbrojenie ochronne, Broń palna dobrej jakości, Dodatkowa amunicja, Broń biała dobrej jakości."
     },
 };

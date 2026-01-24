@@ -138,7 +138,9 @@
       },
       "additional": {
         "general": [
-          { "unit1": { "units": ["sie_porucznik"] } }
+          { "unit1": { "units": ["sie_porucznik"],
+            "is_toggle": true
+          } }
         ],
         "additional1": [
           {
@@ -206,6 +208,7 @@
     "recon": 0,
     "awareness": 3,
     "activations": 2,
+    "additional_supply": 4,
     "unit_improvements": [
       {
         "id": "veterans",
@@ -308,10 +311,6 @@
     "unit_improvements": [
       {
         "id": "additional_ammo"
-      },
-      {
-        "id": "veterans",
-        "max_amount": 1
       }
     ],
     "structure": {

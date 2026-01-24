@@ -7,8 +7,13 @@ export const RegimentOptionTile = ({ optId, group, isActive, onClick, getRegimen
     const name = def?.name || optId;
     const cost = def?.base_cost || 0;
 
+    // 1. Koszt PU (ujemny wpływ na pulę)
     let puCost = def?.pu_cost || def?.improvement_points_cost || 0;
 
+    // 2. Bonus PU (dodatni wpływ na pulę - additional_supply)
+    const additionalSupply = def?.additional_supply || 0;
+
+    // 3. Logika modyfikatorów kosztu PU z zasad dywizji
     if (divisionDefinition?.rules) {
         divisionDefinition.rules.forEach(rule => {
             if (rule.id === 'extra_regiment_cost' && rule.regiment_ids?.includes(optId)) {
@@ -46,8 +51,17 @@ export const RegimentOptionTile = ({ optId, group, isActive, onClick, getRegimen
                     </div>
                 )}
 
-                <div className={styles.cardCost}>
-                    Bazowo: {cost} PS {puCost > 0 ? `+ ${puCost} PU` : ''}
+                {/* --- ZMIENIONA SEKCJA KOSZTÓW I BONUSÓW --- */}
+                <div className={styles.cardCost} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                    <div>
+                        Koszt: {cost} PS {puCost > 0 ? `, ${puCost} PU` : ''}
+                    </div>
+
+                    {additionalSupply > 0 && (
+                        <div style={{ color: '#2e7d32', fontWeight: 'bold', fontSize: '0.9em' }}>
+                            Bonus: +{additionalSupply} PU
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

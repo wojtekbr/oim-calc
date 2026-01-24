@@ -90,6 +90,11 @@
     "type": "unit",
     "cost": "normal"
   },
+  "fearless": {
+    "name": "Nieustraszeni",
+    "type": "unit",
+    "cost": "normal"
+  },
   "great_warriors": {
     "name": "Świetni wojownicy",
     "type": "unit",

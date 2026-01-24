@@ -69,7 +69,6 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         if (unitDef.is_harassing) stats.recon += 1;
         if (unitDef.is_disperse) stats.recon += 1;
 
-        // --- ZMIANA: NOWA LOGIKA MOTYWACJI ---
         if (unitDef.rank === RANK_TYPES.BRONZE) {
             stats.motivation += 0.5;
         } else if (unitDef.rank === RANK_TYPES.SILVER) {
@@ -77,7 +76,6 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         } else if (unitDef.rank === RANK_TYPES.GOLD) {
             stats.motivation += 2;
         }
-        // -------------------------------------
 
         if (unitDef.orders) {
             let ordersValue = unitDef.orders;
@@ -138,10 +136,7 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         }
     }
 
-    // --- ZMIANA: ZAOKRĄGLANIE MOTYWACJI W GÓRĘ ---
-    // (przed dodaniem bonusów z zasad, które zazwyczaj są liczbami całkowitymi)
     stats.motivation = Math.ceil(stats.motivation);
-    // ---------------------------------------------
 
     const totalCombatUnits = mountedCount + footCount;
     if (totalCombatUnits > 0) {
@@ -188,6 +183,13 @@ export const calculateTotalSupplyBonus = (divisionConfig, unitsMap, getRegimentD
     allRegiments.forEach(regiment => {
         if (regiment.id === IDS.NONE) return;
         const def = getRegimentDefinition(regiment.id);
+
+        // --- NOWOŚĆ: Sprawdzenie samej definicji pułku pod kątem additional_supply ---
+        if (def && typeof def.additional_supply === 'number') {
+            supplyBonus += def.additional_supply;
+        }
+        // -----------------------------------------------------------------------------
+
         const config = regiment.config || {};
 
         const units = collectRegimentUnits(config, def);
