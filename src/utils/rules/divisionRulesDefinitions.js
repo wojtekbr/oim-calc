@@ -134,5 +134,82 @@ export const DIVISION_RULES_DEFINITIONS = {
     "pomoc_miejscowych": {
         title: "Pomoc miejscowych",
         getDescription: () => "Zasada opisana w podręczniku OiM."
-    }
+    },
+    "elektor_przyslal_swoich_poslow": {
+        title: "Elektor przysłał swoich posłów",
+        getDescription: () => "Gracz, który posiada tą zasadę, na początku bitwy otrzymuje 1VP za scenariusz. Jeżeli przynajmniej połowa pułków w dywizji zostanie złamana, gracz traci ten 1VP."
+    },
+    "wiarolomny_sojusznik": {
+        title: "Wiarołomny sojusznik",
+        getDescription: () => "Za każdy regiment pruski (rajtarów, piechoty, dragonów) który zostanie złamany, każdy dostaje dodatkowo -1 motywacji."
+    },
+    "light_medium_artillery_upgrade": {
+        title: "Ulepszenie dział",
+        getDescription: () => "Działa lekkie otrzymują darmowe ulepszenie \"Działa 4f\". Działa średnie otrzymują darmowe ulepszenie \"Działa 8f\"."
+    },
+    "limit_regiments_containing_unit": {
+        title: "Ograniczenie składu regimentów",
+        getDescription: (params, context) => {
+            const { unitsMap, getRegimentDefinition } = context;
+            const max = params.max_regiments || 1;
+
+            const unitNames = (params.unit_ids || []).map(uid =>
+                unitsMap?.[uid]?.name || uid
+            ).join(", ");
+
+            let regimentScope = "regiment";
+            if (params.target_regiment_ids && params.target_regiment_ids.length > 0) {
+                const regNames = params.target_regiment_ids.map(rid => {
+                    const def = getRegimentDefinition ? getRegimentDefinition(rid) : null;
+                    return def ? `"${def.name}"` : rid;
+                }).join(" lub ");
+                regimentScope = `regiment typu ${regNames}`;
+            }
+
+            return `Tylko ${max} ${regimentScope} może mieć w składzie: ${unitNames}.`;
+        }
+    },
+    "na_wlasnej_ziemi_3": {
+        title: "Na własnej ziemi (3)",
+        getDescription: () => "Zasada opisana w podręczniku OiM."
+    },
+    "na_wlasnej_ziemi_4": {
+        title: "Na własnej ziemi (4)",
+        getDescription: () => "Zasada opisana w podręczniku OiM."
+    },
+    "obronic_prusy_za_wszelka_cene": {
+        title: "Obronić Prusy za wszelką cenę",
+        getDescription: () => "Zasada opisana w podręczniku OiM."
+    },
+    "to_nie_nasza_wojna": {
+        title: "To nie nasza wojna",
+        getDescription: () => "Po rozstawieniu wszystkich Jednostek przez obu graczy, należy wykonać test wyszkolenia głównodowodzącego pułku. Test wykonuje się 3 kostkami, jeżeli głównodowodzący ma ####, lub 4 kostkami, jeżeli ma ###, Każda porażka oznacza, że gracz musi położyć na dowolnej jednostce w pułku jeden punkt strat (czaszka)."
+    },
+    "donnerweter": {
+        title: "Donnerweter, co to za kraj!",
+        getDescription: () => "Zwiad armii jest domyślnie pomniejszony o 2."
+    },
+    "nie_przystepuj_do_rozprawy": {
+        title: "Nie przystępuj zatem bez wielkiej ostrożności do walnej rozprawy",
+        getDescription: () => "Jeżeli Gracz Cesarski jest niebieski może wybierać tylko z scenariuszy Pieszych i Mieszanych, nawet jeżeli jego armia jest konna."
+    },
+    "grant_one_free_improvements_to_regiments": {
+        title: "Darmowe ulepszenie (1 na regiment)",
+        getDescription: (params, context) => {
+            const { getRegimentDefinition, improvements } = context;
+
+            const regIds = params?.regiment_ids || [];
+            const regNames = regIds.map(rid => {
+                const def = getRegimentDefinition ? getRegimentDefinition(rid) : null;
+                return def ? `"${def.name}"` : rid;
+            }).join(", ");
+
+            const impIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
+            const impNames = impIds.map(id =>
+                improvements ? (improvements[id]?.name || id) : id
+            ).join(", ");
+
+            return `W każdym z pułków: ${regNames}, można za darmo przydzielić jedno ulepszenie: ${impNames}.`;
+        }
+    },
 };

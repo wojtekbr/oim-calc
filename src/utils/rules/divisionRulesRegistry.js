@@ -208,6 +208,7 @@ export const DIVISION_RULES_REGISTRY = {
             return Number(discount) || 0;
         }
     },
+
     "has_any_additional_regiment": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             const count = divisionConfig.additional?.filter(r => r.id !== IDS.NONE).length || 0;
@@ -215,6 +216,7 @@ export const DIVISION_RULES_REGISTRY = {
             return ["Wymagany przynajmniej jeden pułk dodatkowy."];
         }
     },
+
     "additional_pu_points_for_units": {
         getBonus: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             const targetUnitIds = params?.unit_ids || [];
@@ -328,6 +330,7 @@ export const DIVISION_RULES_REGISTRY = {
             return errors;
         }
     },
+
     "limit_max_units": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             const constraints = params?.constraints || [];
@@ -376,6 +379,7 @@ export const DIVISION_RULES_REGISTRY = {
             return errors;
         }
     },
+
     "limit_regiments_with_improvement": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params, improvements) => {
             const targetRegimentIds = params?.regiment_ids || [];
@@ -417,6 +421,7 @@ export const DIVISION_RULES_REGISTRY = {
             return [];
         }
     },
+
     "banned_units_in_vanguard": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             const bannedUnitIds = params?.banned_unit_ids || params?.unit_ids || [];
@@ -452,6 +457,7 @@ export const DIVISION_RULES_REGISTRY = {
             return errors;
         }
     },
+
     "conditional_unit_restriction": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             const triggerRegimentId = params?.trigger_regiment_id;
@@ -494,6 +500,7 @@ export const DIVISION_RULES_REGISTRY = {
             return errors;
         }
     },
+
     "extra_regiment_cost": {
         getRegimentCostModifier: (divisionConfig, targetRegimentId, params) => {
             const targetIds = params?.regiment_ids || [];
@@ -506,6 +513,7 @@ export const DIVISION_RULES_REGISTRY = {
             return null;
         }
     },
+
     "panowie_bracia": {
         getRegimentStatsBonus: (divisionConfig, targetRegimentId, params) => {
             const countingIds = params?.counting_regiment_ids || [];
@@ -535,6 +543,7 @@ export const DIVISION_RULES_REGISTRY = {
             return null;
         }
     },
+
     "limit_units_by_size_in_regiments": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             let targetRegimentIds = params?.regiment_ids || [];
@@ -575,6 +584,7 @@ export const DIVISION_RULES_REGISTRY = {
             return errors;
         }
     },
+
     "regiment_dependency": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             const triggerId = params?.trigger_regiment_id;
@@ -610,25 +620,20 @@ export const DIVISION_RULES_REGISTRY = {
         }
     },
 
-    // --- POPRAWIONO: Sprawdza dolny ORAZ górny limit ilościowy ---
     "mandatory_support_unit_per_regiment": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             const regimentIds = params?.regiment_ids || [];
             const supportUnitId = params?.support_unit_id;
             const amountPerRegiment = params?.amount_per_regiment || 1;
-
-            // Obsługa flagi (boolean lub string "true")
             const excludeVanguard = params?.exclude_vanguard === true || params?.exclude_vanguard === "true";
 
             if (!supportUnitId || regimentIds.length === 0) return [];
 
-            // 1. Budujemy listę pułków do sprawdzenia
             let allRegiments = [
                 ...(divisionConfig.base || []),
                 ...(divisionConfig.additional || [])
             ];
 
-            // Jeśli NIE wykluczamy straży, dodajemy ją do puli
             if (!excludeVanguard) {
                 allRegiments = [
                     ...(divisionConfig.vanguard || []),
@@ -636,7 +641,6 @@ export const DIVISION_RULES_REGISTRY = {
                 ];
             }
 
-            // 2. Liczymy aktywne pułki z listy
             let regimentCount = 0;
             allRegiments.forEach(reg => {
                 if (reg.id && reg.id !== 'none' && regimentIds.includes(reg.id)) {
@@ -646,7 +650,6 @@ export const DIVISION_RULES_REGISTRY = {
 
             if (regimentCount === 0) return [];
 
-            // 3. Liczymy posiadane jednostki wsparcia tego typu
             const supportCount = (divisionConfig.supportUnits || [])
                 .filter(su => su.id === supportUnitId).length;
 
@@ -659,12 +662,10 @@ export const DIVISION_RULES_REGISTRY = {
             }).join(" lub ");
             const contextInfo = excludeVanguard ? " (poza Strażą Przednią)" : "";
 
-            // --- WALIDACJA: ZA MAŁO ---
             if (supportCount < requiredAmount) {
                 return [`Wymagana jednostka wsparcia: Posiadasz ${regimentCount} pułk(i) typu ${regNames}${contextInfo}. Musisz dokupić jeszcze ${requiredAmount - supportCount}x "${unitName}".`];
             }
 
-            // --- NOWE WALIDACJA: ZA DUŻO ---
             if (supportCount > requiredAmount) {
                 return [`Nadmiarowa jednostka wsparcia: Posiadasz ${regimentCount} pułk(i) typu ${regNames}${contextInfo}. Limit wynosi ${requiredAmount}, a posiadasz ${supportCount}x "${unitName}". Usuń nadmiarowe jednostki.`];
             }
@@ -672,16 +673,16 @@ export const DIVISION_RULES_REGISTRY = {
             return [];
         }
     },
+
     "block_units_if_regiments_present": {
         validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
             const errors = [];
             const triggerIds = params.trigger_regiment_ids || [];
             const forbiddenUnitIds = params.forbidden_unit_ids || [];
-            const targetRegimentIds = params.target_regiment_ids || []; // Jeśli puste, dotyczy wszystkich pułków
+            const targetRegimentIds = params.target_regiment_ids || [];
 
             if (triggerIds.length === 0 || forbiddenUnitIds.length === 0) return [];
 
-            // 1. Sprawdzamy, czy w dywizji jest "zapalnik" (np. regiment dragonów)
             const allRegiments = [
                 ...(divisionConfig.vanguard || []),
                 ...(divisionConfig.base || []),
@@ -690,24 +691,20 @@ export const DIVISION_RULES_REGISTRY = {
 
             const foundTrigger = allRegiments.find(r => r.id !== 'none' && triggerIds.includes(r.id));
 
-            if (!foundTrigger) return []; // Nie ma triggera, więc nie ma blokady
+            if (!foundTrigger) return [];
 
             const triggerName = getRegimentDefinition(foundTrigger.id)?.name || foundTrigger.id;
 
-            // 2. Iterujemy po pułkach, żeby sprawdzić ich zawartość
             allRegiments.forEach(reg => {
                 if (!reg.id || reg.id === 'none') return;
 
-                // Jeśli zdefiniowano konkretne pułki docelowe (target_regiment_ids), sprawdzamy tylko je
                 if (targetRegimentIds.length > 0 && !targetRegimentIds.includes(reg.id)) {
                     return;
                 }
 
                 const regDef = getRegimentDefinition(reg.id);
-                // Używamy helpera, żeby wyciągnąć listę wszystkich jednostek wybranych w tym pułku
                 const activeUnits = collectRegimentUnits(reg.config || {}, regDef);
 
-                // Sprawdzamy czy którakolwiek z aktywnych jednostek jest na liście zakazanych
                 const illegalUnit = activeUnits.find(u => u.unitId && forbiddenUnitIds.includes(u.unitId));
 
                 if (illegalUnit) {
@@ -723,6 +720,7 @@ export const DIVISION_RULES_REGISTRY = {
             return errors;
         }
     },
+
     "position_based_cost_modifier": {
         getRegimentCostModifier: (divisionConfig, targetRegimentId, params) => {
             const targetIds = params?.regiment_ids || [];
@@ -737,6 +735,113 @@ export const DIVISION_RULES_REGISTRY = {
 
             if (isPresentInGroup) {
                 return { pu: extraPu, ps: extraPs };
+            }
+            return null;
+        }
+    },
+
+    "limit_regiments_containing_unit": {
+        validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
+            const targetRegimentIds = params.target_regiment_ids || [];
+            const targetUnitIds = params.unit_ids || [];
+            const maxRegiments = params.max_regiments || 1;
+
+            if (targetUnitIds.length === 0) return [];
+
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []),
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+
+            let regimentsWithUnitCount = 0;
+
+            allRegiments.forEach(reg => {
+                if (!reg.id || reg.id === 'none') return;
+
+                if (targetRegimentIds.length > 0 && !targetRegimentIds.includes(reg.id)) {
+                    return;
+                }
+
+                const def = getRegimentDefinition(reg.id);
+                if (!def) return;
+
+                const units = collectRegimentUnits(reg.config || {}, def);
+
+                const hasTargetUnit = units.some(u => targetUnitIds.includes(u.unitId));
+
+                if (hasTargetUnit) {
+                    regimentsWithUnitCount++;
+                }
+            });
+
+            if (regimentsWithUnitCount > maxRegiments) {
+                const unitNames = targetUnitIds.map(uid => unitsMap[uid]?.name || uid).join(", ");
+                return [`Ograniczenie: Tylko ${maxRegiments} regiment(y) może/mogą posiadać w składzie jednostki: "${unitNames}". (Obecnie: ${regimentsWithUnitCount})`];
+            }
+
+            return [];
+        }
+    },
+
+    "grant_one_free_improvements_to_regiments": {
+        getInjectedImprovements: (params, regimentId) => {
+            const targetRegimentIds = params?.regiment_ids || (params?.regiment_id ? [params.regiment_id] : []) || [];
+
+            if (targetRegimentIds.includes(regimentId)) {
+                const ids = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
+                return ids.map(id => ({ id: id, max_amount: 1 }));
+            }
+            return [];
+        },
+
+        calculateDiscount: (regimentConfig, activeUnits, improvementsMap, params, regimentId, context) => {
+            const targetRegimentIds = params?.regiment_ids || (params?.regiment_id ? [params.regiment_id] : []) || [];
+            const targetImpIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
+
+            if (!targetRegimentIds.includes(regimentId) || !improvementsMap) return 0;
+
+            const { unitsMap, regimentDefinition, calculateCostFn } = context || {};
+
+            let discount = 0;
+            let usedCount = 0;
+
+            for (const unit of activeUnits) {
+                const unitImps = regimentConfig.improvements?.[unit.key] || [];
+                const matchImpId = unitImps.find(imp => targetImpIds.includes(imp));
+
+                if (matchImpId) {
+                    if (usedCount < 1) {
+                        if (calculateCostFn && unitsMap && regimentDefinition) {
+                            const cost = calculateCostFn(unitsMap[unit.unitId], matchImpId, regimentDefinition, improvementsMap);
+                            discount += cost;
+                        } else {
+                            const impDef = improvementsMap[matchImpId];
+                            const cost = Number(impDef?.cost || 0);
+                            discount += cost;
+                        }
+                        usedCount++;
+                    }
+                }
+                if (usedCount >= 1) break;
+            }
+            return Number(discount) || 0;
+        },
+
+        isImprovementFree: (unitId, impId, params, regimentId) => {
+            const targetRegimentIds = params?.regiment_ids || (params?.regiment_id ? [params.regiment_id] : []) || [];
+            const targetImpIds = params?.improvement_ids || (params?.improvement_id ? [params.improvement_id] : []) || [];
+
+            if (targetRegimentIds.includes(regimentId) && targetImpIds.includes(impId)) {
+                return true;
+            }
+            return false;
+        }
+    },
+    "donnerweter": {
+        getRegimentStatsBonus: (divisionConfig, regimentId, params, regimentInstance) => {
+            if (divisionConfig.vanguard?.includes(regimentInstance)) {
+                return { recon: -2 };
             }
             return null;
         }

@@ -84,7 +84,11 @@
     "faction_variants": {
       "denmark": {
         "special_rules_replace": ["max_one_l_unit", "wydano_z_krolewskiego_arsenalu_1"]
+      },
+      "brandenburg": {
+        "special_rules_replace": ["roznorodne_wyposazenie_2"]
       }
+
     }
   },
   "mrc_reiters": {
@@ -140,7 +144,7 @@
         }
       },
       "brandenburg": {
-        "special_rules_add": ["roznorodne_wyposazenie"]
+        "special_rules_add": ["roznorodne_wyposazenie_2"]
       },
       "denmark": {
         "special_rules_add": ["wydano_z_krolewskiego_arsenalu_1"]
@@ -200,7 +204,7 @@
         }
       },
       "brandenburg": {
-        "special_rules_add": ["roznorodne_wyposazenie"]
+        "special_rules_add": ["roznorodne_wyposazenie_2"]
       },
       "denmark": {
         "special_rules_add": ["wydano_z_krolewskiego_arsenalu_1"]
@@ -261,7 +265,7 @@
         }
       },
       "brandenburg": {
-        "special_rules_add": ["roznorodne_wyposazenie"]
+        "special_rules_add": ["roznorodne_wyposazenie_2"]
       },
       "denmark": {
         "special_rules_add": ["wydano_z_krolewskiego_arsenalu_1"]
@@ -335,7 +339,7 @@
         }
       },
       "brandenburg": {
-        "special_rules_add": ["roznorodne_wyposazenie"]
+        "special_rules_add": ["roznorodne_wyposazenie_2"]
       },
       "denmark": {
         "special_rules_add": ["wydano_z_krolewskiego_arsenalu_1"]

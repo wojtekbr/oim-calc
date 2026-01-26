@@ -67,7 +67,8 @@
     "cost": 3,
     "is_artillery": true,
     "rank": "bronze",
-    "improvement_cost": 2
+    "improvement_cost": 2,
+    "mandatory_improvements": ["four_pounders"]
   },
   "bra_medium_artillery_s": {
     "id": "swe_medium_artillery_s",
@@ -75,6 +76,7 @@
     "cost": 5,
     "is_artillery": true,
     "rank": "silver",
-    "improvement_cost": 3
+    "improvement_cost": 3,
+    "mandatory_improvements": ["eight_pounders"]
   }
 }

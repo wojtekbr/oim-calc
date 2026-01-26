@@ -27,16 +27,16 @@
         "max_amount": 1
       },
       {
-        "id": "tylko_jeden_regiment_opancerzony"
+        "id": "limit_regiments_containing_unit",
+        "target_regiment_ids": ["mrc_reiters"],
+        "unit_ids": ["mrc_reiters_mercenary_armored_s", "mrc_reiters_mercenary_armored_m"],
+        "max_regiments": 1
       },
       {
-        "id": "darmowe_ulepszenie_dzial_lekkich"
-      },
-      {
-        "id": "darmowe_ulepszenie_dzial_srednich"
-      },
-      {
-        "id": "roznorodne_wyposazenie_2"
+        "id": "limit_regiments_containing_unit",
+        "target_regiment_ids": ["mrc_infantry"],
+        "unit_ids": ["mrc_infantry_mercenary_armored_m","mrc_infantry_mercenary_armored_l"],
+        "max_regiments": 1
       }
     ],
     "additional_units": [
@@ -51,6 +51,9 @@
         "assignment_rules": {
           "can_be_assigned": false
         }
+      },
+      {
+        "id": "light_medium_artillery_upgrade"
       }
     ],
     "division_artillery": [
@@ -81,7 +84,6 @@
       "regiments_list": [
         "mrc_reiters",
         "mrc_dragoons",
-        "mrc_dragoons",
         "mrc_armoured_reiters",
         "mrc_infantry"
       ]
@@ -89,7 +91,7 @@
   },
 
   "bra_obrona_terytorialna": {
-    "name": "Obrona terytorialna (1655-60)",
+    "name": "Obrona Terytorialna (1655-60)",
     "improvement_points": 12,
     "base_cost": 12,
     "general": ["bra_general"],
@@ -98,7 +100,10 @@
         "id": "na_wlasnej_ziemi_4"
       },
       {
-        "id": "wojska_stale"
+        "id": "grant_one_free_improvements_to_regiments",
+        "name_override": "Wojska Stałe",
+        "regiment_ids": ["bra_reg_rajtarow_pruskich"],
+        "improvement_ids": ["veterans_free"]
       },
       {
         "id": "elektor_przyslal_swoich_poslow"
@@ -120,19 +125,37 @@
         "max_amount": 2
       },
       {
-        "id": "wymog_wystawienia_rajtarow_pruskich"
+        "id": "limit_regiments_containing_unit",
+        "target_regiment_ids": ["mrc_reiters"],
+        "unit_ids": ["mrc_reiters_mercenary_armored_s", "mrc_reiters_mercenary_armored_m"],
+        "max_regiments": 1
       },
       {
-        "id": "wymog_wystawienia_piechoty_pruskiej"
+        "id": "limit_regiments_containing_unit",
+        "target_regiment_ids": ["mrc_infantry"],
+        "unit_ids": ["mrc_infantry_mercenary_armored_m","mrc_infantry_mercenary_armored_l"],
+        "max_regiments": 1
       },
       {
-        "id": "darmowe_ulepszenie_dzial_lekkich"
+        "id": "min_regiments_present",
+        "requirements": [
+          {
+            "regiment_id": ["bra_reg_rajtarow_pruskich"],
+            "min_amount": 1
+          }
+        ]
       },
       {
-        "id": "darmowe_ulepszenie_dzial_srednich"
+        "id": "min_regiments_present",
+        "requirements": [
+          {
+            "regiment_id": ["bra_reg_piechoty_pruskiej"],
+            "min_amount": 1
+          }
+        ]
       },
       {
-        "id": "roznorodne_wyposazenie_2"
+        "id": "light_medium_artillery_upgrade"
       }
     ],
     "additional_units": [

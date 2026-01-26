@@ -173,4 +173,8 @@ export const REGIMENT_RULES_DEFINITIONS = {
         title: "Wydano z królewskiego arsenału (1)",
         description: "Przed wystawieniem pułku należy wylosować jedno z darmowych Ulepszeń, które otrzymają wszystkie jednostki w tym pułku: Lepsze uzbrojenie ochronne, Broń palna dobrej jakości, Dodatkowa amunicja, Broń biała dobrej jakości."
     },
+    "roznorodne_wyposazenie_2": {
+        title: "Różnorodne Wyposażenie (2)",
+        getDescription: () => "Przed wystawieniem pułku należy wylosować jedno z darmowych Ulepszeń, które otrzymają wszystkie jednostki w tym pułku: Zdyscyplinowani, Wysokie nasycenie bronią palną."
+    }
 };

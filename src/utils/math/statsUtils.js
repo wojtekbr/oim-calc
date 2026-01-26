@@ -22,6 +22,14 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     const regimentDefinition = getRegimentDefinition(regimentId);
     if (!regimentDefinition) return stats;
 
+    // --- ZMIANA: Znalezienie konkretnej instancji pułku (potrzebne do kontekstu zasad, np. donnerweter) ---
+    let currentRegimentInstance = null;
+    if (configuredDivision) {
+        const allRegiments = [ ...(configuredDivision.vanguard || []), ...(configuredDivision.base || []), ...(configuredDivision.additional || []) ];
+        currentRegimentInstance = allRegiments.find(r => r.config === regimentConfig);
+    }
+    // ------------------------------------------------------------------------------------------------------
+
     stats.cost = regimentDefinition.base_cost || 0;
     stats.recon = regimentDefinition.recon || 0;
     stats.activations = regimentDefinition.activations || 0;
@@ -109,11 +117,9 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     });
 
     if (configuredDivision && configuredDivision.supportUnits) {
-        const allRegiments = [ ...(configuredDivision.vanguard || []), ...(configuredDivision.base || []), ...(configuredDivision.additional || []) ];
-        const currentRegimentData = allRegiments.find(r => r.config === regimentConfig);
-
-        if (currentRegimentData) {
-            const positionKey = `${currentRegimentData.group}/${currentRegimentData.index}`;
+        if (currentRegimentInstance) {
+            // Używamy zidentyfikowanej instancji do znalezienia pozycji
+            const positionKey = `${currentRegimentInstance.group}/${currentRegimentInstance.index}`;
 
             configuredDivision.supportUnits
                 .filter(su => su.assignedTo?.positionKey === positionKey)
@@ -147,12 +153,21 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
 
     stats = applyRegimentRuleStats(stats, activeUnits, regimentDefinition, ruleContext);
 
+    // --- ZASADY DYWIZYJNE (Modyfikatory statystyk pułku) ---
     if (configuredDivision && configuredDivision.divisionDefinition?.rules) {
         configuredDivision.divisionDefinition.rules.forEach(rule => {
             const ruleImpl = DIVISION_RULES_REGISTRY[rule.id];
             if (ruleImpl && ruleImpl.getRegimentStatsBonus) {
-                const bonus = ruleImpl.getRegimentStatsBonus(configuredDivision, regimentId, rule);
-                if (bonus && bonus.motivation) stats.motivation += bonus.motivation;
+                // Przekazujemy currentRegimentInstance do funkcji zasad
+                const bonus = ruleImpl.getRegimentStatsBonus(configuredDivision, regimentId, rule, currentRegimentInstance);
+
+                if (bonus) {
+                    if (bonus.motivation) stats.motivation += bonus.motivation;
+                    // --- DODANO OBSŁUGĘ ZWIADU I CZUJNOŚCI ---
+                    if (bonus.recon) stats.recon += bonus.recon;
+                    if (bonus.awareness) stats.awareness += bonus.awareness;
+                    // ------------------------------------------
+                }
             }
             if (ruleImpl && ruleImpl.getRegimentCostModifier) {
                 const costMod = ruleImpl.getRegimentCostModifier(configuredDivision, regimentId, rule);
@@ -183,12 +198,9 @@ export const calculateTotalSupplyBonus = (divisionConfig, unitsMap, getRegimentD
     allRegiments.forEach(regiment => {
         if (regiment.id === IDS.NONE) return;
         const def = getRegimentDefinition(regiment.id);
-
-        // --- NOWOŚĆ: Sprawdzenie samej definicji pułku pod kątem additional_supply ---
         if (def && typeof def.additional_supply === 'number') {
             supplyBonus += def.additional_supply;
         }
-        // -----------------------------------------------------------------------------
 
         const config = regiment.config || {};
 

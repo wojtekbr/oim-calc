@@ -118,12 +118,6 @@
         "id": "limit_max_same_regiments",
         "regiment_id": ["mrc_dragoons"],
         "max_amount": 1
-      },
-      {
-        "id": "position_based_cost_modifier",
-        "regiment_ids": ["hre_reg_chorwatow"],
-        "group": "vanguard",
-        "pu_cost": 1
       }
     ],
     "additional_units": [

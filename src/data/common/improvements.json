@@ -1,4 +1,9 @@
 {
+  "veterans_free": {
+    "name": "Weterani",
+    "cost": 0,
+    "type": "unit"
+  },
   "veterans": {
     "name": "Weterani",
     "cost": "double",
@@ -98,7 +103,17 @@
   "great_warriors": {
     "name": "Świetni wojownicy",
     "type": "unit",
-    "cost": "normal"
+    "cost": 0
+  },
+  "four_pounders": {
+    "name": "Działa 4f",
+    "type": "unit",
+    "cost": 0
+  },
+  "eight_pounders": {
+    "name": "Działa 8f",
+    "type": "unit",
+    "cost": 0
   },
 
   "mos_prikaz_wybornych": {
