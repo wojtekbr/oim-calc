@@ -22,16 +22,24 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     const regimentDefinition = getRegimentDefinition(regimentId);
     if (!regimentDefinition) return stats;
 
-    // --- ZMIANA: Znalezienie konkretnej instancji pułku (potrzebne do kontekstu zasad, np. donnerweter) ---
+    // --- DEBUG LOG START ---
+    const debugLog = [];
+    const logRecon = (msg, val) => debugLog.push(`${msg}: ${val > 0 ? '+' : ''}${val}`);
+    // ----------------------
+
+    // Identyfikacja instancji (dla zasad dywizyjnych)
     let currentRegimentInstance = null;
     if (configuredDivision) {
         const allRegiments = [ ...(configuredDivision.vanguard || []), ...(configuredDivision.base || []), ...(configuredDivision.additional || []) ];
         currentRegimentInstance = allRegiments.find(r => r.config === regimentConfig);
     }
-    // ------------------------------------------------------------------------------------------------------
 
     stats.cost = regimentDefinition.base_cost || 0;
+
+    // 1. Baza zwiadu z definicji pułku
     stats.recon = regimentDefinition.recon || 0;
+    if (stats.recon !== 0) logRecon(`Baza Pułku (${regimentDefinition.name})`, stats.recon);
+
     stats.activations = regimentDefinition.activations || 0;
     stats.awareness = regimentDefinition.awareness || 0;
 
@@ -65,17 +73,17 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         }
 
         if (unitDef.is_cavalry) stats.recon += 1;
-        if (unitDef.is_light_cavalry) stats.recon += 1;
+        if (unitDef.are_dragoons) stats.recon += 1;
+        if (unitDef.are_proxy_dragoons) stats.recon += 1;
+        if (unitDef.open_order) stats.recon += 1;
+        if (unitDef.is_disperse) stats.recon += 1;
+        if (unitDef.are_scouts) stats.recon += 1;
+        if (unitDef.is_harassing) stats.recon += 1;
+        if (unitDef.are_looters_insubordinate) stats.recon -= 1;
         if (unitDef.has_lances) stats.recon -= 1;
         if (unitDef.is_pike_and_shot) stats.recon -= 1;
-        if (unitDef.are_looters_insubordinate) stats.recon -= 1;
-        if (unitDef.are_proxy_dragoons) stats.recon += 1;
-        if (unitDef.are_scouts) stats.recon += 1;
-        if (unitDef.are_dragoons) stats.recon += 1;
         if (unitDef.is_artillery) stats.recon -= 2;
         if (unitDef.are_wagons) stats.recon -= 2;
-        if (unitDef.is_harassing) stats.recon += 1;
-        if (unitDef.is_disperse) stats.recon += 1;
 
         if (unitDef.rank === RANK_TYPES.BRONZE) {
             stats.motivation += 0.5;
@@ -118,7 +126,6 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
 
     if (configuredDivision && configuredDivision.supportUnits) {
         if (currentRegimentInstance) {
-            // Używamy zidentyfikowanej instancji do znalezienia pozycji
             const positionKey = `${currentRegimentInstance.group}/${currentRegimentInstance.index}`;
 
             configuredDivision.supportUnits
@@ -151,22 +158,25 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         else { stats.regimentType = "Pieszy"; }
     }
 
+    // --- ZASTOSOWANIE ZASAD PUŁKOWYCH (modifyStats) ---
     stats = applyRegimentRuleStats(stats, activeUnits, regimentDefinition, ruleContext);
 
-    // --- ZASADY DYWIZYJNE (Modyfikatory statystyk pułku) ---
+    // Sprawdzamy czy applyRegimentRuleStats zmieniło zwiad (trudne do wykrycia bezpośrednio, ale możemy sprawdzić różnicę, jeśli zrobilibyśmy snapshot przed)
+    // Uprośćmy: w applyRegimentRuleStats nie mamy logów, więc jeśli tam się dzieje magia, zobaczymy to w wyniku końcowym.
+
+    // --- ZASADY DYWIZYJNE ---
     if (configuredDivision && configuredDivision.divisionDefinition?.rules) {
         configuredDivision.divisionDefinition.rules.forEach(rule => {
             const ruleImpl = DIVISION_RULES_REGISTRY[rule.id];
             if (ruleImpl && ruleImpl.getRegimentStatsBonus) {
-                // Przekazujemy currentRegimentInstance do funkcji zasad
                 const bonus = ruleImpl.getRegimentStatsBonus(configuredDivision, regimentId, rule, currentRegimentInstance);
-
                 if (bonus) {
                     if (bonus.motivation) stats.motivation += bonus.motivation;
-                    // --- DODANO OBSŁUGĘ ZWIADU I CZUJNOŚCI ---
-                    if (bonus.recon) stats.recon += bonus.recon;
+                    if (bonus.recon) {
+                        stats.recon += bonus.recon;
+                        logRecon(`Zasada Dywizji [${rule.id}]`, bonus.recon);
+                    }
                     if (bonus.awareness) stats.awareness += bonus.awareness;
-                    // ------------------------------------------
                 }
             }
             if (ruleImpl && ruleImpl.getRegimentCostModifier) {
@@ -175,6 +185,16 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
             }
         });
     }
+
+    // --- FINALNY LOG W KONSOLI ---
+    // Logujemy tylko jeśli zwiad > 0, żeby nie śmiecić przy pustych slotach
+    if (stats.recon !== 0 || debugLog.length > 0) {
+        console.groupCollapsed(`🔍 DEBUG ZWIADU: ${regimentDefinition.name} (Suma: ${stats.recon})`);
+        debugLog.forEach(l => console.log(l));
+        console.log("-> Wynik końcowy:", stats.recon);
+        console.groupEnd();
+    }
+    // -----------------------------
 
     return stats;
 };
