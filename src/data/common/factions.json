@@ -1,7 +1,8 @@
 {
   "brandengurd": {
     "name": "Elektorat Brandenburgii",
-    "dir": "brandenburg"
+    "dir": "brandenburg",
+    "hidden": true
   },
   "ron": {
     "name": "Rzeczpospolita Obojga Narodów",
@@ -14,7 +15,8 @@
   },
   "denmark": {
     "name": "Królestwo Danii i Norwegii",
-    "dir": "denmark"
+    "dir": "denmark",
+    "hidden": true
   },
   "hre": {
     "name": "Święte Cesarstwo Rzymskie",

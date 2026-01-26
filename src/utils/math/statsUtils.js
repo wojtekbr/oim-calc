@@ -22,10 +22,6 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     const regimentDefinition = getRegimentDefinition(regimentId);
     if (!regimentDefinition) return stats;
 
-    // --- DEBUG LOG START ---
-    const debugLog = [];
-    const logRecon = (msg, val) => debugLog.push(`${msg}: ${val > 0 ? '+' : ''}${val}`);
-    // ----------------------
 
     // Identyfikacja instancji (dla zasad dywizyjnych)
     let currentRegimentInstance = null;
@@ -38,7 +34,6 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
 
     // 1. Baza zwiadu z definicji pułku
     stats.recon = regimentDefinition.recon || 0;
-    if (stats.recon !== 0) logRecon(`Baza Pułku (${regimentDefinition.name})`, stats.recon);
 
     stats.activations = regimentDefinition.activations || 0;
     stats.awareness = regimentDefinition.awareness || 0;
@@ -174,7 +169,6 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
                     if (bonus.motivation) stats.motivation += bonus.motivation;
                     if (bonus.recon) {
                         stats.recon += bonus.recon;
-                        logRecon(`Zasada Dywizji [${rule.id}]`, bonus.recon);
                     }
                     if (bonus.awareness) stats.awareness += bonus.awareness;
                 }
@@ -185,16 +179,6 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
             }
         });
     }
-
-    // --- FINALNY LOG W KONSOLI ---
-    // Logujemy tylko jeśli zwiad > 0, żeby nie śmiecić przy pustych slotach
-    if (stats.recon !== 0 || debugLog.length > 0) {
-        console.groupCollapsed(`🔍 DEBUG ZWIADU: ${regimentDefinition.name} (Suma: ${stats.recon})`);
-        debugLog.forEach(l => console.log(l));
-        console.log("-> Wynik końcowy:", stats.recon);
-        console.groupEnd();
-    }
-    // -----------------------------
 
     return stats;
 };
