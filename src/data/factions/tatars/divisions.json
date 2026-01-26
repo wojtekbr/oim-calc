@@ -18,6 +18,12 @@
         "support_unit_id": "tat_jasyr",
         "exclude_vanguard": true,
         "amount_per_regiment": 1
+      },
+      {
+        "id": "jasyr"
+      },
+      {
+        "id": "rozlaly_sie_zagony"
       }
     ],
     "additional_units": [

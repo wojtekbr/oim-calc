@@ -4,8 +4,8 @@ import {
     canUnitTakeImprovement,
     checkIfImprovementWouldBeFree,
     checkIfImprovementIsMandatory,
-    calculateSingleImprovementIMPCost,
-    calculateEffectiveImprovementCount
+    calculateSingleImprovementIMPCost
+    // calculateEffectiveImprovementCount <--- Nie potrzebujemy już lokalnego importu
 } from "../../utils/armyMath";
 
 export const ActiveOptionConfigurationPanel = ({
@@ -30,45 +30,70 @@ export const ActiveOptionConfigurationPanel = ({
                 const positionKey = `${basePositionKey}/${uIdx}`;
                 const unitDef = unitsMap[uid];
 
-                const isGroupRank = unitDef?.rank === 'group';
+                const isGroupRank = unitDef?.rank === "group";
+                if (isGroupRank) {
+                    return (
+                        <div key={uIdx} className={styles.activeConfigRow}>
+                            <div className={styles.unitNameTitle}>
+                                {unitDef?.name || uid} (Grupa - brak ulepszeń)
+                            </div>
+                        </div>
+                    );
+                }
 
-                const validImprovements = unitLevelImprovements.filter(imp => {
-                    return canUnitTakeImprovement(unitDef, imp.id, regiment, divisionDefinition, unitsMap);
-                });
+                const currentImps = state.improvements[positionKey] || [];
+                const possibleImps = unitLevelImprovements.filter(imp =>
+                    canUnitTakeImprovement(unitDef, imp.id, regiment, divisionDefinition, unitsMap)
+                );
 
                 return (
-                    <div key={uIdx} className={styles.activeUnitRow}>
-                        <div className={styles.activeUnitHeader}>
-                            <span>{uIdx + 1}. {unitDef?.name}</span>
-                            <span className={styles.activeUnitCostLabel}>({helpers.getFinalUnitCost(uid, false)} PS)</span>
+                    <div key={uIdx} className={styles.activeConfigRow}>
+                        <div className={styles.unitNameTitle}>
+                            {unitDef?.name || uid}
                         </div>
 
-                        {!isGroupRank && (
-                            <div className={styles.cleanImprovementsContainer}>
-                                {validImprovements.length > 0 ? validImprovements.map(imp => {
-                                    const isSelected = state.improvements[positionKey]?.includes(imp.id);
+                        {possibleImps.length > 0 && (
+                            <div className={styles.impsContainer}>
+                                {possibleImps.map(imp => {
+                                    const isSelected = currentImps.includes(imp.id);
 
-                                    // FIX: Przekazujemy positionKey zamiast uid
-                                    const willBeFree = checkIfImprovementWouldBeFree(currentConfig, regiment, positionKey, imp.id, divisionDefinition, unitsMap);
+                                    // --- ZMIANA: Używamy helpera z useRegimentLogic, który liczy też support units ---
+                                    const effectiveCount = helpers.getImprovementCount(imp.id);
+                                    // ---------------------------------------------------------------------------------
 
+                                    const isLimitReached = imp.max_amount && effectiveCount >= imp.max_amount;
                                     const isMandatory = checkIfImprovementIsMandatory(uid, imp.id, divisionDefinition, regiment.id, unitsMap);
 
-                                    const cost = calculateSingleImprovementIMPCost(unitDef, imp.id, regiment, commonImprovements);
-                                    const canAfford = isSelected || willBeFree || (state.newRemainingPointsAfterLocalChanges - cost >= 0);
+                                    let cost = 0;
+                                    let willBeFree = false;
 
-                                    const effectiveCount = calculateEffectiveImprovementCount(currentConfig, regiment, imp.id, divisionDefinition, unitsMap);
-                                    const isLimitReached = imp.max_amount && effectiveCount >= imp.max_amount;
+                                    if (!isSelected) {
+                                        willBeFree = checkIfImprovementWouldBeFree(currentConfig, regiment, positionKey, imp.id, divisionDefinition, unitsMap);
+                                        if (!willBeFree) {
+                                            cost = calculateSingleImprovementIMPCost(unitDef, imp.id, regiment, commonImprovements);
+                                        }
+                                    }
 
-                                    const isDisabled = (
-                                        isMandatory ||
-                                        (!isSelected && ((isLimitReached && !willBeFree) || (!willBeFree && !canAfford)))
-                                    );
+                                    const canAfford = willBeFree || (state.newRemainingPointsAfterLocalChanges - cost >= 0);
 
-                                    let tooltip = willBeFree ? "0 PU (Darmowe)" : `${cost} PU`;
-                                    if (isMandatory) tooltip = "0 PU (Obowiązkowe z zasad dywizji)";
-                                    else if (!isSelected) {
-                                        if (isLimitReached && !willBeFree) tooltip += " (Limit osiągnięty)";
-                                        else if (!willBeFree && !canAfford) tooltip += " (Brak punktów)";
+                                    // Disable logic:
+                                    // 1. Mandatory -> disabled (can't remove)
+                                    // 2. Limit reached -> disabled (can't add more), unless currently selected (can remove)
+                                    // 3. Can't afford -> disabled (can't add)
+                                    let isDisabled = false;
+                                    let tooltip = "";
+
+                                    if (isMandatory) {
+                                        isDisabled = true;
+                                        tooltip = "Ulepszenie obowiązkowe";
+                                    } else if (!isSelected) {
+                                        if (isLimitReached) {
+                                            isDisabled = true;
+                                            tooltip = `Osiągnięto limit: ${imp.max_amount}`;
+                                        } else if (!canAfford) {
+                                            isDisabled = true;
+                                            tooltip = "Brak wystarczających punktów ulepszeń";
+                                        }
                                     }
 
                                     const commonDef = commonImprovements[imp.id];
@@ -86,10 +111,11 @@ export const ActiveOptionConfigurationPanel = ({
                                             {isMandatory && " 🔒"}
                                         </button>
                                     );
-                                }) : (
-                                    <span className={styles.emptyImprovements}>Brak dostępnych ulepszeń</span>
-                                )}
+                                })}
                             </div>
+                        )}
+                        {possibleImps.length === 0 && (
+                            <div className={styles.emptyImprovements}>Brak dostępnych ulepszeń</div>
                         )}
                     </div>
                 );

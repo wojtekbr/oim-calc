@@ -12,6 +12,7 @@ import {
     calculateImprovementPointsCost,
     calculateTotalSupplyBonus
 } from "../utils/armyMath";
+import { getDivisionUnitBlockage } from "../utils/math/validationUtils";
 import { calculateRuleBonuses, checkSupportUnitRequirements } from "../utils/divisionRules";
 import { DIVISION_RULES_REGISTRY } from "../utils/divisionRules";
 import { validateRegimentRules } from "../utils/regimentRules";
@@ -33,17 +34,6 @@ export const useRegimentLogic = ({
 
     const divisionDefinition = propDivisionDefinition || regiment.divisionDefinition || {};
 
-    const structure = regiment.structure || {};
-    const base = structure.base || {};
-    const additional = structure.additional || {};
-
-    const currentConfig = configuredDivision?.[regimentGroup]?.[regimentIndex]?.config || {};
-    const customCostDefinition = additional?.unit_custom_cost;
-    const customCostSlotName = customCostDefinition?.[0]?.depends_on;
-
-    const unitLevelImprovements = regiment.unit_improvements || [];
-    const regimentLevelImprovements = regiment.regiment_improvements || [];
-
     // --- 1. Zidentyfikowanie przypisanych jednostek wsparcia ---
     const assignedSupportUnits = useMemo(() => {
         const regimentPositionKey = `${regimentGroup}/${regimentIndex}`;
@@ -51,10 +41,51 @@ export const useRegimentLogic = ({
             .filter(su => su.assignedTo?.positionKey === regimentPositionKey);
     }, [configuredDivision.supportUnits, regimentGroup, regimentIndex]);
 
-    // --- 2. Agregacja dostępnych ulepszeń (Unit Level) ---
+    // --- 2. Inicjalizacja Stanu ---
+    const currentConfig = configuredDivision?.[regimentGroup]?.[regimentIndex]?.config || {};
+
+    const [baseSelections, setBaseSelections] = useState(() => (currentConfig.baseSelections || {}));
+    const [additionalSelections, setAdditionalSelections] = useState(() => (currentConfig.additionalSelections || {}));
+    const [additionalEnabled, setAdditionalEnabled] = useState(() => !!currentConfig.additionalEnabled || false);
+    const [optionalEnabled, setOptionalEnabled] = useState(() => (currentConfig.optionalEnabled || {}));
+    const [optionalSelections, setOptionalSelections] = useState(() => (currentConfig.optionalSelections || {}));
+    const [selectedAdditionalCustom, setSelectedAdditionalCustom] = useState(currentConfig.additionalCustom || null);
+
+    const [improvements, setImprovements] = useState(() => {
+        const initImps = { ...(currentConfig.improvements || {}) };
+        assignedSupportUnits.forEach(su => {
+            const key = `support/${su.id}-${su.assignedTo.positionKey}/0`;
+            if (su.improvements && su.improvements.length > 0) {
+                if (!initImps[key]) {
+                    initImps[key] = [...su.improvements];
+                }
+            }
+        });
+        return initImps;
+    });
+
+    const [regimentImprovements, setRegimentImprovements] = useState(currentConfig.regimentImprovements || []);
+    const [regimentDefinition, setRegimentDefinition] = useState(null);
+
+    useEffect(() => {
+        const def = getRegimentDefinition(regiment.id, faction?.meta?.key);
+        setRegimentDefinition(def);
+    }, [regiment.id, faction, getRegimentDefinition]);
+
+    const structure = regimentDefinition?.structure || {};
+    const activeStructure = regimentDefinition?.structure || regiment.structure || {};
+    const base = activeStructure.base || {};
+    const additional = activeStructure.additional || {};
+    const customCostDefinition = activeStructure.additional?.unit_custom_cost;
+    const customCostSlotName = customCostDefinition?.[0]?.depends_on;
+
+    const unitLevelImprovements = regimentDefinition?.unit_improvements || regiment.unit_improvements || [];
+
+    // --- 3. Agregacja dostępnych ulepszeń (Unit Level) ---
     const effectiveUnitLevelImprovements = useMemo(() => {
         const combined = [...unitLevelImprovements];
         const extraIds = new Set();
+        const extraOverrides = {};
 
         if (divisionDefinition?.rules) {
             divisionDefinition.rules.forEach(rule => {
@@ -63,9 +94,18 @@ export const useRegimentLogic = ({
                 if (ruleImpl) {
                     if (typeof ruleImpl.getInjectedImprovements === 'function') {
                         const injected = ruleImpl.getInjectedImprovements(rule, regiment.id);
-                        if (Array.isArray(injected)) injected.forEach(id => extraIds.add(id));
+                        if (Array.isArray(injected)) {
+                            injected.forEach(item => {
+                                const id = typeof item === 'object' ? item.id : item;
+                                extraIds.add(id);
+                                if (typeof item === 'object') {
+                                    extraOverrides[id] = { ...extraOverrides[id], ...item };
+                                }
+                            });
+                        }
                         handledByRegistry = true;
-                    } else if (ruleImpl.injectedImprovements) {
+                    }
+                    else if (ruleImpl.injectedImprovements) {
                         ruleImpl.injectedImprovements.forEach(id => extraIds.add(id));
                         handledByRegistry = true;
                     }
@@ -79,8 +119,15 @@ export const useRegimentLogic = ({
             });
         }
 
-        const tempConfig = currentConfig;
-        const activeUnits = collectRegimentUnits(tempConfig, regiment);
+        const tempConfig = {
+            baseSelections, additionalSelections, additionalEnabled,
+            optionalEnabled, optionalSelections, additionalCustom: selectedAdditionalCustom,
+            improvements, regimentImprovements
+        };
+
+        const defToUse = regimentDefinition || regiment;
+        const activeUnits = collectRegimentUnits(tempConfig, defToUse);
+
         const supportUnitsToCheck = assignedSupportUnits.map(su => ({ unitId: su.id }));
         const allUnitsToCheck = [...activeUnits, ...supportUnitsToCheck];
 
@@ -90,43 +137,56 @@ export const useRegimentLogic = ({
                 unitDef.mandatory_improvements.forEach(id => extraIds.add(id));
             }
             if (u.structureMandatory) {
-                u.structureMandatory.forEach(id => extraIds.add(id));
+                if (Array.isArray(u.structureMandatory)) {
+                    u.structureMandatory.forEach(id => extraIds.add(id));
+                } else {
+                    extraIds.add(u.structureMandatory);
+                }
             }
         });
 
         extraIds.forEach(extraId => {
             if (!combined.find(def => def.id === extraId)) {
-                combined.push({ id: extraId });
+                const override = extraOverrides[extraId] || {};
+                const commonDef = commonImprovements[extraId];
+                if (commonDef) {
+                    combined.push({
+                        ...commonDef,
+                        ...override,
+                        id: extraId,
+                        max_amount: override.max_amount !== undefined ? override.max_amount : commonDef.max_amount
+                    });
+                } else {
+                    combined.push({ id: extraId, ...override });
+                }
             }
         });
 
         return combined;
-    }, [unitLevelImprovements, divisionDefinition, regiment.id, currentConfig, assignedSupportUnits, unitsMap]);
+    }, [
+        unitLevelImprovements,
+        divisionDefinition,
+        regiment.id,
+        baseSelections, additionalSelections, additionalEnabled, optionalSelections, selectedAdditionalCustom, improvements, regimentImprovements,
+        assignedSupportUnits,
+        unitsMap,
+        regimentDefinition,
+        regiment,
+        commonImprovements
+    ]);
 
-    // --- 3. Inicjalizacja Stanu ---
-    const [baseSelections, setBaseSelections] = useState(() => (currentConfig.baseSelections || {}));
-    const [additionalSelections, setAdditionalSelections] = useState(() => (currentConfig.additionalSelections || {}));
-    const [additionalEnabled, setAdditionalEnabled] = useState(() => !!currentConfig.additionalEnabled || false);
-    const [optionalEnabled, setOptionalEnabled] = useState(() => (currentConfig.optionalEnabled || {}));
-    const [optionalSelections, setOptionalSelections] = useState(() => (currentConfig.optionalSelections || {}));
-    const [selectedAdditionalCustom, setSelectedAdditionalCustom] = useState(currentConfig.additionalCustom || null);
-
-    // Inicjalizacja improvements z uwzględnieniem support units
-    const [improvements, setImprovements] = useState(() => {
-        const initImps = { ...(currentConfig.improvements || {}) };
-
-        assignedSupportUnits.forEach(su => {
-            const key = `support/${su.id}-${su.assignedTo.positionKey}/0`;
-            if (su.improvements && su.improvements.length > 0) {
-                if (!initImps[key]) {
-                    initImps[key] = [...su.improvements];
-                }
-            }
+    const regimentLevelImprovements = useMemo(() => {
+        const def = regimentDefinition || regiment;
+        return (def.regiment_improvements || []).map(imp => {
+            const commonDef = commonImprovements[imp.id];
+            return {
+                ...commonDef,
+                ...imp,
+                type: 'regiment'
+            };
         });
-        return initImps;
-    });
+    }, [regimentDefinition, regiment, commonImprovements]);
 
-    const [regimentImprovements, setRegimentImprovements] = useState(currentConfig.regimentImprovements || []);
 
     const getUnitName = (id) => unitsMap?.[id]?.name || id;
     const getUnitCost = (id) => unitsMap?.[id]?.cost || 0;
@@ -142,7 +202,7 @@ export const useRegimentLogic = ({
 
     const groupKeys = (obj) => (obj && typeof obj === "object" ? Object.keys(obj) : []);
 
-    // Init Selections
+    // Init Selections Logic
     useEffect(() => {
         const initForGroup = (groupObj, prevSelections = {}) => {
             const out = { ...prevSelections };
@@ -169,8 +229,12 @@ export const useRegimentLogic = ({
             return out;
         };
 
-        setBaseSelections(initForGroup(base, currentConfig.baseSelections || {}));
-        setAdditionalSelections(initForGroup(additional, currentConfig.additionalSelections || {}));
+        const activeStruct = regimentDefinition?.structure || regiment.structure || {};
+        const activeBase = activeStruct.base || {};
+        const activeAdditional = activeStruct.additional || {};
+
+        setBaseSelections(initForGroup(activeBase, currentConfig.baseSelections || {}));
+        setAdditionalSelections(initForGroup(activeAdditional, currentConfig.additionalSelections || {}));
 
         const optSelInit = { ...(currentConfig.optionalSelections || {}) };
         const optEnabledInit = { ...(currentConfig.optionalEnabled || {}) };
@@ -196,13 +260,13 @@ export const useRegimentLogic = ({
                 if (optEnabledInit[key] === undefined) optEnabledInit[key] = !!currentConfig.optionalEnabled?.[key] || false;
             }
         }
-        initOptionalGroup(GROUP_TYPES.BASE, base);
-        initOptionalGroup(GROUP_TYPES.ADDITIONAL, additional);
+        initOptionalGroup(GROUP_TYPES.BASE, activeBase);
+        initOptionalGroup(GROUP_TYPES.ADDITIONAL, activeAdditional);
         setOptionalSelections(optSelInit);
         setOptionalEnabled(optEnabledInit);
         setAdditionalEnabled(!!currentConfig.additionalEnabled);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [regiment.id, structure]);
+    }, [regiment.id, regimentDefinition]);
 
     // Mandatory Improvements Effect
     useEffect(() => {
@@ -210,7 +274,8 @@ export const useRegimentLogic = ({
             baseSelections, additionalSelections, additionalCustom: selectedAdditionalCustom,
             additionalEnabled, optionalEnabled, optionalSelections
         };
-        const activeUnits = collectRegimentUnits(tempConfig, regiment);
+        const defToUse = regimentDefinition || regiment;
+        const activeUnits = collectRegimentUnits(tempConfig, defToUse);
         const supportUnitsToCheck = assignedSupportUnits.map(su => ({
             unitId: su.id,
             key: `support/${su.id}-${su.assignedTo.positionKey}/0`
@@ -240,7 +305,7 @@ export const useRegimentLogic = ({
         });
         if (hasChanges) setImprovements(nextImprovements);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [baseSelections, additionalSelections, additionalEnabled, optionalSelections, optionalEnabled, selectedAdditionalCustom, regiment.id, divisionDefinition, effectiveUnitLevelImprovements, assignedSupportUnits]);
+    }, [baseSelections, additionalSelections, additionalEnabled, optionalSelections, optionalEnabled, selectedAdditionalCustom, regiment.id, divisionDefinition, effectiveUnitLevelImprovements, assignedSupportUnits, regimentDefinition]);
 
     const hasAdditionalBaseSelection = useMemo(() => {
         return Object.entries(additionalSelections).some(([key, arr]) => {
@@ -281,11 +346,76 @@ export const useRegimentLogic = ({
     const totalCost = stats.cost;
 
     const regimentRuleErrors = useMemo(() => {
-        const activeUnits = collectRegimentUnits(currentLocalConfig, regiment);
-        return validateRegimentRules(activeUnits, regiment, { regimentConfig: currentLocalConfig, unitsMap });
-    }, [currentLocalConfig, regiment, unitsMap]);
+        const defToUse = regimentDefinition || regiment;
+        const activeUnits = collectRegimentUnits(currentLocalConfig, defToUse);
 
-    // --- 4. Ręczne obliczanie kosztu (FIXED: Poprawne argumenty funkcji) ---
+        const internalErrors = validateRegimentRules(activeUnits, regiment, {
+            regimentConfig: currentLocalConfig,
+            unitsMap,
+            divisionDefinition,
+            regimentDefinition: defToUse,
+            checkIfImprovementIsMandatory,
+            improvements: commonImprovements
+        }) || [];
+
+        const divisionBlockingErrors = [];
+        activeUnits.forEach(u => {
+            if (u.unitId && u.unitId !== IDS.NONE) {
+                const blockage = getDivisionUnitBlockage(
+                    u.unitId,
+                    regiment.id,
+                    configuredDivision,
+                    divisionDefinition,
+                    unitsMap,
+                    getRegimentDefinition
+                );
+                if (blockage && blockage.isBlocked) {
+                    divisionBlockingErrors.push(blockage.reason);
+                }
+            }
+        });
+
+        const allErrors = [...internalErrors, ...divisionBlockingErrors];
+        return [...new Set(allErrors)];
+
+    }, [currentLocalConfig, regiment, unitsMap, divisionDefinition, commonImprovements, configuredDivision, getRegimentDefinition, regimentDefinition]);
+
+    // --- HELPER OBLICZAJĄCY UŻYCIE ULEPSZEŃ (WŁĄCZNIE ZE WSPARCIEM) ---
+    const getImprovementCount = (impId) => {
+        const defToUse = regimentDefinition || regiment;
+        // 1. Policz wewnątrz pułku
+        const countInRegiment = calculateEffectiveImprovementCount(currentLocalConfig, defToUse, impId, divisionDefinition, unitsMap);
+
+        // 2. Policz w jednostkach wsparcia przypisanych do tego pułku
+        let countInSupport = 0;
+        assignedSupportUnits.forEach(su => {
+            const key = `support/${su.id}-${su.assignedTo.positionKey}/0`;
+            const imps = improvements[key] || [];
+
+            if (imps.includes(impId)) {
+                const isMandatorySup = checkIfImprovementIsMandatory(su.id, impId, divisionDefinition, regiment.id, unitsMap);
+                let isFreeSup = false;
+
+                // Sprawdzenie czy jest darmowe z zasad (nie liczy się do limitu)
+                if (!isMandatorySup && divisionDefinition?.rules) {
+                    divisionDefinition.rules.forEach(rule => {
+                        const impl = DIVISION_RULES_REGISTRY[rule.id];
+                        if (impl?.isImprovementFree && impl.isImprovementFree(su.id, impId, rule, regiment.id, unitsMap, divisionDefinition)) {
+                            isFreeSup = true;
+                        }
+                    });
+                }
+
+                // Jeśli nie jest wymuszone i nie jest darmowe, to wlicza się do limitu
+                if (!isMandatorySup && !isFreeSup) {
+                    countInSupport++;
+                }
+            }
+        });
+
+        return countInRegiment + countInSupport;
+    };
+
     const newRemainingPointsAfterLocalChanges = useMemo(() => {
         if (remainingImprovementPoints === undefined) return 0;
         const totalDivisionLimit = divisionDefinition.improvement_points || 0;
@@ -293,7 +423,6 @@ export const useRegimentLogic = ({
         const tmp = JSON.parse(JSON.stringify(configuredDivision));
         tmp[regimentGroup][regimentIndex].config = currentLocalConfig;
 
-        // Czyszczenie ulepszeń w kopii, aby uniknąć podwójnego naliczania przez główny kalkulator
         if (tmp.supportUnits) {
             tmp.supportUnits.forEach(su => {
                 if (su.assignedTo?.positionKey === `${regimentGroup}/${regimentIndex}`) {
@@ -302,16 +431,14 @@ export const useRegimentLogic = ({
             });
         }
 
-        // Koszt standardowy (Pułk + reszta dywizji)
         const totalUsedWithLocalChanges = calculateImprovementPointsCost(tmp, unitsMap, getRegimentDefinition, commonImprovements);
 
-        // Ręczne obliczanie kosztu ulepszeń jednostek wsparcia z lokalnego stanu
         let manualSupportCost = 0;
         assignedSupportUnits.forEach(su => {
             const key = `support/${su.id}-${su.assignedTo.positionKey}/0`;
             const imps = improvements[key];
             if (Array.isArray(imps)) {
-                const unitDef = unitsMap[su.id]; // <--- POBIERAMY OBIEKT JEDNOSTKI
+                const unitDef = unitsMap[su.id];
 
                 imps.forEach(impId => {
                     const isMandatory = checkIfImprovementIsMandatory(
@@ -322,14 +449,13 @@ export const useRegimentLogic = ({
                         unitsMap
                     );
 
-                    if (isMandatory) return; // Koszt 0
+                    if (isMandatory) return;
 
                     if (unitDef) {
-                        // FIX: Używamy poprawnych argumentów z costUtils.js: (unitDef, impId, regimentDefinition, commonImprovements)
                         const cost = calculateSingleImprovementIMPCost(
                             unitDef,
                             impId,
-                            regiment, // props.regiment działa tutaj jako regimentDefinition
+                            regiment,
                             commonImprovements
                         );
                         manualSupportCost += cost;
@@ -346,6 +472,17 @@ export const useRegimentLogic = ({
 
     }, [currentLocalConfig, configuredDivision, assignedSupportUnits, divisionDefinition, remainingImprovementPoints, regimentGroup, regimentIndex, unitsMap, getRegimentDefinition, commonImprovements, improvements, regiment]);
 
+    const checkUnitBlockage = (unitId) => {
+        if (!unitId || unitId === IDS.NONE) return null;
+        return getDivisionUnitBlockage(
+            unitId,
+            regiment.id,
+            configuredDivision,
+            divisionDefinition,
+            unitsMap,
+            getRegimentDefinition
+        );
+    };
 
     // --- Handlers ---
 
@@ -362,8 +499,10 @@ export const useRegimentLogic = ({
         }
 
         const isDeselecting = currentSelection === optionKey;
-        const groupDef = type === GROUP_TYPES.BASE ? base : additional;
-        const pod = groupDef[groupKey]?.[index];
+
+        const activeStruct = regimentDefinition?.structure || regiment.structure || {};
+        const groupDef = type === GROUP_TYPES.BASE ? activeStruct.base : activeStruct.additional;
+        const pod = groupDef?.[groupKey]?.[index];
         const optionDef = pod?.[optionKey];
         const isToggleable = !!optionDef?.is_toggle;
 
@@ -458,34 +597,8 @@ export const useRegimentLogic = ({
         const canTake = canUnitTakeImprovement(unitDef, impId, regiment, divisionDefinition, unitsMap);
         if (!canTake) return;
 
-        const regImpDef = effectiveUnitLevelImprovements.find(i => i.id === impId);
-        const isAdding = !isRemoving;
-
-        if (isAdding && regImpDef?.max_amount) {
-            const nextImprovements = { ...improvements };
-            const nextList = [...(nextImprovements[positionKey] || []), impId];
-            nextImprovements[positionKey] = nextList;
-
-            const nextConfig = { ...currentLocalConfig, improvements: nextImprovements };
-
-            const countInRegiment = calculateEffectiveImprovementCount(nextConfig, regiment, impId, divisionDefinition, unitsMap);
-
-            let countInSupport = 0;
-            assignedSupportUnits.forEach(su => {
-                const key = `support/${su.id}-${su.assignedTo.positionKey}/0`;
-                const imps = nextImprovements[key] || [];
-                if (imps.includes(impId)) {
-                    countInSupport += 1;
-                }
-            });
-
-            const totalEffectiveCount = countInRegiment + countInSupport;
-
-            if (totalEffectiveCount > regImpDef.max_amount) {
-                alert(`Osiągnięto limit ulepszeń "${impId}" w tym pułku (${regImpDef.max_amount}).`);
-                return;
-            }
-        }
+        // --- USUNIĘTO ALERT I WALIDACJĘ BLOKUJĄCĄ TUTAJ ---
+        // Walidacja "max_amount" odbywa się teraz w ActiveOptionConfigurationPanel (disabling button)
 
         setImprovements((prev) => {
             const cur = Array.isArray(prev[positionKey]) ? [...prev[positionKey]] : [];
@@ -573,7 +686,9 @@ export const useRegimentLogic = ({
             return;
         }
 
-        const activeUnits = collectRegimentUnits(currentLocalConfig, regiment);
+        // Walidacja końcowa limitów (na wszelki wypadek)
+        const defToUse = regimentDefinition || regiment;
+        const activeUnits = collectRegimentUnits(currentLocalConfig, defToUse);
         const usedImprovements = new Set();
 
         activeUnits.forEach(u => {
@@ -587,16 +702,8 @@ export const useRegimentLogic = ({
         for (const impId of usedImprovements) {
             const regImpDef = effectiveUnitLevelImprovements.find(i => i.id === impId);
             if (regImpDef?.max_amount) {
-                const countInRegiment = calculateEffectiveImprovementCount(currentLocalConfig, regiment, impId, divisionDefinition, unitsMap);
-
-                let countInSupport = 0;
-                assignedSupportUnits.forEach(su => {
-                    const key = `support/${su.id}-${su.assignedTo.positionKey}/0`;
-                    const imps = improvements[key] || [];
-                    if (imps.includes(impId)) countInSupport++;
-                });
-
-                const totalEffectiveCount = countInRegiment + countInSupport;
+                // Używamy nowego helpera
+                const totalEffectiveCount = getImprovementCount(impId);
 
                 if (totalEffectiveCount > regImpDef.max_amount) {
                     const commonDef = commonImprovements[impId];
@@ -693,6 +800,12 @@ export const useRegimentLogic = ({
             saveAndGoBack,
             onBack
         },
-        helpers: { getUnitName, getFinalUnitCost, groupKeys }
+        helpers: {
+            getUnitName,
+            getFinalUnitCost,
+            groupKeys,
+            checkUnitBlockage,
+            getImprovementCount
+        }
     };
 };

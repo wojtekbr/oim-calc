@@ -88,7 +88,7 @@ export const REGIMENT_RULES_DEFINITIONS = {
         }
     },
     "max_one_l_unit": {
-        title: "Ograniczenie ciężkich jednostek",
+        title: "Ograniczenie ilości jednostek L",
         description: "W składzie tego regimentu może znajdować się maksymalnie jedna jednostka o rozmiarze L."
     },
     "mos_prikaz_wybornych": {
@@ -119,4 +119,62 @@ export const REGIMENT_RULES_DEFINITIONS = {
             "motywacji (wystawiając 4 takie Pułki motywacja wzrośnie o 2). " +
             "Tracąc jeden z tych Pułków, motywacja każdego z nich spada o 2 a nie o 1."
     },
+    "restricted_unit_size": {
+        title: "Ograniczenie rozmiaru jednostek",
+        getDescription: (params, context) => {
+            const { unitsMap } = context || {};
+            const size = (params?.target_size || "?").toUpperCase();
+            
+            let subject = "Jednostki";
+            if (params?.unit_ids && params.unit_ids.length > 0) {
+                const names = params.unit_ids.map(id => unitsMap?.[id]?.name || id).join(", ");
+                subject = `Jednostki: "${names}"`;
+            }
+
+            const conditions = [];
+
+            if (params?.requires_level_1) {
+                conditions.push("Regiment ma wykupiony Poziom I");
+            }
+
+            if (params?.forbidden_unit_ids && params.forbidden_unit_ids.length > 0) {
+                const names = params.forbidden_unit_ids.map(id => unitsMap?.[id]?.name || id).join(" lub ");
+                conditions.push(`nie wybrano: "${names}"`);
+            }
+
+            const conditionText = conditions.join(" ORAZ ");
+
+            return `${subject} mogą zostać rozwinięte do rozmiaru ${size} tylko jeżeli: ${conditionText}.`;
+        }
+    },
+    "unit_blocks_improvements": {
+        title: "Wykluczenie ulepszeń",
+        getDescription: (params, context) => {
+            const { unitsMap, improvements } = context || {};
+
+            const unitNames = (params.trigger_unit_ids || []).map(id =>
+                unitsMap?.[id]?.name || id
+            ).join(" lub ");
+
+            const impNames = (params.forbidden_improvement_ids || []).map(id =>
+                improvements ? (improvements[id]?.name || id) : id
+            ).join(", ");
+
+            return `Jeżeli wystawisz w pułku: "${unitNames}", nie możesz wykupić ulepszeń: "${impNames}".`;
+        }
+    },
+    "pospolite_ruszenie_1": {
+        title: "Pospolite ruszenie (1)",
+        description: "Po wystawieniu wszystkich jednostek w Pułku, należy wylosować:\n\n" +
+            "Dla wszystkich jednostek Jazdy Komitackiej w Pułku:\n• Nieustraszeni\n• Dobre Konie\n• Świetni Wojownicy\n• Dodatkowy Pistolet\n\n" +
+            "Dla wszystkich jednostek Jazdy Dymowej w Pułku:\n• Nieustraszeni\n• Dobre Konie\n• Świetni Wojownicy\n• Lepsze uzbrojenie ochronne"
+    },
+    "wydano_z_krolewskiego_arsenalu_1": {
+        title: "Wydano z królewskiego arsenału (1)",
+        description: "Przed wystawieniem pułku należy wylosować jedno z darmowych Ulepszeń, które otrzymają wszystkie jednostki w tym pułku: Lepsze uzbrojenie ochronne, Broń palna dobrej jakości, Dodatkowa amunicja, Broń biała dobrej jakości."
+    },
+    "roznorodne_wyposazenie_2": {
+        title: "Różnorodne Wyposażenie (2)",
+        getDescription: () => "Przed wystawieniem pułku należy wylosować jedno z darmowych Ulepszeń, które otrzymają wszystkie jednostki w tym pułku: Zdyscyplinowani, Wysokie nasycenie bronią palną."
+    }
 };

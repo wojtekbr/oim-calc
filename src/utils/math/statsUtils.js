@@ -1,11 +1,17 @@
 import { IDS, GROUP_TYPES, RANK_TYPES } from "../../constants";
-import { DIVISION_RULES_REGISTRY } from "../divisionRules";
+import { DIVISION_RULES_REGISTRY } from "../rules/divisionRulesRegistry";
 import { applyRegimentRuleStats, applyRegimentRuleCosts } from "../regimentRules";
 import { collectRegimentUnits } from "./structureUtils";
 import { calculateSingleImprovementArmyCost } from "./costUtils";
 import { getEffectiveUnitImprovements } from "./validationUtils";
 
-// ... (isRegimentAllied i calculateRegimentStats bez zmian - zakładam, że masz wersję z poprzedniego kroku)
+export const isRegimentAllied = (regId, selectedFaction, getRegimentDefinition) => {
+    if (!selectedFaction || !selectedFaction.regiments) return false;
+    if (selectedFaction.regiments[regId]) return false;
+    const def = getRegimentDefinition(regId);
+    if (def && def._sourceFaction === 'mercenaries') return false;
+    return true;
+};
 
 export const calculateRegimentStats = (regimentConfig, regimentId, configuredDivision, unitsMap, getRegimentDefinition, commonImprovements, faction = null) => {
     let stats = {
@@ -16,13 +22,24 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     const regimentDefinition = getRegimentDefinition(regimentId);
     if (!regimentDefinition) return stats;
 
+
+    // Identyfikacja instancji (dla zasad dywizyjnych)
+    let currentRegimentInstance = null;
+    if (configuredDivision) {
+        const allRegiments = [ ...(configuredDivision.vanguard || []), ...(configuredDivision.base || []), ...(configuredDivision.additional || []) ];
+        currentRegimentInstance = allRegiments.find(r => r.config === regimentConfig);
+    }
+
     stats.cost = regimentDefinition.base_cost || 0;
+
+    // 1. Baza zwiadu z definicji pułku
     stats.recon = regimentDefinition.recon || 0;
+
     stats.activations = regimentDefinition.activations || 0;
     stats.awareness = regimentDefinition.awareness || 0;
 
     const isAllied = faction ? isRegimentAllied(regimentId, faction, getRegimentDefinition) : false;
-    const ruleContext = { isAllied, unitsMap, improvements: commonImprovements, regimentConfig }; // Dodano regimentConfig do kontekstu
+    const ruleContext = { isAllied, unitsMap, improvements: commonImprovements, regimentConfig };
 
     stats.cost = applyRegimentRuleCosts(stats.cost, regimentDefinition, ruleContext);
 
@@ -51,20 +68,25 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         }
 
         if (unitDef.is_cavalry) stats.recon += 1;
-        if (unitDef.is_light_cavalry) stats.recon += 1;
+        if (unitDef.are_dragoons) stats.recon += 1;
+        if (unitDef.are_proxy_dragoons) stats.recon += 1;
+        if (unitDef.open_order) stats.recon += 1;
+        if (unitDef.is_disperse) stats.recon += 1;
+        if (unitDef.are_scouts) stats.recon += 1;
+        if (unitDef.is_harassing) stats.recon += 1;
+        if (unitDef.are_looters_insubordinate) stats.recon -= 1;
         if (unitDef.has_lances) stats.recon -= 1;
         if (unitDef.is_pike_and_shot) stats.recon -= 1;
-        if (unitDef.are_looters_insubordinate) stats.recon -= 1;
-        if (unitDef.are_proxy_dragoons) stats.recon += 1;
-        if (unitDef.are_scouts) stats.recon += 1;
-        if (unitDef.are_dragoons) stats.recon += 1;
         if (unitDef.is_artillery) stats.recon -= 2;
         if (unitDef.are_wagons) stats.recon -= 2;
-        if (unitDef.is_harassing) stats.recon += 1;
-        if (unitDef.is_disperse) stats.recon += 1;
 
-        if (unitDef.rank === RANK_TYPES.BRONZE || unitDef.rank === RANK_TYPES.SILVER) stats.motivation += 1;
-        else if (unitDef.rank === RANK_TYPES.GOLD) stats.motivation += 2;
+        if (unitDef.rank === RANK_TYPES.BRONZE) {
+            stats.motivation += 0.5;
+        } else if (unitDef.rank === RANK_TYPES.SILVER) {
+            stats.motivation += 1;
+        } else if (unitDef.rank === RANK_TYPES.GOLD) {
+            stats.motivation += 2;
+        }
 
         if (unitDef.orders) {
             let ordersValue = unitDef.orders;
@@ -98,11 +120,8 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     });
 
     if (configuredDivision && configuredDivision.supportUnits) {
-        const allRegiments = [ ...(configuredDivision.vanguard || []), ...(configuredDivision.base || []), ...(configuredDivision.additional || []) ];
-        const currentRegimentData = allRegiments.find(r => r.config === regimentConfig);
-
-        if (currentRegimentData) {
-            const positionKey = `${currentRegimentData.group}/${currentRegimentData.index}`;
+        if (currentRegimentInstance) {
+            const positionKey = `${currentRegimentInstance.group}/${currentRegimentInstance.index}`;
 
             configuredDivision.supportUnits
                 .filter(su => su.assignedTo?.positionKey === positionKey)
@@ -125,6 +144,8 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         }
     }
 
+    stats.motivation = Math.ceil(stats.motivation);
+
     const totalCombatUnits = mountedCount + footCount;
     if (totalCombatUnits > 0) {
         if (footCount === 0) { stats.regimentType = "Konny"; }
@@ -132,14 +153,25 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
         else { stats.regimentType = "Pieszy"; }
     }
 
+    // --- ZASTOSOWANIE ZASAD PUŁKOWYCH (modifyStats) ---
     stats = applyRegimentRuleStats(stats, activeUnits, regimentDefinition, ruleContext);
 
+    // Sprawdzamy czy applyRegimentRuleStats zmieniło zwiad (trudne do wykrycia bezpośrednio, ale możemy sprawdzić różnicę, jeśli zrobilibyśmy snapshot przed)
+    // Uprośćmy: w applyRegimentRuleStats nie mamy logów, więc jeśli tam się dzieje magia, zobaczymy to w wyniku końcowym.
+
+    // --- ZASADY DYWIZYJNE ---
     if (configuredDivision && configuredDivision.divisionDefinition?.rules) {
         configuredDivision.divisionDefinition.rules.forEach(rule => {
             const ruleImpl = DIVISION_RULES_REGISTRY[rule.id];
             if (ruleImpl && ruleImpl.getRegimentStatsBonus) {
-                const bonus = ruleImpl.getRegimentStatsBonus(configuredDivision, regimentId, rule);
-                if (bonus && bonus.motivation) stats.motivation += bonus.motivation;
+                const bonus = ruleImpl.getRegimentStatsBonus(configuredDivision, regimentId, rule, currentRegimentInstance);
+                if (bonus) {
+                    if (bonus.motivation) stats.motivation += bonus.motivation;
+                    if (bonus.recon) {
+                        stats.recon += bonus.recon;
+                    }
+                    if (bonus.awareness) stats.awareness += bonus.awareness;
+                }
             }
             if (ruleImpl && ruleImpl.getRegimentCostModifier) {
                 const costMod = ruleImpl.getRegimentCostModifier(configuredDivision, regimentId, rule);
@@ -151,7 +183,6 @@ export const calculateRegimentStats = (regimentConfig, regimentId, configuredDiv
     return stats;
 };
 
-// ZMIANA: calculateTotalSupplyBonus teraz sprawdza też division_pu_bonus w ulepszeniach pułku
 export const calculateTotalSupplyBonus = (divisionConfig, unitsMap, getRegimentDefinition, commonImprovements) => {
     if (!unitsMap || !divisionConfig) return 0;
     let supplyBonus = 0;
@@ -171,13 +202,15 @@ export const calculateTotalSupplyBonus = (divisionConfig, unitsMap, getRegimentD
     allRegiments.forEach(regiment => {
         if (regiment.id === IDS.NONE) return;
         const def = getRegimentDefinition(regiment.id);
+        if (def && typeof def.additional_supply === 'number') {
+            supplyBonus += def.additional_supply;
+        }
+
         const config = regiment.config || {};
 
-        // 1. Sprawdzamy jednostki
         const units = collectRegimentUnits(config, def);
         units.forEach(u => checkUnit(u.unitId));
 
-        // 2. NOWOŚĆ: Sprawdzamy ulepszenia pułkowe (np. Białocerkiewski +4 PU)
         if (config.regimentImprovements && commonImprovements) {
             config.regimentImprovements.forEach(impId => {
                 const impDef = commonImprovements[impId];
@@ -193,16 +226,6 @@ export const calculateTotalSupplyBonus = (divisionConfig, unitsMap, getRegimentD
     }
 
     return supplyBonus;
-};
-
-// ... (calculateDivisionCost, calculateDivisionType, isRegimentAllied, calculateMainForceKey bez zmian)
-// Upewnij się, że isRegimentAllied jest wyeksportowane jak poprzednio
-export const isRegimentAllied = (regId, selectedFaction, getRegimentDefinition) => {
-    if (!selectedFaction || !selectedFaction.regiments) return false;
-    if (selectedFaction.regiments[regId]) return false;
-    const def = getRegimentDefinition(regId);
-    if (def && def._sourceFaction === 'mercenaries') return false;
-    return true;
 };
 
 export const calculateDivisionCost = (configuredDivision, unitsMap, getRegimentDefinition, commonImprovements) => {

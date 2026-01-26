@@ -14,14 +14,14 @@
     "name": "Wojewoda (utalentowany)",
     "cost": 0,
     "rank": "group",
-    "orders": 4
+    "orders": 3
   },
   "mos_wojewoda_koneksje": {
     "id": "mos_wojewoda_koneksje",
     "name": "Wojewoda (z koneksjami +8PU)",
     "cost": 0,
     "rank": "group",
-    "orders": 3,
+    "orders": 2,
     "additional_supply": 8
   },
   "mos_pulkownik": {
@@ -227,7 +227,8 @@
     "cost": 2,
     "is_artillery": true,
     "rank": "bronze",
-    "improvement_cost": 2
+    "improvement_cost": 2,
+    "allowed_improvements": ["veterans", "additional_ammo"]
   },
   "mos_lekkie_dziala_m": {
     "id": "mos_lekkie_dziala_m",
@@ -235,7 +236,8 @@
     "cost": 4,
     "is_artillery": true,
     "rank": "silver",
-    "improvement_cost": 3
+    "improvement_cost": 3,
+    "allowed_improvements": ["veterans"]
   },
   "mos_srednie_dziala_s": {
     "id": "mos_srednie_dziala_s",

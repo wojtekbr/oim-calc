@@ -23,6 +23,17 @@
         "id": "limit_max_same_regiments",
         "regiment_ids": ["mrc_dragoons"],
         "max_amount": 1
+      },
+      {
+        "id": "block_units_if_regiments_present",
+        "trigger_regiment_ids": ["mrc_dragoons"],
+        "forbidden_unit_ids": ["hre_dragoni_vet_s", "hre_dragoni_vet_m"],
+        "target_regiment_ids": ["hre_stary_reg_kirasjerow"]
+      },
+      {
+        "id": "grant_improvements_to_specific_regiments",
+        "regiment_ids": ["hre_stary_reg_kirasjerow"],
+        "improvement_ids": ["great_warriors"]
       }
     ],
     "additional_units": [
@@ -41,7 +52,17 @@
     ],
     "division_artillery": [
       {
-        "unit1": ["hre_major_1"]
+        "unit1": ["hre_major_1"],
+        "assignment_rules": {
+          "can_be_assigned": false
+        },
+        "requirements": [
+          {
+            "type": "division_contains_any_unit",
+            "unit_ids": ["hre_light_artillery_s", "hre_medium_artillery_s"],
+            "message": "Wymagane jest posiadanie Artylerii Dywizyjnej."
+          }
+        ]
       },
       {
         "type": "group",
@@ -86,8 +107,8 @@
   },
   "hre_dywizja_na_granicy_z_turcja": {
     "name": "Dywizja na granicy z Turcją (1663-64)",
-    "improvement_points": 10,
-    "base_cost": 2,
+    "improvement_points": 12,
+    "base_cost": 8,
     "general": ["hre_general"],
     "rules": [
       { 
@@ -95,12 +116,7 @@
       },
       {
         "id": "limit_max_same_regiments",
-        "regiment_ids": ["mrc_dragoons"],
-        "max_amount": 1
-      },
-      {
-        "id": "limit_max_same_regiments",
-        "regiment_ids": ["hre_reg_chorwatow"],
+        "regiment_id": ["mrc_dragoons"],
         "max_amount": 1
       }
     ],
@@ -114,7 +130,17 @@
     ],
     "division_artillery": [
       {
-        "unit1": ["hre_major_1"]
+        "unit1": ["hre_major_1"],
+        "assignment_rules": {
+          "can_be_assigned": false
+        },
+        "requirements": [
+          {
+            "type": "division_contains_any_unit",
+            "unit_ids": ["hre_light_artillery_s", "hre_medium_artillery_s"],
+            "message": "Wymagane jest posiadanie Artylerii Dywizyjnej."
+          }
+        ]
       },
       {
         "type": "group",

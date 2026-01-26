@@ -6,7 +6,12 @@
     "awareness": 4,
     "activations": 3,
     "special_rules": [
-      "swietni_wojownicy"
+      "swietni_wojownicy",
+      {
+        "id": "restricted_unit_size",
+        "target_size": "m",
+        "requires_level_1": true
+      }
     ],
     "unit_improvements": [
       {
@@ -145,6 +150,13 @@
         ]
       }
     ],
+    "special_rules": [
+      {
+        "id": "restricted_unit_size",
+        "target_size": "m",
+        "requires_level_1": true
+      }
+    ],
     "structure": {
       "base": {
         "general": [
@@ -229,7 +241,18 @@
     "awareness": 3,
     "activations": 2,
     "special_rules": [
-      "restrykcja_dziala_lekkie"
+      "restrykcja_dziala_lekkie",
+      {
+        "id": "restricted_unit_size",
+        "target_size": "l",
+        "requires_level_1": true,
+        "forbidden_unit_ids": ["hre_muszkieterzy_komenderowani_s"]
+      },
+      {
+        "id": "unit_blocks_improvements",
+        "trigger_unit_ids": ["hre_muszkieterzy_komenderowani_s"],
+        "forbidden_improvement_ids": ["veterans"]
+      }
     ],
     "unit_improvements": [
       {
@@ -337,6 +360,7 @@
     "recon": 2,
     "awareness": 4,
     "activations": 2,
+    "pu_cost": 1,
     "special_rules": [
       "poslijcie_chorwatow"
     ],
@@ -421,7 +445,12 @@
     "awareness": 4,
     "activations": 3,
     "special_rules": [
-      "hre_kirasjerzy_limit_poziom"
+      {
+        "id": "restricted_unit_size",
+        "target_size": "m",
+        "requires_level_1": true,
+        "unit_ids": ["hre_kirasjerzy_m"]
+      }
     ],
     "unit_improvements": [
       {

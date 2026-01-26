@@ -35,14 +35,14 @@ export default function RegimentSelector(props) {
     const { improvements } = useArmyData();
     const [showRules, setShowRules] = useState(false);
 
-    // --- 1. Filtrowanie TABORU (dla sekcji zakupów na dole - bez zmian) ---
+    // --- 1. Filtrowanie TABORU ---
     const taborDefinitions = divisionArtilleryDefinitions.filter(item => {
         const nameToCheck = item.type === 'group' ? item.name : (typeof item === 'string' ? item : item.name);
         return nameToCheck && nameToCheck.toLowerCase().includes("tabor");
     });
     const standardArtilleryDefinitions = divisionArtilleryDefinitions.filter(item => !taborDefinitions.includes(item));
 
-    // --- 2. Podział KUPIONYCH jednostek (dla SummaryCard) ---
+    // --- 2. Podział KUPIONYCH jednostek ---
     const artDefsCount = divisionArtilleryDefinitions.length;
     const unassignedSupport = configuredDivision.supportUnits.filter(su => !su.assignedTo);
 
@@ -162,10 +162,9 @@ export default function RegimentSelector(props) {
                         {purchasedInstances.map(instance => {
                             const realUnitDef = state.unitsMap[instance.id];
 
-                            // FIX: Tutaj przekazujemy zapisane ulepszenia z instancji!
                             const instanceEffectiveImps = getEffectiveUnitImprovements(
                                 instance.id,
-                                instance.improvements || [], // <--- POPRAWKA: Przekazujemy zapisane ulepszenia
+                                instance.improvements || [],
                                 divisionDefinition,
                                 null,
                                 state.unitsMap
@@ -191,6 +190,7 @@ export default function RegimentSelector(props) {
                                     getRegimentDefinition={getRegimentDefinition}
                                     effectiveImprovements={instanceEffectiveImps}
                                     improvementsMap={improvements}
+                                    unitsMap={state.unitsMap}
                                 />
                             );
                         })}
@@ -221,14 +221,31 @@ export default function RegimentSelector(props) {
                     getRegimentDefinition={getRegimentDefinition}
                     effectiveImprovements={previewEffectiveImps}
                     improvementsMap={improvements}
+                    unitsMap={state.unitsMap}
                 />
             );
         };
 
         if (typeof item === 'string' || (typeof item === 'object' && !item.type)) {
-            const unitId = typeof item === 'string' ? item : (item.name || item.id);
-            return renderTile(unitId);
+            // FIX: Rozszerzona logika wyciągania ID
+            // Obsługuje string, obiekt z 'id', 'name' ORAZ obiekt typu { unit1: ["id"] }
+            let unitId = typeof item === 'string' ? item : (item.name || item.id);
+
+            if (!unitId && typeof item === 'object') {
+                const keys = Object.keys(item);
+                // Szukamy klucza, który ma wartość tablicową (np. unit1, options, etc.)
+                const podKey = keys.find(k => Array.isArray(item[k]) && item[k].length > 0);
+                if (podKey) {
+                    unitId = item[podKey][0];
+                }
+            }
+
+            // Jeśli nadal null, to znaczy że dane są błędne, ale zapobiegamy crashowi
+            if (unitId) {
+                return renderTile(unitId);
+            }
         }
+
         if (typeof item === 'object' && item.type === 'group') {
             return (
                 <div key={idx} className={styles.supportGroupContainer}>

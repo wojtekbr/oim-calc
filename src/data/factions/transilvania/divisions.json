@@ -9,7 +9,7 @@
         "id": "zawsze_obsadzac_wzgorza"
       },
       {
-        "id": "poruszac_sie_tylko_dobrymi_traktami_4"
+        "id": "poruszac_sie_tylko_dobrymi_traktami"
       }
     ],
     "additional_units": [
@@ -51,7 +51,7 @@
     }
   },
   "sie_obleznicza": {
-    "name": "Dywizja oblężnicza",
+    "name": "Dywizja Oblężnicza",
     "improvement_points": 12,
     "base_cost": 8,
     "general": ["sie_general"],
@@ -60,7 +60,13 @@
         "id": "zawsze_obsadzac_wzgorza"
       },
       {
-        "id": "poruszac_sie_tylko_dobrymi_traktami_4"
+        "id": "poruszac_sie_tylko_dobrymi_traktami"
+      },
+      {
+        "id": "ograniczenie_dragonow_najemnych"
+      },
+      {
+        "id": "ograniczenie_piechoty_najemnej"
       }
     ],
     "additional_units": [
@@ -77,7 +83,7 @@
         "requirements": [
           {
             "type": "division_contains_any_regiment",
-            "regiment_ids": ["sie_sereg_wojsk_komitackich"]
+            "regiment_ids": ["sie_sereg_wojsk_komitackich", "sie_sereg_jazdy_zacieznej"]
           }
         ]
       }
@@ -95,7 +101,7 @@
       }
     ],
     "vanguard": [
-      { "options": ["mrc_dragoons"] }
+      { "options": ["mrc_dragoons_tra"] }
     ],
     "base": [
       { "options": ["sie_sereg_piechoty_miejskiej"] },
@@ -106,7 +112,7 @@
       "max_amount": 2,
       "regiments_list": [
         "sie_sereg_semenow",
-        "mrc_infantry",
+        "mrc_infantry_tra",
         "sie_sereg_piechoty_miejskiej",
         "sie_sereg_jazdy_zacieznej",
         "sie_sereg_wojsk_komitackich"

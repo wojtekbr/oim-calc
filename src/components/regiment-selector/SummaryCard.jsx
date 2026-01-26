@@ -26,6 +26,16 @@ export const SummaryCard = ({
     const hasArtillery = unassignedArtillery && unassignedArtillery.length > 0;
     const hasAdditional = unassignedAdditional && unassignedAdditional.length > 0;
 
+    // --- LOGIKA ZWIADU I CZUJNOŚCI ---
+    // Pobieramy pułk będący strażą przednią
+    const vanguardRegiment = activeRegimentsList.find(r => r.isVanguard);
+
+    // Statystyki są już obliczone w activeRegimentsList (przez calculateRegimentStats w rodzicu),
+    // więc uwzględniają już modyfikatory z zasad specjalnych pułku (np. Chłopscy Szpiedzy).
+    const divisionRecon = vanguardRegiment ? vanguardRegiment.stats.recon : 0;
+    const divisionAwareness = vanguardRegiment ? vanguardRegiment.stats.awareness : 0;
+    // ---------------------------------
+
     // Funkcja renderująca grupę wsparcia jako "Pułk"
     const renderSummaryGroup = (title, units, titleColor) => {
         const totalCost = units.reduce((acc, u) => acc + (unitsMap[u.id]?.cost || 0), 0);
@@ -45,7 +55,7 @@ export const SummaryCard = ({
                     {units.map((u, i) => {
                         const uDef = unitsMap[u.id];
 
-                        // --- NOWOŚĆ: Obliczanie ulepszeń dla nieprzypisanych jednostek ---
+                        // Obliczanie ulepszeń dla nieprzypisanych jednostek
                         let effectiveImps = [];
                         if (getEffectiveUnitImprovements) {
                             effectiveImps = getEffectiveUnitImprovements(
@@ -88,10 +98,14 @@ export const SummaryCard = ({
             {/* --- HEADER KARTY --- */}
             <div className={styles.summaryHeader}>
                 <div>
-                    <div className={styles.summaryTitle}>{divisionDefinition?.name} ({totalDivisionCost} PS)</div>
-                    <div className={styles.summarySubtitle}>
-                        Typ: <strong>{divisionType}</strong> • Koszt bazowy: {divisionBaseCost} PS
+                    {/* ZMIANA FORMATOWANIA NAGŁÓWKA */}
+                    <div className={styles.summaryTitle}>
+                        {divisionDefinition?.name} <span style={{fontSize: '0.7em', fontWeight: 'normal'}}>(Koszt bazowy: {divisionBaseCost} PS)</span>
                     </div>
+                    <div className={styles.summarySubtitle}>
+                        Typ: <strong>{divisionType}</strong> • Koszt: <strong>{totalDivisionCost} PS</strong> • Zwiad: <strong>{divisionRecon}</strong> • Czujność: <strong>{divisionAwareness}</strong>
+                    </div>
+
                     {rulesDescriptions.length > 0 && (
                         <button className={styles.rulesToggleBtn} onClick={() => setShowRules(!showRules)}>
                             {showRules ? '▼ Ukryj zasady specjalne' : '▶ Pokaż zasady specjalne'}

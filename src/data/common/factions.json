@@ -20,8 +20,7 @@
   },
   "hre": {
     "name": "Święte Cesarstwo Rzymskie",
-    "dir": "hre",
-    "hidden": true
+    "dir": "hre"
   },
   "moscow": {
     "name": "Carstwo Moskiewskie",
@@ -41,8 +40,7 @@
   },
   "transilvania": {
     "name": "Siedmiogród",
-    "dir": "transilvania",
-    "hidden": true
+    "dir": "transilvania"
   },
   "najemnicy": {
     "name": "Wojska Najemne",

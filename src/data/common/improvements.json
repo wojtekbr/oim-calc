@@ -1,4 +1,9 @@
 {
+  "veterans_free": {
+    "name": "Weterani",
+    "cost": 0,
+    "type": "unit"
+  },
   "veterans": {
     "name": "Weterani",
     "cost": "double",
@@ -85,10 +90,30 @@
     "type": "unit",
     "cost": "normal"
   },
-  "dragoons_attachment": {
+  "well_trained": {
     "name": "Przeszkoleni",
     "type": "unit",
     "cost": "normal"
+  },
+  "fearless": {
+    "name": "Nieustraszeni",
+    "type": "unit",
+    "cost": "normal"
+  },
+  "great_warriors": {
+    "name": "Świetni wojownicy",
+    "type": "unit",
+    "cost": 0
+  },
+  "four_pounders": {
+    "name": "Działa 4f",
+    "type": "unit",
+    "cost": 0
+  },
+  "eight_pounders": {
+    "name": "Działa 8f",
+    "type": "unit",
+    "cost": 0
   },
 
   "mos_prikaz_wybornych": {

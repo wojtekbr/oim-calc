@@ -106,6 +106,24 @@
     "rank": "silver",
     "is_cavalry": true
   },
+  "mrc_reiters_mercenary_vet_s": {
+    "id": "mrc_reiters_mercenary_vet_s",
+    "name": "Rajtarzy najemni (weterani) S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "rank": "silver",
+    "is_cavalry": true,
+    "mandatory_improvements": ["veterans"]
+  },
+  "mrc_reiters_mercenary_vet_m": {
+    "id": "mrc_reiters_mercenary_vet_m",
+    "name": "Rajtarzy najemni (weterani) M",
+    "cost": 9,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true,
+    "mandatory_improvements": ["veterans"]
+  },
     "mrc_reiters_mercenary_armored_s": {
     "id": "mrc_reiters_mercenary_armored_s",
     "name": "Opancerzeni Rajtarzy Najemni S",
@@ -122,5 +140,24 @@
     "improvement_cost": 4,
     "rank": "gold",
     "is_cavalry": true
-  }  
+  },
+    "mrc_reiters_mercenary_armored_vet_s": {
+    "id": "mrc_reiters_mercenary_armored_vet_s",
+    "name": "Opancerzeni Rajtarzy Najemni (weterani) S",
+    "cost": 7,
+    "improvement_cost": 3,
+    "rank": "silver",
+    "is_cavalry": true,
+      "mandatory_improvements": ["veterans"]
+  },
+  "mrc_reiters_mercenary_armored_vet_m": {
+    "id": "mrc_reiters_mercenary_armored_vet_m",
+    "name": "Opancerzeni Rajtarzy Najemni (weterani) M",
+    "cost": 10,
+    "improvement_points_cost": 1,
+    "improvement_cost": 4,
+    "rank": "gold",
+    "is_cavalry": true,
+    "mandatory_improvements": ["veterans"]
+  }
 }

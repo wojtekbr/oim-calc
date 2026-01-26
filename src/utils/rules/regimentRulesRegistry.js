@@ -196,5 +196,101 @@ export const REGIMENT_RULES_REGISTRY = {
             }
             return null;
         }
-    }
+    },
+   "restricted_unit_size": {
+        name: "Ograniczenie rozmiaru jednostek",
+        validate: (activeUnits, params, context) => {
+            const { regimentConfig, unitsMap } = context || {};
+
+            const targetSize = (params.target_size || "").toLowerCase(); // np. "l" lub "m"
+            const suffix = `_${targetSize}`;
+            const specificUnits = params.unit_ids || []; 
+            
+            const hasTargetSizeUnit = activeUnits.some(u => {
+                if (!u.unitId || !u.unitId.toLowerCase().endsWith(suffix)) return false;
+
+                if (specificUnits.length > 0 && !specificUnits.includes(u.unitId)) {
+                    return false;
+                }
+                return true;
+            });
+
+            if (!hasTargetSizeUnit) return null;
+
+            if (params.requires_level_1 && !regimentConfig?.additionalEnabled) {
+                const subject = specificUnits.length > 0 ? "Wymienione jednostki" : "Jednostki";
+                return `Ograniczenie Rozmiaru: ${subject} mogą zostać rozwinięte do rozmiaru ${targetSize.toUpperCase()} tylko jeżeli Regiment ma wykupiony Poziom I.`;
+            }
+
+            if (params.forbidden_unit_ids && Array.isArray(params.forbidden_unit_ids)) {
+                const foundForbidden = activeUnits.find(u => params.forbidden_unit_ids.includes(u.unitId));
+
+                if (foundForbidden) {
+                    const forbiddenName = unitsMap?.[foundForbidden.unitId]?.name || foundForbidden.unitId;
+                    const subject = specificUnits.length > 0 ? "Wymienionych jednostek" : "jednostek";
+                    return `Ograniczenie Rozmiaru: Nie można wystawić ${subject} w rozmiarze ${targetSize.toUpperCase()}, ponieważ w pułku znajdują się: "${forbiddenName}".`;
+                }
+            }
+
+            return null;
+        }
+    },
+    "unit_blocks_improvements": {
+        name: "Jednostka blokuje ulepszenia",
+        validate: (activeUnits, params, context) => {
+            const {
+                regimentConfig,
+                unitsMap,
+                improvements,
+                divisionDefinition,
+                regimentDefinition,
+                checkIfImprovementIsMandatory
+            } = context || {};
+
+            const triggerUnitIds = params.trigger_unit_ids || [];
+            const forbiddenImpIds = params.forbidden_improvement_ids || [];
+
+            if (triggerUnitIds.length === 0 || forbiddenImpIds.length === 0) return null;
+
+            const presentTrigger = activeUnits.find(u => triggerUnitIds.includes(u.unitId));
+            if (!presentTrigger) return null;
+
+            for (const unit of activeUnits) {
+                const unitImps = regimentConfig?.improvements?.[unit.key] || [];
+                const regImps = regimentConfig?.regimentImprovements || [];
+
+                const allActiveImps = new Set([...unitImps, ...regImps]);
+
+                const foundForbidden = forbiddenImpIds.filter(id => allActiveImps.has(id));
+
+                for (const forbiddenId of foundForbidden) {
+                    if (checkIfImprovementIsMandatory && checkIfImprovementIsMandatory(unit.unitId, forbiddenId, divisionDefinition, regimentDefinition?.id, unitsMap)) {
+                        continue;
+                    }
+
+                    if (regimentDefinition?.rules) {
+                        const grantedByOtherRule = regimentDefinition.rules.some(r => {
+                            if (r.id === "free_unit_improvement") {
+                                const targetUnits = r.unit_ids || [];
+                                const targetImps = r.improvement_ids || (r.improvement_id ? [r.improvement_id] : []);
+                                if (targetUnits.includes(unit.unitId) && targetImps.includes(forbiddenId)) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        });
+
+                        if (grantedByOtherRule) continue;
+                    }
+
+                    const triggerName = unitsMap?.[presentTrigger.unitId]?.name || presentTrigger.unitId;
+                    const impName = improvements ? (improvements[forbiddenId]?.name || forbiddenId) : forbiddenId;
+
+                    return `Niedozwolona konfiguracja: Ponieważ w pułku znajduje się "${triggerName}", nie możesz wykupić ulepszenia "${impName}".`;
+                }
+            }
+
+            return null;
+        }
+    },
 };

@@ -5,14 +5,14 @@
     "recon": 0,
     "awareness": 3,
     "activations": 2,
-    "special_rules": ["sie_pospolite_ruszenie", "sie_piechota_bramowa_mixed"],
+    "special_rules": ["pospolite_ruszenie_1"],
     "unit_improvements": [
       {
         "id": "additional_pistol",
         "units_allowed": ["sie_jazda_komitacka_m", "sie_jazda_komitacka_l"]
       },
       {
-        "id": "przeszkoleni",
+        "id": "well_trained",
         "max_amount": 2
       }
     ],
@@ -39,7 +39,8 @@
       },
       "additional": {
         "general": [
-          { "unit1": { "units": ["sie_porucznik"] } }
+          { "unit1": { "units": ["sie_porucznik"],
+                  "mandatory": true } }
         ],
         "additional1": [
           {
@@ -62,7 +63,7 @@
         "id": "additional_ammo"
       },
       {
-        "id": "przeszkoleni",
+        "id": "well_trained",
         "max_amount": 1,
         "units_allowed": ["sie_piechota_szeklerska_m"]
       },
@@ -137,7 +138,9 @@
       },
       "additional": {
         "general": [
-          { "unit1": { "units": ["sie_porucznik"] } }
+          { "unit1": { "units": ["sie_porucznik"],
+            "is_toggle": true
+          } }
         ],
         "additional1": [
           {
@@ -205,6 +208,7 @@
     "recon": 0,
     "awareness": 3,
     "activations": 2,
+    "additional_supply": 4,
     "unit_improvements": [
       {
         "id": "veterans",
@@ -307,10 +311,6 @@
     "unit_improvements": [
       {
         "id": "additional_ammo"
-      },
-      {
-        "id": "veterans",
-        "max_amount": 1
       }
     ],
     "structure": {
@@ -336,6 +336,138 @@
           {
             "unit1": { "units": ["sie_semeni_s"] },
             "unit2": { "units": ["sie_semeni_m"] }
+          }
+        ]
+      }
+    }
+  },
+  "mrc_dragoons_tra": {
+    "name": "Regiment Dragonów Najemnych",
+    "base_cost": 0,
+    "recon": 1,
+    "awareness": 4,
+    "activations": 2,
+    "unit_improvements": [
+      { "id": "veterans"},
+      { "id": "additional_ammo" }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "mrc_pulkownik"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "mrc_dragoons_mercenary_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "mrc_dragoons_mercenary_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "mrc_dragoons_mercenary_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "mrc_dragoons_mercenary_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "mrc_infantry_tra": {
+    "name": "Regiment Piechoty Najemnej",
+    "base_cost": 0,
+    "recon": 0,
+    "awareness": 3,
+    "activations": 2,
+    "special_rules": [
+      "max_one_l_unit"
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans",
+        "max_amount": 1
+      },
+      {
+        "id": "regimental_guns",
+        "max_amount": 2
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "mrc_pulkownik"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "mrc_musketeers_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "mrc_musketeers_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "mrc_musketeers_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "mrc_major"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "mrc_musketeers_m"
+              ]
+            }
           }
         ]
       }

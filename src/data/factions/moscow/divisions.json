@@ -16,6 +16,11 @@
         ]
       },
       {
+        "id": "limit_max_same_regiments",
+        "regiment_id": ["mos_pulk_soldacki","mos_pulk_rajtarow", "mos_pulk_kopijnikow", "mos_pulk_dragonow_polowych"],
+        "max_amount": 2
+      },
+      {
         "id": "regiment_dependency",
         "trigger_regiment_id": "mos_pulk_kopijnikow",
         "required_regiment_id": "mos_pulk_rajtarow"

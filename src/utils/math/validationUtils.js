@@ -8,6 +8,7 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
     if (!unitDef || !regimentDefinition) return false;
     if (unitDef.rank === RANK_TYPES.GROUP || unitDef.rank === 'group') return false;
 
+    // 1. Sprawdzenie ulepszeń WYMUSZONYCH (Mandatory)
     if (divisionDefinition && unitsMap && regimentDefinition) {
         if (checkIfImprovementIsMandatory(unitDef.id, improvementId, divisionDefinition, regimentDefinition.id, unitsMap)) {
             return true;
@@ -18,7 +19,51 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
         return true;
     }
 
-    const regImpDef = regimentDefinition.unit_improvements?.find(i => i.id === improvementId);
+    // --- BIAŁA LISTA ---
+    if (unitDef.allowed_improvements && Array.isArray(unitDef.allowed_improvements)) {
+        if (!unitDef.allowed_improvements.includes(improvementId)) {
+            return false;
+        }
+    }
+
+    // 3. Sprawdzenie czy ulepszenie istnieje w pułku
+    let regImpDef = regimentDefinition.unit_improvements?.find(i => i.id === improvementId);
+
+    // --- FIX: Obsługa ulepszeń wstrzykiwanych dynamicznie przez zasady dywizyjne ---
+    if (!regImpDef && divisionDefinition?.rules) {
+        const regId = regimentDefinition.id;
+
+        const isInjected = divisionDefinition.rules.some(rule => {
+            const ruleImpl = DIVISION_RULES_REGISTRY[rule.id];
+
+            if (ruleImpl) {
+                // Dynamiczne (funkcja getInjectedImprovements)
+                if (typeof ruleImpl.getInjectedImprovements === 'function') {
+                    const injected = ruleImpl.getInjectedImprovements(rule, regId);
+                    if (Array.isArray(injected)) {
+                        // Sprawdzamy czy lista zawiera improvementId (bezpośrednio jako string lub jako obiekt.id)
+                        return injected.some(item => (typeof item === 'string' ? item === improvementId : item.id === improvementId));
+                    }
+                }
+
+                // Statyczne (tablica injectedImprovements)
+                if (ruleImpl.injectedImprovements && ruleImpl.injectedImprovements.includes(improvementId)) {
+                    return true;
+                }
+            }
+
+            if (rule.improvement_id === improvementId) return true;
+            if (rule.improvement_ids && rule.improvement_ids.includes(improvementId)) return true;
+
+            return false;
+        });
+
+        if (isInjected) {
+            regImpDef = { id: improvementId };
+        }
+    }
+    // --------------------------------------------------------------------------------
+
     if (!regImpDef) return false;
 
     if (unitDef.improvement_limitations?.includes(improvementId)) return false;
@@ -60,32 +105,22 @@ export const checkIfImprovementIsMandatory = (unitId, impId, divisionDefinition 
     return isMandatory;
 };
 
-// --- FIX: Zmiana targetUnitId na targetUnitKey dla precyzji ---
 export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition, targetUnitKey, targetImpId, divisionDefinition = null, unitsMap = null) => {
     if (!regimentDefinition) return false;
 
     const activeUnits = collectRegimentUnits(regimentConfig, regimentDefinition);
-
-    // Znajdź jednostkę po kluczu pozycji, aby pobrać jej ID definicji
     const targetUnitObj = activeUnits.find(u => u.key === targetUnitKey);
     if (!targetUnitObj) return false;
 
     const targetUnitId = targetUnitObj.unitId;
 
-    // Sprawdzenie wrodzonych (units.json)
     if (unitsMap && targetUnitId) {
         const unitDef = unitsMap[targetUnitId];
         if (unitDef?.rank === RANK_TYPES.GROUP || unitDef?.rank === 'group') return false;
-
-        if (unitDef?.mandatory_improvements?.includes(targetImpId)) {
-            return true;
-        }
+        if (unitDef?.mandatory_improvements?.includes(targetImpId)) return true;
     }
 
-    // Sprawdzenie strukturalnych (regiments.json)
-    if (targetUnitObj.structureMandatory?.includes(targetImpId)) {
-        return true;
-    }
+    if (targetUnitObj.structureMandatory?.includes(targetImpId)) return true;
 
     const rulesUsageState = {};
     if (regimentDefinition.special_rules) {
@@ -98,9 +133,6 @@ export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition
 
     activeUnits.forEach(u => {
         const unitImps = regimentConfig.improvements?.[u.key] || [];
-
-        // FIX: Sprawdzamy konkretny klucz (u.key), a nie typ jednostki (u.unitId)
-        // Symulujemy dodanie ulepszenia TYLKO do tej jednej, konkretnej jednostki
         const impsToCheck = (u.key === targetUnitKey) ? [...unitImps, targetImpId] : unitImps;
 
         impsToCheck.forEach(impId => {
@@ -111,10 +143,7 @@ export const checkIfImprovementWouldBeFree = (regimentConfig, regimentDefinition
                     const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
 
                     if (ruleImpl && ruleImpl.isImprovementFree) {
-                        // Zasady nadal sprawdzają po ID typu (u.unitId), bo tak są zdefiniowane (np. "dla wszystkich ordyńców")
                         const isFree = ruleImpl.isImprovementFree(u.unitId, impId, params, rulesUsageState[ruleIdx]);
-
-                        // Ale wynik przypisujemy tylko jeśli to jest ta konkretna instancja i to konkretne ulepszenie
                         if (u.key === targetUnitKey && impId === targetImpId && isFree) {
                             isTargetFree = true;
                         }
@@ -164,14 +193,10 @@ export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefin
 
             if (unitsMap) {
                 const unitDef = unitsMap[u.unitId];
-                if (unitDef?.mandatory_improvements?.includes(improvementId)) {
-                    isFree = true;
-                }
+                if (unitDef?.mandatory_improvements?.includes(improvementId)) isFree = true;
             }
 
-            if (!isFree && u.structureMandatory?.includes(improvementId)) {
-                isFree = true;
-            }
+            if (!isFree && u.structureMandatory?.includes(improvementId)) isFree = true;
 
             if (!isFree && regimentDefinition.special_rules) {
                 regimentDefinition.special_rules.forEach((ruleEntry, ruleIdx) => {
@@ -180,9 +205,7 @@ export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefin
                     const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
 
                     if (ruleImpl && ruleImpl.isImprovementFree) {
-                        if (ruleImpl.isImprovementFree(u.unitId, improvementId, params, rulesUsageState[ruleIdx])) {
-                            isFree = true;
-                        }
+                        if (ruleImpl.isImprovementFree(u.unitId, improvementId, params, rulesUsageState[ruleIdx])) isFree = true;
                     }
                 });
             }
@@ -191,16 +214,12 @@ export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefin
                 divisionDefinition.rules.forEach(ruleConfig => {
                     const ruleImpl = DIVISION_RULES_REGISTRY[ruleConfig.id];
                     if (ruleImpl && ruleImpl.isImprovementFree) {
-                        if (ruleImpl.isImprovementFree(u.unitId, improvementId, ruleConfig, regimentDefinition.id, unitsMap, divisionDefinition)) {
-                            isFree = true;
-                        }
+                        if (ruleImpl.isImprovementFree(u.unitId, improvementId, ruleConfig, regimentDefinition.id, unitsMap, divisionDefinition)) isFree = true;
                     }
                 });
             }
 
-            if (!isFree) {
-                count++;
-            }
+            if (!isFree) count++;
         }
     });
 
@@ -209,9 +228,7 @@ export const calculateEffectiveImprovementCount = (regimentConfig, regimentDefin
 
 export const getEffectiveUnitImprovements = (unitId, currentImprovements, divisionDefinition, regimentId, unitsMap) => {
     const unitDef = unitsMap?.[unitId];
-    if (unitDef?.rank === RANK_TYPES.GROUP || unitDef?.rank === 'group') {
-        return [];
-    }
+    if (unitDef?.rank === RANK_TYPES.GROUP || unitDef?.rank === 'group') return [];
 
     const active = new Set(currentImprovements || []);
 
@@ -227,7 +244,9 @@ export const getEffectiveUnitImprovements = (unitId, currentImprovements, divisi
             let candidates = [];
             if (typeof ruleImpl.getInjectedImprovements === 'function') {
                 const injected = ruleImpl.getInjectedImprovements(rule, regimentId);
-                if (Array.isArray(injected)) candidates.push(...injected);
+                if (Array.isArray(injected)) {
+                    injected.forEach(item => candidates.push(typeof item === 'string' ? item : item.id));
+                }
             } else if (ruleImpl.injectedImprovements) {
                 candidates.push(...ruleImpl.injectedImprovements);
             }
@@ -245,7 +264,6 @@ export const getEffectiveUnitImprovements = (unitId, currentImprovements, divisi
     return Array.from(active);
 };
 
-// ... (validateVanguardCost, validateAlliedCost bez zmian)
 export const validateVanguardCost = (divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements) => {
     const mainForceKey = calculateMainForceKey(divisionConfig, unitsMap, selectedFaction, getRegimentDefinition, commonImprovements);
     let mainForceCost = 0;
@@ -306,4 +324,49 @@ export const validateAlliedCost = (divisionConfig, unitsMap, selectedFaction, ge
         }
     }
     return { isValid: true };
+};
+
+export const getDivisionUnitBlockage = (unitId, regimentId, configuredDivision, divisionDefinition, unitsMap, getRegimentDefinition) => {
+    if (!divisionDefinition?.rules || !unitId || !configuredDivision) return null;
+
+    const activeRegimentIds = new Set();
+    [
+        ...(configuredDivision.vanguard || []),
+        ...(configuredDivision.base || []),
+        ...(configuredDivision.additional || [])
+    ].forEach(r => {
+        if (r.id && r.id !== 'none') activeRegimentIds.add(r.id);
+    });
+
+    for (const rule of divisionDefinition.rules) {
+        if (rule.id === 'block_units_if_regiments_present') {
+            const {
+                trigger_regiment_ids = [],
+                forbidden_unit_ids = [],
+                target_regiment_ids = []
+            } = rule;
+
+            if (forbidden_unit_ids.includes(unitId)) {
+                if (target_regiment_ids.length > 0 && !target_regiment_ids.includes(regimentId)) {
+                    continue;
+                }
+
+                const triggerPresent = trigger_regiment_ids.some(tid => activeRegimentIds.has(tid));
+
+                if (triggerPresent) {
+                    const triggerName = trigger_regiment_ids
+                        .filter(tid => activeRegimentIds.has(tid))
+                        .map(tid => getRegimentDefinition(tid)?.name || tid)
+                        .join(" / ");
+
+                    return {
+                        isBlocked: true,
+                        reason: `Zablokowane przez obecność pułku: ${triggerName}`
+                    };
+                }
+            }
+        }
+    }
+
+    return null;
 };
