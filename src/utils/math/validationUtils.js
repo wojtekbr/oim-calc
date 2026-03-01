@@ -8,6 +8,23 @@ export const canUnitTakeImprovement = (unitDef, improvementId, regimentDefinitio
     if (!unitDef || !regimentDefinition) return false;
     if (unitDef.rank === RANK_TYPES.GROUP || unitDef.rank === 'group') return false;
 
+    if (divisionDefinition && divisionDefinition.rules) {
+        for (const rule of divisionDefinition.rules) {
+            if (rule.id === "free_improvement_for_specific_units") {
+                const targetImpId = rule.improvement_id;
+                const allowedUnits = rule.unit_ids || [];
+
+                // Jeśli sprawdzamy ulepszenie z zasady...
+                if (targetImpId === improvementId) {
+                    // ...i obecnej jednostki nie ma na liście uprawnionych -> odrzuć (ukryj kafelek)
+                    if (!allowedUnits.includes(unitDef.id)) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
     // 1. Sprawdzenie ulepszeń WYMUSZONYCH (Mandatory)
     if (divisionDefinition && unitsMap && regimentDefinition) {
         if (checkIfImprovementIsMandatory(unitDef.id, improvementId, divisionDefinition, regimentDefinition.id, unitsMap)) {

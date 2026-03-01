@@ -9,8 +9,7 @@
   },
   "cossacks": {
     "name": "Kozacy",
-    "dir": "cossacks",
-    "hidden": true
+    "dir": "cossacks"
   },
   "denmark": {
     "name": "Królestwo Danii i Norwegii",

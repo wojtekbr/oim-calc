@@ -17,14 +17,6 @@
       },
       {
         "id": "swivel_guns"
-      },
-      {
-        "id": "partisans",
-        "max_amount": 1,
-        "cost_override": 0,
-        "units_allowed": [
-          "koz_molojcy_rejestrowi_s", "koz_molojcy_strzelcy_s", "koz_czern_m"
-        ]
       }
     ],
     "structure": {
@@ -186,13 +178,6 @@
       },
       {
         "id": "swivel_guns"
-      },
-      {
-        "id": "partisans",
-        "max_amount": 1,
-        "units_allowed": [
-          "koz_molojcy_rejestrowi_s", "koz_molojcy_strzelcy_s", "koz_czern_m"
-        ]
       }
     ],
     "structure": {
@@ -580,53 +565,17 @@
     "recon": 0,
     "awareness": 4,
     "activations": 3,
-    "special_rules": [
-      "cossack_registered_rules"
-    ],
     "unit_improvements": [
       {
-        "id": "additional_ammo",
-        "cost": 1,
-        "units_allowed": [
-          "koz_molojcy_rejestrowi_s",
-          "koz_molojcy_rejestrowi_m",
-          "koz_konni_molojcy_s"
-        ]
+        "id": "additional_ammo"
       },
       {
-        "id": "smigownice",
-        "name": "Śmigownice",
-        "cost": 1,
-        "max_amount": 2,
-        "units_allowed": [
-          "koz_molojcy_rejestrowi_s",
-          "koz_molojcy_rejestrowi_m"
-        ]
+        "id": "veterans"
       },
       {
-        "id": "partisans",
-        "max_amount": 1,
-        "units_allowed": [
-          "koz_molojcy_rejestrowi_s", "koz_molojcy_strzelcy_s", "koz_czern_m"
-        ]
+        "id": "independent",
+        "max_amount": 1
       }
-    ],
-    "regiment_improvements": [
-      { "id": "region_kijowski" },
-      { "id": "region_bialocerkiewski" },
-      { "id": "region_nizynski" },
-      { "id": "region_korsunski" },
-      { "id": "region_czerkaski" },
-      { "id": "region_czehrynski" },
-      { "id": "region_prylucki" },
-      { "id": "region_kaniowski" },
-      { "id": "region_mirhorodzki" },
-      { "id": "region_perejaslawski" },
-      { "id": "cmdr_zdanowycz" },
-      { "id": "cmdr_neczaj" },
-      { "id": "cmdr_doroszenko" },
-      { "id": "cmdr_dyki" },
-      { "id": "cmdr_lisowskyj" }
     ],
     "structure": {
       "base": {
@@ -689,6 +638,966 @@
             "unit2": {
               "units": [
                 "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_perejeslawski": {
+    "name": "Pułk Perejesławski",
+    "base_cost": 8,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "special_rules": [
+      {
+        "id": "bonus_motivation",
+        "name_override": "Pułk Perejesławski",
+        "description_override": "Bardzo lojalny wobec Chmielnickiego. Wszystkie jednostki w pułku otrzymują ulepszenie: Nieustraszeni. Motywacja pułku jest zwiększona o 2.",
+        "bonus": 2
+      }
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik_4"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_fearless_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_fearless_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_fearless_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_fearless_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_fearless_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_fearless_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_mirhorodzki": {
+    "name": "Pułk Mirhorodzki",
+    "base_cost": 4,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "cost_override": 7,
+              "units": ["koz_konni_molojcy_vet_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_kaniowsky": {
+    "name": "Pułk Kaniówsky",
+    "base_cost": 9,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "special_rules": [
+      {
+        "id": "improvement_requires_unit",
+        "name_override": "Andrij Doroszenko",
+        "description_override": "Organizator: Może przydzielić 2 jednostkom z swojego pułku darmowe ulepszenie “Dodatkowa amunicja”.",
+        "trigger_unit_ids": ["koz_andrij"],
+        "improvement_id": "independent",
+        "error_message": "Zasada 'Antin Żdanowycz': Aby posiadać darmowe ulepszenia, musisz zachować Andrija Doroszenko w rozpisce."
+      }
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "ammo_free",
+        "max_amount": 2
+      },
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_andrij"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_kaniowsky_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_kaniowsky_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_kaniowsky_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_kaniowsky_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_kaniowsky_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_kaniowsky_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_prylucki": {
+    "name": "Pułk Pryłucki",
+    "base_cost": 8,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "special_rules": [
+      {
+        "id": "pulk_prylucki"
+      }
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_prylucki_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_prylucki_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_prylucki_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_prylucki_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_prylucki_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_prylucki_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_czehrynski": {
+    "name": "Pułk Czehryński",
+    "base_cost": 9,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "special_rules": [
+      {
+        "id": "bonus_motivation",
+        "name_override": "Pułk Czehrynski",
+        "description_override": "Pułk którym przed powstaniem dowodził sam Chmielnicki. Najbardziej oddany pułk w powstaniu. Wszystkie jednostki w pułku otrzymują ulepszenie “Do ostatniego żołnierza”. Motywacja pułku jest zwiększona o 2.",
+        "bonus": 2
+      },
+      {
+        "id": "fedor_lisowskyj"
+      }
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_fedor"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_czehrynski_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_czehrynski_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_czehrynski_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_czehrynski_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_czehrynski_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_czehrynski_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_czerkaski": {
+    "name": "Pułk Czerkaski",
+    "base_cost": 8,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "special_rules": [
+      {
+        "id": "pulk_czerkaski"
+      },
+      {
+        "id": "iwan_dyki"
+      }
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_iwan"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_fearless_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_fearless_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_fearless_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_fearless_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_fearless_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_fearless_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_kijowski": {
+    "name": "Pułk Kijowski",
+    "base_cost": 8,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "special_rules": [
+      {
+        "id": "bonus_motivation",
+        "name_override": "Pułk Kijowski",
+        "description_override": "Najbardziej prestiżowy pułk. Pułkownik ma 4 PD, Esauł 2PD. Motywacja pułku jest zwiększona o 1.",
+        "bonus": 1
+      },
+      {
+        "id": "improvement_requires_unit",
+        "name_override": "Antin Żdanowycz",
+        "description_override": "Samodzielny i ambitny: +1PD. Jedna jednostka w jego pułku otrzymuje zasadę Samodzielność.",
+        "trigger_unit_ids": ["koz_antin"],
+        "improvement_id": "independent",
+        "error_message": "Zasada 'Przywilej Dowódcy': Aby posiadać darmową Samodzielność, musisz zachować Pułkownika w rozpisce."
+      }
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans",
+        "max_amount": 2
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      },
+      {
+        "id": "independent_free",
+        "max_amount": 1,
+        "cost": 0
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik_4"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_antin"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul_2"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_bialocerkiewski": {
+    "name": "Pułk Białocerkiewski",
+    "base_cost": 9,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "special_rules": [
+      {
+        "id": "bonus_division_pu",
+        "name_override": "Pułk Białocerkiewski",
+        "description_override": "Jedne z liczniejszych, z dużymi koneksjami. Daje dywizji +4PU, Wszystkie jednostki w pułku mają wszystkie stany zwiększone o 1.",
+        "bonus": 4
+      },
+      "danylo_neczaj"
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans",
+        "max_amount": 2
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_danylo"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_nizynski": {
+    "name": "Pułk Niżyński",
+    "base_cost": 4,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans",
+        "max_amount": 2
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ],
+        "optional": [
+          {
+            "unit1": {
+              "units": ["koz_molojcy_rejestrowi_s"]
+            },
+            "unit2": {
+              "units": ["koz_molojcy_rejestrowi_m"]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_m"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "koz_korsunski": {
+    "name": "Pułk Korsuński",
+    "base_cost": 8,
+    "recon": 0,
+    "awareness": 4,
+    "activations": 3,
+    "special_rules": [
+      {
+        "id": "bonus_motivation",
+        "name_override": "Pułk Korsuński",
+        "description_override": "Był bardzo narażony na ataki tatarów co czyniło ich bardzo doświadczonymi. Wszystkie jednostki w pułku otrzymują ulepszenie Świetni wojownicy. Motywacja pułku jest zwiększona o 1",
+        "bonus": 1
+      }
+    ],
+    "unit_improvements": [
+      {
+        "id": "additional_ammo"
+      },
+      {
+        "id": "veterans"
+      },
+      {
+        "id": "independent",
+        "max_amount": 1
+      }
+    ],
+    "structure": {
+      "base": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_pulkownik"
+              ]
+            }
+          }
+        ],
+        "base1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_korsun_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_korsun_m"
+              ]
+            }
+          }
+        ],
+        "base2": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_korsun_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_korsun_m"
+              ]
+            }
+          }
+        ]
+      },
+      "additional": {
+        "general": [
+          {
+            "unit1": {
+              "units": [
+                "koz_esaul"
+              ],
+              "is_toggle": true
+            }
+          }
+        ],
+        "additional1": [
+          {
+            "unit1": {
+              "units": [
+                "koz_molojcy_rejestrowi_korsun_s"
+              ]
+            },
+            "unit2": {
+              "units": [
+                "koz_molojcy_rejestrowi_korsun_m"
               ]
             }
           }

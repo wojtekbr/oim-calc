@@ -45,7 +45,6 @@ export const ActiveOptionConfigurationPanel = ({
                 const possibleImps = unitLevelImprovements.filter(imp =>
                     canUnitTakeImprovement(unitDef, imp.id, regiment, divisionDefinition, unitsMap)
                 );
-
                 return (
                     <div key={uIdx} className={styles.activeConfigRow}>
                         <div className={styles.unitNameTitle}>

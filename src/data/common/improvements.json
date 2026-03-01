@@ -50,6 +50,16 @@
     "cost": "triple",
     "type": "unit"
   },
+  "independent_free": {
+    "name": "Samodzielność (0)",
+    "cost": 0,
+    "type": "unit"
+  },
+  "ammo_free": {
+    "name": "Dodatkowa amunicja (0)",
+    "cost": 0,
+    "type": "unit"
+  },
   "regimental_guns": {
     "name": "Działa Regimentowe",
     "cost": "normal",
@@ -112,6 +122,21 @@
   },
   "eight_pounders": {
     "name": "Działa 8f",
+    "type": "unit",
+    "cost": 0
+  },
+  "last_soldier": {
+    "name": "Do ostatniego żołnierza",
+    "type": "unit",
+    "cost": 0
+  },
+  "discipline_bonus": {
+    "name": "Dyscyplina (+1)",
+    "type": "unit",
+    "cost": 0
+  },
+  "water_deployment": {
+    "name": "Desant Wodny",
     "type": "unit",
     "cost": 0
   },

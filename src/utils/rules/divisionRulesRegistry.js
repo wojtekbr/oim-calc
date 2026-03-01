@@ -182,13 +182,65 @@ export const DIVISION_RULES_REGISTRY = {
         }
     },
 
+    // "free_improvement_for_specific_units": {
+    //     calculateDiscount: (regimentConfig, activeUnits, improvementsMap, params) => {
+    //         const targetUnitIds = params?.unit_ids || [];
+    //         const targetImpId = params?.improvement_id;
+    //         const maxPerRegiment = params?.max_per_regiment || 1;
+    //
+    //         if (!targetImpId || targetUnitIds.length === 0 || !improvementsMap) return 0;
+    //
+    //         let discount = 0;
+    //         let count = 0;
+    //
+    //         for (const unit of activeUnits) {
+    //             if (targetUnitIds.includes(unit.unitId)) {
+    //                 const unitImps = regimentConfig.improvements?.[unit.key] || [];
+    //                 if (unitImps.includes(targetImpId)) {
+    //                     const impDef = improvementsMap[targetImpId];
+    //                     const cost = Number(impDef?.cost || 0);
+    //                     discount += cost;
+    //                     count++;
+    //                     if (count >= maxPerRegiment) break;
+    //                 }
+    //             }
+    //         }
+    //         return Number(discount) || 0;
+    //     }
+    // },
+
     "free_improvement_for_specific_units": {
-        calculateDiscount: (regimentConfig, activeUnits, improvementsMap, params) => {
+        // Wstrzykuje ulepszenie z nałożonym limitem ilościowym
+        getInjectedImprovements: (params, regimentId) => {
+            const impId = params?.improvement_id;
+            const maxAmount = params?.max_per_regiment || 1;
+
+            if (impId) {
+                return [{ id: impId, max_amount: maxAmount }];
+            }
+            return [];
+        },
+
+        // Zwraca UI informację, że ulepszenie jest darmowe (wyświetla "0 PU")
+        isImprovementFree: (unitId, impId, params, regimentId) => {
+            const targetUnitIds = params?.unit_ids || [];
+            const targetImpId = params?.improvement_id;
+
+            if (targetImpId === impId && targetUnitIds.includes(unitId)) {
+                return true;
+            }
+            return false;
+        },
+
+        // Odlicza koszt od głównej puli armii
+        calculateDiscount: (regimentConfig, activeUnits, improvementsMap, params, regimentId, context) => {
             const targetUnitIds = params?.unit_ids || [];
             const targetImpId = params?.improvement_id;
             const maxPerRegiment = params?.max_per_regiment || 1;
 
             if (!targetImpId || targetUnitIds.length === 0 || !improvementsMap) return 0;
+
+            const { unitsMap, regimentDefinition, calculateCostFn } = context || {};
 
             let discount = 0;
             let count = 0;
@@ -196,16 +248,61 @@ export const DIVISION_RULES_REGISTRY = {
             for (const unit of activeUnits) {
                 if (targetUnitIds.includes(unit.unitId)) {
                     const unitImps = regimentConfig.improvements?.[unit.key] || [];
+
                     if (unitImps.includes(targetImpId)) {
-                        const impDef = improvementsMap[targetImpId];
-                        const cost = Number(impDef?.cost || 0);
-                        discount += cost;
+                        if (calculateCostFn && unitsMap && regimentDefinition) {
+                            const cost = calculateCostFn(unitsMap[unit.unitId], targetImpId, regimentDefinition, improvementsMap);
+                            discount += cost;
+                        } else {
+                            const impDef = improvementsMap[targetImpId];
+                            const cost = Number(impDef?.cost || 0);
+                            discount += cost;
+                        }
+
                         count++;
                         if (count >= maxPerRegiment) break;
                     }
                 }
             }
             return Number(discount) || 0;
+        },
+
+        validate: (divisionConfig, unitsMap, getRegimentDefinition, params, improvementsMap) => {
+            const targetImpId = params?.improvement_id;
+            const maxPerRegiment = params?.max_per_regiment || 1;
+
+            if (!targetImpId) return [];
+
+            const errors = [];
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []),
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+
+            allRegiments.forEach(reg => {
+                if (reg.id && reg.id !== 'none') {
+                    const def = getRegimentDefinition(reg.id);
+                    if (!def) return;
+
+                    const activeUnits = collectRegimentUnits(reg.config || {}, def);
+
+                    let count = 0;
+                    for (const unit of activeUnits) {
+                        const unitImps = reg.config.improvements?.[unit.key] || [];
+                        if (unitImps.includes(targetImpId)) {
+                            count++;
+                        }
+                    }
+
+                    if (count > maxPerRegiment) {
+                        const impName = improvementsMap ? (improvementsMap[targetImpId]?.name || targetImpId) : targetImpId;
+                        errors.push(`Przekroczono limit: W pułku "${def.name}" przydzielono ulepszenie "${impName}" ${count} raz(y). Twój limit wynosi ${maxPerRegiment}. Odznacz nadmiarowe ulepszenia.`);
+                    }
+                }
+            });
+
+            return errors;
         }
     },
 
@@ -844,6 +941,88 @@ export const DIVISION_RULES_REGISTRY = {
                 return { recon: -2 };
             }
             return null;
+        }
+    },
+    "limit_individual_regiments": {
+        validate: (divisionConfig, unitsMap, getRegimentDefinition, ruleParams) => {
+            const targetIds = ruleParams.regiment_ids || [];
+            const max = ruleParams.max_amount !== undefined ? ruleParams.max_amount : 1;
+
+            if (targetIds.length === 0) return [];
+
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []),
+                ...(divisionConfig.base || []),
+                ...(divisionConfig.additional || [])
+            ];
+
+            const counts = {};
+            allRegiments.forEach(reg => {
+                if (reg.id && reg.id !== 'none') {
+                    counts[reg.id] = (counts[reg.id] || 0) + 1;
+                }
+            });
+
+            const errors = [];
+
+            targetIds.forEach(tid => {
+                if (counts[tid] > max) {
+                    const def = getRegimentDefinition(tid);
+                    const name = def ? def.name : tid;
+                    errors.push(`Przekroczono limit wystąpień dla pułku "${name}". Możesz wystawić go maksymalnie ${max} raz(y) (obecnie: ${counts[tid]}).`);
+                }
+            });
+
+            return errors;
+        }
+    },
+    "incompatible_regiments": {
+        validate: (divisionConfig, unitsMap, getRegimentDefinition, params) => {
+            const triggers = params.trigger_regiment_ids || [];
+            const forbidden = params.forbidden_regiment_ids || [];
+            const restrictedGroup = params.restricted_group; // np. 'additional', 'base', 'vanguard'
+
+            if (triggers.length === 0 || forbidden.length === 0) return [];
+
+            const allRegiments = [
+                ...(divisionConfig.vanguard || []).map(r => ({ ...r, groupType: 'vanguard' })),
+                ...(divisionConfig.base || []).map(r => ({ ...r, groupType: 'base' })),
+                ...(divisionConfig.additional || []).map(r => ({ ...r, groupType: 'additional' }))
+            ].filter(r => r.id && r.id !== 'none');
+
+            const foundTrigger = allRegiments.find(r => {
+                if (!triggers.includes(r.id)) return false;
+                if (restrictedGroup && r.groupType !== restrictedGroup) return false;
+                return true;
+            });
+
+            if (!foundTrigger) return [];
+
+            const errors = [];
+            const triggerName = getRegimentDefinition(foundTrigger.id)?.name || foundTrigger.id;
+
+            const groupNames = {
+                vanguard: "Straż Przednia",
+                base: "Pułki Podstawowe",
+                additional: "Pułki Dodatkowe"
+            };
+
+            allRegiments.forEach(reg => {
+                if (forbidden.includes(reg.id)) {
+                    if (restrictedGroup && reg.groupType !== restrictedGroup) {
+                        return;
+                    }
+
+                    const translatedGroup = groupNames[restrictedGroup] || restrictedGroup;
+
+                    const forbiddenName = getRegimentDefinition(reg.id)?.name || reg.id;
+                    let errorMsg = `Niedozwolona konfiguracja: Ponieważ w ${translatedGroup} znajduje się "${triggerName}", nie możesz w tej sekcji wystawić pułku "${forbiddenName}".`;
+
+                    errors.push(errorMsg);
+                }
+            });
+
+            return errors;
         }
     },
 };

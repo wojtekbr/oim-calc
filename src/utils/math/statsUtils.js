@@ -4,6 +4,7 @@ import { applyRegimentRuleStats, applyRegimentRuleCosts } from "../regimentRules
 import { collectRegimentUnits } from "./structureUtils";
 import { calculateSingleImprovementArmyCost } from "./costUtils";
 import { getEffectiveUnitImprovements } from "./validationUtils";
+import { REGIMENT_RULES_REGISTRY } from "../rules/regimentRulesRegistry";
 
 export const isRegimentAllied = (regId, selectedFaction, getRegimentDefinition) => {
     if (!selectedFaction || !selectedFaction.regiments) return false;
@@ -204,6 +205,18 @@ export const calculateTotalSupplyBonus = (divisionConfig, unitsMap, getRegimentD
         const def = getRegimentDefinition(regiment.id);
         if (def && typeof def.additional_supply === 'number') {
             supplyBonus += def.additional_supply;
+        }
+
+        if (def && def.special_rules) {
+            def.special_rules.forEach(ruleEntry => {
+                const ruleId = typeof ruleEntry === 'string' ? ruleEntry : ruleEntry.id;
+                const params = typeof ruleEntry === 'object' ? ruleEntry : {};
+                const ruleImpl = REGIMENT_RULES_REGISTRY[ruleId];
+
+                if (ruleImpl && ruleImpl.getDivisionPuBonus) {
+                    supplyBonus += ruleImpl.getDivisionPuBonus(params);
+                }
+            });
         }
 
         const config = regiment.config || {};

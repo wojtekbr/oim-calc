@@ -293,4 +293,49 @@ export const REGIMENT_RULES_REGISTRY = {
             return null;
         }
     },
+    "bonus_motivation": {
+        name: "Dodatkowa motywacja",
+        modifyStats: (stats, activeUnits, params) => {
+            const bonus = params?.bonus || 1;
+            return {
+                ...stats,
+                motivation: (stats.motivation || 0) + bonus
+            };
+        }
+    },
+    "bonus_division_pu": {
+        name: "Dodatkowe PU dla dywizji",
+        getDivisionPuBonus: (params) => {
+            return params?.bonus || 4;
+        }
+    },
+    "improvement_requires_unit": {
+        name: "Wymaganie ulepszenia",
+        validate: (activeUnits, params, context) => {
+            const triggerUnits = params.trigger_unit_ids || [];
+            const improvementId = params.improvement_id;
+
+            if (!improvementId || triggerUnits.length === 0) return null;
+
+            const { regimentConfig, improvements, unitsMap } = context || {};
+
+            const hasRegimentImp = (regimentConfig?.regimentImprovements || []).includes(improvementId);
+            const hasUnitImp = Object.values(regimentConfig?.improvements || {}).some(imps => imps.includes(improvementId));
+
+            if (hasRegimentImp || hasUnitImp) {
+                const hasTriggerUnit = activeUnits.some(u => triggerUnits.includes(u.unitId));
+
+                if (!hasTriggerUnit) {
+                    const impName = improvements ? (improvements[improvementId]?.name || improvementId) : improvementId;
+                    const unitName = triggerUnits.length === 1 && unitsMap
+                        ? (unitsMap[triggerUnits[0]]?.name || triggerUnits[0])
+                        : "wymaganej jednostki";
+
+                    return params.error_message || `Błąd konfiguracji: Darmowe ulepszenie "${impName}" wymaga posiadania w pułku: ${unitName}.`;
+                }
+            }
+
+            return null;
+        }
+    },
 };

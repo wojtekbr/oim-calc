@@ -193,6 +193,10 @@ export const DIVISION_RULES_DEFINITIONS = {
         title: "Nie przystępuj zatem bez wielkiej ostrożności do walnej rozprawy",
         getDescription: () => "Jeżeli Gracz Cesarski jest niebieski może wybierać tylko z scenariuszy Pieszych i Mieszanych, nawet jeżeli jego armia jest konna."
     },
+    "kiedy_koazk_nie_ma_wody": {
+        title: "Kiedy Kozak nie ma wody, błota albo jam to przepadł",
+        getDescription: () => "Zasada opisana w podręczniku głównym OiM."
+    },
     "grant_one_free_improvements_to_regiments": {
         title: "Darmowe ulepszenie (1 na regiment)",
         getDescription: (params, context) => {
@@ -210,6 +214,94 @@ export const DIVISION_RULES_DEFINITIONS = {
             ).join(", ");
 
             return `W każdym z pułków: ${regNames}, można za darmo przydzielić jedno ulepszenie: ${impNames}.`;
+        }
+    },
+    "free_improvement_for_specific_units": {
+        title: "Darmowe ulepszenie dla wybranych jednostek",
+        getDescription: (params, context) => {
+            if (params.description_override) return params.description_override;
+
+            const { improvements, unitsMap } = context || {};
+            const impId = params?.improvement_id;
+            const impName = improvements ? (improvements[impId]?.name || impId) : impId;
+
+            const unitIds = params?.unit_ids || [];
+            const unitNames = unitIds.map(id => unitsMap ? (unitsMap[id]?.name || id) : id).join(", ");
+
+            const max = params?.max_per_regiment || 1;
+
+            return `W każdym pułku można przydzielić za darmo ulepszenie "${impName}" maksymalnie ${max} jednostce/om spośród następujących: ${unitNames}.`;
+        }
+    },
+    "limit_individual_regiments": {
+        title: "Limit unikalnych pułków",
+        getDescription: (params, context) => {
+            const max = params?.max_amount !== undefined ? params.max_amount : 1;
+            const regIds = params?.regiment_ids || [];
+
+            if (regIds.length > 0 && context?.getRegimentDefinition) {
+                const regNames = regIds.map(rid => {
+                    const def = context.getRegimentDefinition(rid);
+                    return def ? `"${def.name}"` : `"${rid}"`;
+                }).join(", ");
+
+                return `Następujące pułki mogą wystąpić w dywizji maksymalnie ${max} raz(y): ${regNames}.`;
+            }
+
+            return `Wskazane pułki mogą wystąpić w dywizji maksymalnie ${max} raz(y).`;
+        }
+    },
+    "incompatible_regiments": {
+        title: "Wykluczające się pułki",
+        getDescription: (params, context) => {
+            const { getRegimentDefinition } = context;
+
+            const triggers = (params.trigger_regiment_ids || []).map(id => {
+                const def = getRegimentDefinition ? getRegimentDefinition(id) : null;
+                return def ? `"${def.name}"` : `"${id}"`;
+            }).join(" lub ");
+
+            const forbidden = (params.forbidden_regiment_ids || []).map(id => {
+                const def = getRegimentDefinition ? getRegimentDefinition(id) : null;
+                return def ? `"${def.name}"` : `"${id}"`;
+            }).join(", ");
+
+            if (params.restricted_group) {
+                const groupNames = {
+                    vanguard: "Straży Przedniej",
+                    base: "Pułkach Podstawowych",
+                    additional: "Pułkach Dodatkowych"
+                };
+                const translatedGroup = groupNames[params.restricted_group] || params.restricted_group;
+                return `Jeżeli w ${translatedGroup} znajduje się ${triggers}, nie możesz wystawić w tej samej sekcji żadnego z następujących pułków: ${forbidden}.`;
+            }
+
+            return `Jeżeli w ${translatedGroup} znajduje się ${triggers}, nie możesz wystawić w niej żadnego z następujących pułków: ${forbidden}.`;
+        }
+    },
+    "conditional_unit_restriction": {
+        title: "Ograniczenie wystawiania jednostek",
+        getDescription: (params, context) => {
+            if (params?.description_override) return params.description_override;
+
+            const { getRegimentDefinition, unitsMap } = context || {};
+
+            const triggerId = params?.trigger_regiment_id;
+            const triggerDef = getRegimentDefinition ? getRegimentDefinition(triggerId) : null;
+            const triggerName = triggerDef ? `"${triggerDef.name}"` : `"${triggerId}"`;
+
+            const targetIds = params?.target_regiment_ids || [];
+            const targetNames = targetIds.map(id => {
+                const def = getRegimentDefinition ? getRegimentDefinition(id) : null;
+                return def ? `"${def.name}"` : `"${id}"`;
+            }).join(" lub ");
+
+            const bannedIds = params?.banned_unit_ids || [];
+            const bannedNames = bannedIds.map(id => {
+                return unitsMap && unitsMap[id] ? `"${unitsMap[id].name}"` : `"${id}"`;
+            }).join(", ");
+
+            return `Jeżeli w dywizji wystawiono pułk ${triggerName}, to w pułku/pułkach ${targetNames} nie można umieścić następujących jednostek: ${bannedNames}.`;
         }
     },
 };

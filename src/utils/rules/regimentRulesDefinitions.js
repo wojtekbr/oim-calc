@@ -176,5 +176,59 @@ export const REGIMENT_RULES_DEFINITIONS = {
     "roznorodne_wyposazenie_2": {
         title: "Różnorodne Wyposażenie (2)",
         getDescription: () => "Przed wystawieniem pułku należy wylosować jedno z darmowych Ulepszeń, które otrzymają wszystkie jednostki w tym pułku: Zdyscyplinowani, Wysokie nasycenie bronią palną."
+    },
+    "bonus_motivation": {
+        title: "Dodatkowa motywacja",
+        getDescription: (params) => {
+            if (params?.description_override) {
+                return params.description_override;
+            }
+            const bonus = params?.bonus || 1;
+            return `Motywacja tego pułku wzrasta o ${bonus}.`;
+        }
+    },
+    "bonus_division_pu": {
+        title: "Dodatkowe PU dla dywizji",
+        getDescription: (params) => {
+            if (params?.description_override) return params.description_override;
+
+            const bonus = params?.bonus || 4;
+            return `Dywizja otrzymuje +${bonus} PU.`;
+        }
+    },
+    "pulk_czerkaski": {
+        title: "Pułk Czerkaski",
+        getDescription: () => "Z pułku pochodziło wiele ważnych przywódców kozackich, a jego ziemie były mocno zrusyfikowane. Wszystkie jednostki w pułku otrzymują ulepszenie: Nieustraszeni. Pułkownik ma 4 PD."
+    },
+    "pulk_prylucki": {
+        title: "Pułk Pryłucki",
+        getDescription: () => "Wysoko zdyscyplinowany pułk. Wszystkie jednostki w pułku otrzymują zasadę “Dyscyplina (+1)”. Wszystkie jednostki mogą przerzucać nie zdane testy morale i wyszkolenia."
+    },
+    "pulk_kaniowskyki": {
+        title: "Pułk Kaniówsky",
+        getDescription: () => "Był znany z tradycji rzecznych i flisackich. Wszystkie jednostki w pułku otrzymują zasadę “Desant Wodny”. Pułk można wystawić jako dodatkowy pułk w Straży przedniej (z uwzględnieniem zasady Desant wodny) - jeżeli się na to zdecydujesz pułk daje +1 kość do testu Zwiadu."
+    },
+    "pulk_mirhorodzki": {
+        title: "Pułk Mirhorodzki",
+        getDescription: () => "Znany z jednej z najlepszych sotni jazdy. Może wystawić dodatkową M konnych mołojców Weteranów za 7PS."
+    },
+    "danylo_neczaj": {
+        title: "Danyło Neczaj",
+        getDescription: () => "Odważny i utalentowany: Ma morale zwiększone o 1. Dopóki dowodzi pułkiem, a pułk nie został zniesiony może za 1PD dodać jedną kość do inicjatywy"
+    },
+    "iwan_dyki": {
+        title: "Iwan Dyki",
+        getDescription: () => "Brawura: Jednostki w jego pułku mają Szybkość zwiększoną o 1."
+    },
+    "fedor_lisowskyj": {
+        title: "Fedor Lisowśkyj",
+        getDescription: () => "Wierny współpracownik Chmielnickiego: Dodaje +1ZA dla głównodowodzącego armii."
+    },
+    "improvement_requires_unit": {
+        title: "Warunkowe ulepszenie",
+        getDescription: (params) => {
+            if (params?.description_override) return params.description_override;
+            return `Wybrane ulepszenie jest dostępne wyłącznie, jeśli w pułku znajduje się określona jednostka.`;
+        }
     }
 };

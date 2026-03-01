@@ -1,15 +1,24 @@
 {
-  "cro_koronna": {
+  "cos_kozacka": {
     "name": "Dywizja Kozacka (1648-51)",
     "improvement_points": 10,
     "base_cost": 9,
     "general": ["koz_pulkownik_head"],
     "rules": [
-      { 
-        "id": "czaty"
+      {
+        "id": "free_improvement_for_specific_units",
+        "name_override": "Czaty",
+        "description_override": "W każdym pułku, jednej jednostce (S Mołojców Strzelców i S Rejestrowych lub M Czerni) można za darmo przydzielić ulepszenie: Partyzanci.",
+        "unit_ids": [
+          "koz_molojcy_strzelcy_s",
+          "koz_molojcy_rejestrowi_s",
+          "koz_czern_m"
+        ],
+        "improvement_id": "partisans",
+        "max_per_regiment": 1
       },
       {
-        "id": "Kiedy kozak nie ma wody, błota albo jam to przepadł"
+        "id": "kiedy_koazk_nie_ma_wody"
       },
       {
         "id": "Wozy taborowe"
@@ -23,6 +32,23 @@
       {
         "id": "banned_units_in_vanguard",
         "banned_unit_ids": ["koz_wozy_taborowe", "koz_umocnienia_taborowe"]
+      },
+      {
+        "id": "limit_individual_regiments",
+        "regiment_ids": [
+          "koz_czerkaski", "koz_kijowski", "koz_bialocerkiewski", "koz_nizynski", "koz_korsunski", "koz_czehrynski", "koz_prylucki", "koz_kaniowsky", "koz_mirhorodzki", "koz_perejeslawski"
+        ],
+        "max_amount": 1
+      },
+      {
+        "id": "incompatible_regiments",
+        "trigger_regiment_ids": [
+          "koz_czerkaski", "koz_kijowski", "koz_bialocerkiewski", "koz_nizynski", "koz_korsunski", "koz_czehrynski", "koz_prylucki", "koz_kaniowsky", "koz_mirhorodzki", "koz_perejeslawski"
+        ],
+        "forbidden_regiment_ids": [
+          "koz_piechota_rejestrowa"
+        ],
+        "restricted_group": "additional"
       }
     ],
     "additional_units": [
@@ -280,7 +306,7 @@
     ],
     "base": [
       { "options": ["koz_pulk_kozacki"] },
-      { "options": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki", "koz_piechota_rejestrowa"] }
+      { "options": ["koz_pulk_kozacki","koz_doborowy_pulk_kozacki", "koz_piechota_rejestrowa", "koz_czerkaski", "koz_kijowski", "koz_bialocerkiewski", "koz_nizynski", "koz_korsunski", "koz_czehrynski", "koz_prylucki", "koz_kaniowsky", "koz_mirhorodzki", "koz_perejeslawski"]}
     ],
     "additional_regiments": {
       "max_amount": 2,
@@ -289,7 +315,8 @@
           "koz_pulk_kozacki",
           "koz_pulk_czerni",
           "koz_pulk_czerni",
-          "koz_piechota_rejestrowa"
+          "koz_piechota_rejestrowa",
+          "koz_czerkaski", "koz_kijowski", "koz_bialocerkiewski", "koz_nizynski", "koz_korsunski", "koz_czehrynski", "koz_prylucki", "koz_kaniowsky", "koz_mirhorodzki", "koz_perejeslawski"
         ]
     }
   }

@@ -9,6 +9,50 @@
     "rank": "group",
     "orders": 2
   },
+  "koz_pulkownik_4": {
+    "id": "koz_pulkownik_4",
+    "name": "Pułkownik 4#",
+    "cost": 0,
+    "rank": "group",
+    "orders": 4
+  },
+  "koz_antin": {
+    "id": "koz_antin",
+    "name": "Antin Żdanowycz",
+    "cost": 1,
+    "rank": "group",
+    "orders": 3
+  },
+  "koz_danylo": {
+    "id": "koz_danylo",
+    "name": "Danyło Neczaj",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "koz_andrij": {
+    "id": "koz_andrij",
+    "name": "Andrij Doroszenko",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "koz_iwan": {
+    "id": "koz_iwan",
+    "name": "Iwan Dyki",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2
+  },
+  "koz_fedor": {
+    "id": "koz_fedor",
+    "name": "Fedor Lisowśkyj",
+    "cost": 0,
+    "rank": "group",
+    "orders": 2,
+    "additional_supply": 1
+  },
+
   "koz_pulkownik_head": {
     "id": "koz_pulkownik_head",
     "name": "Pułkownik",
@@ -19,11 +63,17 @@
   "koz_esaul": {
     "id": "koz_esaul",
     "name": "Esauł Pułkowy",
-    "cost": 0,
+    "cost": 2,
     "rank": "group",
     "orders": 1
   },
-  "koz_watazka": {
+  "koz_esaul_2": {
+    "id": "koz_esaul_2",
+    "name": "Esauł Pułkowy 2#",
+    "cost": 2,
+    "rank": "group",
+    "orders": 2
+  },"koz_watazka": {
     "id": "koz_watazka",
     "name": "Watażka",
     "cost": 0,
@@ -120,6 +170,96 @@
     "improvement_cost": 2,
     "is_infantry": true,
     "rank": "gold"
+  },
+  "koz_molojcy_rejestrowi_korsun_s": {
+    "id": "koz_molojcy_rejestrowi_korsun_s",
+    "name": "Mołojcy Rejestrowi S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "silver",
+    "mandatory_improvements": ["great_warriors"]
+  },
+  "koz_molojcy_rejestrowi_korsun_m": {
+    "id": "koz_molojcy_rejestrowi_korsun_m",
+    "name": "Mołojcy Rejestrowi M",
+    "cost": 9,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "gold",
+    "mandatory_improvements": ["great_warriors"]
+  },
+  "koz_molojcy_rejestrowi_fearless_s": {
+    "id": "koz_molojcy_rejestrowi_fearless_s",
+    "name": "Mołojcy Rejestrowi S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "silver",
+    "mandatory_improvements": ["fearless"]
+  },
+  "koz_molojcy_rejestrowi_fearless_m": {
+    "id": "koz_molojcy_rejestrowi_fearless_m",
+    "name": "Mołojcy Rejestrowi M",
+    "cost": 9,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "gold",
+    "mandatory_improvements": ["fearless"]
+  },
+  "koz_molojcy_rejestrowi_czehrynski_s": {
+    "id": "koz_molojcy_rejestrowi_czehrynski_s",
+    "name": "Mołojcy Rejestrowi S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "silver",
+    "mandatory_improvements": ["last_soldier"]
+  },
+  "koz_molojcy_rejestrowi_czehrynski_m": {
+    "id": "koz_molojcy_rejestrowi_czehrynski_m",
+    "name": "Mołojcy Rejestrowi M",
+    "cost": 9,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "gold",
+    "mandatory_improvements": ["last_soldier"]
+  },
+  "koz_molojcy_rejestrowi_prylucki_s": {
+    "id": "koz_molojcy_rejestrowi_prylucki_s",
+    "name": "Mołojcy Rejestrowi S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "silver",
+    "mandatory_improvements": ["discipline_bonus"]
+  },
+  "koz_molojcy_rejestrowi_prylucki_m": {
+    "id": "koz_molojcy_rejestrowi_prylucki_m",
+    "name": "Mołojcy Rejestrowi M",
+    "cost": 9,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "gold",
+    "mandatory_improvements": ["discipline_bonus"]
+  },
+  "koz_molojcy_rejestrowi_kaniowsky_s": {
+    "id": "koz_molojcy_rejestrowi_kaniowsky_s",
+    "name": "Mołojcy Rejestrowi S",
+    "cost": 6,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "silver",
+    "mandatory_improvements": ["water_deployment"]
+  },
+  "koz_molojcy_rejestrowi_kaniowsky_m": {
+    "id": "koz_molojcy_rejestrowi_kaniowsky_m",
+    "name": "Mołojcy Rejestrowi M",
+    "cost": 9,
+    "improvement_cost": 2,
+    "is_infantry": true,
+    "rank": "gold",
+    "mandatory_improvements": ["water_deployment"]
   },
   "koz_czern_m": {
     "id": "koz_czern_m",
